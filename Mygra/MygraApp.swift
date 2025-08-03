@@ -8,13 +8,20 @@
 import SwiftUI
 import SwiftData
 
+/// The main app declaration
 @main
 struct MygraApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            User.self,
+            Migraine.self,
         ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        let modelConfiguration = ModelConfiguration(
+            schema: schema,
+            isStoredInMemoryOnly: false,
+            allowsSave: true,
+            cloudKitDatabase: .private("iCloud.com.molargiksoftware.Mygra")
+        )
 
         do {
             return try ModelContainer(for: schema, configurations: [modelConfiguration])
@@ -25,7 +32,7 @@ struct MygraApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MygraRootView()
         }
         .modelContainer(sharedModelContainer)
     }
