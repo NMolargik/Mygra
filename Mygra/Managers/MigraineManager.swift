@@ -20,16 +20,10 @@ final class MigraineManager {
     // MARK: - Source of truth
     private(set) var migraines: [Migraine] = []
 
-    // Active filters (tweak as you like)
-    struct Filter: Equatable {
-        var pinnedOnly: Bool = false
-        var dateRange: ClosedRange<Date>? = nil
-        var minPainLevel: Int? = nil
-        var requiredTriggers: Set<MigraineTrigger> = []
-        var searchText: String = "" // searches note/insight
-    }
+    // Track a single ongoing migraine (endDate == nil)
+    private(set) var ongoingMigraine: Migraine? = nil
 
-    var filter: Filter = Filter() {
+    var filter: MigraineFilter = MigraineFilter() {
         didSet { Task { await refresh() } }
     }
 
@@ -57,10 +51,13 @@ final class MigraineManager {
             }
             let fetched = try context.fetch(desc)
             self.migraines = fetched
+            // Update the ongoing migraine reference (first ongoing in newest-first list)
+            self.ongoingMigraine = fetched.first(where: { $0.isOngoing })
         } catch {
             // In production you may want to surface this via a published error state.
             print("MigraineManager.refresh() fetch error: \(error)")
             self.migraines = []
+            self.ongoingMigraine = nil
         }
     }
 
@@ -93,13 +90,32 @@ final class MigraineManager {
             health: health
         )
         context.insert(model)
+
+        // If this is an ongoing migraine, track it immediately
+        if model.isOngoing {
+            self.ongoingMigraine = model
+        }
+
         saveAndReload()
         return model
     }
 
     // MARK: - Update (mutate in place)
     func update(_ migraine: Migraine, _ mutate: (Migraine) -> Void) {
+        let wasOngoing = migraine.isOngoing
         mutate(migraine)
+        let isOngoingNow = migraine.isOngoing
+
+        // Keep ongoing tracking in sync:
+        // - If it was ongoing and is no longer, clear if it was the tracked one.
+        if wasOngoing && !isOngoingNow, ongoingMigraine?.id == migraine.id {
+            ongoingMigraine = nil
+        }
+        // - If it becomes ongoing, set it.
+        if !wasOngoing && isOngoingNow {
+            ongoingMigraine = migraine
+        }
+
         saveAndReload()
     }
 
@@ -110,6 +126,10 @@ final class MigraineManager {
 
     // MARK: - Delete
     func delete(_ migraine: Migraine) {
+        // Clear ongoing if we are deleting the tracked migraine
+        if ongoingMigraine?.id == migraine.id {
+            ongoingMigraine = nil
+        }
         context.delete(migraine)
         saveAndReload()
     }
@@ -118,6 +138,9 @@ final class MigraineManager {
         for idx in offsets {
             guard idx >= 0 && idx < visibleMigraines.count else { continue }
             let model = visibleMigraines[idx]
+            if ongoingMigraine?.id == model.id {
+                ongoingMigraine = nil
+            }
             context.delete(model)
         }
         saveAndReload()

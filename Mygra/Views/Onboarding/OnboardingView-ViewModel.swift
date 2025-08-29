@@ -13,6 +13,8 @@ extension OnboardingView {
         var currentPage: OnboardingPage = .health
         var newUser: User = User()
         var userFormComplete: Bool = false
+        var notificationsAuthorized = false
+        var isMovingForward: Bool = true
         
         func criteriaMet(healthManager: HealthManager, weatherManager: WeatherManager) -> Bool {
             switch(self.currentPage) {
@@ -27,6 +29,21 @@ extension OnboardingView {
             case .complete:
                 return true
             }
+        }
+        
+        var forwardTransition: AnyTransition {
+            .asymmetric(
+                insertion: .move(edge: .trailing).combined(with: .opacity),
+                removal: .move(edge: .leading).combined(with: .opacity)
+            )
+        }
+        
+        var backwardTransition: AnyTransition {
+            .asymmetric(
+                insertion: .move(edge: .leading).combined(with: .opacity),
+                // when going back: outgoing page exits toward trailing
+                removal: .move(edge: .trailing).combined(with: .opacity)
+            )
         }
     }
 }

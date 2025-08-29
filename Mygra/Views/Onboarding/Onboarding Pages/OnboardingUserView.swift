@@ -14,14 +14,17 @@ struct OnboardingUserView: View {
     
     var body: some View {
         ZStack {
-            UserEditView(
-                user: $viewModel.newUser,
-                userFormComplete: $viewModel.userFormComplete,
-                dismiss: {
-                    showingEdit = false
-                }
-            )
+            Form {
+                UserEditView(
+                    user: $viewModel.newUser,
+                    userFormComplete: $viewModel.userFormComplete,
+                    dismiss: {
+                        showingEdit = false
+                    }
+                )
                 .transition(.move(edge: .bottom))
+            }
+            .navigationTitle("User")
             
             if !showingEdit {
                 VStack {
@@ -52,7 +55,7 @@ struct OnboardingUserView: View {
                     }
                     .padding()
                 }
-                .background(.white)
+                .background(Color(.systemBackground))
                 .zIndex(1)
                 .offset(y: dragOffset)
                 .gesture(
@@ -70,6 +73,7 @@ struct OnboardingUserView: View {
             }
         }
         .animation(.spring(), value: showingEdit)
+        .navigationTitle("User Details")
     }
 }
 

@@ -8,64 +8,197 @@
 import SwiftUI
 import SwiftData
 import WeatherKit
-
-enum AppTab: String, CaseIterable, Identifiable {
-    case insights = "Insights"
-    case list = "Migraines"
-    case settings = "Settings"
-    
-    var id: String { self.rawValue }
-    
-    var icon: Image {
-        switch(self) {
-        case .insights: return Image(systemName: "lightbulb.max.fill")
-        case .list: return Image(systemName: "list.dash")
-        case .settings: return Image(systemName: "gear")
-        }
-    }
-    
-    var color: Color {
-        switch(self) {
-        case .insights: return Color.pink
-        case .list: return Color.blue
-        case .settings: return Color.orange
-        }
-    }
-}
+import Combine
 
 struct MainView: View {
     var returnToAppStage: (AppStage) -> Void
     
     @Environment(\.modelContext) private var modelContext
+    @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @State private var appTab: AppTab = .list // TODO: Change to Insights
     
+    @State private var showingEntrySheet: Bool = false
+
+    // Navigation path for the List tab
+    @State private var listPath = NavigationPath()
+    // Track the last pushed migraine id explicitly (avoid introspecting NavigationPath)
+    @State private var lastPushedMigraineID: UUID? = nil
+    // A ticking date to refresh the duration display while ongoing
+    @State private var now: Date = Date()
+    // Drive SF Symbols draw-on/draw-off animation
+    @State private var drawOn: Bool = false
+    @State private var drawOff: Bool = false
+    
     var body: some View {
-        NavigationStack {
-            TabView(selection: $appTab) {
-                InsightsView()
-                    .tabItem {
-                        AppTab.insights.icon
-                        Text(AppTab.insights.rawValue)
-                    }
-                    .tag(AppTab.insights)
-                
-                MigrainesView()
-                    .tabItem {
-                        AppTab.list.icon
-                        Text(AppTab.list.rawValue)
-                    }
-                    .tag(AppTab.list)
-                
-                SettingsView()
-                    .tabItem {
-                        AppTab.settings.icon
-                        Text(AppTab.settings.rawValue)
-                    }
-                    .tag(AppTab.settings)
+        TabView(selection: $appTab) {
+            NavigationStack {
+                InsightsView(
+                    showingEntrySheet: $showingEntrySheet
+                )
+                    .navigationTitle(AppTab.insights.rawValue)
             }
-            .tint(appTab.color)
-            .navigationTitle(appTab.rawValue)
+            .tabItem {
+                AppTab.insights.icon(selectedTab: appTab)
+                Text(AppTab.insights.rawValue)
+            }
+            .tag(AppTab.insights)
+            
+            NavigationStack(path: $listPath) {
+                MigraineListView(
+                    showingEntrySheet: $showingEntrySheet
+                )
+                    .navigationTitle(AppTab.list.rawValue)
+                    // Destination for programmatic navigation by Migraine ID
+                    .navigationDestination(for: UUID.self) { migraineID in
+                        // Attempt to find the migraine by id in the manager
+                        if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
+                                           ?? migraineManager.migraines.first { $0.id == migraineID }) {
+                            MigraineDetailView(migraine: migraine)
+                                .onAppear {
+                                    // TODO: Kick off migraine insight creation!!!!!
+                                }
+                        } else {
+                            // Fallback view if not found
+                            ContentUnavailableView(
+                                "Migraine Not Found",
+                                systemImage: "exclamationmark.triangle",
+                                description: Text("The selected migraine could not be loaded.")
+                            )
+                        }
+                    }
+            }
+            .tabItem {
+                AppTab.list.icon(selectedTab: appTab)
+                Text(AppTab.list.rawValue)
+            }
+            .tag(AppTab.list)
+            
+            NavigationStack {
+                SettingsView()
+                    .navigationTitle(AppTab.settings.rawValue)
+            }
+            .tabItem {
+                AppTab.settings.icon(selectedTab: appTab)
+                Text(AppTab.settings.rawValue)
+            }
+            .tag(AppTab.settings)
         }
+        .tint(appTab.color)
+        .tabViewBottomAccessory {
+            if let ongoing = migraineManager.ongoingMigraine {
+                Button {
+                    // Navigate to the ongoing migraine detail (only once)
+                    appTab = .list
+                    // If already showing this migraine at the top of the stack, do nothing
+                    if lastPushedMigraineID == ongoing.id {
+                        return
+                    }
+                    listPath.append(ongoing.id)
+                    lastPushedMigraineID = ongoing.id
+                } label: {
+                    HStack(spacing: 8) {
+                        // ECG symbol with draw-on/draw-off animation
+                        Image(systemName: "waveform.path.ecg")
+                            .symbolVariant(.fill)
+                            .foregroundStyle(.pink)
+                            // Use availability to prefer a draw-like effect if the SDK exposes it,
+                            // otherwise fall back to a pulse that’s driven by drawOn/drawOff.
+                            .modifier(DrawOnOffEffect(drawOn: drawOn, drawOff: drawOff))
+                        
+                        Text("Ongoing Migraine")
+                            .font(.headline)
+                        Text("•")
+                            .foregroundStyle(.secondary)
+                        Text(durationString(since: ongoing.startDate, now: now))
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                        Spacer(minLength: 0)
+                        Image(systemName: "chevron.right")
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                // Drive periodic updates so duration ticks while ongoing and retrigger the animation
+                .onReceive(timer) { tick in
+                    self.now = tick
+                    // Alternate reveal/hide phases by toggling both flags.
+                    // If you prefer a staggered cadence, toggle drawOn first and drawOff after a delay.
+                    withAnimation(.easeInOut(duration: 0.8)) {
+                        self.drawOn.toggle()
+                        self.drawOff.toggle()
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $showingEntrySheet) {
+            MigraineEntryView(onMigraineSaved: { migraine in
+                // Dismiss the sheet
+                showingEntrySheet = false
+                // Switch to the List tab
+                appTab = .list
+                // Push the detail for the newly created migraine
+                // Avoid double-pushing if already on top
+                if lastPushedMigraineID == migraine.id {
+                    return
+                }
+                listPath.append(migraine.id)
+                lastPushedMigraineID = migraine.id
+            })
+                .interactiveDismissDisabled(true)
+                .presentationDetents([.large])
+        }
+        // Optional: keep lastPushedMigraineID roughly in sync with path emptiness
+        .onChange(of: listPath) { _, newValue in
+            if newValue.count == 0 {
+                lastPushedMigraineID = nil
+            }
+        }
+    }
+    
+    // A 1-second timer publisher to keep the duration label fresh and drive drawOn toggling
+    private var timer: Publishers.Autoconnect<Timer.TimerPublisher> {
+        // If you want a faster “heartbeat”, reduce the interval (e.g., 0.6 for ~100 BPM)
+        Timer.publish(every: 0.8, on: .main, in: .common).autoconnect()
+    }
+    
+    // Formats elapsed time since start into H:MM:SS or M:SS if under 1 hour
+    private func durationString(since start: Date, now: Date) -> String {
+        let elapsed = max(0, Int(now.timeIntervalSince(start)))
+        let hours = elapsed / 3600
+        let minutes = (elapsed % 3600) / 60
+        let seconds = elapsed % 60
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%d:%02d", minutes, seconds)
+        }
+    }
+}
+
+// MARK: - DrawOnOffEffect: wraps symbolEffect availability differences
+private struct DrawOnOffEffect: ViewModifier {
+    let drawOn: Bool
+    let drawOff: Bool
+    
+    func body(content: Content) -> some View {
+        // Try to use the “draw” effect if the SDK provides it under the expected names.
+        // Because your current toolchain reports missing members, keep the code compiling
+        // by using a conditional compilation path with a safe fallback.
+        #if compiler(>=6.0)
+        // Future-facing: if “draw/reveal/hide” exist, prefer them.
+        // Replace the below with the exact members once they’re available in your SDK:
+        //   .symbolEffect(.draw, options: .reveal, value: drawOn)
+        //   .symbolEffect(.draw, options: .hide, value: drawOff)
+        content
+            // Temporary fallback under this branch as well, to keep builds green until the API lands.
+            .symbolEffect(.pulse, options: .repeating, value: drawOn)
+        #else
+        // Current stable fallback (iOS 17/18 era): repeatable pulse driven by drawOn.
+        content
+            .symbolEffect(.pulse, options: .repeating, value: drawOn)
+        #endif
     }
 }
 
@@ -93,7 +226,6 @@ struct MainView: View {
     
     // Helper: make dates
     let twoHoursAgo = cal.date(byAdding: .hour, value: -2, to: now)!
-    let yesterday = cal.date(byAdding: .day, value: -1, to: now)!
     let yesterdayStart = cal.date(byAdding: .hour, value: -20, to: now)! // roughly yesterday
     let yesterdayEnd = cal.date(byAdding: .hour, value: -18, to: now)!
     let lastWeekStart = cal.date(byAdding: .day, value: -7, to: now)!
@@ -147,8 +279,7 @@ struct MainView: View {
         caffeineMg: 250,
         stepCount: 3000,
         restingHeartRate: 65,
-        activeHeartRate: 120,
-        menstrualPhase: nil
+        activeHeartRate: 120
     )
     
     // Create a few migraines
@@ -189,7 +320,6 @@ struct MainView: View {
         note: "Severe migraine during thunderstorm.",
         insight: "Barometric pressure drop and high humidity likely factors.",
         triggers: [.barometricPressureChange, .highHumidity, .stormsWind],
-        foodsEaten: ["Chocolate"],
         weather: wx3,
         health: h3
     )

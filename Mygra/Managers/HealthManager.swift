@@ -52,8 +52,10 @@ final class HealthManager {
 
     func requestAuthorization() async {
         guard HKHealthStore.isHealthDataAvailable() else {
-            self.lastError = HKError(.errorAuthorizationDenied)
+            let err = HKError(.errorHealthDataUnavailable)
+            self.lastError = err
             self.isAuthorized = false
+            print("[Health] Health data unavailable on this device: \(err)")
             return
         }
 
@@ -69,12 +71,69 @@ final class HealthManager {
 
         do {
             try await store.requestAuthorization(toShare: toShare, read: toRead)
-            self.isAuthorized = true
+            // After request, inspect per-type status to decide "isAuthorized"
+            await updateAuthorizationFlag(readTypes: toRead, shareTypes: toShare)
             self.lastError = nil
         } catch {
             self.isAuthorized = false
             self.lastError = error
+            print("[Health] requestAuthorization failed: \(error)")
         }
+    }
+
+    private func updateAuthorizationFlag(readTypes: Set<HKObjectType>, shareTypes: Set<HKSampleType>) async {
+        // Log request status (optional)
+        do {
+            let readReqStatus = try await store.statusForAuthorizationRequest(toShare: [], read: readTypes)
+            switch readReqStatus {
+            case .unknown: print("[Health] Read request status: UNKNOWN")
+            case .unnecessary: print("[Health] Read request status: UNNECESSARY")
+            case .shouldRequest: print("[Health] Read request status: SHOULD REQUEST")
+            @unknown default: print("[Health] Read request status: UNKNOWN(default)")
+            }
+        } catch {
+            print("[Health] Failed to get overall read request status: \(error)")
+        }
+
+        if !shareTypes.isEmpty {
+            do {
+                let shareReqStatus = try await store.statusForAuthorizationRequest(toShare: shareTypes, read: [])
+                switch shareReqStatus {
+                case .unknown: print("[Health] Share request status: UNKNOWN")
+                case .unnecessary: print("[Health] Share request status: UNNECESSARY")
+                case .shouldRequest: print("[Health] Share request status: SHOULD REQUEST")
+                @unknown default: print("[Health] Share request status: UNKNOWN(default)")
+                }
+            } catch {
+                print("[Health] Failed to get share request status: \(error)")
+            }
+        }
+
+        // Determine actual authorization by checking per-type authorizationStatus(for:)
+        var readOK = true
+        for obj in readTypes {
+            if let sampleType = obj as? HKSampleType {
+                let status = store.authorizationStatus(for: sampleType)
+                if status == .notDetermined {
+                    readOK = false
+                    print("[Health] Read authorization NOT DETERMINED for \(obj.identifier)")
+                }
+            }
+        }
+
+        var shareOK = true
+        for sample in shareTypes {
+            let status = store.authorizationStatus(for: sample)
+            if status != .sharingAuthorized {
+                shareOK = false
+                print("[Health] Share authorization NOT AUTHORIZED for \(sample.identifier) (status=\(status.rawValue))")
+            }
+        }
+
+        // Use readOK to set the overall flag (and log shareOK to avoid unused variable warnings).
+        // If you want to require share authorization too, replace `readOK` with `(readOK && shareOK)`.
+        self.isAuthorized = readOK
+        print("[Health] Overall authorization flag (based on read): \(self.isAuthorized). Share authorized: \(shareOK)")
     }
 
     // MARK: - High-level snapshot API
@@ -124,6 +183,7 @@ final class HealthManager {
             self.latestData = snapshot
             self.lastError = nil
         } catch {
+            print("Refresh of Health Data failed! error=\(error)")
             self.latestData = nil
             self.lastError = error
         }
@@ -178,7 +238,13 @@ final class HealthManager {
         try await withCheckedThrowingContinuation { cont in
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
             let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, stats, error in
-                if let error { cont.resume(throwing: error); return }
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: 0.0)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
                 let total = stats?.sumQuantity()?.doubleValue(for: unit) ?? 0
                 cont.resume(returning: total)
             }
@@ -190,7 +256,13 @@ final class HealthManager {
         try await withCheckedThrowingContinuation { cont in
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
             let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .discreteAverage) { _, stats, error in
-                if let error { cont.resume(throwing: error); return }
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: 0.0)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
                 let avg = stats?.averageQuantity()?.doubleValue(for: unit) ?? 0
                 cont.resume(returning: avg)
             }
@@ -203,7 +275,13 @@ final class HealthManager {
             let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
             let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: true)
             let query = HKSampleQuery(sampleType: ctSleep, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [sort]) { _, samples, error in
-                if let error { cont.resume(throwing: error); return }
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: 0.0)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
 
                 let totalSeconds = (samples as? [HKCategorySample])?
                     .filter { sample in
@@ -221,17 +299,22 @@ final class HealthManager {
     // MARK: - Menstrual phase (optional & naive)
 
     private func inferMenstrualPhase(from start: Date, to end: Date) async throws -> MenstrualPhase? {
-        // If you don’t want this, return nil and remove the read types above.
         guard let flowType = ctMenstrualFlow else { return nil }
 
         return try await withCheckedThrowingContinuation { cont in
             let predicate = HKQuery.predicateForSamples(withStart: start.addingTimeInterval(-28*24*3600), end: end, options: [])
             let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
             let query = HKSampleQuery(sampleType: flowType, predicate: predicate, limit: 50, sortDescriptors: [sort]) { _, samples, error in
-                if let error { cont.resume(throwing: error); return }
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: nil)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
+
                 let recent = (samples as? [HKCategorySample]) ?? []
 
-                // Extremely rough heuristic: if there’s any recent "heavy" flow in the past 7 days → Menstruation
                 let sevenDaysAgo = Date().addingTimeInterval(-7*24*3600)
                 let hasRecentHeavy = recent.contains {
                     $0.endDate >= sevenDaysAgo &&
@@ -241,7 +324,6 @@ final class HealthManager {
                 if hasRecentHeavy {
                     cont.resume(returning: .menstrual)
                 } else {
-                    // Otherwise guess phases by days since last recorded flow (very naive).
                     if let lastFlow = recent.first {
                         let days = Calendar.current.dateComponents([.day], from: lastFlow.endDate, to: Date()).day ?? 0
                         switch days {
@@ -265,9 +347,9 @@ final class HealthManager {
         if !isAuthorized {
             await requestAuthorization()
             if !isAuthorized {
+                print("HEALTH NOT AUTHORIZED (isAuthorized=false). lastError=\(lastError?.localizedDescription ?? "nil")")
                 throw HKError(.errorAuthorizationDenied)
             }
         }
     }
 }
-

@@ -16,39 +16,26 @@ struct OnboardingView: View {
     @Environment(NotificationManager.self) private var notificationManager: NotificationManager
     @Environment(UserManager.self) private var userManager: UserManager
     
-    @State private var notificationsAuthorized = false
-    
     var body: some View {
         VStack {
             Group {
-                switch viewModel.currentPage {
-                case .health:
-                    OnboardingHealthView(viewModel: viewModel)
-                case .location:
-                    OnboardingLocationView(viewModel: viewModel, onLocationAuthorized: { locationManager in
-                        self.weatherManager.setLocationProvider(locationManager)
-                    })
-                case .notifications:
-                    OnboardingNotificationView(viewModel: viewModel)
-                        .onAppear {
-                            Task {
-                                self.notificationsAuthorized = await notificationManager.isAuthorized
-                            }
-                        }
-                case .user:
-                    OnboardingUserView(viewModel: viewModel)
-                case .complete:
-                    OnboardingCompleteView(viewModel: viewModel, finishOnboarding: {
-                        proceedForward()
-                    })
+                ZStack {
+                    pageView()
+                        .id(viewModel.currentPage) // important for transition
+                        .transition(viewModel.isMovingForward ? viewModel.forwardTransition : viewModel.backwardTransition)
                 }
+                .animation(.easeInOut(duration: 0.3), value: viewModel.currentPage)
                 
                 Spacer()
                 
                 HStack {
                     if viewModel.currentPage != .health && viewModel.currentPage != .complete {
                         Button("Back") {
-                            viewModel.currentPage = viewModel.currentPage.previous
+                            viewModel.isMovingForward = false
+                            let previous = viewModel.currentPage.previous
+                            withAnimation {
+                                viewModel.currentPage = previous
+                            }
                         }
                         .frame(width: 80)
                         .foregroundStyle(.white)
@@ -64,8 +51,11 @@ struct OnboardingView: View {
                             if viewModel.currentPage == .user {
                                 userManager.createOrReplace(newUser: viewModel.newUser)
                             }
-                            
-                            viewModel.currentPage = viewModel.currentPage.next
+                            viewModel.isMovingForward = true
+                            let next = viewModel.currentPage.next
+                            withAnimation {
+                                viewModel.currentPage = next
+                            }
                         }
                         .frame(width: 80)
                         .foregroundStyle(.white)
@@ -77,6 +67,31 @@ struct OnboardingView: View {
                 }
                 .padding()
             }
+        }
+    }
+    
+    @ViewBuilder
+    private func pageView() -> some View {
+        switch viewModel.currentPage {
+        case .health:
+            OnboardingHealthView(viewModel: viewModel)
+        case .location:
+            OnboardingLocationView(viewModel: viewModel, onLocationAuthorized: { locationManager in
+                self.weatherManager.setLocationProvider(locationManager)
+            })
+        case .notifications:
+            OnboardingNotificationView(viewModel: viewModel)
+                .onAppear {
+                    Task {
+                        viewModel.notificationsAuthorized = await notificationManager.isAuthorized
+                    }
+                }
+        case .user:
+            OnboardingUserView(viewModel: viewModel)
+        case .complete:
+            OnboardingCompleteView(viewModel: viewModel, finishOnboarding: {
+                proceedForward()
+            })
         }
     }
 }

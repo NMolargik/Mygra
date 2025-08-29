@@ -8,45 +8,68 @@
 import SwiftUI
 import SwiftData
 
-enum AppStage: String, Identifiable {
-    case start
-    case splash
-    case onboarding
-    case main
-    
-    var id: String { self.rawValue }
-}
-
 struct ContentView: View {
     @Environment(UserManager.self) private var userManager: UserManager
     @Environment(HealthManager.self) private var healthManager: HealthManager
+    @Environment(WeatherManager.self) private var weatherManager: WeatherManager
+    
     @State private var migraineManager: MigraineManager?
-
+    @State private var insightManager: InsightManager?
     @State private var appStage: AppStage = .start
     
+    private var leadingTransition: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .move(edge: .leading).combined(with: .opacity)
+        )
+    }
+    
     var body: some View {
-        switch (appStage) {
-        case .start:
-            ProgressView()
-                .task {
-                    await prepareApp()
-                }
-        case .splash:
-            SplashView(proceedForward: {
-                self.appStage = .onboarding
-            })
-        case .onboarding:
-            OnboardingView(proceedForward: {
-                self.appStage = .main
-            })
-        case .main:
-            MainView(
-                returnToAppStage: { appStage in
-                    self.appStage = appStage
-                }
-            )
-            .environment(migraineManager)
+        ZStack {
+            switch (appStage) {
+            case .start:
+                ProgressView()
+                    .id("start")
+                    .zIndex(0)
+                    .task {
+                        await prepareApp()
+                    }
+            case .splash:
+                SplashView(proceedForward: {
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        self.appStage = .onboarding
+                    }
+                })
+                .id("splash")
+                .transition(leadingTransition)
+                .zIndex(1)
+            case .onboarding:
+                OnboardingView(proceedForward: {
+                    if self.migraineManager == nil {
+                        self.migraineManager = MigraineManager(context: userManager.context)
+                    }
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        self.appStage = .main
+                    }
+                })
+                .id("onboarding")
+                .transition(leadingTransition)
+                .zIndex(1)
+            case .main:
+                MainView(
+                    returnToAppStage: { stage in
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            self.appStage = stage
+                        }
+                    }
+                )
+                .environment(migraineManager)
+                .environment(insightManager)
+                .id("main")
+                .zIndex(0)
+            }
         }
+        .animation(.easeInOut(duration: 0.3), value: appStage)
     }
     
     private func prepareApp() async {
@@ -60,10 +83,27 @@ struct ContentView: View {
                     self.migraineManager = MigraineManager(context: userManager.context)
                 }
                 
-                appStage = .main
+                if self.weatherManager.locationManager == nil {
+                    self.weatherManager.setLocationProvider(LocationManager())
+                }
+                
+                if self.insightManager == nil {
+                    self.insightManager = InsightManager(
+                        userManager: userManager,
+                        migraineManager: migraineManager!,
+                        weatherManager: weatherManager,
+                        healthManager: healthManager
+                    )
+                }
+                
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    appStage = .main
+                }
             }
         } else {
-            appStage = .splash
+            withAnimation(.easeInOut(duration: 0.3)) {
+                appStage = .splash
+            }
         }
     }
 }
@@ -78,8 +118,12 @@ struct ContentView: View {
     }
     let previewUserManager = UserManager(context: container.mainContext)
     let previewHealthManager = HealthManager()
+    let previewWeatherManager = WeatherManager()
+    let previewNotificationManager = NotificationManager()
     return ContentView()
         .modelContainer(container)
         .environment(previewUserManager)
         .environment(previewHealthManager)
+        .environment(previewWeatherManager)
+        .environment(previewNotificationManager)
 }

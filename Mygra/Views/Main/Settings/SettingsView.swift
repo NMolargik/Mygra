@@ -6,13 +6,97 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SettingsView: View {
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @Environment(UserManager.self) private var userManager: UserManager
+    
+    @State private var editingUser: Bool = false
+    
+    private var appVersion: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
+        let build = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as? String ?? "—"
+        return "Version \(version) (Build \(build))"
+    }
+    
+    private var bundleIdentifier: String {
+        Bundle.main.bundleIdentifier ?? "—"
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        @Bindable var manager = userManager
+        
+        // Provide a safe Binding<User> for the editor.
+        // - get: return the existing user if present; otherwise a temporary User()
+        // - set: if a real user exists, apply mutations via UserManager.update(_:)
+        //        (no-op if nil to protect against unexpected absence)
+        let userBinding: Binding<User> = Binding(
+            get: {
+                manager.currentUser ?? User()
+            },
+            set: { updated in
+                manager.update { existing in
+                    // Copy fields from updated into the existing managed User
+                    existing.name = updated.name
+                    existing.birthday = updated.birthday
+                    existing.biologicalSex = updated.biologicalSex
+                    existing.heightMeters = updated.heightMeters
+                    existing.weightKilograms = updated.weightKilograms
+                    existing.averageSleepHours = updated.averageSleepHours
+                    existing.averageCaffeineMg = updated.averageCaffeineMg
+                    existing.chronicConditions = updated.chronicConditions
+                    existing.dietaryRestrictions = updated.dietaryRestrictions
+                }
+            }
+        )
+        
+        Form {
+            Toggle("Use Metric Units", isOn: $useMetricUnits)
+            
+            Toggle("Edit User", isOn: $editingUser)
+            
+            if (editingUser) {
+                UserEditView(
+                    user: userBinding,
+                    userFormComplete: .constant(true),
+                    dismiss: { }
+                )
+            }
+            
+            Section("Mygra") {
+                LabeledContent("App") {
+                    Text(appVersion)
+                        .foregroundStyle(.secondary)
+                }
+                LabeledContent("Developer") {
+                    Link("Nick Molargik", destination: URL(string: "https://www.linkedin.com/in/nicholas-molargik/")!)
+                        .foregroundStyle(.blue)
+                }
+                LabeledContent("Business") {
+                    Link("Molargik Software LLC", destination: URL(string: "https://www.molargiksoftware.com")!)
+                        .foregroundStyle(.blue)
+                }
+            }
+        }
     }
 }
 
 #Preview {
-    SettingsView()
+    let container: ModelContainer
+    do {
+        // Mirror the app schema but use an in-memory store for previews
+        container = try ModelContainer(
+            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    } catch {
+        fatalError("Preview ModelContainer setup failed: \(error)")
+    }
+    
+    let previewUserManager = UserManager(context: container.mainContext)
+    
+    return SettingsView()
+        .modelContainer(container)
+        .environment(previewUserManager)
 }

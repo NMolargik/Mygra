@@ -18,27 +18,30 @@ struct OnboardingCompleteView: View {
             Text("All Done!")
                 .font(.largeTitle)
                 .bold()
+                .frame(maxWidth: .infinity, alignment: .center)
             
             HStack(spacing: 16) {
-                Image(systemName: "brain.head.profile")
+                Image(systemName: "brain.head.profile.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
                     .foregroundStyle(.blue)
-                Text("Track your migraines")
+                Text("Track your migraines.")
                     .font(.title3)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 8)
 
             HStack(spacing: 16) {
-                Image(systemName: "lightbulb")
+                Image(systemName: "lightbulb.max.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
                     .foregroundStyle(.yellow)
-                Text("Get intelligent insights")
+                Text("Get intelligent insights.")
                     .font(.title3)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 8)
 
             HStack(spacing: 16) {
@@ -47,13 +50,14 @@ struct OnboardingCompleteView: View {
                     .scaledToFit()
                     .frame(width: 40, height: 40)
                     .foregroundStyle(.green)
-                Text("Track trends")
+                Text("View trends and likely migraine causes.")
                     .font(.title3)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 8)
             
             HStack(spacing: 16) {
-                Image(systemName: "cloud.fill")
+                Image(systemName: "icloud.fill")
                     .resizable()
                     .scaledToFit()
                     .frame(width: 40, height: 40)
@@ -61,6 +65,7 @@ struct OnboardingCompleteView: View {
                 Text("All of your data syncs automatically wherever you're signed into iCloud!")
                     .font(.title3)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.vertical, 8)
 
             Spacer()
@@ -74,7 +79,9 @@ struct OnboardingCompleteView: View {
             .bold()
             .frame(width: 200)
             .glassEffect(.regular.interactive().tint(.blue))
+            .frame(maxWidth: .infinity, alignment: .center)
         }
+        .padding(.horizontal)
     }
 }
 
