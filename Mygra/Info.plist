@@ -4,8 +4,21 @@
 <dict>
 	<key></key>
 	<string></string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.molargiksoftware.Mygra.weatherRefresh</string>
+	</array>
+	<key>CFBundleGetInfoString</key>
+	<string></string>
+	<key>CFBundleSignature</key>
+	<string></string>
+	<key>NSWeatherUsageDescription</key>
+	<string>Mygra uses weather data to provide personalized migraine insights.</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>location</string>
 		<string>remote-notification</string>
 	</array>
 </dict>

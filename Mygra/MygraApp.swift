@@ -8,32 +8,37 @@
 import SwiftUI
 import SwiftData
 
-/// The main app declaration
 @main
 struct MygraApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            User.self,
-            Migraine.self,
-        ])
-        let modelConfiguration = ModelConfiguration(
-            schema: schema,
-            isStoredInMemoryOnly: false,
-            allowsSave: true,
-            cloudKitDatabase: .private("iCloud.com.molargiksoftware.Mygra")
-        )
+    private let container: ModelContainer
+    private let userManager: UserManager
+    private let weatherManager: WeatherManager
+    private let healthManager: HealthManager
+    private let notificationManager: NotificationManager
 
+    init() {
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            container = try ModelContainer(
+                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                configurations: ModelConfiguration("iCloud.com.molargiksoftware.Mygra")
+            )
         } catch {
-            fatalError("Could not create ModelContainer: \(error)")
+            fatalError("Failed to initialize ModelContainer: \(error)")
         }
-    }()
+        userManager = UserManager(context: container.mainContext)
+        weatherManager = WeatherManager()
+        healthManager = HealthManager()
+        notificationManager = NotificationManager()
+    }
 
     var body: some Scene {
         WindowGroup {
-            MygraRootView()
+            ContentView()
+                .modelContainer(container)
+                .environment(userManager)
+                .environment(weatherManager)
+                .environment(healthManager)
+                .environment(notificationManager)
         }
-        .modelContainer(sharedModelContainer)
     }
 }
