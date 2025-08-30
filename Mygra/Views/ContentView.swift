@@ -39,6 +39,8 @@ struct ContentView: View {
                     withAnimation(.easeInOut(duration: 0.3)) {
                         self.appStage = .onboarding
                     }
+                }, refreshUser: {
+                    Task { await refreshUser() }
                 })
                 .id("splash")
                 .transition(leadingTransition)
@@ -47,6 +49,15 @@ struct ContentView: View {
                 OnboardingView(proceedForward: {
                     if self.migraineManager == nil {
                         self.migraineManager = MigraineManager(context: userManager.context)
+                    }
+                    
+                    if self.insightManager == nil {
+                        self.insightManager = InsightManager(
+                            userManager: userManager,
+                            migraineManager: migraineManager!,
+                            weatherManager: weatherManager,
+                            healthManager: healthManager
+                        )
                     }
                     withAnimation(.easeInOut(duration: 0.3)) {
                         self.appStage = .main
@@ -73,7 +84,13 @@ struct ContentView: View {
     }
     
     private func prepareApp() async {
+        // Initial local fetch
         await userManager.refresh()
+
+        // If no user yet, attempt a restore window from iCloud before deciding onboarding
+        if userManager.currentUser == nil {
+            await userManager.restoreFromCloud(timeout: 1, pollInterval: 1.0)
+        }
         
         if let _ = userManager.currentUser {
             Task {
@@ -101,9 +118,47 @@ struct ContentView: View {
                 }
             }
         } else {
+            // Still no user after the restore window → onboarding
             withAnimation(.easeInOut(duration: 0.3)) {
                 appStage = .splash
             }
+        }
+    }
+    
+    // Attempt another iCloud restore when the user requests a refresh on the splash screen.
+    private func refreshUser() async {
+        // Re-fetch local state first
+        await userManager.refresh()
+        // Try another iCloud restore attempt (slightly longer timeout to improve chances)
+        await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
+        
+        guard userManager.currentUser != nil else {
+            // Stay on splash if we still don't have a user
+            return
+        }
+        
+        // Initialize managers and move to main, mirroring prepareApp happy path
+        await healthManager.refreshLatestForToday()
+        
+        if self.migraineManager == nil {
+            self.migraineManager = MigraineManager(context: userManager.context)
+        }
+        
+        if self.weatherManager.locationManager == nil {
+            self.weatherManager.setLocationProvider(LocationManager())
+        }
+        
+        if self.insightManager == nil {
+            self.insightManager = InsightManager(
+                userManager: userManager,
+                migraineManager: migraineManager!,
+                weatherManager: weatherManager,
+                healthManager: healthManager
+            )
+        }
+        
+        withAnimation(.easeInOut(duration: 0.3)) {
+            appStage = .main
         }
     }
 }

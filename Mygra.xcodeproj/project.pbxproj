@@ -7,10 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		EB0E1B1A2E62838E0060F834 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E62E59536C00AAA8C1 /* WidgetKit.framework */; };
+		EB0E1B1B2E62838E0060F834 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */; };
+		EB0E1B282E62838F0060F834 /* MygraWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EB290BA22E2494AB0061B1D0 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = EB290BA12E2494AB0061B1D0 /* README.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		EB0E1B262E62838F0060F834 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB290AC52E244A200061B1D0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB0E1B182E62838E0060F834;
+			remoteInfo = MygraWidgetsExtension;
+		};
 		EB290ADF2E244A210061B1D0 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EB290AC52E244A200061B1D0 /* Project object */;
@@ -34,6 +44,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				EB0E1B282E62838F0060F834 /* MygraWidgetsExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -41,6 +52,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MygraWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB290ACD2E244A200061B1D0 /* Mygra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mygra.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB290ADE2E244A210061B1D0 /* MygraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MygraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB290AE82E244A210061B1D0 /* MygraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MygraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -50,6 +62,36 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EB0E1B2C2E62838F0060F834 /* Exceptions for "MygraWidgets" folder in "MygraWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */;
+		};
+		EB0E1B2E2E6283FC0060F834 /* Exceptions for "Mygra" folder in "MygraWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Managers/MigraineManager.swift,
+				Models/Enumerations/BiologicalSex.swift,
+				Models/Enumerations/MenstrualPhase.swift,
+				Models/Enumerations/MigraineTrigger.swift,
+				Models/Enumerations/Severity.swift,
+				Models/HealthData.swift,
+				Models/Migraine.swift,
+				Models/MigraineFilter.swift,
+				Models/WeatherData.swift,
+			);
+			target = EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */;
+		};
+		EB0E1B3A2E62851E0060F834 /* Exceptions for "MygraWidgets" folder in "Mygra" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				MigraineActivityCenter.swift,
+				MygraWidgetsLiveActivity.swift,
+			);
+			target = EB290ACC2E244A200061B1D0 /* Mygra */;
+		};
 		EB290AF02E244A210061B1D0 /* Exceptions for "Mygra" folder in "Mygra" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -60,10 +102,20 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		EB0E1B1C2E62838E0060F834 /* MygraWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EB0E1B3A2E62851E0060F834 /* Exceptions for "MygraWidgets" folder in "Mygra" target */,
+				EB0E1B2C2E62838F0060F834 /* Exceptions for "MygraWidgets" folder in "MygraWidgetsExtension" target */,
+			);
+			path = MygraWidgets;
+			sourceTree = "<group>";
+		};
 		EB290ACF2E244A200061B1D0 /* Mygra */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				EB290AF02E244A210061B1D0 /* Exceptions for "Mygra" folder in "Mygra" target */,
+				EB0E1B2E2E6283FC0060F834 /* Exceptions for "Mygra" folder in "MygraWidgetsExtension" target */,
 			);
 			path = Mygra;
 			sourceTree = "<group>";
@@ -78,14 +130,18 @@
 			path = MygraUITests;
 			sourceTree = "<group>";
 		};
-		EBB762EA2E59536C00AAA8C1 /* MygraWidgets */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MygraWidgets;
-			sourceTree = "<group>";
-		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		EB0E1B162E62838E0060F834 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB0E1B1B2E62838E0060F834 /* SwiftUI.framework in Frameworks */,
+				EB0E1B1A2E62838E0060F834 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EB290ACA2E244A200061B1D0 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -117,7 +173,7 @@
 				EB290ACF2E244A200061B1D0 /* Mygra */,
 				EB290AE12E244A210061B1D0 /* MygraTests */,
 				EB290AEB2E244A210061B1D0 /* MygraUITests */,
-				EBB762EA2E59536C00AAA8C1 /* MygraWidgets */,
+				EB0E1B1C2E62838E0060F834 /* MygraWidgets */,
 				EBB762E52E59536C00AAA8C1 /* Frameworks */,
 				EB290ACE2E244A200061B1D0 /* Products */,
 			);
@@ -129,6 +185,7 @@
 				EB290ACD2E244A200061B1D0 /* Mygra.app */,
 				EB290ADE2E244A210061B1D0 /* MygraTests.xctest */,
 				EB290AE82E244A210061B1D0 /* MygraUITests.xctest */,
+				EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -145,6 +202,28 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB0E1B292E62838F0060F834 /* Build configuration list for PBXNativeTarget "MygraWidgetsExtension" */;
+			buildPhases = (
+				EB0E1B152E62838E0060F834 /* Sources */,
+				EB0E1B162E62838E0060F834 /* Frameworks */,
+				EB0E1B172E62838E0060F834 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EB0E1B1C2E62838E0060F834 /* MygraWidgets */,
+			);
+			name = MygraWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = MygraWidgetsExtension;
+			productReference = EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		EB290ACC2E244A200061B1D0 /* Mygra */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EB290AF12E244A210061B1D0 /* Build configuration list for PBXNativeTarget "Mygra" */;
@@ -157,6 +236,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				EB0E1B272E62838F0060F834 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EB290ACF2E244A200061B1D0 /* Mygra */,
@@ -224,6 +304,9 @@
 				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
+					EB0E1B182E62838E0060F834 = {
+						CreatedOnToolsVersion = 26.0;
+					};
 					EB290ACC2E244A200061B1D0 = {
 						CreatedOnToolsVersion = 26.0;
 					};
@@ -254,11 +337,19 @@
 				EB290ACC2E244A200061B1D0 /* Mygra */,
 				EB290ADD2E244A210061B1D0 /* MygraTests */,
 				EB290AE72E244A210061B1D0 /* MygraUITests */,
+				EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		EB0E1B172E62838E0060F834 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EB290ACB2E244A200061B1D0 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -284,6 +375,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		EB0E1B152E62838E0060F834 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EB290AC92E244A200061B1D0 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -308,6 +406,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		EB0E1B272E62838F0060F834 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */;
+			targetProxy = EB0E1B262E62838F0060F834 /* PBXContainerItemProxy */;
+		};
 		EB290AE02E244A210061B1D0 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = EB290ACC2E244A200061B1D0 /* Mygra */;
@@ -321,14 +424,80 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		EB0E1B2A2E62838F0060F834 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = R8Q8DM58C6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MygraWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MygraWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EB0E1B2B2E62838F0060F834 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = R8Q8DM58C6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MygraWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = MygraWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		EB290AF22E244A210061B1D0 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = MygraIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mygra/Mygra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -354,6 +523,7 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location is used to proactively warn of potential environmental triggers.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Your location is used to proactively warn of environmental triggers.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to fetch weather data for migraine trigger analysis.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -363,7 +533,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -389,11 +559,12 @@
 		EB290AF32E244A210061B1D0 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = MygraIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mygra/Mygra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -419,6 +590,7 @@
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "Your location is used to proactively warn of potential environmental triggers.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "Your location is used to proactively warn of environmental triggers.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Your location is used to fetch weather data for migraine trigger analysis.";
+				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -428,7 +600,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
@@ -672,6 +844,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		EB0E1B292E62838F0060F834 /* Build configuration list for PBXNativeTarget "MygraWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB0E1B2A2E62838F0060F834 /* Debug */,
+				EB0E1B2B2E62838F0060F834 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		EB290AC82E244A200061B1D0 /* Build configuration list for PBXProject "Mygra" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

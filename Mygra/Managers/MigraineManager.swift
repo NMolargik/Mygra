@@ -54,7 +54,6 @@ final class MigraineManager {
             // Update the ongoing migraine reference (first ongoing in newest-first list)
             self.ongoingMigraine = fetched.first(where: { $0.isOngoing })
         } catch {
-            // In production you may want to surface this via a published error state.
             print("MigraineManager.refresh() fetch error: \(error)")
             self.migraines = []
             self.ongoingMigraine = nil
@@ -107,13 +106,15 @@ final class MigraineManager {
         let isOngoingNow = migraine.isOngoing
 
         // Keep ongoing tracking in sync:
-        // - If it was ongoing and is no longer, clear if it was the tracked one.
         if wasOngoing && !isOngoingNow, ongoingMigraine?.id == migraine.id {
             ongoingMigraine = nil
+            // End any Live Activity for this migraine
+            MigraineActivityCenter.end(for: migraine.id)
         }
-        // - If it becomes ongoing, set it.
         if !wasOngoing && isOngoingNow {
             ongoingMigraine = migraine
+            // Start a Live Activity if it became ongoing
+            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate)
         }
 
         saveAndReload()
@@ -130,6 +131,8 @@ final class MigraineManager {
         if ongoingMigraine?.id == migraine.id {
             ongoingMigraine = nil
         }
+        // End any Live Activity
+        MigraineActivityCenter.end(for: migraine.id)
         context.delete(migraine)
         saveAndReload()
     }
@@ -141,6 +144,7 @@ final class MigraineManager {
             if ongoingMigraine?.id == model.id {
                 ongoingMigraine = nil
             }
+            MigraineActivityCenter.end(for: model.id)
             context.delete(model)
         }
         saveAndReload()
@@ -176,7 +180,7 @@ final class MigraineManager {
         } catch {
             print("MigraineManager.save error: \(error)")
         }
-        // Re-fetch so the in-memory list stays sorted and consistent.
         Task { await refresh() }
     }
 }
+

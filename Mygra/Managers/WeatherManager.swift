@@ -166,6 +166,11 @@ final class WeatherManager {
         guard let p = pressure else { return nil }
         let fmt = MeasurementFormatter()
         fmt.unitOptions = .providedUnit
+        // Configure number formatter to show zero decimal places
+        let nf = NumberFormatter()
+        nf.maximumFractionDigits = 0
+        nf.minimumFractionDigits = 0
+        fmt.numberFormatter = nf
         return fmt.string(from: p)
     }
 

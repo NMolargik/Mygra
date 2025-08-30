@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SplashView: View {
     var proceedForward: () -> Void
+    var refreshUser: () -> Void
     var viewModel = SplashView.ViewModel()
 
     var body: some View {
@@ -47,7 +48,13 @@ struct SplashView: View {
             .glassEffect(.regular.interactive().tint(.blue))
             .opacity(viewModel.buttonVisible ? 1 : 0)
             .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
-            .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)            
+            .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
+            
+            Button("No, I'm not new!") {
+                refreshUser()
+            }
+            .foregroundStyle(.blue)
+            .padding()
         }
         .onAppear {
             viewModel.activateAnimation()
@@ -57,5 +64,5 @@ struct SplashView: View {
 }
 
 #Preview {
-    SplashView(proceedForward: {})
+    SplashView(proceedForward: {}, refreshUser: {})
 }

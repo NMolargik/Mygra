@@ -12,8 +12,11 @@ struct MigraineDetailView: View {
     @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.horizontalSizeClass) private var hSizeClass
 
     let migraine: Migraine
+    // Optional close handler (useful for iPad split detail)
+    var onClose: (() -> Void)? = nil
 
     // End Migraine flow
     @State private var showingEndSheet = false
@@ -127,6 +130,25 @@ struct MigraineDetailView: View {
         }
         .navigationTitle("Migraine")
         .navigationBarTitleDisplayMode(.inline)
+        // iPad-only Close button in the leading position
+        .toolbar {
+            if hSizeClass == .regular {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        if let onClose {
+                            onClose()
+                        } else {
+                            dismiss()
+                        }
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "chevron.left")
+                            Text("Close")
+                        }
+                    }
+                }
+            }
+        }
         .sheet(isPresented: $showingEndSheet) {
             EndMigraineSheet(
                 startDate: migraine.startDate,
@@ -367,3 +389,4 @@ private struct LabeledRow<Value: View>: View {
 #Preview {
     MigraineDetailView(migraine: Migraine(startDate: Date.now, painLevel: 5, stressLevel: 6))
 }
+

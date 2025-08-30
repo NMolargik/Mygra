@@ -1,0 +1,82 @@
+{
+  "fill" : "automatic",
+  "groups" : [
+    {
+      "layers" : [
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "display-p3:0.96301,0.96783,0.88987,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.95417,0.96783,0.89061,1.00000"
+              }
+            }
+          ],
+          "glass" : true,
+          "image-name" : "stress.svg",
+          "name" : "stress",
+          "position" : {
+            "scale" : 1.5,
+            "translation-in-points" : [
+              437.48629603796144,
+              213.47823425194974
+            ]
+          }
+        },
+        {
+          "fill-specializations" : [
+            {
+              "appearance" : "dark",
+              "value" : "none"
+            }
+          ],
+          "glass" : false,
+          "hidden" : true,
+          "image-name" : "folds.svg",
+          "name" : "folds"
+        },
+        {
+          "hidden" : true,
+          "image-name" : "brain 2.svg",
+          "name" : "brain 2"
+        },
+        {
+          "fill-specializations" : [
+            {
+              "value" : {
+                "solid" : "display-p3:0.81994,0.15270,0.00000,1.00000"
+              }
+            },
+            {
+              "appearance" : "dark",
+              "value" : {
+                "solid" : "display-p3:0.82178,0.18420,0.11353,1.00000"
+              }
+            }
+          ],
+          "image-name" : "head 4.svg",
+          "name" : "head 4"
+        }
+      ],
+      "shadow" : {
+        "kind" : "neutral",
+        "opacity" : 0.5
+      },
+      "translucency" : {
+        "enabled" : true,
+        "value" : 0.5
+      }
+    }
+  ],
+  "supported-platforms" : {
+    "circles" : [
+      "watchOS"
+    ],
+    "squares" : "shared"
+  }
+}

@@ -40,8 +40,8 @@ struct InsightsView: View {
                     // Quick Log (HealthKit)
                     quickLogCard
 
-                    // Insights section (cards)
-                    insightsSection
+                    // Quick Bits section (cards)
+                    quickBitsSection
 
                     // Recent migraines preview
                     recentMigrainesSection
@@ -51,22 +51,6 @@ struct InsightsView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)
-            }
-            .navigationTitle("Mygra")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingEntrySheet = true
-                    } label: {
-                        HStack(spacing: 6) {
-                            Image(systemName: "plus")
-                            Text("New Migraine")
-                                .bold()
-                        }
-                        .foregroundStyle(.blue)
-                    }
-                    .accessibilityIdentifier("addEntryButton")
-                }
             }
             .refreshable {
                 await refreshAll()
@@ -273,10 +257,10 @@ struct InsightsView: View {
         .accessibilityElement(children: .contain)
     }
 
-    private var insightsSection: some View {
+    private var quickBitsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Label("Insights", systemImage: "lightbulb.max.fill")
+                Label("Quick Bits", systemImage: "lightbulb.max.fill")
                     .font(.headline)
                 Spacer()
                 if insightManager.isRefreshing {
@@ -426,10 +410,9 @@ struct InsightsView: View {
             }
             Spacer(minLength: 4)
             VStack(alignment: .trailing, spacing: 4) {
-                Text(insight.generatedAt, style: .relative)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
                 priorityBadge(insight.priority)
+                
+                Spacer()
             }
         }
         .padding(10)

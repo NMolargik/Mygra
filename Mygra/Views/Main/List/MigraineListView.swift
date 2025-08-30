@@ -77,40 +77,102 @@ struct MigraineListView: View {
                     )
                 }
             } else {
-                List(migraineManager.visibleMigraines) { migraine in
-                    NavigationLink {
-                        MigraineDetailView(
-                            migraine: migraine
-                        )
-                    } label: {
-                        MigraineRowView(
-                            migraine: migraine,
-                            viewModel: viewModel
-                        )
-                    }
-                    // Leading swipe: pin/unpin
-                    .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                        Button {
-                            migraineManager.togglePinned(migraine)
+                // Compute filter state for non-empty case
+                let f = migraineManager.filter
+                let defaultFilter = MigraineFilter()
+                let hasNonPinnedFilters =
+                    f.dateRange != nil ||
+                    f.minPainLevel != nil ||
+                    !f.requiredTriggers.isEmpty ||
+                    !f.searchText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                let hasAnyFilter = f.pinnedOnly || hasNonPinnedFilters || f != defaultFilter
+
+                List {
+                    ForEach(migraineManager.visibleMigraines) { migraine in
+                        NavigationLink {
+                            MigraineDetailView(
+                                migraine: migraine
+                            )
                         } label: {
-                            Label(migraine.pinned ? "Unpin" : "Pin",
-                                  systemImage: migraine.pinned ? "pin.slash" : "pin")
+                            MigraineRowView(
+                                migraine: migraine,
+                                viewModel: viewModel
+                            )
                         }
-                        .tint(.yellow)
+                        // Leading swipe: pin/unpin
+                        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+                            Button {
+                                migraineManager.togglePinned(migraine)
+                            } label: {
+                                Label(migraine.pinned ? "Unpin" : "Pin",
+                                      systemImage: migraine.pinned ? "pin.slash" : "pin")
+                            }
+                            .tint(.yellow)
+                        }
+                        // Trailing swipe: delete
+                        .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                            Button(role: .destructive) {
+                                migraineManager.delete(migraine)
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                                    .tint(.red)
+                            }
+                        }
                     }
-                    // Trailing swipe: delete
-                    .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(role: .destructive) {
-                            migraineManager.delete(migraine)
-                        } label: {
-                            Label("Delete", systemImage: "trash")
-                                .tint(.red)
+
+                    // Footer alert when filters are active and there are results
+                    if hasAnyFilter {
+                        Section {
+                            EmptyView()
+                        } footer: {
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "line.3.horizontal.decrease.circle")
+                                        .foregroundStyle(.secondary)
+                                    Text("Filters are applied")
+                                        .font(.footnote).bold()
+                                        .foregroundStyle(.secondary)
+                                }
+                                HStack(spacing: 10) {
+                                    if f.pinnedOnly {
+                                        Button {
+                                            var new = f
+                                            new.pinnedOnly = false
+                                            migraineManager.filter = new
+                                        } label: {
+                                            Label("Show All", systemImage: "pin.slash")
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .tint(.yellow)
+                                        .controlSize(.small)
+                                        .accessibilityIdentifier("footerShowAllButton")
+                                    }
+                                    Button {
+                                        migraineManager.filter = .init()
+                                    } label: {
+                                        Label("Clear Filters", systemImage: "xmark.circle")
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .tint(.blue)
+                                    .controlSize(.small)
+                                    .accessibilityIdentifier("footerClearFiltersButton")
+                                    
+                                    Button {
+                                        viewModel.showingFilterSheet = true
+                                    } label: {
+                                        Label("Adjust", systemImage: "slider.horizontal.3")
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .controlSize(.small)
+                                    .accessibilityIdentifier("footerAdjustFiltersButton")
+                                }
+                            }
+                            .padding(.top, 4)
                         }
                     }
                 }
             }
         }
-        .navigationTitle("Migraines")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
@@ -135,20 +197,6 @@ struct MigraineListView: View {
                 .accessibilityIdentifier("pinnedOnlyToggle")
                 .tint(.yellow)
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingEntrySheet = true
-                } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus")
-                        Text("Add")
-                            .bold()
-
-                    }
-                    .foregroundStyle(.blue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
         }
         .sheet(isPresented: $viewModel.showingFilterSheet) {
             NavigationStack {
@@ -170,6 +218,10 @@ struct MigraineListView: View {
             .presentationDetents([.medium, .large])
             .interactiveDismissDisabled()
         }
+        // Pull-to-refresh to re-run the manager query
+        .refreshable {
+            await migraineManager.refresh()
+        }
     }
 }
 
@@ -190,4 +242,3 @@ struct MigraineListView: View {
         .modelContainer(container)
         .environment(previewMigraineManager)
 }
-

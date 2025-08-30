@@ -1,90 +1,117 @@
-// MygraWidgetsLiveActivity.swift
-// MygraWidgetsLiveActivity
+//
+//  MygraWidgetsLiveActivity.swift
+//  MygraWidgets
+//
+//  Created by Nick Molargik on 8/29/25.
+//
 
 import ActivityKit
 import WidgetKit
 import SwiftUI
 
+// MARK: - Attributes for Migraine Live Activity
 struct MigraineActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        var startDate: Date
+        // Dynamic state for the activity (if we ever need to update while ongoing)
+        // For our case, startDate is fixed; we keep it here to render the live timer.
+        let migraineID: UUID
+        let startDate: Date
     }
-    var migraineId: UUID
+
+    // Fixed properties (none required for now)
 }
 
-struct MigraineLiveActivity: Widget {
+// MARK: - Live Activity Widget
+struct MygraWidgetsLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: MigraineActivityAttributes.self) { context in
             // Lock screen / banner UI
-            VStack {
-                Text("Migraine Ongoing")
-                    .font(.headline)
-                Text(timerInterval: context.state.startDate...Date(), countsDown: false)
-                    .font(.largeTitle.monospacedDigit())
-                Button("End Now") {
-                    // Deep link into the app to end migraine
-                    WidgetCenter.shared.reloadAllTimelines()
+            HStack(spacing: 12) {
+                Image(systemName: "waveform.path.ecg")
+                    .symbolVariant(.fill)
+                    .foregroundStyle(.pink)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Ongoing Migraine")
+                        .font(.headline)
+                    // Live timer since start
+                    Text(context.state.startDate, style: .timer)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
                 }
-                .padding()
+                Spacer()
             }
-            .padding()
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .activityBackgroundTint(.clear)
+            .activitySystemActionForegroundColor(.pink)
+
         } dynamicIsland: { context in
             DynamicIsland {
+                // Expanded regions
+                DynamicIslandExpandedRegion(.leading) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "bolt.heart.fill") // narrower than waveform.path.ecg
+                            .foregroundStyle(.pink)
+                            .accessibilityLabel("Migraine")
+                        Text("Mygra")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                DynamicIslandExpandedRegion(.trailing) {
+                    // Live timer
+                    Text(context.state.startDate, style: .timer)
+                        .monospacedDigit()
+                        .font(.headline)
+                }
                 DynamicIslandExpandedRegion(.center) {
-                    VStack {
-                        Text(timerInterval: context.state.startDate...Date(), countsDown: false)
-                            .font(.title.monospacedDigit())
-                        Button("End") {
-                            WidgetCenter.shared.reloadAllTimelines()
+                    Text("Ongoing Migraine")
+                        .font(.headline)
+                }
+                DynamicIslandExpandedRegion(.bottom) {
+                    // Deep link to end the migraine in-app
+                    if let url = URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)?action=end") {
+                        Link(destination: url) {
+                            Label("End Migraine", systemImage: "stop.circle.fill")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
                         }
+                        .tint(.pink)
                         .buttonStyle(.borderedProminent)
                     }
                 }
             } compactLeading: {
-                Text(timerInterval: context.state.startDate...Date(), countsDown: false)
-                    .font(.caption.monospacedDigit())
+                // Keep this minimal and narrow so the system keeps the island tight.
+                Image(systemName: "bolt.heart.fill")
+                    .foregroundStyle(.pink)
             } compactTrailing: {
-                Image(systemName: "xmark.circle")
+                // Single view, right-aligned, minimal intrinsic width.
+                Text(context.state.startDate, style: .timer)
+                    .monospacedDigit()
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.85)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
             } minimal: {
-                Image(systemName: "waveform.path.ecg")
+                Image(systemName: "bolt.heart.fill")
+                    .foregroundStyle(.pink)
             }
+            .keylineTint(.pink)
         }
     }
 }
 
-// MARK: - Preview Support
-
-extension MigraineActivityAttributes {
-    static var preview: MigraineActivityAttributes {
-        MigraineActivityAttributes(migraineId: UUID())
-    }
-
-    static var previewContent: MigraineActivityAttributes.ContentState {
-        // Simulate a migraine started 5 minutes ago
-        MigraineActivityAttributes.ContentState(startDate: Date().addingTimeInterval(-300))
+// MARK: - Previews
+extension MigraineActivityAttributes.ContentState {
+    static var sample: MigraineActivityAttributes.ContentState {
+        .init(migraineID: UUID(), startDate: Date().addingTimeInterval(-3600))
     }
 }
 
-#Preview("Live Activity - Lock Screen", as: .content, using: MigraineActivityAttributes.preview) {
-    MigraineLiveActivity()
+#Preview("Lock Screen", as: .content, using: MigraineActivityAttributes()) {
+    MygraWidgetsLiveActivity()
 } contentStates: {
-    MigraineActivityAttributes.previewContent
+    MigraineActivityAttributes.ContentState.sample
 }
 
-#Preview("Dynamic Island - Expanded", as: .dynamicIsland(.expanded), using: MigraineActivityAttributes.preview) {
-    MigraineLiveActivity()
-} contentStates: {
-    MigraineActivityAttributes.previewContent
-}
-
-#Preview("Dynamic Island - Compact", as: .dynamicIsland(.compact), using: MigraineActivityAttributes.preview) {
-    MigraineLiveActivity()
-} contentStates: {
-    MigraineActivityAttributes.previewContent
-}
-
-#Preview("Dynamic Island - Minimal", as: .dynamicIsland(.minimal), using: MigraineActivityAttributes.preview) {
-    MigraineLiveActivity()
-} contentStates: {
-    MigraineActivityAttributes.previewContent
-}

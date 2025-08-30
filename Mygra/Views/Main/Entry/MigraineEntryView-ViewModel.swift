@@ -22,7 +22,7 @@ extension MigraineEntryView {
 
         // Entry form state
         var startDate: Date = Date()
-        var isOngoing: Bool = true
+        var isOngoing: Bool = false
         var endDate: Date = Date()
         var painLevel: Int = 5
         var stressLevel: Int = 5

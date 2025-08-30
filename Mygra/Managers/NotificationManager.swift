@@ -22,23 +22,6 @@ final class NotificationManager {
         }
     }
     
-    /// Schedule a local notification (fire after a time interval)
-    func scheduleNotification(title: String, body: String, inSeconds seconds: TimeInterval, category: LocalNotificationCategory = .reminder) async {
-        let content = UNMutableNotificationContent()
-        content.title = title
-        content.body = body
-        content.sound = .default
-        content.categoryIdentifier = category.rawValue
-        
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: seconds, repeats: false)
-        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-        do {
-            try await center.add(request)
-        } catch {
-            print("[NotificationsManager] Failed to schedule notification: \(error)")
-        }
-    }
-    
     /// Remove all pending (scheduled but undelivered) notifications
     func removeAllPendingNotifications() {
         center.removeAllPendingNotificationRequests()
@@ -63,6 +46,28 @@ final class NotificationManager {
             center.getPendingNotificationRequests { requests in
                 continuation.resume(returning: requests)
             }
+        }
+    }
+    
+    /// Send a local notification immediately.
+    func send(
+        title: String,
+        body: String,
+        category: LocalNotificationCategory = .alert,
+        identifier: String = UUID().uuidString
+    ) async {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.sound = .default
+        content.categoryIdentifier = category.rawValue
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        do {
+            try await center.add(request)
+        } catch {
+            print("Failed to schedule notification: \(error)")
         }
     }
 }

@@ -573,8 +573,6 @@ struct MigraineEntryView: View {
             guard viewModel.didPullWeather, viewModel.weatherError == nil else { return nil }
             let pressureHpa: Double? = {
                 guard let p = weatherManager.pressure else { return nil }
-                // WeatherKit’s current.pressure is a Measurement<UnitPressure>
-                // Convert to hPa for our model
                 let hPa = p.converted(to: .hectopascals).value
                 return hPa
             }()
@@ -590,7 +588,6 @@ struct MigraineEntryView: View {
                     condition: cond
                 )
             } else if tempC != nil || pressureHpa != nil || humidityPercent != nil || condition != nil {
-                // If we have partial data, still capture what we can (missing values default to 0)
                 return WeatherData(
                     barometricPressureHpa: pressureHpa ?? 0,
                     temperatureCelsius: tempC ?? 0,
@@ -622,6 +619,11 @@ struct MigraineEntryView: View {
             weather: weatherModel,
             health: healthModel
         )
+
+        // Start Live Activity if ongoing
+        if newMigraine.isOngoing {
+            MigraineActivityCenter.start(for: newMigraine.id, startDate: newMigraine.startDate)
+        }
 
         // Done
         onMigraineSaved(newMigraine)

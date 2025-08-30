@@ -54,13 +54,42 @@ struct SettingsView: View {
         Form {
             Toggle("Use Metric Units", isOn: $useMetricUnits)
             
-            Toggle("Edit User", isOn: $editingUser)
+            // Edit/Save button replaces the toggle
+            Button {
+                if editingUser {
+                    // Save changes explicitly and exit editing mode
+                    let updated = userBinding.wrappedValue
+                    manager.update { existing in
+                        existing.name = updated.name
+                        existing.birthday = updated.birthday
+                        existing.biologicalSex = updated.biologicalSex
+                        existing.heightMeters = updated.heightMeters
+                        existing.weightKilograms = updated.weightKilograms
+                        existing.averageSleepHours = updated.averageSleepHours
+                        existing.averageCaffeineMg = updated.averageCaffeineMg
+                        existing.chronicConditions = updated.chronicConditions
+                        existing.dietaryRestrictions = updated.dietaryRestrictions
+                    }
+                    editingUser = false
+                } else {
+                    // Enter editing mode
+                    editingUser = true
+                }
+            } label: {
+                Text(editingUser ? "Save User" : "Edit User")
+                    .bold()
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(editingUser ? .green : .blue)
             
             if (editingUser) {
                 UserEditView(
                     user: userBinding,
                     userFormComplete: .constant(true),
-                    dismiss: { }
+                    dismiss: {
+                        // If you want dismiss to cancel, you could:
+                        // editingUser = false
+                    }
                 )
             }
             

@@ -10,12 +10,18 @@ import SwiftUI
 struct MigraineRowView: View {
     var migraine: Migraine
     var viewModel: MigraineListView.ViewModel
+    @Environment(\.horizontalSizeClass) private var hSizeClass
+
+    // Treat iPad as “regular width” even if size class is nil in this environment.
+    private var isRegularWidth: Bool {
+        if UIDevice.current.userInterfaceIdiom == .pad { return true }
+        return hSizeClass == .regular
+    }
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
-            // Leading status indicator: pulsing tall rectangle if ongoing, static if not
+            // Leading status indicator
             ZStack {
-                // Outer pulsing aura
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .fill(migraine.severity.color)
                     .frame(width: 8)
@@ -24,10 +30,9 @@ struct MigraineRowView: View {
             VStack(alignment: .leading, spacing: 6) {
                 // Primary line: start + duration, optional pin
                 HStack(alignment: .firstTextBaseline) {
-                    TimelineView(.periodic(from: .now, by: 1.0)) { context in
-                        // If ongoing, show live duration; else show static range text with short format
+                    TimelineView(.periodic(from: .now, by: 1.0)) { _ in
                         if migraine.isOngoing {
-                            Text("\(startString) • \(liveDurationString(now: context.date))")
+                            Text("Ongoing")
                                 .font(.headline)
                                 .lineLimit(1)
                                 .minimumScaleFactor(0.8)
@@ -49,12 +54,14 @@ struct MigraineRowView: View {
                         metricPill(
                             label: "Pain",
                             value: "\(migraine.painLevel)",
-                            tint: migraine.severity.color
+                            tint: migraine.severity.color,
+                            showTextLabel: !isRegularWidth // hide label on iPad/regular width
                         )
                         metricPill(
                             label: "Stress",
                             value: "\(migraine.stressLevel)",
-                            tint: .purple
+                            tint: .purple,
+                            showTextLabel: !isRegularWidth // hide label on iPad/regular width
                         )
                     }
                 }
@@ -81,23 +88,20 @@ struct MigraineRowView: View {
 
     // MARK: - Derived strings
 
-    // dd/MM/yy HH:mm format for the start date
     private var startString: String {
         let df = DateFormatter()
         df.dateFormat = "dd/MM/yy HH:mm"
         return df.string(from: migraine.startDate)
     }
 
-    // dd/MM/yy HH:mm – dd/MM/yy HH:mm or "… – ongoing" in short format
     private func dateRangeShort(for migraine: Migraine) -> String {
+        if migraine.isOngoing {
+            return "Ongoing"
+        }
         let df = DateFormatter()
         df.dateFormat = "MM/dd/yy HH:mm"
         let start = df.string(from: migraine.startDate)
-        if let _ = migraine.endDate {
-            return "\(start)"
-        } else {
-            return "Ongoing"
-        }
+        return "\(start)"
     }
 
     private func liveDurationString(now: Date) -> String {
@@ -117,12 +121,13 @@ struct MigraineRowView: View {
         var parts: [String] = []
         if migraine.isOngoing {
             parts.append("Ongoing")
-        }
-        parts.append("Started \(startString)")
-        if let end = migraine.endDate {
-            let df = DateFormatter()
-            df.dateFormat = "dd/MM/yy HH:mm"
-            parts.append("Ended \(df.string(from: end))")
+        } else {
+            parts.append("Started \(startString)")
+            if let end = migraine.endDate {
+                let df = DateFormatter()
+                df.dateFormat = "dd/MM/yy HH:mm"
+                parts.append("Ended \(df.string(from: end))")
+            }
         }
         parts.append("Pain \(migraine.painLevel)")
         parts.append("Stress \(migraine.stressLevel)")
@@ -137,11 +142,13 @@ struct MigraineRowView: View {
 
     // MARK: - UI helpers
 
-    private func metricPill(label: String, value: String, tint: Color) -> some View {
+    private func metricPill(label: String, value: String, tint: Color, showTextLabel: Bool = true) -> some View {
         HStack(spacing: 4) {
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            if showTextLabel {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
             Text(value)
                 .font(.caption).bold()
                 .foregroundStyle(tint)
@@ -154,10 +161,9 @@ struct MigraineRowView: View {
         )
     }
 
-    // Render a series of dots representing the trigger count
     @ViewBuilder
     private func triggerDots(count: Int) -> some View {
-        let limited = min(count, 10) // cap to avoid overly long rows
+        let limited = min(count, 10)
         HStack(spacing: 3) {
             ForEach(0..<limited, id: \.self) { _ in
                 Circle()

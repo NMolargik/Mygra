@@ -9,12 +9,11 @@ import Foundation
 import SwiftData
 
 /// The single User profile for Mygra, synced via SwiftData + iCloud.
-/// We enforce a single-row invariant using a unique `singletonKey`.
+/// We enforce a single-row invariant in code (no uniqueness constraints in CloudKit-backed stores).
 @Model
 final class User {
-    // MARK: - Singleton enforcement
-    /// A constant unique key so only one `User` can exist in the store.
-    /// Any attempt to insert a second `User` will violate uniqueness.
+    // MARK: - Singleton enforcement (code-level; no uniqueness constraint)
+    /// A constant key you can use for debugging or code-level checks.
     var singletonKey: String = "USER_SINGLETON"
 
     // MARK: - Identity
