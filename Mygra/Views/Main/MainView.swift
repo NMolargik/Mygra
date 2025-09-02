@@ -12,15 +12,19 @@ import Combine
 
 struct MainView: View {
     var returnToAppStage: (AppStage) -> Void
-    
+
+    // Deep link inputs provided by ContentView so we can act once mounted
+    @Binding var pendingDeepLinkID: UUID?
+    @Binding var pendingDeepLinkAction: String?
+
     @Environment(\.modelContext) private var modelContext
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.scenePhase) private var scenePhase
-    
+
     @State private var appTab: AppTab = .insights // iPhone / compact-only
-    
+
     @State private var showingEntrySheet: Bool = false
     @State private var showingSettingsSheet: Bool = false
     @State private var showingOngoingAlert: Bool = false
@@ -30,7 +34,7 @@ struct MainView: View {
     @State private var now: Date = Date()
     @State private var drawOn: Bool = false
     @State private var drawOff: Bool = false
-    
+
     var body: some View {
         Group {
             if isRegularWidth {
@@ -139,7 +143,7 @@ struct MainView: View {
                         Text(AppTab.insights.rawValue)
                     }
                     .tag(AppTab.insights)
-                    
+
                     NavigationStack(path: $listPath) {
                         MigraineListView(
                             showingEntrySheet: $showingEntrySheet
@@ -181,7 +185,7 @@ struct MainView: View {
                         Text(AppTab.list.rawValue)
                     }
                     .tag(AppTab.list)
-                    
+
                     NavigationStack {
                         SettingsView()
                             .navigationTitle(AppTab.settings.rawValue)
@@ -233,47 +237,16 @@ struct MainView: View {
         } message: {
             Text("You already have an ongoing migraine. End it before starting a new one.")
         }
-        // Deep link handling
-        .onOpenURL { url in
-            handleDeepLink(url: url)
+        // Process any pending deep link once mounted and whenever inputs change
+        .task { await processPendingDeepLinkIfNeeded() }
+        .onChange(of: pendingDeepLinkID) { _, _ in
+            Task { await processPendingDeepLinkIfNeeded() }
         }
-    }
-    
-    // MARK: - Deep Link Handling
-    
-    private func handleDeepLink(url: URL) {
-        guard url.scheme?.lowercased() == "mygra" else { return }
-        // Expecting mygra://migraine/<UUID>?action=end (action is optional)
-        let pathComponents = url.pathComponents.filter { $0 != "/" }
-        guard pathComponents.count >= 2, pathComponents[0].lowercased() == "migraine" else { return }
-        let idString = pathComponents[1]
-        guard let uuid = UUID(uuidString: idString) else { return }
-        let action = URLComponents(url: url, resolvingAgainstBaseURL: false)?
-            .queryItems?
-            .first(where: { $0.name == "action" })?.value
-
-        // Navigate to detail
-        if !isRegularWidth {
-            appTab = .list
+        .onChange(of: pendingDeepLinkAction) { _, _ in
+            Task { await processPendingDeepLinkIfNeeded() }
         }
-        if lastPushedMigraineID != uuid {
-            listPath.append(uuid)
-            lastPushedMigraineID = uuid
-        }
-
-        // If action=end, end the migraine now
-        if action?.lowercased() == "end" {
-            if let migraine = (migraineManager.visibleMigraines.first { $0.id == uuid }
-                               ?? migraineManager.migraines.first { $0.id == uuid }) {
-                if migraine.endDate == nil {
-                    migraineManager.update(migraine) { m in
-                        m.endDate = Date()
-                    }
-                    // Live Activity end will be triggered by MigraineManager.update
-                }
-            } else {
-                // No-op if not found; UI will show "not found" destination
-            }
+        .onChange(of: hSizeClass) { _, _ in
+            Task { await processPendingDeepLinkIfNeeded() }
         }
     }
 
@@ -296,7 +269,7 @@ struct MainView: View {
                         .symbolVariant(.fill)
                         .foregroundStyle(.pink)
                         .modifier(DrawOnOffEffect(drawOn: drawOn, drawOff: drawOff))
-                    
+
                     Text("Ongoing Migraine")
                         .font(.headline)
                     Text("•")
@@ -321,17 +294,17 @@ struct MainView: View {
             }
         }
     }
-    
+
     // MARK: - Helpers
-    
+
     private var isRegularWidth: Bool {
         hSizeClass == .regular
     }
-    
+
     private var timer: Publishers.Autoconnect<Timer.TimerPublisher> {
         Timer.publish(every: 0.8, on: .main, in: .common).autoconnect()
     }
-    
+
     private func durationString(since start: Date, now: Date) -> String {
         let elapsed = max(0, Int(now.timeIntervalSince(start)))
         let hours = elapsed / 3600
@@ -343,7 +316,7 @@ struct MainView: View {
             return String(format: "%d:%02d", minutes, seconds)
         }
     }
-    
+
     private func handleAddTapped() {
         if migraineManager.ongoingMigraine != nil {
             showingOngoingAlert = true
@@ -351,13 +324,55 @@ struct MainView: View {
             showingEntrySheet = true
         }
     }
+
+    // MARK: - Deep link processing (from ContentView)
+
+    private func endMigraineIfRequested(for id: UUID, action: String?) {
+        guard action?.lowercased() == "end" else { return }
+        if let migraine = (migraineManager.visibleMigraines.first { $0.id == id }
+                           ?? migraineManager.migraines.first { $0.id == id }) {
+            if migraine.endDate == nil {
+                migraineManager.update(migraine) { m in
+                    m.endDate = Date()
+                }
+            }
+        }
+    }
+
+    private func navigateToMigraine(id: UUID) {
+        if !isRegularWidth {
+            appTab = .list
+        }
+        // Avoid pushing the same destination twice
+        if lastPushedMigraineID == id {
+            return
+        }
+        listPath.append(id)
+        lastPushedMigraineID = id
+    }
+
+    @MainActor
+    private func processPendingDeepLinkIfNeeded() async {
+        guard let id = pendingDeepLinkID else { return }
+
+        // Ensure the stacks are mounted before navigating
+        // A short hop to the next runloop helps after size-class changes or first mount.
+        await Task.yield()
+
+        navigateToMigraine(id: id)
+        endMigraineIfRequested(for: id, action: pendingDeepLinkAction)
+
+        // Clear pending so it won’t repeat
+        pendingDeepLinkID = nil
+        pendingDeepLinkAction = nil
+    }
 }
 
 // MARK: - DrawOnOffEffect
 private struct DrawOnOffEffect: ViewModifier {
     let drawOn: Bool
     let drawOff: Bool
-    
+
     func body(content: Content) -> some View {
         #if compiler(>=6.0)
         content
@@ -380,16 +395,17 @@ private struct DrawOnOffEffect: ViewModifier {
         fatalError("Preview ModelContainer setup failed: \(error)")
     }
     let previewUserManager = UserManager(context: container.mainContext)
-    let migraineManager = MigraineManager(context: container.mainContext)
+    let previewMigraineManager = MigraineManager(context: container.mainContext)
     let previewHealthManager = HealthManager()
     let previewWeatherManager = WeatherManager()
     let previewNotificationManager = NotificationManager()
     let previewLocationManager = LocationManager()
-    
+    let previewInsightManager = InsightManager(userManager: previewUserManager, migraineManager: previewMigraineManager, weatherManager: previewWeatherManager, healthManager: previewHealthManager)
+
     let now = Date()
     let twoHoursAgo = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
 
-    _ = migraineManager.create(
+    _ = previewMigraineManager.create(
         startDate: twoHoursAgo,
         endDate: nil,
         painLevel: 7,
@@ -400,16 +416,18 @@ private struct DrawOnOffEffect: ViewModifier {
         triggers: [],
         foodsEaten: []
     )
-    
+
     return MainView(
-        returnToAppStage: { _ in }
+        returnToAppStage: { _ in },
+        pendingDeepLinkID: .constant(nil),
+        pendingDeepLinkAction: .constant(nil)
     )
     .modelContainer(container)
     .environment(previewUserManager)
-    .environment(migraineManager)
+    .environment(previewMigraineManager)
     .environment(previewWeatherManager)
     .environment(previewHealthManager)
     .environment(previewLocationManager)
     .environment(previewNotificationManager)
+    .environment(previewInsightManager)
 }
-

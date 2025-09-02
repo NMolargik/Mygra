@@ -12,12 +12,14 @@ import WeatherKit
 @Observable
 @MainActor
 final class InsightManager {
-
     // MARK: - Dependencies
     private let userManager: UserManager
     private let migraineManager: MigraineManager
     private let weatherManager: WeatherManager
     private let healthManager: HealthManager
+
+    // Apple Intelligence / Foundation Models orchestrator (availability-gated internally)
+    let intelligenceManager: IntelligenceManager
 
     // MARK: - Public state
     private(set) var insights: [Insight] = []
@@ -27,7 +29,8 @@ final class InsightManager {
 
     // Cache of generated guidance per migraine
     private(set) var generatedGuidance: [UUID: String] = [:]
-    private(set) var isGeneratingGuidance: Bool = false
+    var isGeneratingGuidance: Bool = false
+    var isGeneratingGuidanceFor: Migraine? = nil
 
     // MARK: - Init
     init(
@@ -40,6 +43,38 @@ final class InsightManager {
         self.migraineManager = migraineManager
         self.weatherManager = weatherManager
         self.healthManager = healthManager
+        self.intelligenceManager = IntelligenceManager(userManager: userManager, migraineManager: migraineManager)
+
+        // Observe explicit "migraine created" events using selector-based API to avoid token handling.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(migraineCreated(_:)),
+            name: MigraineManager.migraineCreatedNotification,
+            object: migraineManager
+        )
+    }
+
+    deinit {
+        // Removing by self/object avoids touching any MainActor-isolated stored token.
+        NotificationCenter.default.removeObserver(
+            self,
+            name: MigraineManager.migraineCreatedNotification,
+            object: migraineManager
+        )
+    }
+
+    @objc private func migraineCreated(_ note: Notification) {
+        guard let m = note.userInfo?["migraine"] as? Migraine else { return }
+        Task { await self.handleJustCreatedMigraine(m) }
+    }
+
+    private func handleJustCreatedMigraine(_ migraine: Migraine) async {
+        // Only act for truly new creations; skip if already has insight or device unsupported
+        guard intelligenceManager.supportsAppleIntelligence else { return }
+        if let existing = migraine.insight, !existing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return
+        }
+        await analyzeNewlyCreatedMigraine(migraine)
     }
 
     // MARK: - Refresh orchestration
@@ -76,7 +111,7 @@ final class InsightManager {
         do { all += try await weather } catch { errors.append(error) }
 
         // De-duplicate
-        var seen = Set<Insight.DedupeKey>()
+        var seen = Set<DedupeKey>()
         all = all.filter { seen.insert($0.dedupeKey).inserted }
 
         return all
@@ -403,131 +438,71 @@ final class InsightManager {
         return results
     }
 
-    // MARK: - Generative guidance (placeholder for Foundation Models Framework)
-    func generateGuidance(for migraine: Migraine) async {
-        guard generatedGuidance[migraine.id] == nil else { return }
+    // MARK: - Intelligence (Apple Intelligence / Foundation Models)
+
+    /// Analyze a newly created migraine using Apple Intelligence (if supported) and store a user-facing explanation.
+    /// - Note: This updates both Migraine.insight and the local generatedGuidance cache.
+    func analyzeNewlyCreatedMigraine(_ migraine: Migraine) async {
+        guard intelligenceManager.supportsAppleIntelligence else { return }
+        guard !isGeneratingGuidance else { return }
         isGeneratingGuidance = true
-        defer { isGeneratingGuidance = false }
+        isGeneratingGuidanceFor = migraine
+        defer {
+            isGeneratingGuidance = false
+            isGeneratingGuidanceFor = nil
+        }
 
-        guard FeatureFlags.foundationModelsAvailable else { return }
-
+        let user = userManager.currentUser
         do {
-            let context = buildGuidanceContext(migraine: migraine)
-            let text = try await GenerativeTextEngine.shared.generateAdvice(context: context)
-            generatedGuidance[migraine.id] = text
+            if let text = try await intelligenceManager.analyze(migraine: migraine, user: user) {
+                // Persist on the model
+                migraineManager.update(migraine) { m in
+                    m.insight = text
+                }
+                // Cache in-memory for quick access
+                generatedGuidance[migraine.id] = text
+
+                // Optionally surface as an Insight card
+                let card = Insight(
+                    category: .generative,
+                    title: "Migraine explanation",
+                    message: text,
+                    priority: .medium,
+                    tags: ["migraineID": migraine.id]
+                )
+                insights.insert(card, at: 0)
+            }
         } catch {
             errors.append(error)
         }
     }
 
-    private func buildGuidanceContext(migraine: Migraine) -> String {
-        var parts: [String] = []
-        parts.append("Start: \(migraine.startDate.description)")
-        if let end = migraine.endDate { parts.append("End: \(end.description)") }
-        parts.append("Pain: \(migraine.painLevel)")
-        parts.append("Stress: \(migraine.stressLevel)")
-        if !migraine.triggers.isEmpty {
-            parts.append("Triggers: \(migraine.triggers.map { $0.displayName }.joined(separator: ", "))")
+    /// Start a counselor chat by seeding the IntelligenceManager with user + migraine history.
+    func startCounselorChat() async {
+        guard intelligenceManager.supportsAppleIntelligence else { return }
+        let all = migraineManager.migraines
+        let user = userManager.currentUser
+        await intelligenceManager.startChat(migraines: all, user: user)
+    }
+
+    /// Send a message to the counselor chat and return the assistant's reply.
+    func sendCounselorMessage(_ text: String) async -> String {
+        guard intelligenceManager.supportsAppleIntelligence else { return "This device does not support Apple Intelligence." }
+        do {
+            self.isGeneratingGuidance = true
+            let reply = try await intelligenceManager.send(message: text)
+            self.isGeneratingGuidance = false
+            return reply
+        } catch {
+            self.isGeneratingGuidance = false
+            errors.append(error)
+            return "Sorry, I ran into a problem."
         }
-        if !migraine.foodsEaten.isEmpty {
-            parts.append("Foods: \(migraine.foodsEaten.joined(separator: ", "))")
-        }
-        if let wx = migraine.weather {
-            parts.append(String(format: "Weather: %.0f hPa, %.0f%% humidity, %.1f°C, %@", wx.barometricPressureHpa, wx.humidityPercent, wx.temperatureCelsius, wx.condition.description))
-        }
-        if let h = migraine.health {
-            var bits: [String] = []
-            if let w = h.waterLiters { bits.append(String(format: "%.1f L water", w)) }
-            if let s = h.sleepHours { bits.append(String(format: "%.1f h sleep", s)) }
-            if let e = h.energyKilocalories { bits.append(String(format: "%.0f cal", e)) }
-            if let c = h.caffeineMg { bits.append(String(format: "%.0f mg caffeine", c)) }
-            if !bits.isEmpty { parts.append("Health: " + bits.joined(separator: ", ")) }
-        }
-        if let note = migraine.note, !note.isEmpty {
-            parts.append("Notes: \(note)")
-        }
-        if let user = userManager.currentUser {
-            parts.append("User: \(user.name)")
-            parts.append("Avg sleep goal: \(String(format: "%.1f", user.averageSleepHours)) h")
-            parts.append("Avg caffeine: \(Int(user.averageCaffeineMg)) mg")
-        }
-        return parts.joined(separator: "\n")
+    }
+
+    /// Reset the counselor chat state.
+    func resetCounselorChat() {
+        intelligenceManager.resetChat()
     }
 }
 
-// MARK: - Insight model
-struct Insight: Identifiable, Hashable {
-    enum Category: String, Hashable {
-        case trendFrequency
-        case trendSeverity
-        case trendDuration
-        case triggers
-        case foods
-        case intakeHydration
-        case intakeSleep
-        case intakeNutrition
-        case sleepAssociation
-        case weatherAssociation
-        case generative
-    }
-
-    enum Priority: Int, Comparable, Hashable {
-        case low = 1
-        case medium = 5
-        case high = 9
-        static func < (lhs: Priority, rhs: Priority) -> Bool { lhs.rawValue < rhs.rawValue }
-    }
-
-    let id: UUID
-    let category: Category
-    let title: String
-    let message: String
-    let priority: Priority
-    let generatedAt: Date
-    let tags: [String: AnyHashable]
-
-    init(
-        id: UUID = UUID(),
-        category: Category,
-        title: String,
-        message: String,
-        priority: Priority,
-        generatedAt: Date = Date(),
-        tags: [String: AnyHashable] = [:]
-    ) {
-        self.id = id
-        self.category = category
-        self.title = title
-        self.message = message
-        self.priority = priority
-        self.generatedAt = generatedAt
-        self.tags = tags
-    }
-
-    static func sorter(lhs: Insight, rhs: Insight) -> Bool {
-        if lhs.priority != rhs.priority { return lhs.priority > rhs.priority }
-        if lhs.category != rhs.category { return lhs.category.rawValue < rhs.category.rawValue }
-        return lhs.generatedAt > rhs.generatedAt
-    }
-
-    struct DedupeKey: Hashable {
-        let category: Category
-        let title: String
-        let message: String
-    }
-
-    var dedupeKey: DedupeKey { DedupeKey(category: category, title: title, message: message) }
-}
-
-// MARK: - Feature flag + generative engine placeholders
-enum FeatureFlags {
-    static var foundationModelsAvailable: Bool { false }
-}
-
-actor GenerativeTextEngine {
-    static let shared = GenerativeTextEngine()
-    func generateAdvice(context: String) async throws -> String {
-        // Replace with Apple Foundation Models Framework usage when integrated
-        return "Personalized guidance based on your migraine, health, and profile."
-    }
-}

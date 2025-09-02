@@ -31,6 +31,7 @@ struct OnboardingView: View {
                 HStack {
                     if viewModel.currentPage != .health && viewModel.currentPage != .complete {
                         Button("Back") {
+                            lightTap()
                             viewModel.isMovingForward = false
                             let previous = viewModel.currentPage.previous
                             withAnimation {
@@ -48,13 +49,18 @@ struct OnboardingView: View {
                     
                     if viewModel.currentPage != .complete {
                         Button("Next") {
+                            lightTap()
                             if viewModel.currentPage == .user {
                                 userManager.createOrReplace(newUser: viewModel.newUser)
                             }
+                            let allowed = viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager)
                             viewModel.isMovingForward = true
                             let next = viewModel.currentPage.next
                             withAnimation {
                                 viewModel.currentPage = next
+                            }
+                            if allowed {
+                                successTap()
                             }
                         }
                         .frame(width: 80)
@@ -90,9 +96,25 @@ struct OnboardingView: View {
             OnboardingUserView(viewModel: viewModel)
         case .complete:
             OnboardingCompleteView(viewModel: viewModel, finishOnboarding: {
+                successTap()
                 proceedForward()
             })
         }
+    }
+    
+    // MARK: - Haptics
+    private func lightTap() {
+        #if os(iOS)
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.impactOccurred()
+        #endif
+    }
+    
+    private func successTap() {
+        #if os(iOS)
+        let gen = UINotificationFeedbackGenerator()
+        gen.notificationOccurred(.success)
+        #endif
     }
 }
 

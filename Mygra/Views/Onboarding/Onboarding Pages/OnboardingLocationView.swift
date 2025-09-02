@@ -42,7 +42,7 @@ struct OnboardingLocationView: View {
             .font(.title)
             .bold()
             .frame(width: 200)
-            .glassEffect(.regular.interactive().tint(.blue))
+            .glassEffect(.regular.interactive().tint(.red))
         }
     }
 }

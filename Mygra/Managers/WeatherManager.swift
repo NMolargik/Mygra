@@ -80,7 +80,7 @@ final class WeatherManager {
         // Global cooldown gate
         if let lastAttempt = lastRequestAttempt,
            Date().timeIntervalSince(lastAttempt) < refreshCooldownInterval {
-            // Too soon to attempt another refresh
+            print("Too soon to refresh weather")
             return
         }
 

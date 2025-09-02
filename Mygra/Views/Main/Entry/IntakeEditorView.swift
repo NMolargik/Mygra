@@ -28,6 +28,12 @@ struct IntakeEditorView: View {
     var onAdd: () -> Void
     var onCancel: () -> Void
 
+    // Simple debounce flags to reduce slider haptic spam
+    @State private var waterHapticGate = false
+    @State private var caffeineHapticGate = false
+    @State private var caloriesHapticGate = false
+    @State private var sleepHapticGate = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if let msg = errorMessage {
@@ -43,6 +49,7 @@ struct IntakeEditorView: View {
                         .frame(width: 30)
                     Slider(value: $addWater, in: waterRange, step: waterStep)
                         .tint(.blue)
+                        .onChange(of: addWater) { _, _ in sliderTick(\.waterHapticGate) }
                     Text(waterDisplay(addWater))
                         .monospacedDigit()
                         .frame(width: 90, alignment: .trailing)
@@ -54,6 +61,7 @@ struct IntakeEditorView: View {
                         .frame(width: 30)
                     Slider(value: $addCaffeine, in: 0...1000, step: 10)
                         .tint(.brown)
+                        .onChange(of: addCaffeine) { _, _ in sliderTick(\.caffeineHapticGate) }
                     Text("+\(Int(addCaffeine)) mg")
                         .monospacedDigit()
                         .frame(width: 90, alignment: .trailing)
@@ -65,6 +73,7 @@ struct IntakeEditorView: View {
                         .frame(width: 30)
                     Slider(value: $addCalories, in: 0...2500, step: 50)
                         .tint(.orange)
+                        .onChange(of: addCalories) { _, _ in sliderTick(\.caloriesHapticGate) }
                     Text("+\(Int(addCalories)) cal")
                         .monospacedDigit()
                         .frame(width: 90, alignment: .trailing)
@@ -76,6 +85,7 @@ struct IntakeEditorView: View {
                         .frame(width: 30)
                     Slider(value: $addSleepHours, in: 0...12, step: 0.5)
                         .tint(.indigo)
+                        .onChange(of: addSleepHours) { _, _ in sliderTick(\.sleepHapticGate) }
                     Text(String(format: "+%.1f h", addSleepHours))
                         .monospacedDigit()
                         .frame(width: 90, alignment: .trailing)
@@ -85,6 +95,12 @@ struct IntakeEditorView: View {
             HStack {
                 Spacer()
                 Button(isSaving ? "Adding..." : "Add") {
+                    // Only fire success haptic if the action is actually going to run
+                    if !isSaving && !allAddsAreZero {
+                        successHaptic()
+                    } else {
+                        lightImpact()
+                    }
                     onAdd()
                 }
                 .disabled(isSaving || allAddsAreZero)
@@ -92,6 +108,7 @@ struct IntakeEditorView: View {
                 .tint(.green)
                 
                 Button("Cancel") {
+                    lightImpact()
                     onCancel()
                 }
                 .buttonStyle(.bordered)
@@ -101,5 +118,36 @@ struct IntakeEditorView: View {
             .padding(.top, 4)
         }
         .padding(.top, 6)
+    }
+
+    // MARK: - Haptics
+
+    private func lightImpact() {
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.prepare()
+        gen.impactOccurred()
+    }
+
+    private func successHaptic() {
+        let gen = UINotificationFeedbackGenerator()
+        gen.prepare()
+        gen.notificationOccurred(.success)
+    }
+
+    // Tasteful, debounced tick to avoid spamming during continuous slider drags
+    @MainActor
+    private func sliderTick(_ gateKeyPath: ReferenceWritableKeyPath<IntakeEditorView, Bool>) {
+        // If gate is already open, do nothing
+        if self[keyPath: gateKeyPath] { return }
+
+        // Open gate
+        self[keyPath: gateKeyPath] = true
+
+        lightImpact()
+
+        // Close gate after a short delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            self[keyPath: gateKeyPath] = false
+        }
     }
 }

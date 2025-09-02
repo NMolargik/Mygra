@@ -7,8 +7,6 @@
 
 import Foundation
 import HealthKit
-import Observation
-import CoreLocation
 
 @MainActor
 @Observable
@@ -134,6 +132,16 @@ final class HealthManager {
         // If you want to require share authorization too, replace `readOK` with `(readOK && shareOK)`.
         self.isAuthorized = readOK
         print("[Health] Overall authorization flag (based on read): \(self.isAuthorized). Share authorized: \(shareOK)")
+    }
+    
+    private func ensureAuthorized() async throws {
+        if !isAuthorized {
+            await requestAuthorization()
+            if !isAuthorized {
+                print("HEALTH NOT AUTHORIZED (isAuthorized=false). lastError=\(lastError?.localizedDescription ?? "nil")")
+                throw HKError(.errorAuthorizationDenied)
+            }
+        }
     }
 
     // MARK: - High-level snapshot API
@@ -338,18 +346,6 @@ final class HealthManager {
                 }
             }
             store.execute(query)
-        }
-    }
-
-    // MARK: - Utils
-
-    private func ensureAuthorized() async throws {
-        if !isAuthorized {
-            await requestAuthorization()
-            if !isAuthorized {
-                print("HEALTH NOT AUTHORIZED (isAuthorized=false). lastError=\(lastError?.localizedDescription ?? "nil")")
-                throw HKError(.errorAuthorizationDenied)
-            }
         }
     }
 }

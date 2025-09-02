@@ -11,11 +11,11 @@ import WeatherKit
 struct MigraineDetailView: View {
     @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
+    @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
 
     let migraine: Migraine
-    // Optional close handler (useful for iPad split detail)
     var onClose: (() -> Void)? = nil
 
     // End Migraine flow
@@ -26,18 +26,14 @@ struct MigraineDetailView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
+
                 header
+
+                insightSection
 
                 if migraine.note?.isEmpty == false {
                     infoCard(title: "Note") {
                         Text(migraine.note!)
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-
-                if migraine.insight?.isEmpty == false {
-                    infoCard(title: "Insight") {
-                        Text(migraine.insight!)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
@@ -174,10 +170,59 @@ struct MigraineDetailView: View {
         }
     }
 
+    // MARK: - Insight section (Apple Intelligence)
+    private var insightSection: some View {
+        Group {
+            let isGenerating = insightManager.isGeneratingGuidance && insightManager.isGeneratingGuidanceFor?.id == migraine.id
+            if isGenerating || (migraine.insight?.isEmpty == false) {
+                infoCard(title: "Insight") {
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Header row indicating Apple Intelligence
+                        HStack(spacing: 6) {
+                            Image(systemName: "apple.intelligence")
+                                .foregroundStyle(.pink)
+                            Text("Powered by Apple Intelligence")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Spacer()
+                            if isGenerating {
+                                ProgressView()
+                                    .controlSize(.small)
+                            }
+                        }
+
+                        if isGenerating && (migraine.insight?.isEmpty ?? true) {
+                            // Loading placeholder while generating
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Generating insight…")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                // Subtle animated placeholder lines
+                                VStack(alignment: .leading, spacing: 6) {
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(Color.secondary.opacity(0.15))
+                                        .frame(height: 10)
+                                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                                        .fill(Color.secondary.opacity(0.12))
+                                        .frame(width: 220, height: 10)
+                                }
+                                .redacted(reason: .placeholder)
+                                .shimmer()
+                            }
+                        } else if let text = migraine.insight, !text.isEmpty {
+                            Text(text)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private var header: some View {
         VStack(spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
-                Text(migraine.isOngoing ? "Ongoing Migraine" : "Migraine")
+                Text(migraine.isOngoing ? "Ongoing Migraine" : "")
                     .font(.title2).bold()
                 Spacer()
                 if migraine.pinned {
@@ -386,7 +431,33 @@ private struct LabeledRow<Value: View>: View {
     }
 }
 
+// MARK: - Lightweight shimmer for placeholder
+private struct ShimmerModifier: ViewModifier {
+    @State private var phase: CGFloat = -1
+    func body(content: Content) -> some View {
+        content
+            .overlay(
+                LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.35), Color.clear]),
+                               startPoint: .topLeading,
+                               endPoint: .bottomTrailing)
+                    .blendMode(.plusLighter)
+                    .mask(content)
+                    .offset(x: phase * 180)
+            )
+            .onAppear {
+                withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
+                    phase = 1.2
+                }
+            }
+    }
+}
+
+private extension View {
+    func shimmer() -> some View {
+        self.modifier(ShimmerModifier())
+    }
+}
+
 #Preview {
     MigraineDetailView(migraine: Migraine(startDate: Date.now, painLevel: 5, stressLevel: 6))
 }
-

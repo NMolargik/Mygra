@@ -13,6 +13,9 @@ import Observation
 @Observable
 final class MigraineManager {
 
+    // MARK: - Notifications
+    static let migraineCreatedNotification = Notification.Name("MigraineManager.migraineCreated")
+
     // MARK: - Dependencies
     @ObservationIgnored
     private let context: ModelContext
@@ -95,6 +98,13 @@ final class MigraineManager {
             self.ongoingMigraine = model
         }
 
+        // Post creation notification for observers (e.g., InsightManager)
+        NotificationCenter.default.post(
+            name: MigraineManager.migraineCreatedNotification,
+            object: self,
+            userInfo: ["migraine": model]
+        )
+
         saveAndReload()
         return model
     }
@@ -114,7 +124,7 @@ final class MigraineManager {
         if !wasOngoing && isOngoingNow {
             ongoingMigraine = migraine
             // Start a Live Activity if it became ongoing
-            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate)
+            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate, severity: migraine.painLevel, notes: migraine.note ?? "")
         }
 
         saveAndReload()

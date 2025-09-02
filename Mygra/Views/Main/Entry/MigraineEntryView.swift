@@ -129,6 +129,7 @@ struct MigraineEntryView: View {
                                 HStack {
                                     Spacer()
                                     Button(vm.isEditingHealthValues ? "Cancel Editing" : "Edit Intake Values") {
+                                        lightImpact()
                                         toggleHealthEditor()
                                     }
                                     .tint(.blue)
@@ -155,12 +156,15 @@ struct MigraineEntryView: View {
                                     allAddsAreZero: vm.allAddsAreZero,
                                     // Actions
                                     onAdd: {
+                                        // The actual save and success haptic will be in saveHealthEdits()
                                         Task { await saveHealthEdits() }
                                     },
                                     onCancel: {
+                                        lightImpact()
                                         withAnimation { vm.isEditingHealthValues = false }
                                     }
                                 )
+                                .transition(.opacity.combined(with: .move(edge: .top)))
                             }
                         }
                     }
@@ -227,6 +231,7 @@ struct MigraineEntryView: View {
 
                     Toggle("Ongoing", isOn: $vm.isOngoing)
                         .onChange(of: $vm.isOngoing.wrappedValue) { _, new in
+                            lightImpact()
                             vm.setOngoing(new)
                         }
 
@@ -263,7 +268,7 @@ struct MigraineEntryView: View {
                             Spacer()
                             Text("\(vm.stressLevel)")
                                 .bold()
-                                .foregroundStyle(Severity.from(painLevel: $vm.stressLevel.wrappedValue).color)
+                                .foregroundStyle(.indigo)
                         }
                         Slider(
                             value: Binding(
@@ -273,15 +278,28 @@ struct MigraineEntryView: View {
                             in: 0...10,
                             step: 1
                         )
-                        .tint(gradientColor(for: vm.stressLevel))
+                        .tint(.indigo)
                     }
                 }
 
                 Section("Possible Triggers") {
-                    // Search field
-                    TextField("Search triggers", text: $vm.triggerSearchText)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
+                    // Search field with inline clear button
+                    HStack {
+                        TextField("Search triggers", text: $vm.triggerSearchText)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        if !vm.triggerSearchText.isEmpty {
+                            Button {
+                                lightImpact()
+                                vm.triggerSearchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Clear search")
+                        }
+                    }
 
                     // Grouped, filtered multi-select list
                     ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
@@ -290,6 +308,7 @@ struct MigraineEntryView: View {
                             DisclosureGroup(group.rawValue.capitalized) {
                                 ForEach(items, id: \.self) { trig in
                                     Button {
+                                        lightImpact()
                                         vm.toggleTrigger(trig)
                                     } label: {
                                         HStack {
@@ -335,6 +354,7 @@ struct MigraineEntryView: View {
                 
                 Section("Options") {
                     Toggle("Pin this migraine", isOn: $vm.pinned)
+                        .onChange(of: $vm.pinned.wrappedValue) { _, _ in lightImpact() }
                 }
 
                 Section("Notes") {
@@ -354,12 +374,17 @@ struct MigraineEntryView: View {
             .navigationTitle("New Migraine")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
-                        .foregroundStyle(.red)
+                    Button("Cancel") {
+                        lightImpact()
+                        dismiss()
+                    }
+                    .foregroundStyle(.red)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Finish") {
+                        // Validation happens inside finishTapped(); we’ll do success haptic there on success.
+                        lightImpact()
                         finishTapped()
                     }
                     .foregroundStyle(.blue)
@@ -373,7 +398,9 @@ struct MigraineEntryView: View {
             if vm.endDate < vm.startDate { vm.endDate = vm.startDate }
         }
         .alert("Cannot Save", isPresented: $vm.showValidationAlert, actions: {
-            Button("OK", role: .cancel) { }
+            Button("OK", role: .cancel) {
+                errorHaptic()
+            }
         }, message: {
             Text(vm.validationMessage)
         })
@@ -383,6 +410,32 @@ struct MigraineEntryView: View {
             // Use the stored viewModel here to avoid dynamicMember binding confusion
             viewModel.addWater = snap(viewModel.addWater, toStep: waterStep, in: waterRange)
         }
+    }
+
+    // MARK: - Haptics
+
+    private func lightImpact() {
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.prepare()
+        gen.impactOccurred()
+    }
+
+    private func mediumImpact() {
+        let gen = UIImpactFeedbackGenerator(style: .medium)
+        gen.prepare()
+        gen.impactOccurred()
+    }
+
+    private func successHaptic() {
+        let gen = UINotificationFeedbackGenerator()
+        gen.prepare()
+        gen.notificationOccurred(.success)
+    }
+
+    private func errorHaptic() {
+        let gen = UINotificationFeedbackGenerator()
+        gen.prepare()
+        gen.notificationOccurred(.error)
     }
 
     // MARK: - Helpers (unit-aware display)
@@ -503,8 +556,10 @@ struct MigraineEntryView: View {
 
             viewModel.healthEditErrorMessage = nil
             withAnimation { viewModel.isEditingHealthValues = false }
+            successHaptic()
         } catch {
             viewModel.healthEditErrorMessage = "Failed to save to Apple Health: \(error.localizedDescription)"
+            errorHaptic()
         }
     }
 
@@ -565,6 +620,7 @@ struct MigraineEntryView: View {
     private func finishTapped() {
         // Basic validations
         guard viewModel.validateBeforeSave() else {
+            errorHaptic()
             return
         }
 
@@ -622,9 +678,10 @@ struct MigraineEntryView: View {
 
         // Start Live Activity if ongoing
         if newMigraine.isOngoing {
-            MigraineActivityCenter.start(for: newMigraine.id, startDate: newMigraine.startDate)
+            MigraineActivityCenter.start(for: newMigraine.id, startDate: newMigraine.startDate, severity: newMigraine.painLevel, notes: newMigraine.note ?? "")
         }
 
+        successHaptic()
         // Done
         onMigraineSaved(newMigraine)
     }

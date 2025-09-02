@@ -46,7 +46,13 @@ struct MigraineFilterSheet: View {
     var body: some View {
         Form {
             Section("Date Range") {
-                Toggle("Filter by Date", isOn: $useDateRange)
+                Toggle("Filter by Date", isOn: Binding(
+                    get: { useDateRange },
+                    set: { newValue in
+                        useDateRange = newValue
+                        lightTap()
+                    }
+                ))
                 if useDateRange {
                     DatePicker("Start", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
                     DatePicker("End", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
@@ -54,10 +60,16 @@ struct MigraineFilterSheet: View {
             }
             
             Section("Pain Level") {
-                Stepper(value: Binding(
-                    get: { workingFilter.minPainLevel ?? 0 },
-                    set: { workingFilter.minPainLevel = $0 == 0 ? nil : $0 }
-                ), in: 0...10) {
+                Stepper(
+                    value: Binding(
+                        get: { workingFilter.minPainLevel ?? 0 },
+                        set: { newValue in
+                            workingFilter.minPainLevel = newValue == 0 ? nil : newValue
+                            lightTap()
+                        }
+                    ),
+                    in: 0...10
+                ) {
                     Text("Minimum Pain: \(workingFilter.minPainLevel ?? 0)")
                 }
                 Text("0 means no minimum").font(.footnote).foregroundStyle(.secondary)
@@ -84,17 +96,37 @@ struct MigraineFilterSheet: View {
         .navigationTitle("Filter Migraines")
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") { cancel() }
-                    .foregroundStyle(.red)
+                Button("Cancel") {
+                    lightTap()
+                    cancel()
+                }
+                .foregroundStyle(.red)
             }
             ToolbarItem(placement: .confirmationAction) {
                 Button("Apply") {
                     var f = workingFilter
                     f.dateRange = useDateRange ? min(startDate, endDate)...max(startDate, endDate) : nil
+                    successTap()
                     apply(f)
                 }
                 .foregroundStyle(.blue)
             }
         }
     }
+
+    // MARK: - Haptics
+    private func lightTap() {
+        #if os(iOS)
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.impactOccurred()
+        #endif
+    }
+
+    private func successTap() {
+        #if os(iOS)
+        let gen = UINotificationFeedbackGenerator()
+        gen.notificationOccurred(.success)
+        #endif
+    }
 }
+

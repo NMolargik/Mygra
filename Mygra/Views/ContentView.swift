@@ -13,20 +13,13 @@ struct ContentView: View {
     @Environment(HealthManager.self) private var healthManager: HealthManager
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
     
+    @State private var viewModel: ContentView.ViewModel = ViewModel()
     @State private var migraineManager: MigraineManager?
     @State private var insightManager: InsightManager?
-    @State private var appStage: AppStage = .start
-    
-    private var leadingTransition: AnyTransition {
-        .asymmetric(
-            insertion: .move(edge: .trailing).combined(with: .opacity),
-            removal: .move(edge: .leading).combined(with: .opacity)
-        )
-    }
-    
+
     var body: some View {
         ZStack {
-            switch (appStage) {
+            switch (viewModel.appStage) {
             case .start:
                 ProgressView()
                     .id("start")
@@ -37,13 +30,13 @@ struct ContentView: View {
             case .splash:
                 SplashView(proceedForward: {
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        self.appStage = .onboarding
+                        viewModel.appStage = .onboarding
                     }
                 }, refreshUser: {
                     Task { await refreshUser() }
                 })
                 .id("splash")
-                .transition(leadingTransition)
+                .transition(viewModel.leadingTransition)
                 .zIndex(1)
             case .onboarding:
                 OnboardingView(proceedForward: {
@@ -60,19 +53,21 @@ struct ContentView: View {
                         )
                     }
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        self.appStage = .main
+                        viewModel.appStage = .main
                     }
                 })
                 .id("onboarding")
-                .transition(leadingTransition)
+                .transition(viewModel.leadingTransition)
                 .zIndex(1)
             case .main:
                 MainView(
                     returnToAppStage: { stage in
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            self.appStage = stage
+                            viewModel.appStage = stage
                         }
-                    }
+                    },
+                    pendingDeepLinkID: $viewModel.pendingDeepLinkID,
+                    pendingDeepLinkAction: $viewModel.pendingDeepLinkAction
                 )
                 .environment(migraineManager)
                 .environment(insightManager)
@@ -80,7 +75,16 @@ struct ContentView: View {
                 .zIndex(0)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: appStage)
+        .animation(.easeInOut(duration: 0.3), value: viewModel.appStage)
+        // Handle incoming deep links like mygra://migraine/<uuid>?action=end
+        .onOpenURL { url in
+            let shouldGoToMain = viewModel.handleOpenURL(url)
+            if shouldGoToMain {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    viewModel.appStage = .main
+                }
+            }
+        }
     }
     
     private func prepareApp() async {
@@ -114,13 +118,13 @@ struct ContentView: View {
                 }
                 
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    appStage = .main
+                    viewModel.appStage = .main
                 }
             }
         } else {
             // Still no user after the restore window → onboarding
             withAnimation(.easeInOut(duration: 0.3)) {
-                appStage = .splash
+                viewModel.appStage = .splash
             }
         }
     }
@@ -158,7 +162,7 @@ struct ContentView: View {
         }
         
         withAnimation(.easeInOut(duration: 0.3)) {
-            appStage = .main
+            viewModel.appStage = .main
         }
     }
 }
@@ -182,3 +186,4 @@ struct ContentView: View {
         .environment(previewWeatherManager)
         .environment(previewNotificationManager)
 }
+

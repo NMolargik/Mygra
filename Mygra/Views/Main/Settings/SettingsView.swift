@@ -52,7 +52,13 @@ struct SettingsView: View {
         )
         
         Form {
-            Toggle("Use Metric Units", isOn: $useMetricUnits)
+            Toggle("Use Metric Units", isOn: Binding(
+                get: { useMetricUnits },
+                set: { newValue in
+                    useMetricUnits = newValue
+                    lightTap()
+                }
+            ))
             
             // Edit/Save button replaces the toggle
             Button {
@@ -71,9 +77,11 @@ struct SettingsView: View {
                         existing.dietaryRestrictions = updated.dietaryRestrictions
                     }
                     editingUser = false
+                    successTap()
                 } else {
                     // Enter editing mode
                     editingUser = true
+                    lightTap()
                 }
             } label: {
                 Text(editingUser ? "Save User" : "Edit User")
@@ -108,6 +116,21 @@ struct SettingsView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Haptics
+    private func lightTap() {
+        #if os(iOS)
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.impactOccurred()
+        #endif
+    }
+
+    private func successTap() {
+        #if os(iOS)
+        let gen = UINotificationFeedbackGenerator()
+        gen.notificationOccurred(.success)
+        #endif
     }
 }
 

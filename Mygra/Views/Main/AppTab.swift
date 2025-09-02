@@ -32,7 +32,7 @@ enum AppTab: String, CaseIterable, Identifiable {
     
     var color: Color {
         switch self {
-        case .insights: return Color.orange
+        case .insights: return Color.red
         case .list: return Color.indigo
         case .settings: return Color.green
         }

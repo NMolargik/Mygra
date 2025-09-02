@@ -41,6 +41,7 @@ struct MigraineListView: View {
                             HStack(spacing: 12) {
                                 if f.pinnedOnly {
                                     Button {
+                                        lightTap()
                                         var new = f
                                         new.pinnedOnly = false
                                         migraineManager.filter = new
@@ -52,6 +53,7 @@ struct MigraineListView: View {
                                     .accessibilityIdentifier("emptyShowAllButton")
                                 }
                                 Button {
+                                    successTap()
                                     migraineManager.filter = .init()
                                 } label: {
                                     Label("Clear Filters", systemImage: "xmark.circle")
@@ -64,6 +66,7 @@ struct MigraineListView: View {
                         }
                     } actions: {
                         Button {
+                            lightTap()
                             viewModel.showingFilterSheet = true
                         } label: {
                             Label("Adjust Filters", systemImage: "slider.horizontal.3")
@@ -102,6 +105,7 @@ struct MigraineListView: View {
                         // Leading swipe: pin/unpin
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button {
+                                lightTap()
                                 migraineManager.togglePinned(migraine)
                             } label: {
                                 Label(migraine.pinned ? "Unpin" : "Pin",
@@ -112,6 +116,7 @@ struct MigraineListView: View {
                         // Trailing swipe: delete
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
+                                warningTap()
                                 migraineManager.delete(migraine)
                             } label: {
                                 Label("Delete", systemImage: "trash")
@@ -133,9 +138,10 @@ struct MigraineListView: View {
                                         .font(.footnote).bold()
                                         .foregroundStyle(.secondary)
                                 }
-                                HStack(spacing: 10) {
+                                VStack(alignment: .leading, spacing: 10) {
                                     if f.pinnedOnly {
                                         Button {
+                                            lightTap()
                                             var new = f
                                             new.pinnedOnly = false
                                             migraineManager.filter = new
@@ -148,6 +154,7 @@ struct MigraineListView: View {
                                         .accessibilityIdentifier("footerShowAllButton")
                                     }
                                     Button {
+                                        successTap()
                                         migraineManager.filter = .init()
                                     } label: {
                                         Label("Clear Filters", systemImage: "xmark.circle")
@@ -158,6 +165,7 @@ struct MigraineListView: View {
                                     .accessibilityIdentifier("footerClearFiltersButton")
                                     
                                     Button {
+                                        lightTap()
                                         viewModel.showingFilterSheet = true
                                     } label: {
                                         Label("Adjust", systemImage: "slider.horizontal.3")
@@ -176,6 +184,7 @@ struct MigraineListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
+                    lightTap()
                     viewModel.showingFilterSheet = true
                 } label: {
                     Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
@@ -185,6 +194,7 @@ struct MigraineListView: View {
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
+                    lightTap()
                     var f = migraineManager.filter
                     f.pinnedOnly.toggle()
                     migraineManager.filter = f
@@ -221,7 +231,30 @@ struct MigraineListView: View {
         // Pull-to-refresh to re-run the manager query
         .refreshable {
             await migraineManager.refresh()
+            successTap()
         }
+    }
+
+    // MARK: - Haptics
+    private func lightTap() {
+        #if os(iOS)
+        let gen = UIImpactFeedbackGenerator(style: .light)
+        gen.impactOccurred()
+        #endif
+    }
+
+    private func successTap() {
+        #if os(iOS)
+        let gen = UINotificationFeedbackGenerator()
+        gen.notificationOccurred(.success)
+        #endif
+    }
+
+    private func warningTap() {
+        #if os(iOS)
+        let gen = UINotificationFeedbackGenerator()
+        gen.notificationOccurred(.warning)
+        #endif
     }
 }
 
