@@ -395,8 +395,8 @@ private struct DrawOnOffEffect: ViewModifier {
         fatalError("Preview ModelContainer setup failed: \(error)")
     }
     let previewUserManager = UserManager(context: container.mainContext)
-    let previewMigraineManager = MigraineManager(context: container.mainContext)
     let previewHealthManager = HealthManager()
+    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
     let previewWeatherManager = WeatherManager()
     let previewNotificationManager = NotificationManager()
     let previewLocationManager = LocationManager()

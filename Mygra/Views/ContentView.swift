@@ -41,7 +41,7 @@ struct ContentView: View {
             case .onboarding:
                 OnboardingView(proceedForward: {
                     if self.migraineManager == nil {
-                        self.migraineManager = MigraineManager(context: userManager.context)
+                        self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
                     }
                     
                     if self.insightManager == nil {
@@ -101,7 +101,7 @@ struct ContentView: View {
                 await healthManager.refreshLatestForToday()
                 
                 if self.migraineManager == nil {
-                    self.migraineManager = MigraineManager(context: userManager.context)
+                    self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
                 }
                 
                 if self.weatherManager.locationManager == nil {
@@ -145,7 +145,7 @@ struct ContentView: View {
         await healthManager.refreshLatestForToday()
         
         if self.migraineManager == nil {
-            self.migraineManager = MigraineManager(context: userManager.context)
+            self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
         }
         
         if self.weatherManager.locationManager == nil {
@@ -186,4 +186,3 @@ struct ContentView: View {
         .environment(previewWeatherManager)
         .environment(previewNotificationManager)
 }
-

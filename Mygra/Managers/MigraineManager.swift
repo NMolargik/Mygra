@@ -19,6 +19,8 @@ final class MigraineManager {
     // MARK: - Dependencies
     @ObservationIgnored
     private let context: ModelContext
+    @ObservationIgnored
+    private let healthManager: HealthManager?
 
     // MARK: - Source of truth
     private(set) var migraines: [Migraine] = []
@@ -36,8 +38,9 @@ final class MigraineManager {
     }
 
     // MARK: - Init
-    init(context: ModelContext) {
+    init(context: ModelContext, healthManager: HealthManager? = nil) {
         self.context = context
+        self.healthManager = healthManager
         Task { await refresh() }
     }
 
@@ -107,6 +110,11 @@ final class MigraineManager {
             userInfo: ["migraine": model]
         )
 
+        // If completed at creation time, write to HealthKit immediately
+        if let hm = healthManager, model.endDate != nil {
+            Task { await hm.saveHeadacheForMigraine(model) }
+        }
+
         saveAndReload()
         return model
     }
@@ -127,6 +135,11 @@ final class MigraineManager {
             ongoingMigraine = migraine
             // Start a Live Activity if it became ongoing
             MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate, severity: migraine.painLevel, notes: migraine.note ?? "")
+        }
+
+        // If this migraine just transitioned to completed, write to HealthKit now
+        if wasOngoing && !isOngoingNow, let hm = healthManager {
+            Task { await hm.saveHeadacheForMigraine(migraine) }
         }
 
         saveAndReload()
@@ -197,3 +210,4 @@ final class MigraineManager {
         Task { await refresh() }
     }
 }
+

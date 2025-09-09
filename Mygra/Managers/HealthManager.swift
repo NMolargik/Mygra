@@ -36,6 +36,7 @@ final class HealthManager {
 
     // Category types
     private var ctSleep: HKCategoryType { .categoryType(forIdentifier: .sleepAnalysis)! }
+    private var ctHeadache: HKCategoryType { .categoryType(forIdentifier: .headache)! }
 
     // Cycle tracking (optional)
     private var ctMenstrualFlow: HKCategoryType? { HKObjectType.categoryType(forIdentifier: .menstrualFlow) }
@@ -62,13 +63,13 @@ final class HealthManager {
         }
 
         var toRead: Set<HKObjectType> = [
-            qtWater, qtCaffeine, qtEnergy, qtSteps, qtRestingHR, qtHR, ctSleep, qtGlucose, qtBloodOxygen
+            qtWater, qtCaffeine, qtEnergy, qtSteps, qtRestingHR, qtHR, ctSleep, qtGlucose, qtBloodOxygen, ctHeadache
         ]
         if let m = ctMenstrualFlow { toRead.insert(m) }
         if let o = ctOvulation { toRead.insert(o) }
 
         let toShare: Set<HKSampleType> = [
-            qtWater, qtCaffeine, qtEnergy, ctSleep
+            qtWater, qtCaffeine, qtEnergy, ctSleep, ctHeadache
         ]
 
         do {
@@ -249,6 +250,37 @@ final class HealthManager {
             end: end
         )
         try await store.save(sample)
+    }
+
+    // MARK: - Headache (migraine) writes
+
+    /// Map our app's Severity to HealthKit headache category values.
+    private func hkHeadacheValue(from severity: Severity) -> HKCategoryValueSeverity {
+        switch severity {
+        case .low: return .mild
+        case .medium: return .moderate
+        case .high: return .severe
+        }
+    }
+
+    /// Save a completed headache to HealthKit.
+    /// - Note: HealthKit requires both start and end; do not call this for ongoing headaches.
+    func saveHeadache(start: Date, end: Date, severity: Severity) async throws {
+        try await ensureAuthorized()
+        let value = hkHeadacheValue(from: severity).rawValue
+        let sample = HKCategorySample(type: ctHeadache, value: value, start: start, end: end)
+        try await store.save(sample)
+    }
+
+    /// Convenience: translate a Migraine to a HealthKit headache entry and save it if completed.
+    func saveHeadacheForMigraine(_ migraine: Migraine) async {
+        guard let end = migraine.endDate else { return } // only save when completed
+        do {
+            try await saveHeadache(start: migraine.startDate, end: end, severity: migraine.severity)
+        } catch {
+            print("[Health] Failed to save headache for migraine \(migraine.id): \(error)")
+            self.lastError = error
+        }
     }
 
     // MARK: - Granular helpers (reads)
