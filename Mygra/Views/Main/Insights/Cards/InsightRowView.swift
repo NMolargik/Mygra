@@ -104,6 +104,7 @@ struct InsightRowView: View {
         case .sleepAssociation: return "zzz"
         case .weatherAssociation: return "cloud.sun"
         case .generative: return "sparkles"
+        case .biometrics: return "waveform.path.ecg.text.clipboard"
         }
     }
 }

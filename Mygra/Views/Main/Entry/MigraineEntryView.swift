@@ -95,6 +95,30 @@ struct MigraineEntryView: View {
                                     if let rhr = h.restingHeartRate {
                                         Label("\(rhr) bpm RHR", systemImage: "heart.fill")
                                     }
+                                    
+                                    if let phase = h.menstrualPhase {
+                                        Label {
+                                            Text(displayMenstrualPhase(phase))
+                                        } icon: {
+                                            Image(systemName: menstrualPhaseIcon(phase))
+                                                .foregroundStyle(menstrualPhaseColor(phase))
+                                        }
+                                    }
+                                    
+                                    // add blood oxygen, if applicable
+                                    if let spo2 = h.bloodOxygenPercent {
+                                        let percent = spo2 * 100.0
+                                        Label {
+                                            if percent.truncatingRemainder(dividingBy: 1) == 0 {
+                                                Text("\(Int(percent))% SpO₂")
+                                            } else {
+                                                Text(String(format: "%.1f%% SpO₂", percent))
+                                            }
+                                        } icon: {
+                                            Image(systemName: "lungs.fill")
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 
@@ -117,6 +141,15 @@ struct MigraineEntryView: View {
                                     }
                                     if let steps = h.stepCount {
                                         Label("\(steps) steps", systemImage: "figure.walk")
+                                    }
+                                    
+                                    if let glucose = h.glucoseMgPerdL {
+                                        Label {
+                                            Text(displayGlucose(glucoseMgPerdL: glucose))
+                                        } icon: {
+                                            Image(systemName: "syringe")
+                                                .foregroundStyle(.secondary)
+                                        }
                                     }
                                 }
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -448,6 +481,42 @@ struct MigraineEntryView: View {
             return String(format: "%.0f fl oz water", ounces.rounded())
         }
     }
+    
+    private func displayGlucose(glucoseMgPerdL: Double) -> String {
+        if useMetricUnits {
+            let mmol = glucoseMgPerdL / 18.0
+            return String(format: "%.1f mmol/L glucose", mmol)
+        } else {
+            return String(format: "%.0f mg/dL glucose", glucoseMgPerdL.rounded())
+        }
+    }
+    
+    private func displayMenstrualPhase(_ phase: MenstrualPhase) -> String {
+        switch phase {
+        case .menstrual: return "Menstrual phase"
+        case .follicular: return "Follicular phase"
+        case .ovulatory: return "Ovulatory phase"
+        case .luteal: return "Luteal phase"
+        }
+    }
+    
+    private func menstrualPhaseIcon(_ phase: MenstrualPhase) -> String {
+        switch phase {
+        case .menstrual: return "drop.circle.fill"
+        case .follicular: return "leaf.fill"
+        case .ovulatory: return "sparkles"
+        case .luteal: return "circle.lefthalf.filled"
+        }
+    }
+    
+    private func menstrualPhaseColor(_ phase: MenstrualPhase) -> Color {
+        switch phase {
+        case .menstrual: return .pink
+        case .follicular: return .green
+        case .ovulatory: return .yellow
+        case .luteal: return .orange
+        }
+    }
 
     private func displayTemperature(_ temp: Measurement<UnitTemperature>) -> String {
         let value: Double
@@ -686,3 +755,4 @@ struct MigraineEntryView: View {
         onMigraineSaved(newMigraine)
     }
 }
+

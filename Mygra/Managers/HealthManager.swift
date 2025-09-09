@@ -31,6 +31,8 @@ final class HealthManager {
     private var qtSteps: HKQuantityType { .quantityType(forIdentifier: .stepCount)! }
     private var qtRestingHR: HKQuantityType { .quantityType(forIdentifier: .restingHeartRate)! }
     private var qtHR: HKQuantityType { .quantityType(forIdentifier: .heartRate)! }
+    private var qtGlucose: HKQuantityType { .quantityType(forIdentifier: .bloodGlucose)! }
+    private var qtBloodOxygen: HKQuantityType { .quantityType(forIdentifier: .oxygenSaturation)! }
 
     // Category types
     private var ctSleep: HKCategoryType { .categoryType(forIdentifier: .sleepAnalysis)! }
@@ -45,6 +47,8 @@ final class HealthManager {
     private let unitKCal = HKUnit.kilocalorie()
     private let unitCount = HKUnit.count()
     private let unitBPM = HKUnit.count().unitDivided(by: HKUnit.minute())
+    private let unitMgPerdL = HKUnit(from: "mg/dL")              // Blood glucose common unit
+    private let unitPercent = HKUnit.percent()                    // SpO2 in percent (0–100)
 
     // MARK: - Authorization
 
@@ -58,7 +62,7 @@ final class HealthManager {
         }
 
         var toRead: Set<HKObjectType> = [
-            qtWater, qtCaffeine, qtEnergy, qtSteps, qtRestingHR, qtHR, ctSleep
+            qtWater, qtCaffeine, qtEnergy, qtSteps, qtRestingHR, qtHR, ctSleep, qtGlucose, qtBloodOxygen
         ]
         if let m = ctMenstrualFlow { toRead.insert(m) }
         if let o = ctOvulation { toRead.insert(o) }
@@ -159,12 +163,16 @@ final class HealthManager {
         async let stepsRaw = sumQuantity(qtSteps, unit: unitCount, from: start, to: end)
         async let restHRAvgRaw = averageQuantity(qtRestingHR, unit: unitBPM, from: start, to: end)
         async let activeHRAvgRaw = averageQuantity(qtHR, unit: unitBPM, from: start, to: end)
+        async let glucoseAvg = averageQuantity(qtGlucose, unit: unitMgPerdL, from: start, to: end)
+        async let spo2Avg = averageQuantity(qtBloodOxygen, unit: unitPercent, from: start, to: end)
         async let sleepHours = totalSleepHours(from: start, to: end)
         async let phase = inferMenstrualPhase(from: start, to: end)
 
         let steps = Int(try await stepsRaw)
         let restHRAvg = Int((try await restHRAvgRaw).rounded())
         let activeHRAvg = Int((try await activeHRAvgRaw).rounded())
+        let glucose = try await glucoseAvg
+        let spo2 = try await spo2Avg
 
         let snapshot = HealthData(
             waterLiters: try await (waterML / 1000.0),         // mL → L
@@ -174,8 +182,11 @@ final class HealthManager {
             stepCount: steps,
             restingHeartRate: restHRAvg,
             activeHeartRate: activeHRAvg,
+            glucoseMgPerdL: glucose > 0 ? glucose : nil,
+            bloodOxygenPercent: spo2 > 0 ? spo2 : nil,
             menstrualPhase: try await phase,
-            migraine: nil
+            migraine: nil,
+            createdAt: Date()
         )
 
         return snapshot
@@ -349,3 +360,4 @@ final class HealthManager {
         }
     }
 }
+

@@ -34,6 +34,12 @@ final class HealthData {
     /// Active heart rate in beats per minute.
     var activeHeartRate: Int?
     
+    /// Average blood glucose in mg/dL for the sampled window.
+    var glucoseMgPerdL: Double?
+    
+    /// Average blood oxygen saturation in percent (0–100) for the sampled window.
+    var bloodOxygenPercent: Double?
+    
     /// Menstrual phase, optional.
     var menstrualPhase: MenstrualPhase?
     
@@ -52,6 +58,8 @@ final class HealthData {
         stepCount: Int? = nil,
         restingHeartRate: Int? = nil,
         activeHeartRate: Int? = nil,
+        glucoseMgPerdL: Double? = nil,
+        bloodOxygenPercent: Double? = nil,
         menstrualPhase: MenstrualPhase? = nil,
         migraine: Migraine? = nil,
         createdAt: Date = Date()
@@ -63,6 +71,8 @@ final class HealthData {
         self.stepCount = stepCount
         self.restingHeartRate = restingHeartRate
         self.activeHeartRate = activeHeartRate
+        self.glucoseMgPerdL = glucoseMgPerdL
+        self.bloodOxygenPercent = bloodOxygenPercent
         self.menstrualPhase = menstrualPhase
         self.migraine = migraine
         self.createdAt = createdAt
@@ -80,6 +90,12 @@ final class HealthData {
         set { energyKilocalories = newValue.map { $0 / 4.184 }; }
     }
     
+    /// Glucose in mmol/L (derived from mg/dL).
+    var glucoseMmolPerL: Double? {
+        get { glucoseMgPerdL.map { $0 / 18.0 } }
+        set { glucoseMgPerdL = newValue.map { $0 * 18.0 } }
+    }
+    
     /// Returns water intake to display given unit preference.
     /// - Parameter useMetricUnits: true → liters, false → fluid ounces.
     func displayWater(useMetricUnits: Bool) -> Double? {
@@ -93,3 +109,4 @@ final class HealthData {
         energyKilocalories
     }
 }
+

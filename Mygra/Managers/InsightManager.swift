@@ -101,6 +101,7 @@ final class InsightManager {
         async let intake = generateIntakeInsights()
         async let sleep = generateSleepInsights()
         async let weather = generateWeatherInsights()
+        async let phases = generateMenstrualPhaseInsights()
 
         var all: [Insight] = []
         do { all += try await trends } catch { errors.append(error) }
@@ -109,6 +110,7 @@ final class InsightManager {
         do { all += try await intake } catch { errors.append(error) }
         do { all += try await sleep } catch { errors.append(error) }
         do { all += try await weather } catch { errors.append(error) }
+        do { all += try await phases } catch { errors.append(error) }
 
         // De-duplicate
         var seen = Set<DedupeKey>()
@@ -261,7 +263,7 @@ final class InsightManager {
         }
     }
 
-    // Intake gaps: hydration, sleep, calories on migraine days (from attached HealthData)
+    // Intake gaps and biometrics on migraine days (from attached HealthData)
     private func generateIntakeInsights() async throws -> [Insight] {
         let items = migraineManager.migraines
         guard !items.isEmpty else { return [] }
@@ -273,6 +275,7 @@ final class InsightManager {
 
         var results: [Insight] = []
 
+        // Hydration
         let hydration = window.compactMap { $0.health?.waterLiters }
         if !hydration.isEmpty {
             let avg = hydration.reduce(0, +) / Double(hydration.count)
@@ -289,6 +292,7 @@ final class InsightManager {
             }
         }
 
+        // Sleep
         let sleep = window.compactMap { $0.health?.sleepHours }
         if !sleep.isEmpty {
             let avg = sleep.reduce(0, +) / Double(sleep.count)
@@ -305,6 +309,7 @@ final class InsightManager {
             }
         }
 
+        // Calories
         let calories = window.compactMap { $0.health?.energyKilocalories }
         if !calories.isEmpty {
             let avg = calories.reduce(0, +) / Double(calories.count)
@@ -316,6 +321,61 @@ final class InsightManager {
                         message: String(format: "Average energy consumed: %.0f kcal on migraine days.", avg),
                         priority: .medium,
                         tags: ["avgKcal": avg]
+                    )
+                )
+            }
+        }
+
+        // Blood glucose (mg/dL) — average over migraine days
+        let glucose = window.compactMap { $0.health?.glucoseMgPerdL }
+        if !glucose.isEmpty {
+            let avg = glucose.reduce(0, +) / Double(glucose.count)
+            if avg >= 140 {
+                results.append(
+                    Insight(
+                        category: .biometrics,
+                        title: "Higher glucose on migraine days",
+                        message: String(format: "Average glucose around migraines: %.0f mg/dL.", avg.rounded()),
+                        priority: .low,
+                        tags: ["avgGlucoseMgPerdL": avg]
+                    )
+                )
+            } else if avg <= 70 {
+                results.append(
+                    Insight(
+                        category: .biometrics,
+                        title: "Lower glucose on migraine days",
+                        message: String(format: "Average glucose around migraines: %.0f mg/dL.", avg.rounded()),
+                        priority: .low,
+                        tags: ["avgGlucoseMgPerdL": avg]
+                    )
+                )
+            }
+        }
+
+        // Oxygen saturation (fraction 0.0–1.0) — convert to percent
+        let spo2Fractions = window.compactMap { $0.health?.bloodOxygenPercent }
+        if !spo2Fractions.isEmpty {
+            let percents = spo2Fractions.map { $0 * 100.0 }
+            let avg = percents.reduce(0, +) / Double(percents.count)
+            if avg < 92.0 {
+                results.append(
+                    Insight(
+                        category: .biometrics,
+                        title: "Very low oxygen saturation on migraine days",
+                        message: String(format: "Average SpO₂: %.1f%% around migraines.", avg),
+                        priority: .high,
+                        tags: ["avgSpO2Percent": avg]
+                    )
+                )
+            } else if avg < 95.0 {
+                results.append(
+                    Insight(
+                        category: .biometrics,
+                        title: "Lower oxygen saturation on migraine days",
+                        message: String(format: "Average SpO₂: %.1f%% around migraines.", avg),
+                        priority: .medium,
+                        tags: ["avgSpO2Percent": avg]
                     )
                 )
             }
@@ -436,6 +496,62 @@ final class InsightManager {
         }
 
         return results
+    }
+
+    // Menstrual phase association: which phase correlates with higher pain
+    private func generateMenstrualPhaseInsights() async throws -> [Insight] {
+        let items = migraineManager.migraines
+        // Need at least a few items with phase to be meaningful
+        let withPhase = items.compactMap { m -> (phase: MenstrualPhase, pain: Int)? in
+            guard let p = m.health?.menstrualPhase else { return nil }
+            return (p, m.painLevel)
+        }
+        guard withPhase.count >= 5 else { return [] }
+
+        // Average pain by phase
+        var sums: [MenstrualPhase: Int] = [:]
+        var counts: [MenstrualPhase: Int] = [:]
+        for entry in withPhase {
+            sums[entry.phase, default: 0] += entry.pain
+            counts[entry.phase, default: 0] += 1
+        }
+        let avgs: [(MenstrualPhase, Double)] = counts.compactMap { phase, count in
+            guard count > 0, let sum = sums[phase] else { return nil }
+            return (phase, Double(sum) / Double(count))
+        }
+        guard avgs.count >= 2 else { return [] }
+
+        // Find max vs min average pain
+        let sorted = avgs.sorted { $0.1 > $1.1 }
+        guard let top = sorted.first, let bottom = sorted.last else { return [] }
+
+        // Only surface if difference is meaningful
+        let diff = top.1 - bottom.1
+        guard diff >= 1.0 else { return [] }
+
+        func phaseDisplay(_ p: MenstrualPhase) -> String {
+            switch p {
+            case .menstrual: return "Menstrual"
+            case .follicular: return "Follicular"
+            case .ovulatory: return "Ovulatory"
+            case .luteal: return "Luteal"
+            }
+        }
+
+        return [
+            Insight(
+                category: .biometrics,
+                title: "Higher pain during \(phaseDisplay(top.0)) phase",
+                message: String(format: "Avg pain in %@: %.1f vs %@: %.1f.", phaseDisplay(top.0), top.1, phaseDisplay(bottom.0), bottom.1),
+                priority: .medium,
+                tags: [
+                    "topPhase": top.0.rawValue,
+                    "topAvg": top.1,
+                    "bottomPhase": bottom.0.rawValue,
+                    "bottomAvg": bottom.1
+                ]
+            )
+        ]
     }
 
     // MARK: - Intelligence (Apple Intelligence / Foundation Models)

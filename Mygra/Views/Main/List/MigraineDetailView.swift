@@ -113,7 +113,23 @@ struct MigraineDetailView: View {
                                 LabeledRow("Active HR", value: "\(ahr) bpm")
                             }
                             if let phase = h.menstrualPhase {
-                                LabeledRow("Phase", value: phase.rawValue)
+                                LabeledRow("Menstrual Phase", value: phase.rawValue)
+                            }
+                            if let glucose = h.glucoseMgPerdL {
+                                if useMetricUnits {
+                                    let mmol = glucose / 18.0
+                                    LabeledRow("Glucose", value: String(format: "%.1f mmol/L", mmol))
+                                } else {
+                                    LabeledRow("Glucose", value: String(format: "%.0f mg/dL", glucose.rounded()))
+                                }
+                            }
+                            if let spo2Fraction = h.bloodOxygenPercent {
+                                let percent = spo2Fraction * 100.0
+                                if percent.truncatingRemainder(dividingBy: 1) == 0 {
+                                    LabeledRow("Oxygen Saturation", value: "\(Int(percent))%")
+                                } else {
+                                    LabeledRow("Oxygen Saturation", value: String(format: "%.1f%%", percent))
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)

@@ -19,4 +19,5 @@ enum InsightCategory: String, Hashable {
     case sleepAssociation
     case weatherAssociation
     case generative
+    case biometrics
 }
