@@ -35,7 +35,8 @@ struct InsightsView: View {
                         onRefresh: {
                             lightTap()
                             Task { await weatherManager.refresh() }
-                        }
+                        },
+                        locationString: weatherManager.locationString // <-- pass location from WeatherManager
                     )
                     
                     if insightManager.intelligenceManager.supportsAppleIntelligence {
@@ -186,4 +187,3 @@ struct InsightsView: View {
         #endif
     }
 }
-

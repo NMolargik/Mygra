@@ -11,6 +11,7 @@ struct MigraineRowView: View {
     var migraine: Migraine
     var viewModel: MigraineListView.ViewModel
     @Environment(\.horizontalSizeClass) private var hSizeClass
+    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
 
     // Treat iPad as “regular width” even if size class is nil in this environment.
     private var isRegularWidth: Bool {
@@ -30,19 +31,12 @@ struct MigraineRowView: View {
             VStack(alignment: .leading, spacing: 6) {
                 // Primary line: start + duration, optional pin
                 HStack(alignment: .firstTextBaseline) {
-                    TimelineView(.periodic(from: .now, by: 1.0)) { _ in
-                        if migraine.isOngoing {
-                            Text("Ongoing")
-                                .font(.headline)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        } else {
-                            Text(dateRangeShort(for: migraine))
-                                .font(.headline)
-                                .lineLimit(1)
-                                .minimumScaleFactor(0.8)
-                        }
-                    }
+                    // Removed TimelineView to ensure immediate updates when date format preference changes
+                    Text(primaryTitle)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+
                     if migraine.pinned {
                         Image(systemName: "pin.fill")
                             .foregroundStyle(.secondary)
@@ -68,8 +62,9 @@ struct MigraineRowView: View {
 
                 // Secondary line: triggers as dots + note
                 HStack(spacing: 8) {
-                    if migraine.triggers.count > 0 {
-                        triggerDots(count: migraine.triggers.count)
+                    let triggerCount = migraine.triggers.count + migraine.customTriggers.count
+                    if triggerCount > 0 {
+                        triggerDots(count: triggerCount)
                     }
                     if let note = migraine.note, !note.isEmpty {
                         Text("• \(note)")
@@ -88,20 +83,26 @@ struct MigraineRowView: View {
 
     // MARK: - Derived strings
 
+    // Consolidate the displayed title to ensure it depends on AppStorage directly
+    private var primaryTitle: String {
+        if migraine.isOngoing {
+            return "Ongoing"
+        } else {
+            return DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates)
+        }
+    }
+
     private var startString: String {
-        let df = DateFormatter()
-        df.dateFormat = "dd/MM/yy HH:mm"
-        return df.string(from: migraine.startDate)
+        // Use the global formatting preference
+        DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates)
     }
 
     private func dateRangeShort(for migraine: Migraine) -> String {
         if migraine.isOngoing {
             return "Ongoing"
         }
-        let df = DateFormatter()
-        df.dateFormat = "MM/dd/yy HH:mm"
-        let start = df.string(from: migraine.startDate)
-        return "\(start)"
+        // Show the start date/time using the preferred global format
+        return DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates)
     }
 
     private func liveDurationString(now: Date) -> String {
@@ -124,15 +125,14 @@ struct MigraineRowView: View {
         } else {
             parts.append("Started \(startString)")
             if let end = migraine.endDate {
-                let df = DateFormatter()
-                df.dateFormat = "dd/MM/yy HH:mm"
-                parts.append("Ended \(df.string(from: end))")
+                parts.append("Ended \(DateFormatting.dateTime(end, useDMY: useDayMonthYearDates))")
             }
         }
         parts.append("Pain \(migraine.painLevel)")
         parts.append("Stress \(migraine.stressLevel)")
-        if migraine.triggers.count > 0 {
-            parts.append("Triggers \(migraine.triggers.count)")
+        let triggerCount = migraine.triggers.count + migraine.customTriggers.count
+        if triggerCount > 0 {
+            parts.append("Triggers \(triggerCount)")
         }
         if let note = migraine.note, !note.isEmpty {
             parts.append("Note \(note)")

@@ -111,7 +111,6 @@ struct MigraineAssistantView: View {
             // Input bar pinned to the safe area bottom (stays above the keyboard)
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 inputBar
-                    .background(.ultraThinMaterial)
                     .overlay(Divider(), alignment: .top)
             }
             .toolbar {
@@ -157,31 +156,63 @@ struct MigraineAssistantView: View {
     // MARK: - Input bar
 
     private var inputBar: some View {
-        HStack(spacing: 8) {
-            TextField("Message", text: $inputText, axis: .vertical)
-                .textFieldStyle(.roundedBorder)
-                .lineLimit(1...4)
-                .disabled(insightManager.isGeneratingGuidance)
-                .submitLabel(.send)
-                .onSubmit {
+        // Outer container with subtle elevation
+        HStack {
+            // Composer capsule
+            HStack(spacing: 8) {
+                TextField("Message", text: $inputText, axis: .vertical)
+                    .textFieldStyle(.plain)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .fill(Color(uiColor: .secondarySystemBackground))
+                    )
+                    .lineLimit(1...4)
+                    .disabled(insightManager.isGeneratingGuidance)
+                    .submitLabel(.send)
+                    .onSubmit {
+                        lightTap()
+                        send()
+                    }
+
+                Button {
                     lightTap()
                     send()
+                } label: {
+                    Image(systemName: "paperplane.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .symbolVariant(.fill)
+                        .foregroundStyle(.white)
+                        .frame(width: 34, height: 34)
+                        .background(
+                            Circle()
+                                .fill(sendEnabled ? Color.indigo : Color.secondary.opacity(0.25))
+                        )
                 }
-
-            Button {
-                lightTap()
-                send()
-            } label: {
-                Image(systemName: "paperplane.fill")
-                    .font(.system(size: 17, weight: .semibold))
+                .buttonStyle(.plain)
+                .animation(.spring(response: 0.25, dampingFraction: 0.9), value: sendEnabled)
+                .accessibilityLabel("Send")
+                .disabled(!sendEnabled)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.indigo)
-            .disabled(inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || insightManager.isGeneratingGuidance)
-            .accessibilityLabel("Send")
+            .padding(.horizontal, 10)
+            .padding(.vertical, 8)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(.thinMaterial)
+            )
+            .overlay(
+                Capsule(style: .continuous)
+                    .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+            )
+            .shadow(color: Color.black.opacity(0.06), radius: 8, x: 0, y: 2)
         }
         .padding(.horizontal, 12)
-        .padding(.vertical, 10)
+        .padding(.vertical, 8)
+    }
+
+    private var sendEnabled: Bool {
+        !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !insightManager.isGeneratingGuidance
     }
 
     private func send() {
@@ -377,4 +408,3 @@ private final class KeyboardObserver {
 #Preview {
     MigraineAssistantView()
 }
-

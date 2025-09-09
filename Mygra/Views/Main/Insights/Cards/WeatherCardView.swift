@@ -18,6 +18,12 @@ struct WeatherCardView: View {
     let isFetching: Bool
     let error: Error?
     let onRefresh: () -> Void
+    // NEW: Optional location display (e.g., "San Francisco, CA")
+    let locationString: String?
+
+    // Local state to trigger SF Symbol bounce when condition updates
+    @State private var bounceFlag: Bool = false
+    @State private var previousCondition: WeatherCondition?
 
     var body: some View {
         Group {
@@ -29,17 +35,29 @@ struct WeatherCardView: View {
                     Image(systemName: symbolName(for: condition))
                         .font(.system(size: 32))
                         .foregroundStyle(symbolColor(for: condition))
+                        // Apply bounce when bounceFlag toggles
+                        .symbolEffect(.bounce, options: .repeat(1), value: bounceFlag)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("\(conditionLabel(for: condition)) • \(temp)")
                             .font(.headline)
-                        
-                        HStack(spacing: 8) {
-                            Label(press, systemImage: "gauge.with.dots.needle.bottom.50percent")
-                            Label(humid, systemImage: "humidity")
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 8) {
+                                Label(press, systemImage: "gauge.with.dots.needle.bottom.50percent")
+                                Label(humid, systemImage: "humidity")
+                            }
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+
+                            if let location = locationString, !location.isEmpty {
+                                Text(location)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(1)
+                                    .truncationMode(.tail)
+                            }
                         }
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
                     }
 
                     Spacer()
@@ -76,6 +94,24 @@ struct WeatherCardView: View {
                             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
                             .padding(6)
                         }
+                    }
+                }
+                // Detect condition changes and trigger a single bounce
+                .onChange(of: condition) {
+                    switch (previousCondition, condition as WeatherCondition?) {
+                    case let (old?, new?) where old != new:
+                        bounceFlag.toggle()
+                    case (nil, .some):
+                        bounceFlag.toggle()
+                    default:
+                        break
+                    }
+                    previousCondition = condition
+                }
+                // Initialize previousCondition and optionally bounce on appear
+                .onAppear {
+                    if previousCondition == nil {
+                        previousCondition = condition
                     }
                 }
             } else {

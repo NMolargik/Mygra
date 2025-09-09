@@ -67,32 +67,42 @@ struct TodayCardView: View {
             }
 
             if let data = latestData {
+                // Precompute display strings so we can use them both for value and as stable tokens
+                let waterStr = waterDisplay(from: data)
+                let sleepStr = data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—"
+                let foodStr = data.energyKilocalories.map { "\(Int($0)) cal" } ?? "—"
+                let caffeineStr = data.caffeineMg.map { "\(Int($0)) mg" } ?? "—"
+
                 HStack(spacing: 12) {
                     StatTileView(
                         title: "Water",
-                        value: waterDisplay(from: data),
+                        value: waterStr,
                         systemImage: "drop.fill",
-                        color: .blue
+                        color: .blue,
+                        valueToken: AnyHashable(waterStr)
                     )
                     StatTileView(
                         title: "Sleep",
-                        value: data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—",
+                        value: sleepStr,
                         systemImage: "bed.double.fill",
-                        color: .indigo
+                        color: .indigo,
+                        valueToken: AnyHashable(sleepStr)
                     )
                 }
                 HStack(spacing: 12) {
                     StatTileView(
                         title: "Food",
-                        value: data.energyKilocalories.map { "\(Int($0)) cal" } ?? "—",
+                        value: foodStr,
                         systemImage: "fork.knife",
-                        color: .orange
+                        color: .orange,
+                        valueToken: AnyHashable(foodStr)
                     )
                     StatTileView(
                         title: "Caffeine",
-                        value: data.caffeineMg.map { "\(Int($0)) mg" } ?? "—",
+                        value: caffeineStr,
                         systemImage: "cup.and.saucer.fill",
-                        color: .brown
+                        color: .brown,
+                        valueToken: AnyHashable(caffeineStr)
                     )
                 }
             } else {

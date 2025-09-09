@@ -163,10 +163,17 @@ final class IntelligenceManager {
         } else {
             lines.append("Duration: ongoing")
         }
-        if !migraine.triggers.isEmpty {
-            let t = migraine.triggers.map { $0.displayName }.joined(separator: ", ")
-            lines.append("Selected triggers: \(t)")
+
+        // Triggers: include both canonical and custom
+        let canonical = migraine.triggers.map(\.displayName)
+        let custom = migraine.customTriggers
+            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        let allTriggers = LinkedHashSet(elements: canonical + custom, key: { $0.lowercased() }).ordered
+        if !allTriggers.isEmpty {
+            lines.append("Selected triggers: \(allTriggers.joined(separator: ", "))")
         }
+
         if !migraine.foodsEaten.isEmpty {
             lines.append("Foods: \(migraine.foodsEaten.joined(separator: ", "))")
         }
@@ -227,4 +234,21 @@ struct ChatMessage: Hashable {
     static func system(_ text: String) -> ChatMessage { .init(role: .system, content: text) }
     static func user(_ text: String) -> ChatMessage { .init(role: .user, content: text) }
     static func assistant(_ text: String) -> ChatMessage { .init(role: .assistant, content: text) }
+}
+
+// MARK: - Small helper for stable, case-insensitive deduping while preserving order
+fileprivate struct LinkedHashSet<Element, Key: Hashable> {
+    private var orderedStorage: [Element] = []
+    private var seenKeys: Set<Key> = []
+
+    init<S: Sequence>(elements: S, key: (Element) -> Key) where S.Element == Element {
+        for e in elements {
+            let k = key(e)
+            if seenKeys.insert(k).inserted {
+                orderedStorage.append(e)
+            }
+        }
+    }
+
+    var ordered: [Element] { orderedStorage }
 }

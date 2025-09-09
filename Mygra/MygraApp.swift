@@ -36,8 +36,6 @@ struct MygraApp: App {
                 cloudKitDatabase: cloudDBMode
             )
 
-            let modelTypeNames = ["User", "Migraine", "WeatherData", "HealthData"]
-
             container = try ModelContainer(
                 for: User.self, Migraine.self, WeatherData.self, HealthData.self,
                 configurations: config

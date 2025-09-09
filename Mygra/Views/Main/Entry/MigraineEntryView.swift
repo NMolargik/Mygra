@@ -234,7 +234,11 @@ struct MigraineEntryView: View {
                     if vm.didPullWeather, vm.weatherError == nil {
                         // Single row with two columns, both leading aligned
                         HStack(alignment: .top) {
-                            VStack(alignment: .leading, spacing: 4) {
+                            VStack(alignment: .leading, spacing: 8) {
+                                if let loc = weatherManager.locationString, !loc.isEmpty {
+                                    Label(loc, systemImage: "mappin.and.ellipse")
+                                }
+                                
                                 if let t = weatherManager.temperature {
                                     Label(displayTemperature(t), systemImage: "thermometer.medium")
                                 }
@@ -362,10 +366,57 @@ struct MigraineEntryView: View {
                         }
                     }
 
-                    if vm.selectedTriggers.isEmpty {
+                    // Custom trigger input
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            TextField("Add custom trigger", text: $vm.customTriggerInput)
+                                .textInputAutocapitalization(.never)
+                                .autocorrectionDisabled()
+                                .onSubmit { vm.addCustomTrigger() }
+                            Button {
+                                lightImpact()
+                                vm.addCustomTrigger()
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                            }
+                            .disabled(vm.customTriggerInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                        }
+
+                        if !vm.customTriggers.isEmpty {
+                            FlowLayout(
+                                mode: .scrollable, // allows horizontal scroll within each line if needed
+                                items: vm.customTriggers,
+                                itemSpacing: 6,
+                                lineSpacing: 6
+                            ) { idx, label in
+                                HStack(spacing: 6) {
+                                    Text(label)
+                                        .font(.caption)
+                                        .padding(.vertical, 4)
+                                        .padding(.leading, 10)
+                                    Button {
+                                        lightImpact()
+                                        vm.removeCustomTrigger(at: idx)
+                                    } label: {
+                                        Image(systemName: "xmark.circle.fill")
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    .buttonStyle(.plain)
+                                    .padding(.trailing, 6)
+                                }
+                                .background(
+                                    Capsule().fill(Color.secondary.opacity(0.15))
+                                )
+                            }
+                            .padding(.vertical, 4)
+                        }
+                    }
+
+                    if vm.selectedTriggers.isEmpty && vm.customTriggers.isEmpty {
                         Text("No triggers selected").foregroundStyle(.secondary)
                     } else {
-                        Text("\(vm.selectedTriggers.count) selected")
+                        let total = vm.selectedTriggers.count + vm.customTriggers.count
+                        Text("\(total) selected")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }
@@ -562,8 +613,6 @@ struct MigraineEntryView: View {
         return min(max(snapped, range.lowerBound), range.upperBound)
     }
 
-    // MARK: - Experience color mapping (0→green, 5→yellow, 10→red)
-
     private func gradientColor(for value: Int) -> Color {
         let v = max(0, min(10, value))
         if v <= 5 {
@@ -576,7 +625,6 @@ struct MigraineEntryView: View {
             return Color(red: 1.0, green: 1.0 - t, blue: 0.0)
         }
     }
-
     // MARK: - Health editor actions
 
     private func toggleHealthEditor() {
@@ -704,20 +752,25 @@ struct MigraineEntryView: View {
             let tempC: Double? = weatherManager.temperature?.converted(to: .celsius).value
             let humidityPercent: Double? = weatherManager.humidity.map { $0 * 100.0 }
             let condition: WeatherCondition? = weatherManager.condition
+            let location: String? = weatherManager.locationString
 
             if let ph = pressureHpa, let tc = tempC, let hp = humidityPercent, let cond = condition {
                 return WeatherData(
                     barometricPressureHpa: ph,
                     temperatureCelsius: tc,
                     humidityPercent: hp,
-                    condition: cond
+                    condition: cond,
+                    createdAt: Date(),
+                    locationDescription: location
                 )
             } else if tempC != nil || pressureHpa != nil || humidityPercent != nil || condition != nil {
                 return WeatherData(
                     barometricPressureHpa: pressureHpa ?? 0,
                     temperatureCelsius: tempC ?? 0,
                     humidityPercent: humidityPercent ?? 0,
-                    condition: condition ?? .clear
+                    condition: condition ?? .clear,
+                    createdAt: Date(),
+                    locationDescription: location
                 )
             } else {
                 return nil
@@ -740,6 +793,7 @@ struct MigraineEntryView: View {
             note: viewModel.noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : viewModel.noteText,
             insight: nil,
             triggers: Array(viewModel.selectedTriggers),
+            customTriggers: viewModel.customTriggers,
             foodsEaten: foods,
             weather: weatherModel,
             health: healthModel
@@ -756,3 +810,95 @@ struct MigraineEntryView: View {
     }
 }
 
+// MARK: - Flexible FlowLayout for wrapping chips
+private struct FlowLayout<Item, Content: View>: View {
+    enum Mode {
+        case vstack // pure wrap, no internal scroll
+        case scrollable // each line can scroll horizontally if very long
+    }
+
+    let mode: Mode
+    let items: [Item]
+    let itemSpacing: CGFloat
+    let lineSpacing: CGFloat
+    let content: (_ index: Int, _ item: Item) -> Content
+
+    init(
+        mode: Mode = .vstack,
+        items: [Item],
+        itemSpacing: CGFloat = 8,
+        lineSpacing: CGFloat = 8,
+        @ViewBuilder content: @escaping (_ index: Int, _ item: Item) -> Content
+    ) {
+        self.mode = mode
+        self.items = items
+        self.itemSpacing = itemSpacing
+        self.lineSpacing = lineSpacing
+        self.content = content
+    }
+
+    var body: some View {
+        GeometryReader { proxy in
+            let maxWidth = proxy.size.width
+            self.generateContent(maxWidth: maxWidth)
+        }
+        .frame(minHeight: 0) // allow the form to size it naturally
+    }
+
+    private func generateContent(maxWidth: CGFloat) -> some View {
+        var rows: [[(Int, Item)]] = []
+        var currentRow: [(Int, Item)] = []
+        var currentRowWidth: CGFloat = 0
+
+        let sizes: [CGSize] = items.enumerated().map { idx, item in
+            // Estimate size by rendering offscreen. For simplicity, give a reasonable width budget.
+            let hosting = UIHostingController(rootView:
+                content(idx, item)
+                    .fixedSize() // take natural size
+            )
+            hosting.view.translatesAutoresizingMaskIntoConstraints = false
+            let target = hosting.sizeThatFits(in: CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
+            return target
+        }
+
+        for (idx, item) in items.enumerated() {
+            let size = sizes[idx]
+            let proposedWidth = (currentRow.isEmpty ? 0 : currentRowWidth + itemSpacing) + size.width
+            if proposedWidth <= maxWidth {
+                // fits in current row
+                currentRow.append((idx, item))
+                currentRowWidth = proposedWidth
+            } else {
+                // wrap to next row
+                if !currentRow.isEmpty {
+                    rows.append(currentRow)
+                }
+                currentRow = [(idx, item)]
+                currentRowWidth = size.width
+            }
+        }
+        if !currentRow.isEmpty {
+            rows.append(currentRow)
+        }
+
+        return VStack(alignment: .leading, spacing: lineSpacing) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                if mode == .scrollable {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: itemSpacing) {
+                            ForEach(row, id: \.0) { idx, item in
+                                content(idx, item)
+                            }
+                        }
+                    }
+                } else {
+                    HStack(spacing: itemSpacing) {
+                        ForEach(row, id: \.0) { idx, item in
+                            content(idx, item)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

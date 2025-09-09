@@ -35,6 +35,8 @@ final class Migraine {
     // MARK: - Triggers & foods
     /// Triggers selected from the canonical trigger enum.
     var triggers: [MigraineTrigger] = []
+    /// Custom, free-form triggers provided by the user.
+    var customTriggers: [String] = []
     /// Foods eaten around the time of attack (freeform strings).
     var foodsEaten: [String] = []
 
@@ -54,6 +56,7 @@ final class Migraine {
         note: String? = nil,
         insight: String? = nil,
         triggers: [MigraineTrigger] = [],
+        customTriggers: [String] = [],
         foodsEaten: [String] = [],
         weather: WeatherData? = nil,
         health: HealthData? = nil
@@ -68,6 +71,7 @@ final class Migraine {
         self.note = note
         self.insight = insight
         self.triggers = triggers
+        self.customTriggers = customTriggers
         self.foodsEaten = foodsEaten
         self.weather = weather
         self.health = health
@@ -82,3 +86,4 @@ final class Migraine {
         Severity.from(painLevel: painLevel)
     }
 }
+

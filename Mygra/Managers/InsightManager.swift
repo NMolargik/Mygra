@@ -45,7 +45,6 @@ final class InsightManager {
         self.healthManager = healthManager
         self.intelligenceManager = IntelligenceManager(userManager: userManager, migraineManager: migraineManager)
 
-        // Observe explicit "migraine created" events using selector-based API to avoid token handling.
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(migraineCreated(_:)),
@@ -55,7 +54,6 @@ final class InsightManager {
     }
 
     deinit {
-        // Removing by self/object avoids touching any MainActor-isolated stored token.
         NotificationCenter.default.removeObserver(
             self,
             name: MigraineManager.migraineCreatedNotification,
@@ -69,7 +67,6 @@ final class InsightManager {
     }
 
     private func handleJustCreatedMigraine(_ migraine: Migraine) async {
-        // Only act for truly new creations; skip if already has insight or device unsupported
         guard intelligenceManager.supportsAppleIntelligence else { return }
         if let existing = migraine.insight, !existing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             return
@@ -206,15 +203,20 @@ final class InsightManager {
         return sum / Double(durations.count)
     }
 
-    // Triggers: prevalence across migraines
+    // Triggers: prevalence across migraines (includes custom triggers)
     private func generateTriggerInsights() async throws -> [Insight] {
         let items = migraineManager.migraines
         guard !items.isEmpty else { return [] }
 
         var counts: [String: Int] = [:]
         for m in items {
+            // predefined
             for t in Set(m.triggers) {
                 counts[t.displayName, default: 0] += 1
+            }
+            // custom (normalized to lowercase for grouping)
+            for raw in Set(m.customTriggers.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty }) {
+                counts[raw.capitalized, default: 0] += 1
             }
         }
         guard !counts.isEmpty else { return [] }
@@ -326,7 +328,7 @@ final class InsightManager {
             }
         }
 
-        // Blood glucose (mg/dL) — average over migraine days
+        // Blood glucose (mg/dL)
         let glucose = window.compactMap { $0.health?.glucoseMgPerdL }
         if !glucose.isEmpty {
             let avg = glucose.reduce(0, +) / Double(glucose.count)
@@ -353,7 +355,7 @@ final class InsightManager {
             }
         }
 
-        // Oxygen saturation (fraction 0.0–1.0) — convert to percent
+        // Oxygen saturation (fraction 0.0–1.0)
         let spo2Fractions = window.compactMap { $0.health?.bloodOxygenPercent }
         if !spo2Fractions.isEmpty {
             let percents = spo2Fractions.map { $0 * 100.0 }
@@ -501,14 +503,12 @@ final class InsightManager {
     // Menstrual phase association: which phase correlates with higher pain
     private func generateMenstrualPhaseInsights() async throws -> [Insight] {
         let items = migraineManager.migraines
-        // Need at least a few items with phase to be meaningful
         let withPhase = items.compactMap { m -> (phase: MenstrualPhase, pain: Int)? in
             guard let p = m.health?.menstrualPhase else { return nil }
             return (p, m.painLevel)
         }
         guard withPhase.count >= 5 else { return [] }
 
-        // Average pain by phase
         var sums: [MenstrualPhase: Int] = [:]
         var counts: [MenstrualPhase: Int] = [:]
         for entry in withPhase {
@@ -521,11 +521,9 @@ final class InsightManager {
         }
         guard avgs.count >= 2 else { return [] }
 
-        // Find max vs min average pain
         let sorted = avgs.sorted { $0.1 > $1.1 }
         guard let top = sorted.first, let bottom = sorted.last else { return [] }
 
-        // Only surface if difference is meaningful
         let diff = top.1 - bottom.1
         guard diff >= 1.0 else { return [] }
 
@@ -554,10 +552,8 @@ final class InsightManager {
         ]
     }
 
-    // MARK: - Intelligence (Apple Intelligence / Foundation Models)
+    // MARK: - Intelligence
 
-    /// Analyze a newly created migraine using Apple Intelligence (if supported) and store a user-facing explanation.
-    /// - Note: This updates both Migraine.insight and the local generatedGuidance cache.
     func analyzeNewlyCreatedMigraine(_ migraine: Migraine) async {
         guard intelligenceManager.supportsAppleIntelligence else { return }
         guard !isGeneratingGuidance else { return }
@@ -571,14 +567,10 @@ final class InsightManager {
         let user = userManager.currentUser
         do {
             if let text = try await intelligenceManager.analyze(migraine: migraine, user: user) {
-                // Persist on the model
                 migraineManager.update(migraine) { m in
                     m.insight = text
                 }
-                // Cache in-memory for quick access
                 generatedGuidance[migraine.id] = text
-
-                // Optionally surface as an Insight card
                 let card = Insight(
                     category: .generative,
                     title: "Migraine explanation",
@@ -593,7 +585,6 @@ final class InsightManager {
         }
     }
 
-    /// Start a counselor chat by seeding the IntelligenceManager with user + migraine history.
     func startCounselorChat() async {
         guard intelligenceManager.supportsAppleIntelligence else { return }
         let all = migraineManager.migraines
@@ -601,7 +592,6 @@ final class InsightManager {
         await intelligenceManager.startChat(migraines: all, user: user)
     }
 
-    /// Send a message to the counselor chat and return the assistant's reply.
     func sendCounselorMessage(_ text: String) async -> String {
         guard intelligenceManager.supportsAppleIntelligence else { return "This device does not support Apple Intelligence." }
         do {
@@ -616,7 +606,6 @@ final class InsightManager {
         }
     }
 
-    /// Reset the counselor chat state.
     func resetCounselorChat() {
         intelligenceManager.resetChat()
     }

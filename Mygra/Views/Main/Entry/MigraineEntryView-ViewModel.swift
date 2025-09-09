@@ -27,6 +27,9 @@ extension MigraineEntryView {
         var painLevel: Int = 5
         var stressLevel: Int = 5
         var selectedTriggers: Set<MigraineTrigger> = []
+        // Custom triggers
+        var customTriggerInput: String = ""
+        var customTriggers: [String] = []
         var foodsText: String = ""
         var noteText: String = ""
         var pinned: Bool = false
@@ -76,6 +79,20 @@ extension MigraineEntryView {
             }
         }
 
+        func addCustomTrigger() {
+            let trimmed = customTriggerInput.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return }
+            if !customTriggers.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) {
+                customTriggers.append(trimmed)
+            }
+            customTriggerInput = ""
+        }
+
+        func removeCustomTrigger(at index: Int) {
+            guard index >= 0 && index < customTriggers.count else { return }
+            customTriggers.remove(at: index)
+        }
+
         func parseFoods() -> [String] {
             foodsText
                 .components(separatedBy: CharacterSet(charactersIn: ",\n"))
@@ -105,3 +122,4 @@ extension MigraineEntryView {
         }
     }
 }
+

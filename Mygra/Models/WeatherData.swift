@@ -29,6 +29,10 @@ final class WeatherData {
     // MARK: - Metadata
     var createdAt: Date = Date()
 
+    /// Human-readable location at the time of capture (e.g., "Seattle, WA").
+    /// Optional; may be nil if reverse geocoding was unavailable.
+    var locationDescription: String?
+
     // MARK: - Relationships
     var migraine: Migraine?
 
@@ -39,12 +43,14 @@ final class WeatherData {
         humidityPercent: Double = 0.0,
         condition: WeatherCondition = WeatherCondition.clear,
         createdAt: Date = Date(),
+        locationDescription: String? = nil
     ) {
         self.barometricPressureHpa = barometricPressureHpa
         self.temperatureCelsius = temperatureCelsius
         self.humidityPercent = humidityPercent
         self.condition = condition
         self.createdAt = createdAt
+        self.locationDescription = locationDescription
     }
 
     var temperatureFahrenheit: Double {
@@ -87,4 +93,3 @@ final class WeatherData {
         if useMetricUnits { barometricPressureHpa = value } else { barometricPressureInHg = value }
     }
 }
-

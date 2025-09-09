@@ -10,6 +10,7 @@ import WeatherKit
 
 struct MigraineDetailView: View {
     @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(\.dismiss) private var dismiss
@@ -23,10 +24,12 @@ struct MigraineDetailView: View {
     @State private var proposedEndDate: Date = Date()
     @State private var endError: String?
 
+    // Delete flow
+    @State private var showDeleteConfirm = false
+
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
-
                 header
 
                 insightSection
@@ -38,22 +41,18 @@ struct MigraineDetailView: View {
                     }
                 }
 
-                if !migraine.triggers.isEmpty {
+                if !migraine.triggers.isEmpty || !migraine.customTriggers.isEmpty {
                     infoCard(title: "Triggers") {
                         VStack(alignment: .leading, spacing: 8) {
-                            ForEach(migraine.triggers, id: \.self) { t in
-                                Label(t.displayName, systemImage: "bolt.heart")
+                            if !migraine.triggers.isEmpty {
+                                ForEach(migraine.triggers, id: \.self) { t in
+                                    Label(t.displayName, systemImage: "bolt.heart")
+                                }
                             }
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                    }
-                }
-
-                if !migraine.foodsEaten.isEmpty {
-                    infoCard(title: "Foods Eaten") {
-                        VStack(alignment: .leading, spacing: 8) {
-                            ForEach(migraine.foodsEaten, id: \.self) { f in
-                                Label(f, systemImage: "fork.knife")
+                            if !migraine.customTriggers.isEmpty {
+                                ForEach(migraine.customTriggers, id: \.self) { t in
+                                    Label(t, systemImage: "bolt.heart")
+                                }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
@@ -63,6 +62,10 @@ struct MigraineDetailView: View {
                 if let wx = migraine.weather {
                     infoCard(title: "Weather") {
                         VStack(alignment: .leading, spacing: 8) {
+                            if let place = wx.locationDescription, !place.isEmpty {
+                                LabeledRow("Location", value: place)
+                            }
+                            
                             LabeledRow("Condition", value: wx.condition.description)
                             LabeledRow("Temperature") {
                                 let temp = wx.displayTemperature(useMetricUnits: useMetricUnits)
@@ -137,12 +140,24 @@ struct MigraineDetailView: View {
                 }
 
                 Spacer(minLength: 12)
+
+                // Delete button at the very bottom
+                Button(role: .destructive) {
+                    showDeleteConfirm = true
+                } label: {
+                    Label("Delete Migraine", systemImage: "trash")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                }
+                .buttonStyle(.bordered)
+                .tint(.red)
+                .accessibilityIdentifier("deleteMigraineButton")
             }
             .padding()
         }
         .navigationTitle("Migraine")
         .navigationBarTitleDisplayMode(.inline)
-        // iPad-only Close button in the leading position
+        // iPad-only Close button in the leading position, pin in trailing
         .toolbar {
             if hSizeClass == .regular {
                 ToolbarItem(placement: .topBarLeading) {
@@ -159,6 +174,15 @@ struct MigraineDetailView: View {
                         }
                     }
                 }
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    migraineManager.togglePinned(migraine)
+                } label: {
+                    Image(systemName: migraine.pinned ? "pin.fill" : "pin")
+                        .foregroundStyle(migraine.pinned ? .orange : .secondary)
+                }
+                .accessibilityLabel(migraine.pinned ? "Unpin" : "Pin")
             }
         }
         .sheet(isPresented: $showingEndSheet) {
@@ -179,6 +203,19 @@ struct MigraineDetailView: View {
                 onCancel: { /* simply closes */ }
             )
             .presentationDetents([.medium, .large])
+        }
+        .alert("Delete this migraine?", isPresented: $showDeleteConfirm) {
+            Button("Delete", role: .destructive) {
+                migraineManager.delete(migraine)
+                if let onClose {
+                    onClose()
+                } else {
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("This action cannot be undone.")
         }
         .onAppear {
             // Initialize proposed end date when showing the view
@@ -238,14 +275,11 @@ struct MigraineDetailView: View {
     private var header: some View {
         VStack(spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
-                Text(migraine.isOngoing ? "Ongoing Migraine" : "")
-                    .font(.title2).bold()
-                Spacer()
-                if migraine.pinned {
-                    Image(systemName: "pin.fill")
-                        .foregroundStyle(.orange)
-                        .accessibilityLabel("Pinned")
+                if migraine.isOngoing {
+                    Text("Ongoing Migraine")
+                        .font(.title2).bold()
                 }
+                Spacer()
             }
 
             HStack(spacing: 12) {
@@ -264,8 +298,8 @@ struct MigraineDetailView: View {
             }
 
             VStack(alignment: .leading, spacing: 6) {
-                LabeledRow("Start", value: format(date: migraine.startDate))
-                LabeledRow("End", value: migraine.endDate.map { format(date: $0) } ?? "Ongoing")
+                LabeledRow("Start", value: DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates))
+                LabeledRow("End", value: migraine.endDate.map { DateFormatting.dateTime($0, useDMY: useDayMonthYearDates) } ?? "Ongoing")
                 if let end = migraine.endDate {
                     LabeledRow("Duration", value: formatDuration(from: migraine.startDate, to: end))
                 } else {
@@ -297,7 +331,7 @@ struct MigraineDetailView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .padding(16)
+        .padding()
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color(uiColor: .secondarySystemBackground))
@@ -326,19 +360,14 @@ struct MigraineDetailView: View {
                 Text(value).font(.headline)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .center)
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(tint.opacity(0.12))
         )
-    }
-
-    private func format(date: Date) -> String {
-        let df = DateFormatter()
-        df.dateStyle = .medium
-        df.timeStyle = .short
-        return df.string(from: date)
+        .contentShape(Rectangle())
     }
 
     private var defaultEndDate: Date {

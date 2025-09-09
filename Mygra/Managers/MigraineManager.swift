@@ -14,7 +14,7 @@ import Observation
 final class MigraineManager {
 
     // MARK: - Notifications
-    static let migraineCreatedNotification = Notification.Name("MigraineManager.migraineCreated")
+    nonisolated static let migraineCreatedNotification = Notification.Name("MigraineManager.migraineCreated")
 
     // MARK: - Dependencies
     @ObservationIgnored
@@ -74,6 +74,7 @@ final class MigraineManager {
         note: String? = nil,
         insight: String? = nil,
         triggers: [MigraineTrigger] = [],
+        customTriggers: [String] = [],
         foodsEaten: [String] = [],
         weather: WeatherData? = nil,
         health: HealthData? = nil
@@ -87,6 +88,7 @@ final class MigraineManager {
             note: note,
             insight: insight,
             triggers: triggers,
+            customTriggers: customTriggers,
             foodsEaten: foodsEaten,
             weather: weather,
             health: health
@@ -177,7 +179,9 @@ final class MigraineManager {
                 let t = filter.searchText.lowercased()
                 let noteHit = m.note?.lowercased().contains(t) == true
                 let insightHit = m.insight?.lowercased().contains(t) == true
-                guard noteHit || insightHit else { return false }
+                // Also search custom triggers text
+                let customHit = m.customTriggers.contains { $0.lowercased().contains(t) }
+                guard noteHit || insightHit || customHit else { return false }
             }
             return true
         }
@@ -193,4 +197,3 @@ final class MigraineManager {
         Task { await refresh() }
     }
 }
-
