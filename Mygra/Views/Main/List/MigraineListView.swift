@@ -38,6 +38,12 @@ struct MigraineListView: View {
                             } else {
                                 Text("Filters are applied. Try clearing them to see more migraines.")
                             }
+                            if !f.requiredTriggers.isEmpty {
+                                Text(triggerSummary(for: f.requiredTriggers))
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                            }
                             HStack(spacing: 12) {
                                 if f.pinnedOnly {
                                     Button {
@@ -153,6 +159,12 @@ struct MigraineListView: View {
                                         .controlSize(.small)
                                         .accessibilityIdentifier("footerShowAllButton")
                                     }
+                                    if !f.requiredTriggers.isEmpty {
+                                        Text(triggerSummary(for: f.requiredTriggers))
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                            .accessibilityIdentifier("footerTriggerSummary")
+                                    }
                                     Button {
                                         successTap()
                                         migraineManager.filter = .init()
@@ -232,6 +244,17 @@ struct MigraineListView: View {
         .refreshable {
             await migraineManager.refresh()
             successTap()
+        }
+    }
+
+    // MARK: - Trigger summary helper
+    private func triggerSummary(for set: Set<MigraineTrigger>) -> String {
+        let names = Array(set).map { $0.displayName }.sorted()
+        let shown = names.prefix(3)
+        if names.count <= 3 {
+            return "Triggers: " + shown.joined(separator: ", ")
+        } else {
+            return "Triggers: " + shown.joined(separator: ", ") + " +\(names.count - 3)"
         }
     }
 

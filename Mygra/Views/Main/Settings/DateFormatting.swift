@@ -23,9 +23,9 @@ enum DateFormatting {
         // - DMY: 28 Aug 2025
         // - MDY: Aug 28, 2025
         if useDMY {
-            df.dateFormat = "d MMM yyyy"
+            df.dateFormat = "d MMM yy"
         } else {
-            df.dateFormat = "MMM d, yyyy"
+            df.dateFormat = "MMM d, yy"
         }
         return df.string(from: value)
     }

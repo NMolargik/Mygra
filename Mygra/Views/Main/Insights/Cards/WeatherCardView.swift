@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import WeatherKit
+import CoreLocation
 
 struct WeatherCardView: View {
     let temperatureString: String?
@@ -32,9 +33,11 @@ struct WeatherCardView: View {
                let humid = humidityPercentString,
                let condition {
                 HStack(spacing: 12) {
+                    let layers = symbolLayerColors(for: condition)
                     Image(systemName: symbolName(for: condition))
                         .font(.system(size: 32))
-                        .foregroundStyle(symbolColor(for: condition))
+                        // Important: order colors to match symbol layer order
+                        .foregroundStyle(layers.layer1, layers.layer2)
                         // Apply bounce when bounceFlag toggles
                         .symbolEffect(.bounce, options: .repeat(1), value: bounceFlag)
 
@@ -82,18 +85,24 @@ struct WeatherCardView: View {
                 .padding(14)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
-                    if let error {
+                    if let message = userFacingErrorMessage(from: error) {
                         VStack {
                             Spacer()
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.yellow)
-                                Text(error.localizedDescription).font(.footnote)
+                            HStack(spacing: 8) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .foregroundStyle(.yellow)
+                                Text(message)
+                                    .font(.footnote)
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(2)
+                                    .truncationMode(.tail)
                                 Spacer()
                             }
                             .padding(10)
                             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
                             .padding(6)
                         }
+                        .transition(.opacity)
                     }
                 }
                 // Detect condition changes and trigger a single bounce
@@ -122,9 +131,11 @@ struct WeatherCardView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Weather Unavailable")
                             .font(.headline)
-                        Text("Enable location and refresh to see current weather.")
+                        Text(unavailableSubtitle(for: error))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                            .lineLimit(2)
+                            .truncationMode(.tail)
                     }
                     Spacer()
                     Button("Refresh", action: onRefresh)
@@ -136,6 +147,65 @@ struct WeatherCardView: View {
         }
         .accessibilityElement(children: .combine)
     }
+
+    // MARK: - Error presentation
+
+    private func userFacingErrorMessage(from error: Error?) -> String? {
+        guard let error else { return nil }
+        let ns = error as NSError
+
+        if ns.domain == kCLErrorDomain as String {
+            switch CLError.Code(rawValue: ns.code) {
+            case .some(.locationUnknown),
+                 .some(.deferredAccuracyTooLow),
+                 .some(.deferredCanceled),
+                 .some(.deferredFailed),
+                 .some(.deferredNotUpdatingLocation),
+                 .some(.network),
+                 .some(.denied),
+                 .some(.regionMonitoringDenied),
+                 .some(.regionMonitoringFailure),
+                 .some(.regionMonitoringSetupDelayed),
+                 .some(.geocodeFoundNoResult),
+                 .some(.geocodeCanceled),
+                 .some(.geocodeFoundPartialResult),
+                 .some(.rangingUnavailable),
+                 .some(.rangingFailure),
+                 .some(.promptDeclined):
+                return nil
+            default:
+                return "We couldn’t get your location. Try refreshing."
+            }
+        }
+
+        if ns.domain == NSURLErrorDomain {
+            return "Network issue fetching weather. Check your connection."
+        }
+
+        return "Couldn’t update weather right now."
+    }
+
+    private func unavailableSubtitle(for error: Error?) -> String {
+        guard let error = error as NSError? else {
+            return "Enable location and refresh to see current weather."
+        }
+        if error.domain == kCLErrorDomain as String {
+            switch CLError.Code(rawValue: error.code) {
+            case .some(.denied), .some(.promptDeclined):
+                return "Location access is needed to show local weather."
+            case .some(.network):
+                return "Network issue. Check your connection and try again."
+            default:
+                return "Weather data isn’t available yet. Try refreshing."
+            }
+        }
+        if error.domain == NSURLErrorDomain {
+            return "Network issue. Check your connection and try again."
+        }
+        return "Weather data isn’t available yet. Try refreshing."
+    }
+
+    // MARK: - Labels and symbols
 
     private func conditionLabel(for condition: WeatherCondition) -> String {
         switch condition {
@@ -185,23 +255,53 @@ struct WeatherCardView: View {
         }
     }
 
-    private func symbolColor(for condition: WeatherCondition) -> Color {
+    // Returns colors ordered to match the SF Symbol layer order for the chosen symbol.
+    private func symbolLayerColors(for condition: WeatherCondition) -> (layer1: Color, layer2: Color) {
         switch condition {
-        case .clear, .mostlyClear: return .yellow
-        case .partlyCloudy: return .orange
-        case .cloudy, .mostlyCloudy: return .gray
-        case .drizzle, .rain: return .blue
-        case .heavyRain: return Color.blue.opacity(0.9)
-        case .strongStorms: return .indigo
-        case .snow, .flurries: return .cyan
-        case .sleet, .freezingRain: return .teal
-        case .haze, .foggy: return .gray.opacity(0.7)
-        case .windy: return .teal
-        case .blowingSnow, .blizzard: return .cyan
-        case .frigid: return .blue
-        case .hot: return .red
-        case .smoky: return .brown
-        default: return .gray
+        case .clear, .mostlyClear:
+            // sun.max.fill is effectively single-layer; use same color twice
+            return (.yellow, .yellow)
+        case .partlyCloudy:
+            // cloud.sun.fill => layer1=cloud, layer2=sun
+            return (.gray, .yellow)
+        case .cloudy, .mostlyCloudy:
+            // cloud.fill => single-layer
+            return (.gray, .gray)
+        case .drizzle, .rain:
+            // cloud.rain.fill => layer1=cloud, layer2=rain
+            return (.gray, .blue)
+        case .heavyRain:
+            // cloud.heavyrain.fill => layer1=cloud, layer2=heavy rain
+            return (.gray, Color.blue.opacity(0.9))
+        case .strongStorms:
+            // cloud.bolt.rain.fill => layer1=cloud, layer2=bolt+rain
+            return (.gray, .indigo)
+        case .snow, .flurries:
+            // cloud.snow.fill => layer1=cloud, layer2=snow
+            return (.gray, .cyan)
+        case .sleet, .freezingRain:
+            // cloud.sleet.fill => layer1=cloud, layer2=sleet
+            return (.gray, .teal)
+        case .haze, .foggy:
+            // cloud.fog.fill => layer1=cloud, layer2=fog
+            return (.gray, .gray.opacity(0.6))
+        case .windy:
+            // wind => single-layer
+            return (.teal, .teal)
+        case .blowingSnow, .blizzard:
+            // wind.snow may render as single-layer on some OS versions; still provide two tones
+            return (.gray, .cyan)
+        case .frigid:
+            // thermometer.snowflake is often single-layer in monochrome contexts
+            return (.blue, .blue)
+        case .hot:
+            // thermometer.sun.fill may be multi-layer, but safe default
+            return (.red, .orange)
+        case .smoky:
+            // smoke.fill => single-layer-ish
+            return (.brown, .brown)
+        default:
+            return (.gray, .gray.opacity(0.7))
         }
     }
 }

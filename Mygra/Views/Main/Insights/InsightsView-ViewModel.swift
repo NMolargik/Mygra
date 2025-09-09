@@ -19,7 +19,7 @@ extension InsightsView {
         var intakeError: String?
 
         // UI state
-        var isQuickLogExpanded: Bool = false
+        var isQuickAddExpanded: Bool = false
         var isShowingMigraineAssistant: Bool = false
         
         

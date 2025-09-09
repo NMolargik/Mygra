@@ -13,8 +13,8 @@ struct TodayCardView: View {
     let latestData: HealthData?
     let useMetricUnits: Bool
 
-    // Quick Log expand/collapse
-    @Binding var isQuickLogExpanded: Bool
+    // Quick Add expand/collapse
+    @Binding var isQuickAddExpanded: Bool
 
     // Intake editor bindings/state
     @Binding var addWater: Double
@@ -52,18 +52,18 @@ struct TodayCardView: View {
 
                 Button {
                     withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                        isQuickLogExpanded.toggle()
+                        isQuickAddExpanded.toggle()
                     }
                 } label: {
                     HStack(spacing: 6) {
-                        Text("Quick Log")
+                        Text("Quick Add")
                         Image(systemName: "chevron.down")
-                            .rotationEffect(.degrees(isQuickLogExpanded ? 180 : 0))
-                            .animation(.easeInOut(duration: 0.2), value: isQuickLogExpanded)
+                            .rotationEffect(.degrees(isQuickAddExpanded ? 180 : 0))
+                            .animation(.easeInOut(duration: 0.2), value: isQuickAddExpanded)
                     }
                 }
                 .buttonStyle(.bordered)
-                .accessibilityLabel(isQuickLogExpanded ? "Hide Quick Log" : "Show Quick Log")
+                .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
             }
 
             if let data = latestData {
@@ -116,7 +116,7 @@ struct TodayCardView: View {
                 .padding(.top, 4)
             }
 
-            if isQuickLogExpanded {
+            if isQuickAddExpanded {
                 Divider().padding(.vertical, 2)
 
                 IntakeEditorView(

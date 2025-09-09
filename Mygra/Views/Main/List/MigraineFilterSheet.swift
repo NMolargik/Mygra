@@ -14,6 +14,9 @@ struct MigraineFilterSheet: View {
     @State private var useDateRange: Bool
     @State private var startDate: Date
     @State private var endDate: Date
+
+    // Triggers UI state
+    @State private var triggerSearchText: String = ""
     
     // Callbacks
     var apply: (MigraineFilter) -> Void
@@ -81,16 +84,80 @@ struct MigraineFilterSheet: View {
                     .autocorrectionDisabled()
             }
             
-            // Placeholder for trigger filtering; wiring to real triggers can be added later
-            Section("Triggers") {
+            // Triggers multi-select
+            Section {
+                // Search + quick actions row
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        TextField("Search triggers", text: $triggerSearchText)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                        if !triggerSearchText.isEmpty {
+                            Button {
+                                lightTap()
+                                triggerSearchText = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Clear trigger search")
+                        }
+                    }
+                    .padding(.vertical, 2)
+                    
+                    HStack(spacing: 8) {
+                        Button {
+                            lightTap()
+                            workingFilter.requiredTriggers.removeAll()
+                        } label: {
+                            Label("Clear", systemImage: "circle.slash")
+                        }
+                        .buttonStyle(.bordered)
+                        .controlSize(.small)
+                    }
+                }
+                
+                // Grouped lists by category, filtered by search
+                ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
+                    let items = filteredTriggers(for: group, search: triggerSearchText)
+                    if !items.isEmpty {
+                        DisclosureGroup(groupTitle(group)) {
+                            ForEach(items, id: \.self) { trig in
+                                Button {
+                                    lightTap()
+                                    toggleRequired(trig)
+                                } label: {
+                                    HStack {
+                                        Text(trig.displayName)
+                                        Spacer()
+                                        if workingFilter.requiredTriggers.contains(trig) {
+                                            Image(systemName: "checkmark.circle.fill")
+                                                .foregroundStyle(.blue)
+                                        } else {
+                                            Image(systemName: "circle")
+                                                .foregroundStyle(.blue)
+                                        }
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    }
+                }
+            } header: {
+                HStack(spacing: 6) {
+                    Text("Triggers")
+                    if workingFilter.requiredTriggers.isEmpty {
+                        Text("Optional").font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            } footer: {
                 if workingFilter.requiredTriggers.isEmpty {
-                    Text("No required triggers").foregroundStyle(.secondary)
+                    Text("Select one or more triggers to require them in results.")
                 } else {
                     Text("\(workingFilter.requiredTriggers.count) selected")
                 }
-                Text("A trigger picker can be added here later.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Filter Migraines")
@@ -111,6 +178,35 @@ struct MigraineFilterSheet: View {
                 }
                 .foregroundStyle(.blue)
             }
+            ToolbarItem(placement: .bottomBar) {
+                Button {
+                    successTap()
+                    reset()
+                } label: {
+                    Label("Clear Filters", systemImage: "xmark.circle")
+                }
+            }
+        }
+    }
+
+    // MARK: - Triggers helpers
+    private func groupTitle(_ group: MigraineTrigger.Group) -> String {
+        group.rawValue.capitalized
+    }
+    
+    private func filteredTriggers(for group: MigraineTrigger.Group, search: String) -> [MigraineTrigger] {
+        let all = MigraineTrigger.cases(for: group)
+        let trimmed = search.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return all }
+        let lower = trimmed.lowercased()
+        return all.filter { $0.displayName.lowercased().contains(lower) }
+    }
+    
+    private func toggleRequired(_ trigger: MigraineTrigger) {
+        if workingFilter.requiredTriggers.contains(trigger) {
+            workingFilter.requiredTriggers.remove(trigger)
+        } else {
+            workingFilter.requiredTriggers.insert(trigger)
         }
     }
 
@@ -129,4 +225,3 @@ struct MigraineFilterSheet: View {
         #endif
     }
 }
-

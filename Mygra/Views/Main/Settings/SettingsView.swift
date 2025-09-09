@@ -131,7 +131,7 @@ struct SettingsView: View {
                 } else {
                     Text("Export Migraines as PDF")
                         .bold()
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.orange)
                 }
             }
             .disabled(isExporting)

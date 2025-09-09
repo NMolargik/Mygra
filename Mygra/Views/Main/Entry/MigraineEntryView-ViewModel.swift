@@ -82,9 +82,15 @@ extension MigraineEntryView {
         func addCustomTrigger() {
             let trimmed = customTriggerInput.trimmingCharacters(in: .whitespacesAndNewlines)
             guard !trimmed.isEmpty else { return }
-            if !customTriggers.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) {
-                customTriggers.append(trimmed)
+            // Prevent duplicates case-insensitively
+            let exists = customTriggers.contains { $0.caseInsensitiveCompare(trimmed) == .orderedSame }
+            guard !exists else {
+                customTriggerInput = ""
+                return
             }
+            // Store in title case for display
+            let display = trimmed.capitalized
+            customTriggers.append(display)
             customTriggerInput = ""
         }
 
@@ -122,4 +128,3 @@ extension MigraineEntryView {
         }
     }
 }
-

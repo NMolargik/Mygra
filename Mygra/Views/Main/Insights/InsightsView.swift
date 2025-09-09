@@ -53,8 +53,7 @@ struct InsightsView: View {
                         isAuthorized: healthManager.isAuthorized,
                         latestData: healthManager.latestData,
                         useMetricUnits: useMetricUnits,
-                        isQuickLogExpanded: $viewModel.isQuickLogExpanded,
-                        // Intake bindings
+                        isQuickAddExpanded: $viewModel.isQuickAddExpanded,
                         addWater: $viewModel.addWater,
                         addCaffeine: $viewModel.addCaffeine,
                         addCalories: $viewModel.addCalories,
@@ -108,8 +107,8 @@ struct InsightsView: View {
                     .environment(insightManager)
                     .ignoresSafeArea()
             }
-            // Haptics on expand/collapse of Quick Log
-            .onChange(of: viewModel.isQuickLogExpanded) { _, _ in
+            // Haptics on expand/collapse of Quick Add
+            .onChange(of: viewModel.isQuickAddExpanded) { _, _ in
                 lightTap()
             }
         }
