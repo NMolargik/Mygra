@@ -20,6 +20,9 @@ struct MigraineEntryView: View {
     @State private var viewModel: ViewModel = ViewModel()
     @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
 
+    // Capture the current UIWindowScene without touching UIApplication.shared
+    @State private var capturedScene: UIWindowScene? = nil
+
     var body: some View {
         @Bindable var vm = viewModel
 
@@ -474,6 +477,12 @@ struct MigraineEntryView: View {
                     .foregroundStyle(.blue)
                 }
             }
+            // SceneGrabber runs once view is in a window; captures the UIWindowScene.
+            .background(SceneGrabber { scene in
+                if capturedScene == nil {
+                    capturedScene = scene
+                }
+            })
         }
         .task {
             vm.resetGreeting()
@@ -783,7 +792,7 @@ struct MigraineEntryView: View {
         // Foods parsing
         let foods: [String] = viewModel.parseFoods()
 
-        // Create the migraine
+        // Create the migraine, passing the captured scene for the review prompt
         let newMigraine = migraineManager.create(
             startDate: viewModel.startDate,
             endDate: viewModel.isOngoing ? nil : viewModel.endDate,
@@ -796,7 +805,8 @@ struct MigraineEntryView: View {
             customTriggers: viewModel.customTriggers,
             foodsEaten: foods,
             weather: weatherModel,
-            health: healthModel
+            health: healthModel,
+            reviewScene: capturedScene
         )
 
         // Start Live Activity if ongoing
@@ -807,6 +817,28 @@ struct MigraineEntryView: View {
         successHaptic()
         // Done
         onMigraineSaved(newMigraine)
+    }
+}
+
+// MARK: - SceneGrabber: captures the UIWindowScene without using UIApplication.shared
+private struct SceneGrabber: UIViewRepresentable {
+    var onScene: (UIWindowScene) -> Void
+
+    func makeUIView(context: Context) -> UIView {
+        let v = SceneProbeView()
+        v.onScene = onScene
+        return v
+    }
+    func updateUIView(_ uiView: UIView, context: Context) { }
+
+    private final class SceneProbeView: UIView {
+        var onScene: ((UIWindowScene) -> Void)?
+        override func didMoveToWindow() {
+            super.didMoveToWindow()
+            if let scene = window?.windowScene {
+                onScene?(scene)
+            }
+        }
     }
 }
 
@@ -901,4 +933,48 @@ private struct FlowLayout<Item, Content: View>: View {
             }
         }
     }
+}
+
+#Preview {
+    let container: ModelContainer
+    do {
+        container = try ModelContainer(
+            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    } catch {
+        fatalError("Preview ModelContainer setup failed: \(error)")
+    }
+    let previewUserManager = UserManager(context: container.mainContext)
+    let previewHealthManager = HealthManager()
+    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
+    let previewWeatherManager = WeatherManager()
+    let previewNotificationManager = NotificationManager()
+    let previewLocationManager = LocationManager()
+    let previewInsightManager = InsightManager(userManager: previewUserManager, migraineManager: previewMigraineManager, weatherManager: previewWeatherManager, healthManager: previewHealthManager)
+
+    let now = Date()
+    let twoHoursAgo = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
+
+    _ = previewMigraineManager.create(
+        startDate: twoHoursAgo,
+        endDate: nil,
+        painLevel: 7,
+        stressLevel: 6,
+        pinned: true,
+        note: "Ongoing for preview",
+        insight: nil,
+        triggers: [],
+        foodsEaten: []
+    )
+
+    return MigraineEntryView(onMigraineSaved: { _ in })
+        .modelContainer(container)
+        .environment(previewUserManager)
+        .environment(previewMigraineManager)
+        .environment(previewWeatherManager)
+        .environment(previewHealthManager)
+        .environment(previewLocationManager)
+        .environment(previewNotificationManager)
+        .environment(previewInsightManager)
 }

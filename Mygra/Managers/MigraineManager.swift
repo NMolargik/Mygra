@@ -8,6 +8,8 @@
 import Foundation
 import SwiftData
 import Observation
+import StoreKit
+import UIKit
 
 @MainActor
 @Observable
@@ -80,7 +82,8 @@ final class MigraineManager {
         customTriggers: [String] = [],
         foodsEaten: [String] = [],
         weather: WeatherData? = nil,
-        health: HealthData? = nil
+        health: HealthData? = nil,
+        reviewScene: UIWindowScene? = nil
     ) -> Migraine {
         let model = Migraine(
             pinned: pinned,
@@ -116,6 +119,10 @@ final class MigraineManager {
         }
 
         saveAndReload()
+
+        // Review prompt on the 5th-ever migraine
+        Task { await maybeRequestReviewIfFifthEver(in: reviewScene) }
+
         return model
     }
 
@@ -209,5 +216,45 @@ final class MigraineManager {
         }
         Task { await refresh() }
     }
-}
 
+    // MARK: - Review prompt
+    private static let reviewPromptFifthKey = "MigraineManager.hasPromptedForFifthReview"
+
+    // Accept a scene from the caller to remain extension-safe.
+    private func maybeRequestReviewIfFifthEver(in scene: UIWindowScene?) async {
+        // Avoid prompting more than once for this milestone
+        let defaults = UserDefaults.standard
+        if defaults.bool(forKey: Self.reviewPromptFifthKey) {
+            return
+        }
+
+        // Count total migraines in the persistent store (unfiltered)
+        do {
+            let count = try context.fetchCount(FetchDescriptor<Migraine>())
+            guard count == 5 else { return }
+        } catch {
+            // If counting fails, do not attempt to prompt
+            print("Failed to fetch migraine count for review prompt: \(error)")
+            return
+        }
+
+        // Mark as prompted to ensure we don't prompt again
+        defaults.set(true, forKey: Self.reviewPromptFifthKey)
+
+        // Request review using the provided scene when available.
+        if let scene {
+            if #available(iOS 18.0, *) {
+                AppStore.requestReview(in: scene)
+            } else {
+                SKStoreReviewController.requestReview(in: scene)
+            }
+        } else {
+            // No scene available; fall back to the process-wide request on older systems.
+            if #available(iOS 18.0, *) {
+                // No scene-less API on iOS 18+; silently skip.
+            } else {
+                SKStoreReviewController.requestReview()
+            }
+        }
+    }
+}
