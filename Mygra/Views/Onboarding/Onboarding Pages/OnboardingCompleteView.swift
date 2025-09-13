@@ -29,7 +29,7 @@ struct OnboardingCompleteView: View {
                 Text("Track your migraines.")
                     .font(.title3)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 8)
 
             HStack(spacing: 16) {
@@ -41,7 +41,7 @@ struct OnboardingCompleteView: View {
                 Text("Get intelligent insights.")
                     .font(.title3)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 8)
 
             HStack(spacing: 16) {
@@ -53,7 +53,7 @@ struct OnboardingCompleteView: View {
                 Text("View trends and likely migraine causes.")
                     .font(.title3)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 8)
             
             HStack(spacing: 16) {
@@ -65,7 +65,7 @@ struct OnboardingCompleteView: View {
                 Text("All of your data syncs automatically wherever you're signed into iCloud!")
                     .font(.title3)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .center)
             .padding(.vertical, 8)
 
             Spacer()

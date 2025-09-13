@@ -31,7 +31,7 @@ struct OnboardingNotificationView: View {
             
             Spacer()
             
-            Button("Authorize") {
+            Button("Continue") {
                 Task {
                     await notificationManager.requestAuthorization()
                 }

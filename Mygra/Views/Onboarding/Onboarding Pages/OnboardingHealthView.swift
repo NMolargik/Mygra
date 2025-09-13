@@ -30,7 +30,7 @@ struct OnboardingHealthView: View {
             
             Spacer()
             
-            Button("Authorize") {
+            Button("Continue") {
                 Task {
                     await healthManager.requestAuthorization()
                 }

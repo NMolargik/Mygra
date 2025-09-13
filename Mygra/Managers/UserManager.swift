@@ -40,6 +40,7 @@ class UserManager {
             let fetched = try context.fetch(desc)
             // Enforce singleton invariant: pick the first if any exist.
             self.currentUser = fetched.first
+            
             // Optional safety: if more than one slipped in via sync/merge, keep the first and delete extras.
             if fetched.count > 1 {
                 for extra in fetched.dropFirst() {

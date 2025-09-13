@@ -60,7 +60,19 @@ struct MigraineDetailView: View {
                 }
 
                 if let wx = migraine.weather {
-                    infoCard(title: "Weather") {
+                    infoCard(title: "Weather", trailing: {
+                        HStack(spacing: 6) {
+                            Text(" Weather")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Text("•")
+                                .accessibilityHidden(true)
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                            Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+                                .font(.caption2)
+                        }
+                    }) {
                         VStack(alignment: .leading, spacing: 8) {
                             if let place = wx.locationDescription, !place.isEmpty {
                                 LabeledRow("Location", value: place)
@@ -338,10 +350,14 @@ struct MigraineDetailView: View {
         )
     }
 
-    private func infoCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func infoCard<Content: View, Trailing: View>(title: String, @ViewBuilder trailing: () -> Trailing = { EmptyView() }, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.headline)
+            HStack(alignment: .firstTextBaseline) {
+                Text(title)
+                    .font(.headline)
+                Spacer()
+                trailing()
+            }
             content()
         }
         .padding(16)
@@ -506,3 +522,4 @@ private extension View {
 #Preview {
     MigraineDetailView(migraine: Migraine(startDate: Date.now, painLevel: 5, stressLevel: 6))
 }
+

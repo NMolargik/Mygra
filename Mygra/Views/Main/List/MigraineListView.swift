@@ -79,11 +79,13 @@ struct MigraineListView: View {
                         }
                     }
                 } else {
-                    ContentUnavailableView(
-                        "No Migraines Yet",
-                        systemImage: "list.bullet.rectangle",
-                        description: Text("Your logged migraines will appear here.")
-                    )
+                    ScrollView {
+                        ContentUnavailableView(
+                            "No Migraines Yet",
+                            systemImage: "list.bullet.rectangle",
+                            description: Text("Your logged migraines will appear here.")
+                        )
+                    }
                 }
             } else {
                 // Compute filter state for non-empty case

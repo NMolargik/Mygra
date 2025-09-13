@@ -93,8 +93,18 @@ struct MainView: View {
                     }
                 }
                 .sheet(isPresented: $showingSettingsSheet) {
-                    SettingsView()
-                        .presentationDetents([.large, .medium])
+                    NavigationStack {
+                        SettingsView()
+                            .presentationDetents([.large])
+                            .navigationTitle("Settings")
+                            .toolbar {
+                                ToolbarItem(placement: .topBarTrailing) {
+                                    Button("Close") {
+                                        showingSettingsSheet = false
+                                    }
+                                }
+                            }
+                    }
                 }
                 .tabViewBottomAccessory { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
@@ -209,10 +219,6 @@ struct MainView: View {
                     })
                     .interactiveDismissDisabled(true)
                     .presentationDetents([.large])
-                }
-                .sheet(isPresented: $showingSettingsSheet) {
-                    SettingsView()
-                        .presentationDetents([.large, .medium])
                 }
                 .onChange(of: listPath) { _, newValue in
                     if newValue.count == 0 {

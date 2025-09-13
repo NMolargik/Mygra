@@ -33,7 +33,7 @@ struct ContentView: View {
                         viewModel.appStage = .onboarding
                     }
                 }, refreshUser: {
-                    Task { await refreshUser() }
+                    await refreshUser()
                 })
                 .id("splash")
                 .transition(viewModel.leadingTransition)

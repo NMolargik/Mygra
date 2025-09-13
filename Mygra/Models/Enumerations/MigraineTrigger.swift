@@ -108,7 +108,22 @@ public extension MigraineTrigger {
 // MARK: - Presentation helpers
 
 public extension MigraineTrigger {
-    enum Group: String, CaseIterable { case lifestyle, hormonal, dietary, sensory, weather, physicalMedication, other }
+    enum Group: String, CaseIterable {
+        case lifestyle, hormonal, dietary, sensory, weather, physicalMedication, other
+
+        /// Human-friendly category name for use in UI section headers
+        var displayName: String {
+            switch self {
+            case .lifestyle: return "Lifestyle / Routine"
+            case .hormonal: return "Hormonal"
+            case .dietary: return "Dietary"
+            case .sensory: return "Sensory / Environmental"
+            case .weather: return "Weather / Atmosphere"
+            case .physicalMedication: return "Physical & Medications"
+            case .other: return "Other"
+            }
+        }
+    }
 
     var group: Group {
         switch self {
@@ -128,6 +143,8 @@ public extension MigraineTrigger {
             return .other
         }
     }
+    
+    
 
     /// Human-friendly label for UI.
     var displayName: String {

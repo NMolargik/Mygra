@@ -14,17 +14,22 @@ struct OnboardingUserView: View {
     
     var body: some View {
         ZStack {
-            Form {
-                UserEditView(
-                    user: $viewModel.newUser,
-                    userFormComplete: $viewModel.userFormComplete,
-                    dismiss: {
-                        showingEdit = false
-                    }
-                )
-                .transition(.move(edge: .bottom))
+            Group {
+                Form {
+                    UserEditView(
+                        user: $viewModel.newUser,
+                        userFormComplete: $viewModel.userFormComplete,
+                        dismiss: {
+                            showingEdit = false
+                        }
+                    )
+                    .transition(.move(edge: .bottom))
+                }
+                .navigationTitle("User")
+                .opacity(showingEdit ? 1 : 0)
+                .allowsHitTesting(showingEdit)
+                .accessibilityHidden(!showingEdit)
             }
-            .navigationTitle("User")
             
             if !showingEdit {
                 VStack {
@@ -56,6 +61,7 @@ struct OnboardingUserView: View {
                     .padding()
                 }
                 .background(Color(.systemBackground))
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .zIndex(1)
                 .offset(y: dragOffset)
                 .gesture(

@@ -21,7 +21,7 @@ extension OnboardingView {
             case .health:
                 return healthManager.isAuthorized
             case .location:
-                return weatherManager.locationManager?.isAuthorized ?? false
+                return true
             case .notifications:
                 return true
             case .user:

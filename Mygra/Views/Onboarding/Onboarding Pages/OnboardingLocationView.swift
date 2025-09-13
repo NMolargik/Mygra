@@ -33,7 +33,7 @@ struct OnboardingLocationView: View {
             
             Spacer()
             
-            Button("Authorize") {
+            Button("Continue") {
                 locationManager.requestAuthorization()
                 onLocationAuthorized(locationManager)
             }

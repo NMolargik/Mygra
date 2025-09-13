@@ -171,7 +171,7 @@ struct MigraineEntryView: View {
                                     .tint(.blue)
                                     Spacer()
                                 }
-                                .padding()
+                                .padding([.top, .horizontal])
                             }
                             
                             if vm.isEditingHealthValues {
@@ -206,26 +206,47 @@ struct MigraineEntryView: View {
                     }
 
                     // Weather capsule
-                    HStack(spacing: 10) {
-                        if vm.isPullingWeather {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else if vm.weatherError != nil {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.red)
-                        } else if vm.didPullWeather {
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundStyle(.green)
+                    VStack {
+                        HStack(spacing: 10) {
+                            if vm.isPullingWeather {
+                                ProgressView()
+                                    .controlSize(.small)
+                            } else if vm.weatherError != nil {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.red)
+                            } else if vm.didPullWeather {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                            }
+                            
+                            VStack {
+                                Text(vm.isPullingWeather
+                                     ? "Pulling local weather"
+                                     : (vm.weatherError == nil ? "Pulled local weather" : "Failed to pull weather"))
+                                .foregroundStyle(vm.weatherError == nil ? .primary : .secondary)
+                                .font(.subheadline)
+                                .bold(vm.weatherError != nil)
+                                
+                                Spacer(minLength: 0)
+                            }
+                            
+                            Spacer()
                         }
-
-                        Text(vm.isPullingWeather
-                             ? "Pulling local weather"
-                             : (vm.weatherError == nil ? "Pulled local weather" : "Failed to pull weather"))
-                        .foregroundStyle(vm.weatherError == nil ? .primary : .secondary)
-                        .font(.subheadline)
-                        .bold(vm.weatherError != nil)
-
-                        Spacer(minLength: 0)
+                        
+                        HStack(spacing: 6) {
+                            Text(" Weather")
+                            Text("•")
+                                .accessibilityHidden(true)
+                            Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+                            
+                            Spacer()
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .padding(.top, 2)
+                        .padding(.leading, 5)
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
@@ -236,6 +257,8 @@ struct MigraineEntryView: View {
 
                     if vm.didPullWeather, vm.weatherError == nil {
                         // Single row with two columns, both leading aligned
+                        
+                        
                         HStack(alignment: .top) {
                             VStack(alignment: .leading, spacing: 8) {
                                 if let loc = weatherManager.locationString, !loc.isEmpty {
@@ -345,7 +368,7 @@ struct MigraineEntryView: View {
                     ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
                         let items = filteredTriggers(for: group, search: $vm.triggerSearchText.wrappedValue)
                         if !items.isEmpty {
-                            DisclosureGroup(group.rawValue.capitalized) {
+                            DisclosureGroup(group.displayName) {
                                 ForEach(items, id: \.self) { trig in
                                     Button {
                                         lightImpact()
@@ -978,3 +1001,4 @@ private struct FlowLayout<Item, Content: View>: View {
         .environment(previewNotificationManager)
         .environment(previewInsightManager)
 }
+

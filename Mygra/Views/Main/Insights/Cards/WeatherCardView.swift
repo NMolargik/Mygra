@@ -61,6 +61,19 @@ struct WeatherCardView: View {
                                     .truncationMode(.tail)
                             }
                         }
+                        
+                        // Attribution footer
+                        HStack(spacing: 6) {
+                            Text(" Weather")
+                            Text("•")
+                                .accessibilityHidden(true)
+                            Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .padding(.top, 2)
                     }
 
                     Spacer()

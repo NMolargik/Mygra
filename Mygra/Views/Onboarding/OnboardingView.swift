@@ -9,7 +9,7 @@ import SwiftUI
 import SwiftData
 
 struct OnboardingView: View {
-    var viewModel: OnboardingView.ViewModel = OnboardingView.ViewModel()
+    @State private var viewModel: OnboardingView.ViewModel = OnboardingView.ViewModel()
     var proceedForward: () -> Void
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
     @Environment(HealthManager.self) private var healthManager: HealthManager
@@ -103,6 +103,7 @@ struct OnboardingView: View {
     }
     
     // MARK: - Haptics
+    
     private func lightTap() {
         #if os(iOS)
         let gen = UIImpactFeedbackGenerator(style: .light)
