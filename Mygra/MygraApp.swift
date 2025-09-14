@@ -28,12 +28,10 @@ struct MygraApp: App {
     init() {
         // MARK: - Diagnostics: identify the intended CloudKit container
         let cloudKitContainerID = "iCloud.com.molargiksoftware.Mygra"
-        let cloudDBMode: ModelConfiguration.CloudKitDatabase = .automatic
 
         do {
             let config = ModelConfiguration(
-                cloudKitContainerID,
-                cloudKitDatabase: cloudDBMode
+                cloudKitDatabase: .private(cloudKitContainerID)
             )
 
             container = try ModelContainer(

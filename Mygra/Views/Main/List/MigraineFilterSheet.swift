@@ -178,14 +178,6 @@ struct MigraineFilterSheet: View {
                 }
                 .foregroundStyle(.blue)
             }
-            ToolbarItem(placement: .bottomBar) {
-                Button {
-                    successTap()
-                    reset()
-                } label: {
-                    Label("Clear Filters", systemImage: "xmark.circle")
-                }
-            }
         }
     }
 
