@@ -200,7 +200,8 @@ struct MigraineEntryView: View {
                                         withAnimation { vm.isEditingHealthValues = false }
                                     }
                                 )
-                                .transition(.opacity.combined(with: .move(edge: .top)))
+                                .transition(.asymmetric(
+                                    insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
                             }
                         }
                     }
