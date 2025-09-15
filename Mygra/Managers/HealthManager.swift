@@ -52,7 +52,7 @@ final class HealthManager {
     private let unitPercent = HKUnit.percent()                    // SpO2 in percent (0–100)
 
     // MARK: - Authorization
-
+    
     func requestAuthorization() async {
         guard HKHealthStore.isHealthDataAvailable() else {
             let err = HKError(.errorHealthDataUnavailable)

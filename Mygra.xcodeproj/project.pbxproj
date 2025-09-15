@@ -76,7 +76,6 @@
 				Managers/MigraineManager.swift,
 				Models/DedupeKey.swift,
 				Models/Enumerations/BiologicalSex.swift,
-				Models/Enumerations/FeatureFlag.swift,
 				Models/Enumerations/InsightCategory.swift,
 				Models/Enumerations/InsightPriority.swift,
 				Models/Enumerations/MenstrualPhase.swift,

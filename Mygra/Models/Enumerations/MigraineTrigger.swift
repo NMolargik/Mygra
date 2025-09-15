@@ -57,13 +57,7 @@ public enum MigraineTrigger: String, Codable, CaseIterable, Hashable {
 
     // MARK: - Catch-all
     case other
-}
-
-// MARK: - Category-specific accessors (for grid building)
-
-public extension MigraineTrigger {
-    /// All triggers grouped by the high-level category.
-    /// Use this when building sectioned grids.
+    
     static var grouped: [(group: Group, items: [MigraineTrigger])] {
         [
             (.lifestyle, lifestyle),
@@ -103,11 +97,7 @@ public extension MigraineTrigger {
     static var weather: [MigraineTrigger] { [.barometricPressureChange, .highHumidity, .heatExtreme, .coldExtreme, .stormsWind] }
     static var physicalMedication: [MigraineTrigger] { [.intenseExercise, .certainMedications, .medicationOveruse] }
     static var otherCategory: [MigraineTrigger] { [.other] }
-}
-
-// MARK: - Presentation helpers
-
-public extension MigraineTrigger {
+    
     enum Group: String, CaseIterable {
         case lifestyle, hormonal, dietary, sensory, weather, physicalMedication, other
 
@@ -187,30 +177,5 @@ public extension MigraineTrigger {
 
         case .other: return "Other"
         }
-    }
-}
-
-// MARK: - Suggested ordering for grids
-
-public extension Array where Element == MigraineTrigger {
-    /// Default grouping order for a grid UI.
-    static var defaultGridOrder: [MigraineTrigger] {
-        return [
-            // Lifestyle
-            .stress, .lackOfSleep, .oversleeping, .skippedMeals, .dehydration,
-            .jetLag, .shiftWork, .screenTimeFlicker, .postureNeckTension, .bruxismTeethGrinding,
-            // Hormonal
-            .hormonalFluctuation,
-            // Dietary
-            .alcoholRedWine, .caffeineExcess, .caffeineWithdrawal, .chocolate, .agedCheese, .processedMeatsNitrates, .msg, .aspartame,
-            // Sensory
-            .brightLightGlare, .loudNoise, .strongOdors,
-            // Weather
-            .barometricPressureChange, .highHumidity, .heatExtreme, .coldExtreme, .stormsWind,
-            // Physical & Meds
-            .intenseExercise, .certainMedications, .medicationOveruse,
-            // Other
-            .other
-        ]
     }
 }

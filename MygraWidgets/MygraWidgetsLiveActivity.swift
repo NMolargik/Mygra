@@ -158,12 +158,12 @@ private func severityColor(severity: Int) -> Color {
     }
 }
 
-// MARK: - Previews
 extension MigraineActivityAttributes.ContentState {
     static var sample: MigraineActivityAttributes.ContentState {
         .init(migraineID: UUID(), startDate: Date().addingTimeInterval(-3600), severity: 7, notes: "Triggered by stress")
     }
 }
+
 
 #Preview("Lock Screen", as: .content, using: MigraineActivityAttributes()) {
     MygraWidgetsLiveActivity()

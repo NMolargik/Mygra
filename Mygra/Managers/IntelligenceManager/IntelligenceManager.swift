@@ -220,35 +220,3 @@ final class IntelligenceManager {
         return "count=\(total); recentAvgPain=\(String(format: "%.1f", avgPain)); commonTriggers=\(triggersFlat.joined(separator: ", "))"
     }
 }
-
-// MARK: - ChatMessage
-
-enum ChatRole: String {
-    case system, user, assistant
-}
-
-struct ChatMessage: Hashable {
-    let role: ChatRole
-    let content: String
-
-    static func system(_ text: String) -> ChatMessage { .init(role: .system, content: text) }
-    static func user(_ text: String) -> ChatMessage { .init(role: .user, content: text) }
-    static func assistant(_ text: String) -> ChatMessage { .init(role: .assistant, content: text) }
-}
-
-// MARK: - Small helper for stable, case-insensitive deduping while preserving order
-fileprivate struct LinkedHashSet<Element, Key: Hashable> {
-    private var orderedStorage: [Element] = []
-    private var seenKeys: Set<Key> = []
-
-    init<S: Sequence>(elements: S, key: (Element) -> Key) where S.Element == Element {
-        for e in elements {
-            let k = key(e)
-            if seenKeys.insert(k).inserted {
-                orderedStorage.append(e)
-            }
-        }
-    }
-
-    var ordered: [Element] { orderedStorage }
-}

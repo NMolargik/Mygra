@@ -416,57 +416,6 @@ struct MigraineDetailView: View {
     }
 }
 
-// MARK: - EndMigraineSheet
-private struct EndMigraineSheet: View {
-    let startDate: Date
-    let initialEndDate: Date
-    let onConfirm: (Date) -> Void
-    let onCancel: () -> Void
-
-    @Environment(\.dismiss) private var dismiss
-    @State private var endDate: Date
-
-    init(startDate: Date, initialEndDate: Date, onConfirm: @escaping (Date) -> Void, onCancel: @escaping () -> Void) {
-        self.startDate = startDate
-        self.initialEndDate = initialEndDate
-        self.onConfirm = onConfirm
-        self.onCancel = onCancel
-        _endDate = State(initialValue: initialEndDate)
-    }
-
-    var body: some View {
-        NavigationStack {
-            Form {
-                Section {
-                    DatePicker(
-                        "End Date",
-                        selection: $endDate,
-                        in: startDate...Date().addingTimeInterval(365*24*3600),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                } footer: {
-                    Text("Choose when this migraine ended. The end time must be after the start time.")
-                }
-            }
-            .navigationTitle("End Migraine")
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        onCancel()
-                        dismiss()
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        onConfirm(endDate)
-                    }
-                    .bold()
-                }
-            }
-        }
-    }
-}
-
 // MARK: - Small helper row
 private struct LabeledRow<Value: View>: View {
     let title: String
@@ -492,32 +441,7 @@ private struct LabeledRow<Value: View>: View {
     }
 }
 
-// MARK: - Lightweight shimmer for placeholder
-private struct ShimmerModifier: ViewModifier {
-    @State private var phase: CGFloat = -1
-    func body(content: Content) -> some View {
-        content
-            .overlay(
-                LinearGradient(gradient: Gradient(colors: [Color.clear, Color.white.opacity(0.35), Color.clear]),
-                               startPoint: .topLeading,
-                               endPoint: .bottomTrailing)
-                    .blendMode(.plusLighter)
-                    .mask(content)
-                    .offset(x: phase * 180)
-            )
-            .onAppear {
-                withAnimation(.linear(duration: 1.2).repeatForever(autoreverses: false)) {
-                    phase = 1.2
-                }
-            }
-    }
-}
 
-private extension View {
-    func shimmer() -> some View {
-        self.modifier(ShimmerModifier())
-    }
-}
 
 #Preview {
     MigraineDetailView(migraine: Migraine(startDate: Date.now, painLevel: 5, stressLevel: 6))
