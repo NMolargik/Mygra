@@ -55,10 +55,12 @@ final class IntelligenceManager {
         if #available(iOS 18.0, macOS 15.0, *) {
             // Build instructions to shape the assistant's tone and task
             let instructions = """
-            You are an empathetic migraine assistant.
-            Analyze the provided migraine entry and briefly explain likely contributing factors
-            and one practical tip for prevention or relief. Be concise (2–4 sentences) and avoid
-            medical diagnoses.
+            You are a data analyst for health logs.
+            Provide a concise explanation of likely contributing factors for this single migraine event based ONLY on the provided fields.
+            Then offer up to two non-clinical, everyday mitigation ideas tied to those factors (e.g., hydration, sleep regularity, screen breaks, balanced meals, stress-reduction techniques, indoor air/lighting adjustments).
+            Do NOT provide medical diagnoses, prescriptions, or treatment plans. Use conditional, non-prescriptive language (e.g., "you could try", "might help").
+            Keep it to 2–4 sentences, neutral and practical.
+            End with: "This is general, non-medical guidance and not a diagnosis."
             """
 
             // Create a fresh on-device session and ask for a response
@@ -79,17 +81,20 @@ final class IntelligenceManager {
 
         // System prompt to set behavior
         conversation.append(.system("""
-        You are an empathetic, evidence-informed migraine counselor. Be concise, practical, and supportive.
-        Use information provided about the user and their migraine history to personalize guidance.
-        Avoid making medical diagnoses. Encourage consulting a clinician for persistent or severe issues.
+        You are a data analyst focused on migraine log trends. Provide descriptive, evidence-informed pattern analysis.
+        Stay strictly non-medical: do NOT give advice, diagnoses, or treatment suggestions.
+        Encourage the user to consult a clinician for persistent or severe issues.
         """))
-
-        // Context messages: compact summaries
-        conversation.append(.assistant("I’ve loaded your migraine history and profile. How can I help today?"))
 
         // You can optionally compress the history more:
         let userSummary = summarize(user: user)
         let historySummary = summarize(migraines: migraines, limit: 50)
+
+        // Provide a compact, structured dataset (most recent first)
+        let (entriesTable, entriesJSON) = buildHistoryDataset(migraines: migraines, user: user, limit: 60)
+        conversation.append(.system("Entries (most recent first):\n\(entriesTable)"))
+        conversation.append(.system("EntriesJSON:\n\(entriesJSON)"))
+
         if !userSummary.isEmpty {
             conversation.append(.system("User profile: \(userSummary)"))
         }
@@ -97,22 +102,24 @@ final class IntelligenceManager {
             conversation.append(.system("Migraine history summary: \(historySummary)"))
         }
 
-        if #available(iOS 18.0, macOS 15.0, *) {
-            var instructions = """
-            You are a knowledgeable, friendly migraine counselor AI. Be empathetic, practical, and concise.
-            Use the user's profile and migraine history to personalize guidance. Avoid medical diagnoses;
-            encourage consulting a clinician for persistent or severe issues.
-            """
-            if !userSummary.isEmpty {
-                instructions += "\nUser profile: \(userSummary)"
-            }
-            if !historySummary.isEmpty {
-                instructions += "\nMigraine history summary: \(historySummary)"
-            }
-            // Initialize/replace the session to begin a new multi-turn chat context
-            chatSession = LanguageModelSession(instructions: instructions)
-        }
+        conversation.append(.assistant("I’ve loaded your migraine history and profile, including your last \(min(migraines.count, 60)) entries. I can analyze patterns and trends in your logs. What would you like to explore?"))
 
+        var instructions = """
+        You are a data analyst for migraine logs. Be neutral, concise, and purely descriptive.
+        Use the user's profile and migraine history only to identify trends, correlations, and patterns.
+        You are provided with two views of the data: a Markdown table (Entries) and a JSON array (EntriesJSON).
+        When the user asks whether a pattern appears "in my entries," reference specific rows by date or fields from Entries/EntriesJSON.
+        Prefer concrete, data-backed statements over generalities. If the data is insufficient, say what additional fields would help.
+        Do NOT provide concrete medical advice, diagnoses, or treatment suggestions, though you can state the obvious.
+        """
+        if !userSummary.isEmpty {
+            instructions += "\nUser profile: \(userSummary)"
+        }
+        if !historySummary.isEmpty {
+            instructions += "\nMigraine history summary: \(historySummary)"
+        }
+        // Initialize/replace the session to begin a new multi-turn chat context
+        chatSession = LanguageModelSession(instructions: instructions)
         isChatActive = true
     }
 
@@ -120,14 +127,14 @@ final class IntelligenceManager {
     func send(message: String) async throws -> String {
         guard supportsAppleIntelligence else { return "Apple Intelligence is not available on this device." }
         guard isChatActive else {
-            return "Chat session is not active. Please start a new counselor chat."
+            return "Chat session is not active. Please start a new analysis chat."
         }
 
         conversation.append(.user(message))
 
         if #available(iOS 18.0, macOS 15.0, *) {
             guard let session = chatSession else {
-                let reply = "Chat session is not active. Please start a new counselor chat."
+                let reply = "Chat session is not active. Please start a new analysis chat."
                 conversation.append(.assistant(reply))
                 return reply
             }
@@ -151,8 +158,8 @@ final class IntelligenceManager {
 
     private func buildSingleMigrainePrompt(migraine: Migraine, user: User?) -> String {
         var lines: [String] = []
-        lines.append("Task: Provide a concise, empathetic explanation of likely contributing factors for this migraine.")
-        lines.append("Avoid medical diagnoses. Use simple language. 2–4 sentences.")
+        lines.append("Task: Provide a concise analysis of likely contributing factors for this single migraine event. Then include up to two non-clinical mitigation ideas tied to those factors. Do NOT provide medical diagnoses, prescriptions, or treatment plans.")
+        lines.append("Avoid medical advice/diagnoses. Use conditional, non-prescriptive language. 2–4 sentences max.")
         if let name = (user?.name.isEmpty == false ? user?.name : nil) {
             lines.append("User: \(name)")
         }
@@ -192,8 +199,55 @@ final class IntelligenceManager {
         if let note = migraine.note, !note.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             lines.append("Note: \(note)")
         }
-        lines.append("Output: A short explanation of likely contributing factors and one practical tip.")
+        lines.append("Output: A short summary of likely contributing factors plus up to two non-clinical mitigation ideas linked to those factors. End with: This is general, non-medical guidance and not a diagnosis.")
         return lines.joined(separator: "\n")
+    }
+
+    /// Builds a compact Markdown table and a JSON array string for recent migraines.
+    /// Keeps fields minimal to reduce token use but sufficient for trend questions.
+    private func buildHistoryDataset(migraines: [Migraine], user: User?, limit: Int) -> (table: String, json: String) {
+        let slice = migraines.sorted(by: { $0.startDate > $1.startDate }).prefix(limit)
+        // Markdown table header
+        var tableLines: [String] = [
+            "| date | pain | stress | triggers | duration_h | sleep_h | caffeine_mg | pressure_hPa | humidity_% | temp_C |",
+            "|------|------|--------|----------|------------|---------|-------------|--------------|------------|--------|"
+        ]
+        // JSON array
+        var jsonItems: [String] = []
+        let df = ISO8601DateFormatter()
+        df.formatOptions = [.withInternetDateTime, .withDashSeparatorInDate, .withColonSeparatorInTime]
+        for m in slice {
+            let dateStr = df.string(from: m.startDate)
+            let pain = m.painLevel
+            let stress = m.stressLevel
+            let trig = (m.triggers.map(\.displayName) + m.customTriggers.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }.filter { !$0.isEmpty })
+                .joined(separator: "; ")
+            let durH: Double = {
+                if let end = m.endDate { return max(0, end.timeIntervalSince(m.startDate)) / 3600.0 }
+                return 0
+            }()
+            var sleepH: String = ""
+            var cafMg: String = ""
+            if let h = m.health {
+                if let s = h.sleepHours { sleepH = String(format: "%.1f", s) }
+                if let c = h.caffeineMg { cafMg = String(format: "%.0f", c) }
+            }
+            var pStr = "", humStr = "", tStr = ""
+            if let w = m.weather {
+                pStr = String(format: "%.0f", w.barometricPressureHpa)
+                humStr = String(format: "%.0f", w.humidityPercent)
+                tStr = String(format: "%.0f", w.temperatureCelsius)
+            }
+            tableLines.append("|\(dateStr)|\(pain)|\(stress)|\(trig)|\(String(format: "%.1f", durH))|\(sleepH)|\(cafMg)|\(pStr)|\(humStr)|\(tStr)|")
+            // JSON item (manually build to avoid additional encoders)
+            let jsonItem = """
+            {"date":"\(dateStr)","pain":\(pain),"stress":\(stress),"triggers":"\(trig)","duration_h":\(String(format: "%.1f", durH)),"sleep_h":\(sleepH.isEmpty ? "null" : sleepH),"caffeine_mg":\(cafMg.isEmpty ? "null" : cafMg),"pressure_hPa":\(pStr.isEmpty ? "null" : pStr),"humidity_pct":\(humStr.isEmpty ? "null" : humStr),"temp_C":\(tStr.isEmpty ? "null" : tStr)}
+            """
+            jsonItems.append(jsonItem)
+        }
+        let table = tableLines.joined(separator: "\n")
+        let json = "[\n" + jsonItems.joined(separator: ",\n") + "\n]"
+        return (table, json)
     }
 
     private func summarize(user: User?) -> String {

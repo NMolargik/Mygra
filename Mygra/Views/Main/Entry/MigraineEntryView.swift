@@ -14,30 +14,28 @@ struct MigraineEntryView: View {
     @Environment(HealthManager.self) private var healthManager
     @Environment(WeatherManager.self) private var weatherManager
     @Environment(\.dismiss) private var dismiss
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
 
     var onMigraineSaved: (Migraine, UIWindowScene?) -> Void
     
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @State private var viewModel: ViewModel = ViewModel()
+    @Bindable private var viewModel: ViewModel = ViewModel()
 
     var body: some View {
-        @Bindable var vm = viewModel
-
         NavigationStack {
             Form {
-                Text(vm.greeting.isEmpty ? "We’ve got you." : vm.greeting)
+                Text(viewModel.greeting.isEmpty ? "We’ve got you." : viewModel.greeting)
                     .font(.title2).bold()
 
                 Section("Data Retreival") {
                     // Health capsule
                     HStack(spacing: 10) {
-                        if vm.isPullingHealth {
+                        if viewModel.isPullingHealth {
                             ProgressView()
                                 .controlSize(.small)
-                        } else if vm.healthError != nil {
+                        } else if viewModel.healthError != nil {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.red)
-                        } else if vm.didPullHealth {
+                        } else if viewModel.didPullHealth {
                             // Determine if we should warn (any of sleep/caffeine/water/calories explicitly 0)
                             let zeroHealthFlag: Bool = {
                                 guard let h = healthManager.latestData else { return false }
@@ -49,19 +47,19 @@ struct MigraineEntryView: View {
                             }()
                             if zeroHealthFlag {
                                 Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundStyle(.yellow)
+                                    .foregroundStyle(.yellow.gradient)
                             } else {
                                 Image(systemName: "checkmark.circle.fill")
-                                    .foregroundStyle(.green)
+                                    .foregroundStyle(.green.gradient)
                             }
                         }
 
-                        Text(vm.isPullingHealth
+                        Text(viewModel.isPullingHealth
                              ? "Pulling from Apple Health"
-                             : (vm.healthError == nil ? "Pulled from Apple Health" : "Failed to pull from Apple Health"))
-                        .foregroundStyle(vm.healthError == nil ? .primary : .secondary)
+                             : (viewModel.healthError == nil ? "Pulled from Apple Health" : "Failed to pull from Apple Health"))
+                        .foregroundStyle(viewModel.healthError == nil ? .primary : .secondary)
                         .font(.subheadline)
-                        .bold(vm.healthError != nil)
+                        .bold(viewModel.healthError != nil)
 
                         Spacer(minLength: 0)
                     }
@@ -72,13 +70,13 @@ struct MigraineEntryView: View {
                             .fill(.thinMaterial)
                     )
 
-                    if let h = healthManager.latestData, vm.healthError == nil {
+                    if let h = healthManager.latestData, viewModel.healthError == nil {
                         VStack {
                             HStack(alignment: .top) {
                                 VStack(alignment: .leading, spacing: 8) {
                                     if let w = h.waterLiters {
                                         Label {
-                                            Text(vm.displayWater(w, useMetricUnits: useMetricUnits))
+                                            Text(viewModel.displayWater(w, useMetricUnits: useMetricUnits))
                                         } icon: {
                                             Image(systemName: "drop.fill")
                                                 .foregroundStyle(w == 0 ? .red : .secondary)
@@ -98,10 +96,10 @@ struct MigraineEntryView: View {
                                     
                                     if let phase = h.menstrualPhase {
                                         Label {
-                                            Text(vm.displayMenstrualPhase(phase))
+                                            Text(viewModel.displayMenstrualPhase(phase))
                                         } icon: {
-                                            Image(systemName: vm.menstrualPhaseIcon(phase))
-                                                .foregroundStyle(vm.menstrualPhaseColor(phase))
+                                            Image(systemName: viewModel.menstrualPhaseIcon(phase))
+                                                .foregroundStyle(viewModel.menstrualPhaseColor(phase).gradient)
                                         }
                                     }
                                     
@@ -125,7 +123,12 @@ struct MigraineEntryView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     if let kcal = h.energyKilocalories {
                                         Label {
-                                            Text("\(Int(kcal)) cal")
+                                            if useMetricUnits {
+                                                let kJ = (kcal * 4.184).rounded()
+                                                Text("\(Int(kJ)) kJ")
+                                            } else {
+                                                Text("\(Int(kcal)) kcal")
+                                            }
                                         } icon: {
                                             Image(systemName: "fork.knife")
                                                 .foregroundStyle(kcal == 0 ? .red : .secondary)
@@ -145,7 +148,7 @@ struct MigraineEntryView: View {
                                     
                                     if let glucose = h.glucoseMgPerdL {
                                         Label {
-                                            Text(vm.displayGlucose(mgPerdL: glucose, useMetricUnits: useMetricUnits))
+                                            Text(viewModel.displayGlucose(mgPerdL: glucose, useMetricUnits: useMetricUnits))
                                         } icon: {
                                             Image(systemName: "syringe")
                                                 .foregroundStyle(.secondary)
@@ -158,10 +161,10 @@ struct MigraineEntryView: View {
                             .foregroundStyle(.secondary)
                             
                             // Edit button + expandable editor (centered)
-                            if (!vm.isEditingHealthValues) {
+                            if (!viewModel.isEditingHealthValues) {
                                 HStack {
                                     Spacer()
-                                    Button(vm.isEditingHealthValues ? "Cancel Editing" : "Edit Intake Values") {
+                                    Button(viewModel.isEditingHealthValues ? "Cancel Editing" : "Edit Intake Values") {
                                         Haptics.lightImpact()
                                         toggleHealthEditor()
                                     }
@@ -171,30 +174,26 @@ struct MigraineEntryView: View {
                                 .padding([.top, .horizontal])
                             }
                             
-                            if vm.isEditingHealthValues {
+                            if viewModel.isEditingHealthValues {
                                 IntakeEditorView(
-                                    // Bindings for values
-                                    addWater: $vm.addWater,
-                                    addCaffeine: $vm.addCaffeine,
-                                    addCalories: $vm.addCalories,
-                                    addSleepHours: $vm.addSleepHours,
-                                    // Display/config
+                                    addWater: $viewModel.addWater,
+                                    addCaffeine: $viewModel.addCaffeine,
+                                    addFood: $viewModel.addFood,
+                                    addSleepHours: $viewModel.addSleepHours,
                                     useMetricUnits: useMetricUnits,
-                                    waterRange: vm.waterRange(useMetricUnits: useMetricUnits),
-                                    waterStep: vm.waterStep(useMetricUnits: useMetricUnits),
-                                    waterDisplay: { vm.waterDisplay($0, useMetricUnits: useMetricUnits) },
-                                    // Status/flags
-                                    isSaving: vm.isSavingHealthEdits,
-                                    errorMessage: vm.healthEditErrorMessage,
-                                    allAddsAreZero: vm.allAddsAreZero,
-                                    // Actions
+                                    waterRange: viewModel.waterRange(useMetricUnits: useMetricUnits),
+                                    waterStep: viewModel.waterStep(useMetricUnits: useMetricUnits),
+                                    waterDisplay: { viewModel.waterDisplay($0, useMetricUnits: useMetricUnits) },
+                                    isSaving: viewModel.isSavingHealthEdits,
+                                    errorMessage: viewModel.healthEditErrorMessage,
+                                    allAddsAreZero: viewModel.allAddsAreZero,
                                     onAdd: {
                                         // The actual save and success haptic will be in saveHealthEdits()
                                         Task { await saveHealthEdits() }
                                     },
                                     onCancel: {
                                         Haptics.lightImpact()
-                                        withAnimation { vm.isEditingHealthValues = false }
+                                        withAnimation { viewModel.isEditingHealthValues = false }
                                     }
                                 )
                                 .transition(.asymmetric(
@@ -206,24 +205,24 @@ struct MigraineEntryView: View {
                     // Weather capsule
                     VStack {
                         HStack(spacing: 10) {
-                            if vm.isPullingWeather {
+                            if viewModel.isPullingWeather {
                                 ProgressView()
                                     .controlSize(.small)
-                            } else if vm.weatherError != nil {
+                            } else if viewModel.weatherError != nil {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(.red)
-                            } else if vm.didPullWeather {
+                            } else if viewModel.didPullWeather {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
                             }
                             
                             VStack {
-                                Text(vm.isPullingWeather
+                                Text(viewModel.isPullingWeather
                                      ? "Pulling local weather"
-                                     : (vm.weatherError == nil ? "Pulled local weather" : "Failed to pull weather"))
-                                .foregroundStyle(vm.weatherError == nil ? .primary : .secondary)
+                                     : (viewModel.weatherError == nil ? "Pulled local weather" : "Failed to pull weather"))
+                                .foregroundStyle(viewModel.weatherError == nil ? .primary : .secondary)
                                 .font(.subheadline)
-                                .bold(vm.weatherError != nil)
+                                .bold(viewModel.weatherError != nil)
                                 
                                 Spacer(minLength: 0)
                             }
@@ -253,7 +252,7 @@ struct MigraineEntryView: View {
                             .fill(.thinMaterial)
                     )
 
-                    if vm.didPullWeather, vm.weatherError == nil {
+                    if viewModel.didPullWeather, viewModel.weatherError == nil {
                         // Single row with two columns, both leading aligned
                         
                         
@@ -264,7 +263,7 @@ struct MigraineEntryView: View {
                                 }
                                 
                                 if let t = weatherManager.temperature {
-                                    Label(vm.displayTemperature(t, useMetricUnits: useMetricUnits), systemImage: "thermometer.medium")
+                                    Label(viewModel.displayTemperature(t, useMetricUnits: useMetricUnits), systemImage: "thermometer.medium")
                                 }
                                 if let h = weatherManager.humidityPercentString {
                                     Label(h, systemImage: "humidity.fill")
@@ -274,7 +273,7 @@ struct MigraineEntryView: View {
 
                             VStack(alignment: .leading, spacing: 4) {
                                 if let p = weatherManager.pressure {
-                                    Label(vm.displayPressure(p, useMetricUnits: useMetricUnits), systemImage: "gauge.with.dots.needle.bottom.50percent")
+                                    Label(viewModel.displayPressure(p, useMetricUnits: useMetricUnits), systemImage: "gauge.with.dots.needle.bottom.50percent")
                                 }
                                 if let c = weatherManager.condition {
                                     Label(c.description.capitalized, systemImage: "cloud.sun")
@@ -288,16 +287,16 @@ struct MigraineEntryView: View {
                 }
 
                 Section("Duration") {
-                    DatePicker("Started", selection: $vm.startDate, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker("Started", selection: $viewModel.startDate, displayedComponents: [.date, .hourAndMinute])
 
-                    Toggle("Ongoing", isOn: $vm.isOngoing)
-                        .onChange(of: $vm.isOngoing.wrappedValue) { _, new in
+                    Toggle("Ongoing", isOn: $viewModel.isOngoing)
+                        .onChange(of: $viewModel.isOngoing.wrappedValue) { _, new in
                             Haptics.lightImpact()
-                            vm.setOngoing(new)
+                            viewModel.setOngoing(new)
                         }
 
-                    if !vm.isOngoing {
-                        DatePicker("End", selection: $vm.endDate, in: $vm.startDate.wrappedValue..., displayedComponents: [.date, .hourAndMinute])
+                    if !viewModel.isOngoing {
+                        DatePicker("End", selection: $viewModel.endDate, in: $viewModel.startDate.wrappedValue..., displayedComponents: [.date, .hourAndMinute])
                     } else {
                         Text("We'll start a neat little Live Activity to help you track duration!")
                             .foregroundStyle(.gray)
@@ -309,32 +308,32 @@ struct MigraineEntryView: View {
                         HStack {
                             Text("Pain Level")
                             Spacer()
-                            Text("\(vm.painLevel)")
+                            Text("\(viewModel.painLevel)")
                                 .bold()
-                                .foregroundStyle(Severity.from(painLevel: $vm.painLevel.wrappedValue).color)
+                                .foregroundStyle(Severity.from(painLevel: $viewModel.painLevel.wrappedValue).color)
                         }
                         Slider(
                             value: Binding(
-                                get: { Double(vm.painLevel) },
-                                set: { vm.painLevel = Int(round($0)) }
+                                get: { Double(viewModel.painLevel) },
+                                set: { viewModel.painLevel = Int(round($0)) }
                             ),
                             in: 0...10,
                             step: 1
                         )
-                        .tint(vm.gradientColor(for: vm.painLevel))
+                        .tint(viewModel.gradientColor(for: viewModel.painLevel))
                     }
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Text("Stress Level")
                             Spacer()
-                            Text("\(vm.stressLevel)")
+                            Text("\(viewModel.stressLevel)")
                                 .bold()
                                 .foregroundStyle(.indigo)
                         }
                         Slider(
                             value: Binding(
-                                get: { Double(vm.stressLevel) },
-                                set: { vm.stressLevel = Int(round($0)) }
+                                get: { Double(viewModel.stressLevel) },
+                                set: { viewModel.stressLevel = Int(round($0)) }
                             ),
                             in: 0...10,
                             step: 1
@@ -346,13 +345,13 @@ struct MigraineEntryView: View {
                 Section("Possible Triggers") {
                     // Search field with inline clear button
                     HStack {
-                        TextField("Search triggers", text: $vm.triggerSearchText)
+                        TextField("Search triggers", text: $viewModel.triggerSearchText)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
-                        if !vm.triggerSearchText.isEmpty {
+                        if !viewModel.triggerSearchText.isEmpty {
                             Button {
                                 Haptics.lightImpact()
-                                vm.triggerSearchText = ""
+                                viewModel.triggerSearchText = ""
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .foregroundStyle(.secondary)
@@ -364,23 +363,23 @@ struct MigraineEntryView: View {
 
                     // Grouped, filtered multi-select list
                     ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
-                        let items = vm.filteredTriggers(for: group, search: $vm.triggerSearchText.wrappedValue)
+                        let items = viewModel.filteredTriggers(for: group, search: $viewModel.triggerSearchText.wrappedValue)
                         if !items.isEmpty {
                             DisclosureGroup(group.displayName) {
                                 ForEach(items, id: \.self) { trig in
                                     Button {
                                         Haptics.lightImpact()
-                                        vm.toggleTrigger(trig)
+                                        viewModel.toggleTrigger(trig)
                                     } label: {
                                         HStack {
                                             Text(trig.displayName)
                                             Spacer()
-                                            if vm.selectedTriggers.contains(trig) {
+                                            if viewModel.selectedTriggers.contains(trig) {
                                                 Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundStyle(.blue)
+                                                    .foregroundStyle(.red)
                                             } else {
                                                 Image(systemName: "circle")
-                                                    .foregroundStyle(.blue)
+                                                    .foregroundStyle(.red)
                                             }
                                         }
                                     }
@@ -393,26 +392,26 @@ struct MigraineEntryView: View {
                     // Custom trigger input
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
-                            TextField("Add custom trigger", text: $vm.customTriggerInput)
+                            TextField("Add custom trigger", text: $viewModel.customTriggerInput)
                                 .textInputAutocapitalization(.never)
                                 .autocorrectionDisabled()
-                                .onSubmit { vm.addCustomTrigger() }
+                                .onSubmit { viewModel.addCustomTrigger() }
                             Button {
                                 Haptics.lightImpact()
-                                vm.addCustomTrigger()
+                                viewModel.addCustomTrigger()
                             } label: {
                                 Image(systemName: "plus.circle.fill")
                             }
-                            .disabled(vm.customTriggerInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                            .disabled(viewModel.customTriggerInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         }
 
-                        if !vm.customTriggers.isEmpty {
+                        if !viewModel.customTriggers.isEmpty {
                             LazyVGrid(
                                 columns: [GridItem(.adaptive(minimum: 120), spacing: 6)],
                                 alignment: .leading,
                                 spacing: 6
                             ) {
-                                ForEach(Array(vm.customTriggers.enumerated()), id: \.offset) { idx, label in
+                                ForEach(Array(viewModel.customTriggers.enumerated()), id: \.offset) { idx, label in
                                     HStack(spacing: 6) {
                                         Text(label)
                                             .font(.caption)
@@ -420,7 +419,7 @@ struct MigraineEntryView: View {
                                             .padding(.leading, 10)
                                         Button {
                                             Haptics.lightImpact()
-                                            vm.removeCustomTrigger(at: idx)
+                                            viewModel.removeCustomTrigger(at: idx)
                                         } label: {
                                             Image(systemName: "xmark.circle.fill")
                                                 .foregroundStyle(.secondary)
@@ -437,10 +436,10 @@ struct MigraineEntryView: View {
                         }
                     }
 
-                    if vm.selectedTriggers.isEmpty && vm.customTriggers.isEmpty {
+                    if viewModel.selectedTriggers.isEmpty && viewModel.customTriggers.isEmpty {
                         Text("No triggers selected").foregroundStyle(.secondary)
                     } else {
-                        let total = vm.selectedTriggers.count + vm.customTriggers.count
+                        let total = viewModel.selectedTriggers.count + viewModel.customTriggers.count
                         Text("\(total) selected")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
@@ -448,10 +447,10 @@ struct MigraineEntryView: View {
                 }
 
                 Section("Food Sensitivities") {
-                    TextEditor(text: $vm.foodsText)
+                    TextEditor(text: $viewModel.foodsText)
                         .frame(minHeight: 80)
                         .overlay(alignment: .topLeading) {
-                            if $vm.foodsText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            if $viewModel.foodsText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                 Text("List foods eaten around this time (comma or newline separated)")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -462,15 +461,15 @@ struct MigraineEntryView: View {
                 }
                 
                 Section("Options") {
-                    Toggle("Pin this migraine", isOn: $vm.pinned)
-                        .onChange(of: $vm.pinned.wrappedValue) { _, _ in Haptics.lightImpact() }
+                    Toggle("Pin this migraine", isOn: $viewModel.pinned)
+                        .onChange(of: $viewModel.pinned.wrappedValue) { _, _ in Haptics.lightImpact() }
                 }
 
                 Section("Notes") {
-                    TextEditor(text: $vm.noteText)
+                    TextEditor(text: $viewModel.noteText)
                         .frame(minHeight: 120)
                         .overlay(alignment: .topLeading) {
-                            if $vm.noteText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            if $viewModel.noteText.wrappedValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                 Text("Add any details you want to remember")
                                     .font(.footnote)
                                     .foregroundStyle(.secondary)
@@ -500,23 +499,23 @@ struct MigraineEntryView: View {
             }
         }
         .task {
-            vm.resetGreeting()
+            viewModel.resetGreeting()
             await startHealthFetch()
             await startWeatherFetch()
-            if vm.endDate < vm.startDate { vm.endDate = vm.startDate }
+            if viewModel.endDate < viewModel.startDate { viewModel.endDate = viewModel.startDate }
         }
-        .alert("Cannot Save", isPresented: $vm.showValidationAlert, actions: {
+        .alert("Cannot Save", isPresented: $viewModel.showValidationAlert, actions: {
             Button("OK", role: .cancel) {
                 Haptics.error()
             }
         }, message: {
-            Text(vm.validationMessage)
+            Text(viewModel.validationMessage)
         })
         .presentationDetents([.medium, .large])
         // Snap water to new step/range whenever unit preference changes
         .onChange(of: useMetricUnits) { _, _ in
             // Use the stored viewModel here to avoid dynamicMember binding confusion
-            viewModel.addWater = vm.snap(viewModel.addWater, toStep: vm.waterStep(useMetricUnits: useMetricUnits), in: vm.waterRange(useMetricUnits: useMetricUnits))
+            viewModel.addWater = viewModel.snap(viewModel.addWater, toStep: viewModel.waterStep(useMetricUnits: useMetricUnits), in: viewModel.waterRange(useMetricUnits: useMetricUnits))
         }
     }
 
@@ -526,7 +525,7 @@ struct MigraineEntryView: View {
     private func toggleHealthEditor() {
         if !viewModel.isEditingHealthValues {
             viewModel.addWater = 0
-            viewModel.addCalories = 0
+            viewModel.addFood = 0
             viewModel.addCaffeine = 0
             viewModel.addSleepHours = 0
             viewModel.healthEditErrorMessage = nil
@@ -547,9 +546,9 @@ struct MigraineEntryView: View {
                 current.waterLiters = (current.waterLiters ?? 0) + liters
             }
             // Calories
-            if viewModel.addCalories > 0 {
-                try await healthManager.saveEnergy(kcal: viewModel.addCalories)
-                current.energyKilocalories = (current.energyKilocalories ?? 0) + viewModel.addCalories
+            if viewModel.addFood > 0 {
+                try await healthManager.saveEnergy(kcal: viewModel.addFood)
+                current.energyKilocalories = (current.energyKilocalories ?? 0) + viewModel.addFood
             }
             // Caffeine
             if viewModel.addCaffeine > 0 {
@@ -715,3 +714,4 @@ struct MigraineEntryView: View {
     .environment(previewHealthManager)
     .environment(\.locale, .init(identifier: "en_US"))
 }
+

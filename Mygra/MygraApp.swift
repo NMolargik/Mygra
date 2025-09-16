@@ -13,20 +13,19 @@ import CoreLocation
 
 @main
 struct MygraApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+    @AppStorage("bgWeatherTaskScheduled") private var bgWeatherTaskScheduled: Bool = false
+    
     private let container: ModelContainer
     private let userManager: UserManager
     private let weatherManager: WeatherManager
     private let healthManager: HealthManager
     private let notificationManager: NotificationManager
-
-    @AppStorage("bgWeatherTaskScheduled") private var bgWeatherTaskScheduled: Bool = false
-    @Environment(\.scenePhase) private var scenePhase
-    @State private var lastWeatherHighRisk: Bool = false
-
     private let weatherTaskIdentifier = "com.molargiksoftware.Mygra.weatherRefresh"
 
+    @State private var lastWeatherHighRisk: Bool = false
+
     init() {
-        // MARK: - Diagnostics: identify the intended CloudKit container
         let cloudKitContainerID = "iCloud.com.molargiksoftware.Mygra"
 
         do {
@@ -65,9 +64,9 @@ struct MygraApp: App {
                         scheduleWeatherRefreshTask(earliestInMinutes: 90)
                     }
                 }
-                 .onChange(of: scenePhase) { _, newPhase in
-                     if newPhase == .background { scheduleWeatherRefreshTask(earliestInMinutes: 90) }
-                 }
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .background { scheduleWeatherRefreshTask(earliestInMinutes: 90) }
+                }
         }
     }
 
@@ -161,13 +160,18 @@ struct MygraApp: App {
         if high && !lastWeatherHighRisk {
             let authorized = await notificationManager.isAuthorized
             if authorized {
-                let msg = weatherRiskTitleAndBody()
-                await notificationManager.send(
-                    title: msg.title,
-                    body: msg.body,
-                    category: .alert,
-                    identifier: "weather-risk-\(Int(Date().timeIntervalSince1970))"
-                )
+                do {
+                    try await notificationManager.send(
+                        title: weatherRiskTitleAndBody().title,
+                        body: weatherRiskTitleAndBody().body,
+                        category: .alert,
+                        identifier: "weather-risk-\(Int(Date().timeIntervalSince1970))"
+                    )
+                } catch let error as NotificationError {
+                    print("[Mygra] Notification error: \(error.localizedDescription)")
+                } catch {
+                    print("[Mygra] Unexpected error sending notification: \(error)")
+                }
             }
         }
         lastWeatherHighRisk = high
@@ -186,3 +190,4 @@ struct MygraApp: App {
         }
     }
 }
+

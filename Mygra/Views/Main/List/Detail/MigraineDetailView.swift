@@ -9,38 +9,36 @@ import SwiftUI
 import WeatherKit
 
 struct MigraineDetailView: View {
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
-
+    
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
+    
     let migraine: Migraine
     var onClose: (() -> Void)? = nil
-
-    // End Migraine flow
+    
     @State private var showingEndSheet = false
     @State private var proposedEndDate: Date = Date()
     @State private var endError: String?
-
-    // Delete flow
     @State private var showDeleteConfirm = false
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 header
-
+                
                 insightSection
-
+                
                 if migraine.note?.isEmpty == false {
                     infoCard(title: "Note") {
                         Text(migraine.note!)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 if !migraine.triggers.isEmpty || !migraine.customTriggers.isEmpty {
                     infoCard(title: "Triggers") {
                         VStack(alignment: .leading, spacing: 8) {
@@ -58,7 +56,7 @@ struct MigraineDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 if let wx = migraine.weather {
                     infoCard(title: "Weather", trailing: {
                         HStack(spacing: 6) {
@@ -97,7 +95,7 @@ struct MigraineDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 if let h = migraine.health {
                     infoCard(title: "Health") {
                         VStack(alignment: .leading, spacing: 8) {
@@ -150,9 +148,9 @@ struct MigraineDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 Spacer(minLength: 12)
-
+                
                 // Delete button at the very bottom
                 Button(role: .destructive) {
                     showDeleteConfirm = true
@@ -234,7 +232,7 @@ struct MigraineDetailView: View {
             proposedEndDate = defaultEndDate
         }
     }
-
+    
     // MARK: - Insight section (Apple Intelligence)
     private var insightSection: some View {
         Group {
@@ -245,7 +243,14 @@ struct MigraineDetailView: View {
                         // Header row indicating Apple Intelligence
                         HStack(spacing: 6) {
                             Image(systemName: "apple.intelligence")
-                                .foregroundStyle(.pink)
+                                .foregroundStyle(
+                                    AngularGradient(
+                                        colors: [.orange, .red, .purple, .blue, .purple, .red, .orange, .orange],
+                                        center: .center,
+                                        startAngle: .degrees(-90),
+                                        endAngle: .degrees(270)
+                                    )
+                                )
                             Text("Powered by Apple Intelligence")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -255,7 +260,7 @@ struct MigraineDetailView: View {
                                     .controlSize(.small)
                             }
                         }
-
+                        
                         if isGenerating && (migraine.insight?.isEmpty ?? true) {
                             // Loading placeholder while generating
                             VStack(alignment: .leading, spacing: 8) {
@@ -283,7 +288,7 @@ struct MigraineDetailView: View {
             }
         }
     }
-
+    
     private var header: some View {
         VStack(spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
@@ -293,7 +298,7 @@ struct MigraineDetailView: View {
                 }
                 Spacer()
             }
-
+            
             HStack(spacing: 12) {
                 infoPill(
                     title: "Pain",
@@ -308,7 +313,7 @@ struct MigraineDetailView: View {
                     tint: .purple
                 )
             }
-
+            
             VStack(alignment: .leading, spacing: 6) {
                 LabeledRow("Start", value: DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates))
                 LabeledRow("End", value: migraine.endDate.map { DateFormatting.dateTime($0, useDMY: useDayMonthYearDates) } ?? "Ongoing")
@@ -321,7 +326,7 @@ struct MigraineDetailView: View {
             }
             .padding(12)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-
+            
             if migraine.isOngoing {
                 Button {
                     proposedEndDate = defaultEndDate
@@ -335,7 +340,7 @@ struct MigraineDetailView: View {
                 .tint(.pink)
                 .accessibilityIdentifier("endMigraineButton")
             }
-
+            
             if let error = endError {
                 Text(error)
                     .font(.footnote)
@@ -349,7 +354,7 @@ struct MigraineDetailView: View {
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
     }
-
+    
     private func infoCard<Content: View, Trailing: View>(title: String, @ViewBuilder trailing: () -> Trailing = { EmptyView() }, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
@@ -366,7 +371,7 @@ struct MigraineDetailView: View {
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
     }
-
+    
     private func infoPill(title: String, value: String, icon: String, tint: Color) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
@@ -385,12 +390,12 @@ struct MigraineDetailView: View {
         )
         .contentShape(Rectangle())
     }
-
+    
     private var defaultEndDate: Date {
         let now = Date()
         return max(now, migraine.startDate.addingTimeInterval(60)) // ensure at least 1 min after start
     }
-
+    
     private func formatDuration(from start: Date, to end: Date) -> String {
         let interval = max(0, Int(end.timeIntervalSince(start)))
         let hours = interval / 3600
@@ -402,7 +407,7 @@ struct MigraineDetailView: View {
             return String(format: "%dm %02ds", minutes, seconds)
         }
     }
-
+    
     private func formatLiveDuration(since start: Date) -> String {
         let interval = max(0, Int(Date().timeIntervalSince(start)))
         let hours = interval / 3600
@@ -415,35 +420,3 @@ struct MigraineDetailView: View {
         }
     }
 }
-
-// MARK: - Small helper row
-private struct LabeledRow<Value: View>: View {
-    let title: String
-    let valueView: Value
-
-    init(_ title: String, @ViewBuilder value: () -> Value) {
-        self.title = title
-        self.valueView = value()
-    }
-
-    init(_ title: String, value: String) where Value == Text {
-        self.title = title
-        self.valueView = Text(value)
-    }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .foregroundStyle(.secondary)
-            Spacer()
-            valueView
-        }
-    }
-}
-
-
-
-#Preview {
-    MigraineDetailView(migraine: Migraine(startDate: Date.now, painLevel: 5, stressLevel: 6))
-}
-

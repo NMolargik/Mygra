@@ -157,7 +157,7 @@ enum PDFComposer {
                             hparts.append(String(format: "Sleep: %.1f h", hours))
                         }
                         if let kcal = h.energyKilocalories {
-                            hparts.append(String(format: "Food: %.0f cal", kcal))
+                            hparts.append(String(format: "Food: %.0f cal (kcal)", kcal))
                         }
                         if let caf = h.caffeineMg {
                             hparts.append(String(format: "Caffeine: %.0f mg", caf))

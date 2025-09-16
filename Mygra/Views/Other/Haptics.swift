@@ -1,3 +1,10 @@
+//
+//  Haptics.swift
+//  Mygra
+//
+//  Created by Nick Molargik on 9/16/25.
+//
+
 import UIKit
 
 enum Haptics {

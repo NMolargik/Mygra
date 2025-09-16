@@ -19,7 +19,6 @@ struct WeatherCardView: View {
     let isFetching: Bool
     let error: Error?
     let onRefresh: () -> Void
-    // NEW: Optional location display (e.g., "San Francisco, CA")
     let locationString: String?
 
     // Local state to trigger SF Symbol bounce when condition updates
@@ -36,9 +35,7 @@ struct WeatherCardView: View {
                     let layers = symbolLayerColors(for: condition)
                     Image(systemName: symbolName(for: condition))
                         .font(.system(size: 32))
-                        // Important: order colors to match symbol layer order
-                        .foregroundStyle(layers.layer1, layers.layer2)
-                        // Apply bounce when bounceFlag toggles
+                        .foregroundStyle(layers.layer1.gradient, layers.layer2.gradient)
                         .symbolEffect(.bounce, options: .repeat(1), value: bounceFlag)
 
                     VStack(alignment: .leading, spacing: 4) {
@@ -317,4 +314,54 @@ struct WeatherCardView: View {
             return (.gray, .gray.opacity(0.7))
         }
     }
+}
+
+// MARK: - Previews
+
+#Preview("Sunny in Indy") {
+    WeatherCardView(
+        temperatureString: "78°",
+        pressureString: "29.9 inHg",
+        humidityPercentString: "45% RH",
+        condition: .clear,
+        lastUpdated: Date(),
+        isFetching: false,
+        error: nil,
+        onRefresh: {},
+        locationString: "Indianapolis, IN"
+    )
+    .padding()
+}
+
+#Preview("Fetching…") {
+    WeatherCardView(
+        temperatureString: "78°",
+        pressureString: "29.9 inHg",
+        humidityPercentString: "45% RH",
+        condition: .partlyCloudy,
+        lastUpdated: Date(),
+        isFetching: true,
+        error: nil,
+        onRefresh: {},
+        locationString: "Indianapolis, IN"
+    )
+    .padding()
+}
+
+#Preview("Network Error / Unavailable") {
+    // Simulate a network error to drive the unavailable state
+    let sampleError = NSError(domain: NSURLErrorDomain, code: -1009, userInfo: [NSLocalizedDescriptionKey: "The Internet connection appears to be offline."]) as Error
+
+    return WeatherCardView(
+        temperatureString: nil,
+        pressureString: nil,
+        humidityPercentString: nil,
+        condition: nil,
+        lastUpdated: nil,
+        isFetching: false,
+        error: sampleError,
+        onRefresh: {},
+        locationString: nil
+    )
+    .padding()
 }

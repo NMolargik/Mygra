@@ -9,14 +9,13 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
     @Environment(UserManager.self) private var userManager: UserManager
     @Environment(\.modelContext) private var modelContext
 
-    @State private var editingUser: Bool = false
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
 
-    // Document export
+    @State private var editingUser: Bool = false
     @State private var exportTempURL: URL?
     @State private var showDocumentPicker: Bool = false
     @State private var isExporting: Bool = false
@@ -35,7 +34,6 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var manager = userManager
 
-        // Provide a safe Binding<User> for the editor.
         let userBinding: Binding<User> = Binding(
             get: {
                 manager.currentUser ?? User()
@@ -61,17 +59,19 @@ struct SettingsView: View {
                 get: { useMetricUnits },
                 set: { newValue in
                     useMetricUnits = newValue
-                    lightTap()
+                    Haptics.lightImpact()
                 }
             ))
+            .tint(.green)
 
             Toggle("Use Day–Month–Year Dates", isOn: Binding(
                 get: { useDayMonthYearDates },
                 set: { newValue in
                     useDayMonthYearDates = newValue
-                    lightTap()
+                    Haptics.lightImpact()
                 }
             ))
+            .tint(.green)
             .accessibilityHint("Switch between Month–Day–Year and Day–Month–Year formats for dates.")
 
             // Edit/Save button replaces the toggle
@@ -91,11 +91,11 @@ struct SettingsView: View {
                         existing.dietaryRestrictions = updated.dietaryRestrictions
                     }
                     editingUser = false
-                    successTap()
+                    Haptics.success()
                 } else {
                     // Enter editing mode
                     editingUser = true
-                    lightTap()
+                    Haptics.lightImpact()
                 }
             } label: {
                 Text(editingUser ? "Save User" : "Edit User")
@@ -212,7 +212,7 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
             // Present system Files save prompt
             exportTempURL = fileURL
             showDocumentPicker = true
-            successTap()
+            Haptics.success()
         } catch {
             exportError = "Could not export PDF. \(error.localizedDescription)"
         }
@@ -225,21 +225,6 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
             try? FileManager.default.removeItem(at: url)
         }
         exportTempURL = nil
-    }
-
-    // MARK: - Haptics
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
     }
 }
 

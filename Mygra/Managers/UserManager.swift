@@ -50,7 +50,8 @@ class UserManager {
             }
             self.isRefreshing = false
         } catch {
-            print("UserManager.refresh error: \(error)")
+            let userError = UserError.fetchFailed(underlying: error)
+            handle(userError)
             self.currentUser = nil
             self.isRefreshing = false
         }
@@ -77,42 +78,63 @@ class UserManager {
             await refresh()
             if currentUser != nil { break }
         }
+        // If still nil after timeout, surface a timeout error for diagnostics
+        if currentUser == nil {
+            handle(UserError.cloudRestoreTimedOut)
+        }
     }
 
     // MARK: - Create or Replace
     func createOrReplace(
         newUser: User
     ) {
-        // Delete any existing user
-        if let u = currentUser {
-            context.delete(u)
+        do {
+            // Delete any existing user
+            if let u = currentUser {
+                context.delete(u)
+            }
+            context.insert(newUser)
+            try context.save()
+            Task { await refresh() }
+            print("User Saved!")
+        } catch {
+            handle(UserError.saveFailed(underlying: error))
         }
-        context.insert(newUser)
-        saveAndReload()
-        print("User Saved!")
     }
 
     // MARK: - Update
     func update(_ mutate: (User) -> Void) {
-        guard let u = currentUser else { return }
+        guard let u = currentUser else {
+            handle(UserError.notFound)
+            return
+        }
         mutate(u)
-        saveAndReload()
+        do {
+            try context.save()
+            Task { await refresh() }
+        } catch {
+            handle(UserError.saveFailed(underlying: error))
+        }
     }
 
     // MARK: - Delete
     func deleteUser() {
-        guard let u = currentUser else { return }
-        context.delete(u)
-        saveAndReload()
+        guard let u = currentUser else {
+            handle(UserError.notFound)
+            return
+        }
+        do {
+            context.delete(u)
+            try context.save()
+            Task { await refresh() }
+        } catch {
+            handle(UserError.deleteFailed(underlying: error))
+        }
     }
 
-    // MARK: - Persistence
-    private func saveAndReload() {
-        do {
-            try context.save()
-        } catch {
-            print("UserManager.save error: \(error)")
-        }
-        Task { await refresh() }
+    // MARK: - Error Handling
+    private func handle(_ error: UserError) {
+        // Centralized place to log or send to analytics; expand as needed
+        print("UserManager error: \(error.description)")
     }
 }

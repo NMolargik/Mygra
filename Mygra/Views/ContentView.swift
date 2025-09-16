@@ -16,6 +16,29 @@ struct ContentView: View {
     @State private var viewModel: ContentView.ViewModel = ViewModel()
     @State private var migraineManager: MigraineManager?
     @State private var insightManager: InsightManager?
+    
+    private struct ConditionalEnvironmentMainView<Content: View>: View {
+        let base: Content
+        let migraineManager: MigraineManager?
+        let insightManager: InsightManager?
+
+        init(base: Content, migraineManager: MigraineManager?, insightManager: InsightManager?) {
+            self.base = base
+            self.migraineManager = migraineManager
+            self.insightManager = insightManager
+        }
+
+        var body: some View {
+            var view: AnyView = AnyView(base)
+            if let migraineManager {
+                view = AnyView(view.environment(migraineManager))
+            }
+            if let insightManager {
+                view = AnyView(view.environment(insightManager))
+            }
+            return view
+        }
+    }
 
     var body: some View {
         ZStack {
@@ -171,31 +194,7 @@ struct ContentView: View {
     }
 }
 
-private struct ConditionalEnvironmentMainView<Content: View>: View {
-    let base: Content
-    let migraineManager: MigraineManager?
-    let insightManager: InsightManager?
-
-    init(base: Content, migraineManager: MigraineManager?, insightManager: InsightManager?) {
-        self.base = base
-        self.migraineManager = migraineManager
-        self.insightManager = insightManager
-    }
-
-    var body: some View {
-        var view: AnyView = AnyView(base)
-        if let migraineManager {
-            view = AnyView(view.environment(migraineManager))
-        }
-        if let insightManager {
-            view = AnyView(view.environment(insightManager))
-        }
-        return view
-    }
-}
-
 #Preview {
-    // Set up a preview SwiftData in-memory container
     let container: ModelContainer
     do {
         container = try ModelContainer(for: User.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))

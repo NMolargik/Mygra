@@ -8,12 +8,13 @@
 import SwiftUI
 
 struct EndMigraineSheet: View {
+    @Environment(\.dismiss) private var dismiss
+
     let startDate: Date
     let initialEndDate: Date
     let onConfirm: (Date) -> Void
     let onCancel: () -> Void
 
-    @Environment(\.dismiss) private var dismiss
     @State private var endDate: Date
 
     init(startDate: Date, initialEndDate: Date, onConfirm: @escaping (Date) -> Void, onCancel: @escaping () -> Void) {
@@ -56,3 +57,13 @@ struct EndMigraineSheet: View {
         }
     }
 }
+
+#Preview("Sample EndMigraineSheet") {
+    EndMigraineSheet(
+        startDate: Date().addingTimeInterval(-3600), // 1 hour ago
+        initialEndDate: Date(),
+        onConfirm: { _ in },
+        onCancel: {}
+    )
+}
+

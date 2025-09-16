@@ -14,10 +14,10 @@ struct InsightRowView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: iconName(for: insight.category))
-                .foregroundStyle(color(for: insight.priority))
+                .foregroundStyle(color(for: insight.priority).gradient)
                 .frame(width: 24)
             VStack(alignment: .leading, spacing: 4) {
-                Text(displayTitle)
+                Text(insight.title)
                     .font(.subheadline).bold()
                 Text(displayMessage)
                     .font(.footnote)
@@ -36,11 +36,6 @@ struct InsightRowView: View {
 
     // MARK: - Display overrides for unit-aware content
 
-    private var displayTitle: String {
-        // For now, title is fine as-is; adjust here if you later add unit-bearing titles.
-        insight.title
-    }
-
     private var displayMessage: String {
         switch insight.category {
         case .intakeHydration:
@@ -55,9 +50,6 @@ struct InsightRowView: View {
                 }
             }
             return insight.message
-
-        // Add more category-specific rewrites here if needed in the future,
-        // using tags to avoid parsing strings.
 
         default:
             return insight.message

@@ -72,6 +72,9 @@
 		EB0E1B2E2E6283FC0060F834 /* Exceptions for "Mygra" folder in "MygraWidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Errors/HealthError.swift,
+				Errors/MigraineError.swift,
+				"Extensions/MigraineActivityAttributes.ContentState-sample.swift",
 				Managers/HealthManager.swift,
 				Managers/MigraineManager.swift,
 				Models/DedupeKey.swift,

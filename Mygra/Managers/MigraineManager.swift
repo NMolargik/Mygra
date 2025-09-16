@@ -62,7 +62,7 @@ final class MigraineManager {
             // Update the ongoing migraine reference (first ongoing in newest-first list)
             self.ongoingMigraine = fetched.first(where: { $0.isOngoing })
         } catch {
-            print("MigraineManager.refresh() fetch error: \(error)")
+            print(MigraineError.fetchFailed(underlying: error).localizedDescription)
             self.migraines = []
             self.ongoingMigraine = nil
         }
@@ -189,7 +189,7 @@ final class MigraineManager {
         do {
             try context.save()
         } catch {
-            print("MigraineManager.save error: \(error)")
+            print(MigraineError.saveFailed(underlying: error).localizedDescription)
         }
         Task { await refresh() }
     }
@@ -211,7 +211,7 @@ final class MigraineManager {
             guard count == 5 else { return }
         } catch {
             // If counting fails, do not attempt to prompt
-            print("Failed to fetch migraine count for review prompt: \(error)")
+            print(MigraineError.fetchFailed(underlying: error).localizedDescription)
             return
         }
 

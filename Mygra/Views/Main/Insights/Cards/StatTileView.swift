@@ -34,7 +34,7 @@ struct StatTileView: View {
                 Text(title)
             } icon: {
                 Image(systemName: systemImage)
-                    .foregroundStyle(color)
+                    .foregroundStyle(color.gradient)
                     .symbolEffect(.bounce, options: .repeat(1), value: bounceFlag)
             }
             .font(.subheadline)
@@ -53,4 +53,25 @@ struct StatTileView: View {
             bounceFlag.toggle()
         }
     }
+
+}
+
+#Preview("Sample Stat Tile") {
+    StatTileView(
+        title: "Water Intake",
+        value: "32 oz",
+        systemImage: "drop.fill",
+        color: .blue
+    )
+    .padding()
+}
+
+#Preview("Metric Stat Tile") {
+    StatTileView(
+        title: "Water Intake",
+        value: "500 mL",
+        systemImage: "drop.fill",
+        color: .blue
+    )
+    .padding()
 }

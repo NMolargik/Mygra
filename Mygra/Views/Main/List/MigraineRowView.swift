@@ -8,12 +8,12 @@
 import SwiftUI
 
 struct MigraineRowView: View {
-    var migraine: Migraine
-    var viewModel: MigraineListView.ViewModel
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
+    
+    var migraine: Migraine
+    var viewModel: MigraineListView.ViewModel
 
-    // Treat iPad as “regular width” even if size class is nil in this environment.
     private var isRegularWidth: Bool {
         if UIDevice.current.userInterfaceIdiom == .pad { return true }
         return hSizeClass == .regular

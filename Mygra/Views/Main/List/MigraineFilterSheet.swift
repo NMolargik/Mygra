@@ -53,9 +53,11 @@ struct MigraineFilterSheet: View {
                     get: { useDateRange },
                     set: { newValue in
                         useDateRange = newValue
-                        lightTap()
+                        Haptics.lightImpact()
                     }
                 ))
+                .tint(.green)
+                
                 if useDateRange {
                     DatePicker("Start", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
                     DatePicker("End", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
@@ -68,7 +70,7 @@ struct MigraineFilterSheet: View {
                         get: { workingFilter.minPainLevel ?? 0 },
                         set: { newValue in
                             workingFilter.minPainLevel = newValue == 0 ? nil : newValue
-                            lightTap()
+                            Haptics.lightImpact()
                         }
                     ),
                     in: 0...10
@@ -94,7 +96,7 @@ struct MigraineFilterSheet: View {
                             .autocorrectionDisabled()
                         if !triggerSearchText.isEmpty {
                             Button {
-                                lightTap()
+                                Haptics.lightImpact()
                                 triggerSearchText = ""
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
@@ -108,7 +110,7 @@ struct MigraineFilterSheet: View {
                     
                     HStack(spacing: 8) {
                         Button {
-                            lightTap()
+                            Haptics.lightImpact()
                             workingFilter.requiredTriggers.removeAll()
                         } label: {
                             Label("Clear", systemImage: "circle.slash")
@@ -125,7 +127,7 @@ struct MigraineFilterSheet: View {
                         DisclosureGroup(groupTitle(group)) {
                             ForEach(items, id: \.self) { trig in
                                 Button {
-                                    lightTap()
+                                    Haptics.lightImpact()
                                     toggleRequired(trig)
                                 } label: {
                                     HStack {
@@ -133,10 +135,10 @@ struct MigraineFilterSheet: View {
                                         Spacer()
                                         if workingFilter.requiredTriggers.contains(trig) {
                                             Image(systemName: "checkmark.circle.fill")
-                                                .foregroundStyle(.blue)
+                                                .foregroundStyle(.red)
                                         } else {
                                             Image(systemName: "circle")
-                                                .foregroundStyle(.blue)
+                                                .foregroundStyle(.red)
                                         }
                                     }
                                 }
@@ -164,7 +166,7 @@ struct MigraineFilterSheet: View {
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
                 Button("Cancel") {
-                    lightTap()
+                    Haptics.lightImpact()
                     cancel()
                 }
                 .foregroundStyle(.red)
@@ -173,7 +175,7 @@ struct MigraineFilterSheet: View {
                 Button("Apply") {
                     var f = workingFilter
                     f.dateRange = useDateRange ? min(startDate, endDate)...max(startDate, endDate) : nil
-                    successTap()
+                    Haptics.success()
                     apply(f)
                 }
                 .foregroundStyle(.blue)
@@ -200,20 +202,5 @@ struct MigraineFilterSheet: View {
         } else {
             workingFilter.requiredTriggers.insert(trigger)
         }
-    }
-
-    // MARK: - Haptics
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
     }
 }

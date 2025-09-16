@@ -24,11 +24,9 @@ struct MainView: View {
     @Environment(\.scenePhase) private var scenePhase
 
     @State private var appTab: AppTab = .insights // iPhone / compact-only
-
     @State private var showingEntrySheet: Bool = false
     @State private var showingSettingsSheet: Bool = false
     @State private var showingOngoingAlert: Bool = false
-
     @State private var listPath = NavigationPath()
     @State private var lastPushedMigraineID: UUID? = nil
     @State private var now: Date = Date()
@@ -145,7 +143,7 @@ struct MainView: View {
                         }
                     }
                     .tabItem {
-                        AppTab.insights.icon(selectedTab: appTab)
+                        AppTab.insights.icon()
                         Text(AppTab.insights.rawValue)
                     }
                     .tag(AppTab.insights)
@@ -187,7 +185,7 @@ struct MainView: View {
                         }
                     }
                     .tabItem {
-                        AppTab.list.icon(selectedTab: appTab)
+                        AppTab.list.icon()
                         Text(AppTab.list.rawValue)
                     }
                     .tag(AppTab.list)
@@ -197,12 +195,12 @@ struct MainView: View {
                             .navigationTitle(AppTab.settings.rawValue)
                     }
                     .tabItem {
-                        AppTab.settings.icon(selectedTab: appTab)
+                        AppTab.settings.icon()
                         Text(AppTab.settings.rawValue)
                     }
                     .tag(AppTab.settings)
                 }
-                .tint(appTab.color)
+                .tint(.red)
                 .tabViewBottomAccessory { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(
@@ -266,7 +264,7 @@ struct MainView: View {
                 HStack(spacing: 8) {
                     Image(systemName: "waveform.path.ecg")
                         .symbolVariant(.fill)
-                        .foregroundStyle(.pink)
+                        .foregroundStyle(.red)
                         .modifier(DrawOnOffEffect(drawOn: drawOn, drawOff: drawOff))
 
                     Text("Ongoing Migraine")
@@ -376,67 +374,3 @@ struct MainView: View {
         pendingDeepLinkAction = nil
     }
 }
-
-// MARK: - DrawOnOffEffect
-private struct DrawOnOffEffect: ViewModifier {
-    let drawOn: Bool
-    let drawOff: Bool
-
-    func body(content: Content) -> some View {
-        #if compiler(>=6.0)
-        content
-            .symbolEffect(.pulse, options: .repeating, value: drawOn)
-        #else
-        content
-            .symbolEffect(.pulse, options: .repeating, value: drawOn)
-        #endif
-    }
-}
-//
-//#Preview {
-//    let container: ModelContainer
-//    do {
-//        container = try ModelContainer(
-//            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-//            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-//        )
-//    } catch {
-//        fatalError("Preview ModelContainer setup failed: \(error)")
-//    }
-//    let previewUserManager = UserManager(context: container.mainContext)
-//    let previewHealthManager = HealthManager()
-//    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
-//    let previewWeatherManager = WeatherManager()
-//    let previewNotificationManager = NotificationManager()
-//    let previewLocationManager = LocationManager()
-//    let previewInsightManager = InsightManager(userManager: previewUserManager, migraineManager: previewMigraineManager, weatherManager: previewWeatherManager, healthManager: previewHealthManager)
-//
-//    let now = Date()
-//    let twoHoursAgo = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
-//
-//    _ = previewMigraineManager.create(
-//        startDate: twoHoursAgo,
-//        endDate: nil,
-//        painLevel: 7,
-//        stressLevel: 6,
-//        pinned: true,
-//        note: "Ongoing for preview",
-//        insight: nil,
-//        triggers: [],
-//        foodsEaten: []
-//    )
-//
-//    return MainView(
-//        returnToAppStage: { _ in },
-//        pendingDeepLinkID: .constant(nil),
-//        pendingDeepLinkAction: .constant(nil)
-//    )
-//    .modelContainer(container)
-//    .environment(previewUserManager)
-//    .environment(previewMigraineManager)
-//    .environment(previewWeatherManager)
-//    .environment(previewHealthManager)
-//    .environment(previewLocationManager)
-//    .environment(previewNotificationManager)
-//    .environment(previewInsightManager)
-//}

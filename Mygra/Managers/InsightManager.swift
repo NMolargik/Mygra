@@ -25,7 +25,7 @@ final class InsightManager {
     private(set) var insights: [Insight] = []
     private(set) var isRefreshing: Bool = false
     private(set) var lastRefreshed: Date?
-    private(set) var errors: [Error] = []
+    private(set) var errors: [InsightError] = []
 
     // Cache of generated guidance per migraine
     private(set) var generatedGuidance: [UUID: String] = [:]
@@ -85,7 +85,7 @@ final class InsightManager {
             insights = all.sorted(by: Insight.sorter)
             lastRefreshed = Date()
         } catch {
-            errors.append(error)
+            errors.append(.refreshFailed(underlying: error))
         }
 
         isRefreshing = false
@@ -101,13 +101,13 @@ final class InsightManager {
         async let phases = generateMenstrualPhaseInsights()
 
         var all: [Insight] = []
-        do { all += try await trends } catch { errors.append(error) }
-        do { all += try await triggers } catch { errors.append(error) }
-        do { all += try await foods } catch { errors.append(error) }
-        do { all += try await intake } catch { errors.append(error) }
-        do { all += try await sleep } catch { errors.append(error) }
-        do { all += try await weather } catch { errors.append(error) }
-        do { all += try await phases } catch { errors.append(error) }
+        do { all += try await trends } catch { errors.append(.trendsFailed(underlying: error)) }
+        do { all += try await triggers } catch { errors.append(.triggersFailed(underlying: error)) }
+        do { all += try await foods } catch { errors.append(.foodsFailed(underlying: error)) }
+        do { all += try await intake } catch { errors.append(.intakeFailed(underlying: error)) }
+        do { all += try await sleep } catch { errors.append(.sleepFailed(underlying: error)) }
+        do { all += try await weather } catch { errors.append(.weatherFailed(underlying: error)) }
+        do { all += try await phases } catch { errors.append(.phasesFailed(underlying: error)) }
 
         // De-duplicate
         var seen = Set<DedupeKey>()
@@ -320,7 +320,7 @@ final class InsightManager {
                     Insight(
                         category: .intakeNutrition,
                         title: "Low energy intake on migraine days",
-                        message: String(format: "Average energy consumed: %.0f kcal on migraine days.", avg),
+                        message: String(format: "Average energy consumed: %.0f cal on migraine days.", avg),
                         priority: .medium,
                         tags: ["avgKcal": avg]
                     )
@@ -555,7 +555,10 @@ final class InsightManager {
     // MARK: - Intelligence
 
     func analyzeNewlyCreatedMigraine(_ migraine: Migraine) async {
-        guard intelligenceManager.supportsAppleIntelligence else { return }
+        guard intelligenceManager.supportsAppleIntelligence else {
+            errors.append(.intelligenceUnavailable)
+            return
+        }
         guard !isGeneratingGuidance else { return }
         isGeneratingGuidance = true
         isGeneratingGuidanceFor = migraine
@@ -581,19 +584,25 @@ final class InsightManager {
                 insights.insert(card, at: 0)
             }
         } catch {
-            errors.append(error)
+            errors.append(.intelligenceAnalysisFailed(underlying: error))
         }
     }
 
     func startCounselorChat() async {
-        guard intelligenceManager.supportsAppleIntelligence else { return }
+        guard intelligenceManager.supportsAppleIntelligence else { 
+            errors.append(.intelligenceUnavailable)
+            return 
+        }
         let all = migraineManager.migraines
         let user = userManager.currentUser
         await intelligenceManager.startChat(migraines: all, user: user)
     }
 
     func sendCounselorMessage(_ text: String) async -> String {
-        guard intelligenceManager.supportsAppleIntelligence else { return "This device does not support Apple Intelligence." }
+        guard intelligenceManager.supportsAppleIntelligence else {
+            errors.append(.intelligenceUnavailable)
+            return "This device does not support Apple Intelligence."
+        }
         do {
             self.isGeneratingGuidance = true
             let reply = try await intelligenceManager.send(message: text)
@@ -601,7 +610,7 @@ final class InsightManager {
             return reply
         } catch {
             self.isGeneratingGuidance = false
-            errors.append(error)
+            errors.append(.chatSendFailed(underlying: error))
             return "Sorry, I ran into a problem."
         }
     }

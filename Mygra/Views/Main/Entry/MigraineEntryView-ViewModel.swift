@@ -44,10 +44,10 @@ extension MigraineEntryView {
         var isSavingHealthEdits: Bool = false
         var healthEditErrorMessage: String?
         var addWater: Double = 0.0
-        var addCalories: Double = 0.0
+        var addFood: Double = 0.0
         var addCaffeine: Double = 0.0
         var addSleepHours: Double = 0.0
-        var allAddsAreZero: Bool { addWater == 0 && addCalories == 0 && addCaffeine == 0 && addSleepHours == 0 }
+        var allAddsAreZero: Bool { addWater == 0 && addFood == 0 && addCaffeine == 0 && addSleepHours == 0 }
 
         // Dynamic empathetic/helpful greeting
         var greeting: String = ""
