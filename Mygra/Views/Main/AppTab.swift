@@ -19,7 +19,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .insights:
             return Image(systemName: "lightbulb.max.fill")
         case .list:
-            return Image(systemName: "list.bullet.indent")
+            return Image(systemName: "list.bullet")
         case .settings:
             return Image(systemName: "gearshape.2")
         }

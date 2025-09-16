@@ -74,46 +74,16 @@ struct SettingsView: View {
             .tint(.green)
             .accessibilityHint("Switch between Month–Day–Year and Day–Month–Year formats for dates.")
 
-            // Edit/Save button replaces the toggle
             Button {
-                if editingUser {
-                    // Save changes explicitly and exit editing mode
-                    let updated = userBinding.wrappedValue
-                    manager.update { existing in
-                        existing.name = updated.name
-                        existing.birthday = updated.birthday
-                        existing.biologicalSex = updated.biologicalSex
-                        existing.heightMeters = updated.heightMeters
-                        existing.weightKilograms = updated.weightKilograms
-                        existing.averageSleepHours = updated.averageSleepHours
-                        existing.averageCaffeineMg = updated.averageCaffeineMg
-                        existing.chronicConditions = updated.chronicConditions
-                        existing.dietaryRestrictions = updated.dietaryRestrictions
-                    }
-                    editingUser = false
-                    Haptics.success()
-                } else {
-                    // Enter editing mode
-                    editingUser = true
-                    Haptics.lightImpact()
-                }
+                editingUser = true
+                Haptics.lightImpact()
             } label: {
-                Text(editingUser ? "Save User" : "Edit User")
+                Text("Edit User")
                     .bold()
                     .foregroundStyle(.blue)
             }
             .buttonStyle(.plain)
 
-            if (editingUser) {
-                UserEditView(
-                    user: userBinding,
-                    userFormComplete: .constant(true),
-                    dismiss: {
-                        // If you want dismiss to cancel, you could:
-                        // editingUser = false
-                    }
-                )
-            }
 
             // Export button
             Button {
@@ -172,6 +142,49 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                 .font(.footnote)
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+        .sheet(isPresented: $editingUser) {
+            NavigationStack {
+                Form {
+                    UserEditView(
+                        user: userBinding,
+                        userFormComplete: .constant(true),
+                        dismiss: {
+                            editingUser = false
+                        }
+                    )
+                }
+                .padding(.horizontal)
+                .navigationTitle("Edit User")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            editingUser = false
+                            Haptics.lightImpact()
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            // Save changes explicitly and exit editing mode
+                            let updated = userBinding.wrappedValue
+                            manager.update { existing in
+                                existing.name = updated.name
+                                existing.birthday = updated.birthday
+                                existing.biologicalSex = updated.biologicalSex
+                                existing.heightMeters = updated.heightMeters
+                                existing.weightKilograms = updated.weightKilograms
+                                existing.averageSleepHours = updated.averageSleepHours
+                                existing.averageCaffeineMg = updated.averageCaffeineMg
+                                existing.chronicConditions = updated.chronicConditions
+                                existing.dietaryRestrictions = updated.dietaryRestrictions
+                            }
+                            editingUser = false
+                            Haptics.success()
+                        }
+                        .tint(.blue)
+                    }
+                }
             }
         }
     }

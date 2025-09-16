@@ -209,7 +209,7 @@ struct MigraineDetailView: View {
                     migraineManager.togglePinned(migraine)
                 } label: {
                     Image(systemName: migraine.pinned ? "pin.fill" : "pin")
-                        .foregroundStyle(migraine.pinned ? .orange : .secondary)
+                        .foregroundStyle(migraine.pinned ? .yellow : .secondary)
                 }
                 .accessibilityLabel(migraine.pinned ? "Unpin" : "Pin")
             }
@@ -405,11 +405,11 @@ struct MigraineDetailView: View {
             .presentationDetents([.medium, .large])
         }
         
-        .onChange(of: showingModifySheet) { newValue in
-            if newValue {
-                seedEditState()
-            }
-        }
+.onChange(of: showingModifySheet) { _, newValue in
+    if newValue {
+        seedEditState()
+    }
+}
         .alert("Delete this migraine?", isPresented: $showDeleteConfirm) {
             Button("Delete", role: .destructive) {
                 migraineManager.delete(migraine)

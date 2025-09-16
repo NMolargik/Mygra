@@ -10,6 +10,11 @@ import SwiftData
 import Observation
 import StoreKit
 import UIKit
+import WidgetKit
+
+enum AppGroup {
+    static let id = "group.com.molargiksoftware.mygra"
+}
 
 @MainActor
 @Observable
@@ -33,7 +38,7 @@ final class MigraineManager {
     var filter: MigraineFilter = MigraineFilter() {
         didSet { Task { await refresh() } }
     }
-
+ 
     // Derived, filter-applied list for the UI
     var visibleMigraines: [Migraine] {
         applyFilter(to: migraines)
@@ -61,6 +66,9 @@ final class MigraineManager {
             self.migraines = fetched
             // Update the ongoing migraine reference (first ongoing in newest-first list)
             self.ongoingMigraine = fetched.first(where: { $0.isOngoing })
+
+            // Keep the widget up to date with the newest migraine start
+            self.updateWidgetSharedState()
         } catch {
             print(MigraineError.fetchFailed(underlying: error).localizedDescription)
             self.migraines = []
@@ -184,6 +192,16 @@ final class MigraineManager {
         }
     }
 
+    // MARK: - Widgets sync
+    private func updateWidgetSharedState() {
+        // Persist the latest migraine start date for the widget, and trigger a reload.
+        let defaults = UserDefaults(suiteName: AppGroup.id)
+        let latestStart = self.migraines.first?.startDate
+        let timestamp = latestStart?.timeIntervalSince1970 ?? 0
+        defaults?.set(timestamp, forKey: "lastMigraineStart")
+        WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+    }
+
     // MARK: - Persistence
     private func saveAndReload() {
         do {
@@ -235,4 +253,3 @@ final class MigraineManager {
         }
     }
 }
-

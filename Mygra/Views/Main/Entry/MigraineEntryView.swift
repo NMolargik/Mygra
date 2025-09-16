@@ -345,6 +345,8 @@ struct MigraineEntryView: View {
                         )
                         .tint(.indigo)
                     }
+                    Toggle("Pin this migraine", isOn: $viewModel.pinned)
+                        .onChange(of: $viewModel.pinned.wrappedValue) { _, _ in Haptics.lightImpact() }
                 }
 
                 Section("Possible Triggers") {
@@ -463,11 +465,6 @@ struct MigraineEntryView: View {
                                     .padding(.leading, 5)
                             }
                         }
-                }
-                
-                Section("Options") {
-                    Toggle("Pin this migraine", isOn: $viewModel.pinned)
-                        .onChange(of: $viewModel.pinned.wrappedValue) { _, _ in Haptics.lightImpact() }
                 }
 
                 Section("Notes") {
@@ -623,7 +620,6 @@ struct MigraineEntryView: View {
     }
 
     // MARK: - Save
-
     private func finishTapped() {
         // Basic validations
         let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
@@ -701,7 +697,6 @@ struct MigraineEntryView: View {
 
 
 #Preview("Entry View – Empty State") {
-    // In-memory SwiftData container for preview-only models
     let container: ModelContainer = {
         do {
             return try ModelContainer(
@@ -718,7 +713,6 @@ struct MigraineEntryView: View {
     let previewWeatherManager = WeatherManager()
 
     return MigraineEntryView(onMigraineSaved: { migraine, _ in
-        // For previews, just log the result.
         print("Saved migraine in preview: start=\(migraine.startDate), pain=\(migraine.painLevel)")
     })
     .modelContainer(container)
