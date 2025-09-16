@@ -66,10 +66,10 @@ final class InsightManager {
         Task { await self.handleJustCreatedMigraine(m) }
     }
 
-    private func handleJustCreatedMigraine(_ migraine: Migraine) async {
+    func handleJustCreatedMigraine(_ migraine: Migraine) async {
         guard intelligenceManager.supportsAppleIntelligence else { return }
         if let existing = migraine.insight, !existing.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            return
+            migraine.insight = nil
         }
         await analyzeNewlyCreatedMigraine(migraine)
     }

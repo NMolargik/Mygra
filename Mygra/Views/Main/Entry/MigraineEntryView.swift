@@ -287,7 +287,12 @@ struct MigraineEntryView: View {
                 }
 
                 Section("Duration") {
-                    DatePicker("Started", selection: $viewModel.startDate, displayedComponents: [.date, .hourAndMinute])
+                    DatePicker(
+                        "Started",
+                        selection: $viewModel.startDate,
+                        in: (Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date())...,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
 
                     Toggle("Ongoing", isOn: $viewModel.isOngoing)
                         .onChange(of: $viewModel.isOngoing.wrappedValue) { _, new in
@@ -621,6 +626,13 @@ struct MigraineEntryView: View {
 
     private func finishTapped() {
         // Basic validations
+        let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+        if viewModel.startDate < earliest {
+            viewModel.validationMessage = "Start time cannot be more than 1 day in the past."
+            viewModel.showValidationAlert = true
+            return
+        }
+        
         guard viewModel.validateBeforeSave() else {
             Haptics.error()
             return
