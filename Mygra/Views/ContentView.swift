@@ -60,28 +60,33 @@ struct ContentView: View {
                 .transition(viewModel.leadingTransition)
                 .zIndex(1)
             case .main:
-                MainView(
-                    returnToAppStage: { stage in
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.appStage = stage
-                        }
-                    },
-                    pendingDeepLinkID: $viewModel.pendingDeepLinkID,
-                    pendingDeepLinkAction: $viewModel.pendingDeepLinkAction
+                ConditionalEnvironmentMainView(
+                    base: MainView(
+                        returnToAppStage: { stage in
+                            withAnimation(.easeInOut(duration: 0.3)) {
+                                viewModel.appStage = stage
+                            }
+                        },
+                        pendingDeepLinkID: $viewModel.pendingDeepLinkID,
+                        pendingDeepLinkAction: $viewModel.pendingDeepLinkAction
+                    ),
+                    migraineManager: migraineManager,
+                    insightManager: insightManager
                 )
-                .environment(migraineManager)
-                .environment(insightManager)
                 .id("main")
+                .transition(viewModel.leadingTransition)
                 .zIndex(0)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: viewModel.appStage)
+        // Removed global animation modifier here as per instructions
         // Handle incoming deep links like mygra://migraine/<uuid>?action=end
         .onOpenURL { url in
             let shouldGoToMain = viewModel.handleOpenURL(url)
             if shouldGoToMain {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    viewModel.appStage = .main
+                Task { @MainActor in
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        viewModel.appStage = .main
+                    }
                 }
             }
         }
@@ -95,19 +100,18 @@ struct ContentView: View {
         if userManager.currentUser == nil {
             await userManager.restoreFromCloud(timeout: 1, pollInterval: 1.0)
         }
-        
-        if let _ = userManager.currentUser {
-            Task {
-                await healthManager.refreshLatestForToday()
-                
+
+        if userManager.currentUser != nil {
+            // Perform any data refreshes before transitioning
+            await healthManager.refreshLatestForToday()
+
+            await MainActor.run {
                 if self.migraineManager == nil {
                     self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
                 }
-                
                 if self.weatherManager.locationManager == nil {
                     self.weatherManager.setLocationProvider(LocationManager())
                 }
-                
                 if self.insightManager == nil {
                     self.insightManager = InsightManager(
                         userManager: userManager,
@@ -116,15 +120,15 @@ struct ContentView: View {
                         healthManager: healthManager
                     )
                 }
-                
                 withAnimation(.easeInOut(duration: 0.3)) {
                     viewModel.appStage = .main
                 }
             }
         } else {
-            // Still no user after the restore window → onboarding
-            withAnimation(.easeInOut(duration: 0.3)) {
-                viewModel.appStage = .splash
+            await MainActor.run {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    viewModel.appStage = .splash
+                }
             }
         }
     }
@@ -135,35 +139,58 @@ struct ContentView: View {
         await userManager.refresh()
         // Try another iCloud restore attempt (slightly longer timeout to improve chances)
         await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
-        
+
         guard userManager.currentUser != nil else {
             // Stay on splash if we still don't have a user
             return
         }
-        
+
         // Initialize managers and move to main, mirroring prepareApp happy path
         await healthManager.refreshLatestForToday()
-        
-        if self.migraineManager == nil {
-            self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
+
+        await MainActor.run {
+            if self.migraineManager == nil {
+                self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
+            }
+            if self.weatherManager.locationManager == nil {
+                self.weatherManager.setLocationProvider(LocationManager())
+            }
+            if self.insightManager == nil {
+                self.insightManager = InsightManager(
+                    userManager: userManager,
+                    migraineManager: migraineManager!,
+                    weatherManager: weatherManager,
+                    healthManager: healthManager
+                )
+            }
+
+            withAnimation(.easeInOut(duration: 0.3)) {
+                viewModel.appStage = .main
+            }
         }
-        
-        if self.weatherManager.locationManager == nil {
-            self.weatherManager.setLocationProvider(LocationManager())
+    }
+}
+
+private struct ConditionalEnvironmentMainView<Content: View>: View {
+    let base: Content
+    let migraineManager: MigraineManager?
+    let insightManager: InsightManager?
+
+    init(base: Content, migraineManager: MigraineManager?, insightManager: InsightManager?) {
+        self.base = base
+        self.migraineManager = migraineManager
+        self.insightManager = insightManager
+    }
+
+    var body: some View {
+        var view: AnyView = AnyView(base)
+        if let migraineManager {
+            view = AnyView(view.environment(migraineManager))
         }
-        
-        if self.insightManager == nil {
-            self.insightManager = InsightManager(
-                userManager: userManager,
-                migraineManager: migraineManager!,
-                weatherManager: weatherManager,
-                healthManager: healthManager
-            )
+        if let insightManager {
+            view = AnyView(view.environment(insightManager))
         }
-        
-        withAnimation(.easeInOut(duration: 0.3)) {
-            viewModel.appStage = .main
-        }
+        return view
     }
 }
 

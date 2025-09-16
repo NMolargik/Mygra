@@ -122,14 +122,6 @@ struct MigraineAssistantView: View {
                         Label("Close", systemImage: "xmark")
                     }
                 }
-                ToolbarItem(placement: .keyboard) {
-                    Button {
-                        lightTap()
-                        dismissKeyboard()
-                    } label: {
-                        Image(systemName: "keyboard.chevron.compact.down")
-                    }
-                }
             }
             .onReceive(KeyboardObserver.shared.publisher) { height in
                 // Keep for gentle auto-scroll; no layout padding based on this
@@ -187,7 +179,7 @@ struct MigraineAssistantView: View {
                         .frame(width: 34, height: 34)
                         .background(
                             Circle()
-                                .fill(sendEnabled ? Color.indigo : Color.secondary.opacity(0.25))
+                                .fill(sendEnabled ? Color.pink : Color.secondary.opacity(0.25))
                         )
                 }
                 .buttonStyle(.plain)

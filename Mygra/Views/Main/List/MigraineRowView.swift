@@ -36,11 +36,7 @@ struct MigraineRowView: View {
                         .font(.headline)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
-
-                    if migraine.pinned {
-                        Image(systemName: "pin.fill")
-                            .foregroundStyle(.secondary)
-                    }
+                    
                     Spacer()
 
                     // Pain and stress badges
@@ -62,6 +58,13 @@ struct MigraineRowView: View {
 
                 // Secondary line: triggers as dots + note
                 HStack(spacing: 8) {
+                    if migraine.pinned {
+                        Text("Pinned")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
                     let triggerCount = migraine.triggers.count + migraine.customTriggers.count
                     if triggerCount > 0 {
                         triggerDots(count: triggerCount)

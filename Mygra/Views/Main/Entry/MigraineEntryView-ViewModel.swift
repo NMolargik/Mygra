@@ -56,8 +56,7 @@ extension MigraineEntryView {
             "We’ll help you through this!",
             "Sorry you’re dealing with this...",
             "Let’s get you some relief.",
-            "Here to help.",
-            "You’re not alone."
+            "Here to help."
         ]
 
         // MARK: - Convenience mutations
