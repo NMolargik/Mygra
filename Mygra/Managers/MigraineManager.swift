@@ -69,61 +69,38 @@ final class MigraineManager {
     }
 
     // MARK: - Create
-    @discardableResult
     func create(
-        startDate: Date,
-        endDate: Date? = nil,
-        painLevel: Int,
-        stressLevel: Int,
-        pinned: Bool = false,
-        note: String? = nil,
-        insight: String? = nil,
-        triggers: [MigraineTrigger] = [],
-        customTriggers: [String] = [],
-        foodsEaten: [String] = [],
-        weather: WeatherData? = nil,
-        health: HealthData? = nil,
+        migraine: Migraine,
         reviewScene: UIWindowScene? = nil
-    ) -> Migraine {
-        let model = Migraine(
-            pinned: pinned,
-            startDate: startDate,
-            endDate: endDate,
-            painLevel: painLevel,
-            stressLevel: stressLevel,
-            note: note,
-            insight: insight,
-            triggers: triggers,
-            customTriggers: customTriggers,
-            foodsEaten: foodsEaten,
-            weather: weather,
-            health: health
-        )
-        context.insert(model)
+    ) {
+        context.insert(migraine)
 
         // If this is an ongoing migraine, track it immediately
-        if model.isOngoing {
-            self.ongoingMigraine = model
+        if migraine.isOngoing {
+            self.ongoingMigraine = migraine
         }
 
         // Post creation notification for observers (e.g., InsightManager)
         NotificationCenter.default.post(
             name: MigraineManager.migraineCreatedNotification,
             object: self,
-            userInfo: ["migraine": model]
+            userInfo: ["migraine": migraine]
         )
 
         // If completed at creation time, write to HealthKit immediately
-        if let hm = healthManager, model.endDate != nil {
-            Task { await hm.saveHeadacheForMigraine(model) }
+        if let hm = healthManager, migraine.endDate != nil {
+            Task { await hm.saveHeadacheForMigraine(migraine) }
         }
 
         saveAndReload()
 
         // Review prompt on the 5th-ever migraine
         Task { await maybeRequestReviewIfFifthEver(in: reviewScene) }
+        
+        if migraine.isOngoing {
+            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate, severity: migraine.painLevel, notes: migraine.note ?? "")
+        }
 
-        return model
     }
 
     // MARK: - Update (mutate in place)
@@ -258,3 +235,4 @@ final class MigraineManager {
         }
     }
 }
+

@@ -108,12 +108,8 @@ struct MainView: View {
                 }
                 .tabViewBottomAccessory { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
-                    MigraineEntryView(onMigraineSaved: { migraine in
-                        showingEntrySheet = false
-                        if lastPushedMigraineID != migraine.id {
-                            listPath.append(migraine.id)
-                            lastPushedMigraineID = migraine.id
-                        }
+                    MigraineEntryView(onMigraineSaved: { migraine, reviewScene in
+                        createNewMigraine(migraine: migraine, reviewScene: reviewScene)
                     })
                     .interactiveDismissDisabled(true)
                     .presentationDetents([.large])
@@ -209,13 +205,10 @@ struct MainView: View {
                 .tint(appTab.color)
                 .tabViewBottomAccessory { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
-                    MigraineEntryView(onMigraineSaved: { migraine in
-                        showingEntrySheet = false
+                    MigraineEntryView(
+                        onMigraineSaved: { migraine, reviewScene in
                         appTab = .list
-                        if lastPushedMigraineID != migraine.id {
-                            listPath.append(migraine.id)
-                            lastPushedMigraineID = migraine.id
-                        }
+                        createNewMigraine(migraine: migraine, reviewScene: reviewScene)
                     })
                     .interactiveDismissDisabled(true)
                     .presentationDetents([.large])
@@ -344,6 +337,16 @@ struct MainView: View {
             }
         }
     }
+    
+    private func createNewMigraine(migraine: Migraine, reviewScene: UIWindowScene?) {
+        migraineManager.create(migraine: migraine, reviewScene: reviewScene)
+        
+        showingEntrySheet = false
+        if lastPushedMigraineID != migraine.id {
+            listPath.append(migraine.id)
+            lastPushedMigraineID = migraine.id
+        }
+    }
 
     private func navigateToMigraine(id: UUID) {
         if !isRegularWidth {
@@ -389,51 +392,51 @@ private struct DrawOnOffEffect: ViewModifier {
         #endif
     }
 }
-
-#Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(
-            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewHealthManager = HealthManager()
-    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
-    let previewWeatherManager = WeatherManager()
-    let previewNotificationManager = NotificationManager()
-    let previewLocationManager = LocationManager()
-    let previewInsightManager = InsightManager(userManager: previewUserManager, migraineManager: previewMigraineManager, weatherManager: previewWeatherManager, healthManager: previewHealthManager)
-
-    let now = Date()
-    let twoHoursAgo = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
-
-    _ = previewMigraineManager.create(
-        startDate: twoHoursAgo,
-        endDate: nil,
-        painLevel: 7,
-        stressLevel: 6,
-        pinned: true,
-        note: "Ongoing for preview",
-        insight: nil,
-        triggers: [],
-        foodsEaten: []
-    )
-
-    return MainView(
-        returnToAppStage: { _ in },
-        pendingDeepLinkID: .constant(nil),
-        pendingDeepLinkAction: .constant(nil)
-    )
-    .modelContainer(container)
-    .environment(previewUserManager)
-    .environment(previewMigraineManager)
-    .environment(previewWeatherManager)
-    .environment(previewHealthManager)
-    .environment(previewLocationManager)
-    .environment(previewNotificationManager)
-    .environment(previewInsightManager)
-}
+//
+//#Preview {
+//    let container: ModelContainer
+//    do {
+//        container = try ModelContainer(
+//            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+//            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+//        )
+//    } catch {
+//        fatalError("Preview ModelContainer setup failed: \(error)")
+//    }
+//    let previewUserManager = UserManager(context: container.mainContext)
+//    let previewHealthManager = HealthManager()
+//    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
+//    let previewWeatherManager = WeatherManager()
+//    let previewNotificationManager = NotificationManager()
+//    let previewLocationManager = LocationManager()
+//    let previewInsightManager = InsightManager(userManager: previewUserManager, migraineManager: previewMigraineManager, weatherManager: previewWeatherManager, healthManager: previewHealthManager)
+//
+//    let now = Date()
+//    let twoHoursAgo = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
+//
+//    _ = previewMigraineManager.create(
+//        startDate: twoHoursAgo,
+//        endDate: nil,
+//        painLevel: 7,
+//        stressLevel: 6,
+//        pinned: true,
+//        note: "Ongoing for preview",
+//        insight: nil,
+//        triggers: [],
+//        foodsEaten: []
+//    )
+//
+//    return MainView(
+//        returnToAppStage: { _ in },
+//        pendingDeepLinkID: .constant(nil),
+//        pendingDeepLinkAction: .constant(nil)
+//    )
+//    .modelContainer(container)
+//    .environment(previewUserManager)
+//    .environment(previewMigraineManager)
+//    .environment(previewWeatherManager)
+//    .environment(previewHealthManager)
+//    .environment(previewLocationManager)
+//    .environment(previewNotificationManager)
+//    .environment(previewInsightManager)
+//}

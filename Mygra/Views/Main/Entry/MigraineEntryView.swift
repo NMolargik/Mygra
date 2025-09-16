@@ -8,20 +8,17 @@
 import SwiftUI
 import SwiftData
 import WeatherKit
+import UIKit
 
 struct MigraineEntryView: View {
     @Environment(HealthManager.self) private var healthManager
     @Environment(WeatherManager.self) private var weatherManager
-    @Environment(MigraineManager.self) private var migraineManager
-
-    var onMigraineSaved: (Migraine) -> Void
-    
     @Environment(\.dismiss) private var dismiss
-    @State private var viewModel: ViewModel = ViewModel()
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
 
-    // Capture the current UIWindowScene without touching UIApplication.shared
-    @State private var capturedScene: UIWindowScene? = nil
+    var onMigraineSaved: (Migraine, UIWindowScene?) -> Void
+    
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @State private var viewModel: ViewModel = ViewModel()
 
     var body: some View {
         @Bindable var vm = viewModel
@@ -81,7 +78,7 @@ struct MigraineEntryView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     if let w = h.waterLiters {
                                         Label {
-                                            Text(displayWater(w))
+                                            Text(vm.displayWater(w, useMetricUnits: useMetricUnits))
                                         } icon: {
                                             Image(systemName: "drop.fill")
                                                 .foregroundStyle(w == 0 ? .red : .secondary)
@@ -101,10 +98,10 @@ struct MigraineEntryView: View {
                                     
                                     if let phase = h.menstrualPhase {
                                         Label {
-                                            Text(displayMenstrualPhase(phase))
+                                            Text(vm.displayMenstrualPhase(phase))
                                         } icon: {
-                                            Image(systemName: menstrualPhaseIcon(phase))
-                                                .foregroundStyle(menstrualPhaseColor(phase))
+                                            Image(systemName: vm.menstrualPhaseIcon(phase))
+                                                .foregroundStyle(vm.menstrualPhaseColor(phase))
                                         }
                                     }
                                     
@@ -148,7 +145,7 @@ struct MigraineEntryView: View {
                                     
                                     if let glucose = h.glucoseMgPerdL {
                                         Label {
-                                            Text(displayGlucose(glucoseMgPerdL: glucose))
+                                            Text(vm.displayGlucose(mgPerdL: glucose, useMetricUnits: useMetricUnits))
                                         } icon: {
                                             Image(systemName: "syringe")
                                                 .foregroundStyle(.secondary)
@@ -165,7 +162,7 @@ struct MigraineEntryView: View {
                                 HStack {
                                     Spacer()
                                     Button(vm.isEditingHealthValues ? "Cancel Editing" : "Edit Intake Values") {
-                                        lightImpact()
+                                        Haptics.lightImpact()
                                         toggleHealthEditor()
                                     }
                                     .tint(.blue)
@@ -183,9 +180,9 @@ struct MigraineEntryView: View {
                                     addSleepHours: $vm.addSleepHours,
                                     // Display/config
                                     useMetricUnits: useMetricUnits,
-                                    waterRange: waterRange,
-                                    waterStep: waterStep,
-                                    waterDisplay: waterDisplay(_:),
+                                    waterRange: vm.waterRange(useMetricUnits: useMetricUnits),
+                                    waterStep: vm.waterStep(useMetricUnits: useMetricUnits),
+                                    waterDisplay: { vm.waterDisplay($0, useMetricUnits: useMetricUnits) },
                                     // Status/flags
                                     isSaving: vm.isSavingHealthEdits,
                                     errorMessage: vm.healthEditErrorMessage,
@@ -196,7 +193,7 @@ struct MigraineEntryView: View {
                                         Task { await saveHealthEdits() }
                                     },
                                     onCancel: {
-                                        lightImpact()
+                                        Haptics.lightImpact()
                                         withAnimation { vm.isEditingHealthValues = false }
                                     }
                                 )
@@ -267,7 +264,7 @@ struct MigraineEntryView: View {
                                 }
                                 
                                 if let t = weatherManager.temperature {
-                                    Label(displayTemperature(t), systemImage: "thermometer.medium")
+                                    Label(vm.displayTemperature(t, useMetricUnits: useMetricUnits), systemImage: "thermometer.medium")
                                 }
                                 if let h = weatherManager.humidityPercentString {
                                     Label(h, systemImage: "humidity.fill")
@@ -277,7 +274,7 @@ struct MigraineEntryView: View {
 
                             VStack(alignment: .leading, spacing: 4) {
                                 if let p = weatherManager.pressure {
-                                    Label(displayPressure(p), systemImage: "gauge.with.dots.needle.bottom.50percent")
+                                    Label(vm.displayPressure(p, useMetricUnits: useMetricUnits), systemImage: "gauge.with.dots.needle.bottom.50percent")
                                 }
                                 if let c = weatherManager.condition {
                                     Label(c.description.capitalized, systemImage: "cloud.sun")
@@ -295,7 +292,7 @@ struct MigraineEntryView: View {
 
                     Toggle("Ongoing", isOn: $vm.isOngoing)
                         .onChange(of: $vm.isOngoing.wrappedValue) { _, new in
-                            lightImpact()
+                            Haptics.lightImpact()
                             vm.setOngoing(new)
                         }
 
@@ -324,7 +321,7 @@ struct MigraineEntryView: View {
                             in: 0...10,
                             step: 1
                         )
-                        .tint(gradientColor(for: vm.painLevel))
+                        .tint(vm.gradientColor(for: vm.painLevel))
                     }
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -354,7 +351,7 @@ struct MigraineEntryView: View {
                             .autocorrectionDisabled()
                         if !vm.triggerSearchText.isEmpty {
                             Button {
-                                lightImpact()
+                                Haptics.lightImpact()
                                 vm.triggerSearchText = ""
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
@@ -367,12 +364,12 @@ struct MigraineEntryView: View {
 
                     // Grouped, filtered multi-select list
                     ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
-                        let items = filteredTriggers(for: group, search: $vm.triggerSearchText.wrappedValue)
+                        let items = vm.filteredTriggers(for: group, search: $vm.triggerSearchText.wrappedValue)
                         if !items.isEmpty {
                             DisclosureGroup(group.displayName) {
                                 ForEach(items, id: \.self) { trig in
                                     Button {
-                                        lightImpact()
+                                        Haptics.lightImpact()
                                         vm.toggleTrigger(trig)
                                     } label: {
                                         HStack {
@@ -401,7 +398,7 @@ struct MigraineEntryView: View {
                                 .autocorrectionDisabled()
                                 .onSubmit { vm.addCustomTrigger() }
                             Button {
-                                lightImpact()
+                                Haptics.lightImpact()
                                 vm.addCustomTrigger()
                             } label: {
                                 Image(systemName: "plus.circle.fill")
@@ -410,30 +407,31 @@ struct MigraineEntryView: View {
                         }
 
                         if !vm.customTriggers.isEmpty {
-                            FlowLayout(
-                                mode: .scrollable, // allows horizontal scroll within each line if needed
-                                items: vm.customTriggers,
-                                itemSpacing: 6,
-                                lineSpacing: 6
-                            ) { idx, label in
-                                HStack(spacing: 6) {
-                                    Text(label)
-                                        .font(.caption)
-                                        .padding(.vertical, 4)
-                                        .padding(.leading, 10)
-                                    Button {
-                                        lightImpact()
-                                        vm.removeCustomTrigger(at: idx)
-                                    } label: {
-                                        Image(systemName: "xmark.circle.fill")
-                                            .foregroundStyle(.secondary)
+                            LazyVGrid(
+                                columns: [GridItem(.adaptive(minimum: 120), spacing: 6)],
+                                alignment: .leading,
+                                spacing: 6
+                            ) {
+                                ForEach(Array(vm.customTriggers.enumerated()), id: \.offset) { idx, label in
+                                    HStack(spacing: 6) {
+                                        Text(label)
+                                            .font(.caption)
+                                            .padding(.vertical, 4)
+                                            .padding(.leading, 10)
+                                        Button {
+                                            Haptics.lightImpact()
+                                            vm.removeCustomTrigger(at: idx)
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill")
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .padding(.trailing, 6)
                                     }
-                                    .buttonStyle(.plain)
-                                    .padding(.trailing, 6)
+                                    .background(
+                                        Capsule().fill(Color.secondary.opacity(0.15))
+                                    )
                                 }
-                                .background(
-                                    Capsule().fill(Color.secondary.opacity(0.15))
-                                )
                             }
                             .padding(.vertical, 4)
                         }
@@ -465,7 +463,7 @@ struct MigraineEntryView: View {
                 
                 Section("Options") {
                     Toggle("Pin this migraine", isOn: $vm.pinned)
-                        .onChange(of: $vm.pinned.wrappedValue) { _, _ in lightImpact() }
+                        .onChange(of: $vm.pinned.wrappedValue) { _, _ in Haptics.lightImpact() }
                 }
 
                 Section("Notes") {
@@ -486,7 +484,7 @@ struct MigraineEntryView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
-                        lightImpact()
+                        Haptics.lightImpact()
                         dismiss()
                     }
                     .foregroundStyle(.red)
@@ -494,19 +492,12 @@ struct MigraineEntryView: View {
 
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Finish") {
-                        // Validation happens inside finishTapped(); we’ll do success haptic there on success.
-                        lightImpact()
+                        Haptics.lightImpact()
                         finishTapped()
                     }
                     .foregroundStyle(.blue)
                 }
             }
-            // SceneGrabber runs once view is in a window; captures the UIWindowScene.
-            .background(SceneGrabber { scene in
-                if capturedScene == nil {
-                    capturedScene = scene
-                }
-            })
         }
         .task {
             vm.resetGreeting()
@@ -516,7 +507,7 @@ struct MigraineEntryView: View {
         }
         .alert("Cannot Save", isPresented: $vm.showValidationAlert, actions: {
             Button("OK", role: .cancel) {
-                errorHaptic()
+                Haptics.error()
             }
         }, message: {
             Text(vm.validationMessage)
@@ -525,139 +516,11 @@ struct MigraineEntryView: View {
         // Snap water to new step/range whenever unit preference changes
         .onChange(of: useMetricUnits) { _, _ in
             // Use the stored viewModel here to avoid dynamicMember binding confusion
-            viewModel.addWater = snap(viewModel.addWater, toStep: waterStep, in: waterRange)
+            viewModel.addWater = vm.snap(viewModel.addWater, toStep: vm.waterStep(useMetricUnits: useMetricUnits), in: vm.waterRange(useMetricUnits: useMetricUnits))
         }
     }
 
-    // MARK: - Haptics
 
-    private func lightImpact() {
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.prepare()
-        gen.impactOccurred()
-    }
-
-    private func mediumImpact() {
-        let gen = UIImpactFeedbackGenerator(style: .medium)
-        gen.prepare()
-        gen.impactOccurred()
-    }
-
-    private func successHaptic() {
-        let gen = UINotificationFeedbackGenerator()
-        gen.prepare()
-        gen.notificationOccurred(.success)
-    }
-
-    private func errorHaptic() {
-        let gen = UINotificationFeedbackGenerator()
-        gen.prepare()
-        gen.notificationOccurred(.error)
-    }
-
-    // MARK: - Helpers (unit-aware display)
-
-    private func displayWater(_ liters: Double) -> String {
-        if useMetricUnits {
-            return String(format: "%.1f L water", liters)
-        } else {
-            let ounces = liters * 33.814
-            return String(format: "%.0f fl oz water", ounces.rounded())
-        }
-    }
-    
-    private func displayGlucose(glucoseMgPerdL: Double) -> String {
-        if useMetricUnits {
-            let mmol = glucoseMgPerdL / 18.0
-            return String(format: "%.1f mmol/L glucose", mmol)
-        } else {
-            return String(format: "%.0f mg/dL glucose", glucoseMgPerdL.rounded())
-        }
-    }
-    
-    private func displayMenstrualPhase(_ phase: MenstrualPhase) -> String {
-        switch phase {
-        case .menstrual: return "Menstrual phase"
-        case .follicular: return "Follicular phase"
-        case .ovulatory: return "Ovulatory phase"
-        case .luteal: return "Luteal phase"
-        }
-    }
-    
-    private func menstrualPhaseIcon(_ phase: MenstrualPhase) -> String {
-        switch phase {
-        case .menstrual: return "drop.circle.fill"
-        case .follicular: return "leaf.fill"
-        case .ovulatory: return "sparkles"
-        case .luteal: return "circle.lefthalf.filled"
-        }
-    }
-    
-    private func menstrualPhaseColor(_ phase: MenstrualPhase) -> Color {
-        switch phase {
-        case .menstrual: return .pink
-        case .follicular: return .green
-        case .ovulatory: return .yellow
-        case .luteal: return .orange
-        }
-    }
-
-    private func displayTemperature(_ temp: Measurement<UnitTemperature>) -> String {
-        let value: Double
-        let unit: String
-        if useMetricUnits {
-            value = temp.converted(to: .celsius).value
-            unit = "°C"
-        } else {
-            value = temp.converted(to: .fahrenheit).value
-            unit = "°F"
-        }
-        return "\(Int(round(value))) \(unit)"
-    }
-
-    private func displayPressure(_ pressure: Measurement<UnitPressure>) -> String {
-        if useMetricUnits {
-            let hpa = pressure.converted(to: .hectopascals).value
-            return String(format: "%.0f hPa", hpa)
-        } else {
-            let inHg = pressure.converted(to: .inchesOfMercury).value
-            return String(format: "%.2f inHg", inHg)
-        }
-    }
-
-    // MARK: - Slider helpers
-
-    private var waterRange: ClosedRange<Double> {
-        if useMetricUnits { 0.0...5.0 } else { 0.0...170.0 } // liters vs fl oz
-    }
-    private var waterStep: Double {
-        useMetricUnits ? 0.1 : 1.0
-    }
-    private func waterDisplay(_ value: Double) -> String {
-        if useMetricUnits {
-            return String(format: "+%.1f L", value)
-        } else {
-            return String(format: "+%.0f fl oz", value)
-        }
-    }
-    private func snap(_ value: Double, toStep step: Double, in range: ClosedRange<Double>) -> Double {
-        guard step > 0 else { return min(max(value, range.lowerBound), range.upperBound) }
-        let snapped = (value / step).rounded() * step
-        return min(max(snapped, range.lowerBound), range.upperBound)
-    }
-
-    private func gradientColor(for value: Int) -> Color {
-        let v = max(0, min(10, value))
-        if v <= 5 {
-            // green (0,1,0) to yellow (1,1,0)
-            let t = Double(v) / 5.0
-            return Color(red: t, green: 1.0, blue: 0.0)
-        } else {
-            // yellow (1,1,0) to red (1,0,0)
-            let t = Double(v - 5) / 5.0
-            return Color(red: 1.0, green: 1.0 - t, blue: 0.0)
-        }
-    }
     // MARK: - Health editor actions
 
     private func toggleHealthEditor() {
@@ -706,10 +569,10 @@ struct MigraineEntryView: View {
 
             viewModel.healthEditErrorMessage = nil
             withAnimation { viewModel.isEditingHealthValues = false }
-            successHaptic()
+            Haptics.success()
         } catch {
             viewModel.healthEditErrorMessage = "Failed to save to Apple Health: \(error.localizedDescription)"
-            errorHaptic()
+            Haptics.error()
         }
     }
 
@@ -755,22 +618,12 @@ struct MigraineEntryView: View {
         viewModel.isPullingWeather = false
     }
 
-    // MARK: - Triggers helpers
-
-    private func filteredTriggers(for group: MigraineTrigger.Group, search: String) -> [MigraineTrigger] {
-        let all = MigraineTrigger.cases(for: group)
-        let trimmed = search.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return all }
-        let lower = trimmed.lowercased()
-        return all.filter { $0.displayName.lowercased().contains(lower) }
-    }
-
     // MARK: - Save
 
     private func finishTapped() {
         // Basic validations
         guard viewModel.validateBeforeSave() else {
-            errorHaptic()
+            Haptics.error()
             return
         }
 
@@ -815,191 +668,50 @@ struct MigraineEntryView: View {
 
         // Foods parsing
         let foods: [String] = viewModel.parseFoods()
-
-        // Create the migraine, passing the captured scene for the review prompt
-        let newMigraine = migraineManager.create(
-            startDate: viewModel.startDate,
+        
+        let newMigraine = Migraine(
+            pinned: viewModel.pinned, startDate: viewModel.startDate,
             endDate: viewModel.isOngoing ? nil : viewModel.endDate,
             painLevel: viewModel.painLevel,
             stressLevel: viewModel.stressLevel,
-            pinned: viewModel.pinned,
             note: viewModel.noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : viewModel.noteText,
             insight: nil,
             triggers: Array(viewModel.selectedTriggers),
             customTriggers: viewModel.customTriggers,
             foodsEaten: foods,
             weather: weatherModel,
-            health: healthModel,
-            reviewScene: capturedScene
+            health: healthModel
         )
 
-        // Start Live Activity if ongoing
-        if newMigraine.isOngoing {
-            MigraineActivityCenter.start(for: newMigraine.id, startDate: newMigraine.startDate, severity: newMigraine.painLevel, notes: newMigraine.note ?? "")
-        }
-
-        successHaptic()
-        // Done
-        onMigraineSaved(newMigraine)
+        Haptics.success()
+        onMigraineSaved(newMigraine, nil)
     }
 }
 
-// MARK: - SceneGrabber: captures the UIWindowScene without using UIApplication.shared
-private struct SceneGrabber: UIViewRepresentable {
-    var onScene: (UIWindowScene) -> Void
 
-    func makeUIView(context: Context) -> UIView {
-        let v = SceneProbeView()
-        v.onScene = onScene
-        return v
-    }
-    func updateUIView(_ uiView: UIView, context: Context) { }
-
-    private final class SceneProbeView: UIView {
-        var onScene: ((UIWindowScene) -> Void)?
-        override func didMoveToWindow() {
-            super.didMoveToWindow()
-            if let scene = window?.windowScene {
-                onScene?(scene)
-            }
-        }
-    }
-}
-
-// MARK: - Flexible FlowLayout for wrapping chips
-private struct FlowLayout<Item, Content: View>: View {
-    enum Mode {
-        case vstack // pure wrap, no internal scroll
-        case scrollable // each line can scroll horizontally if very long
-    }
-
-    let mode: Mode
-    let items: [Item]
-    let itemSpacing: CGFloat
-    let lineSpacing: CGFloat
-    let content: (_ index: Int, _ item: Item) -> Content
-
-    init(
-        mode: Mode = .vstack,
-        items: [Item],
-        itemSpacing: CGFloat = 8,
-        lineSpacing: CGFloat = 8,
-        @ViewBuilder content: @escaping (_ index: Int, _ item: Item) -> Content
-    ) {
-        self.mode = mode
-        self.items = items
-        self.itemSpacing = itemSpacing
-        self.lineSpacing = lineSpacing
-        self.content = content
-    }
-
-    var body: some View {
-        GeometryReader { proxy in
-            let maxWidth = proxy.size.width
-            self.generateContent(maxWidth: maxWidth)
-        }
-        .frame(minHeight: 0) // allow the form to size it naturally
-    }
-
-    private func generateContent(maxWidth: CGFloat) -> some View {
-        var rows: [[(Int, Item)]] = []
-        var currentRow: [(Int, Item)] = []
-        var currentRowWidth: CGFloat = 0
-
-        let sizes: [CGSize] = items.enumerated().map { idx, item in
-            // Estimate size by rendering offscreen. For simplicity, give a reasonable width budget.
-            let hosting = UIHostingController(rootView:
-                content(idx, item)
-                    .fixedSize() // take natural size
+#Preview("Entry View – Empty State") {
+    // In-memory SwiftData container for preview-only models
+    let container: ModelContainer = {
+        do {
+            return try ModelContainer(
+                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
             )
-            hosting.view.translatesAutoresizingMaskIntoConstraints = false
-            let target = hosting.sizeThatFits(in: CGSize(width: maxWidth, height: .greatestFiniteMagnitude))
-            return target
+        } catch {
+            fatalError("Preview ModelContainer setup failed: \(error)")
         }
+    }()
 
-        for (idx, item) in items.enumerated() {
-            let size = sizes[idx]
-            let proposedWidth = (currentRow.isEmpty ? 0 : currentRowWidth + itemSpacing) + size.width
-            if proposedWidth <= maxWidth {
-                // fits in current row
-                currentRow.append((idx, item))
-                currentRowWidth = proposedWidth
-            } else {
-                // wrap to next row
-                if !currentRow.isEmpty {
-                    rows.append(currentRow)
-                }
-                currentRow = [(idx, item)]
-                currentRowWidth = size.width
-            }
-        }
-        if !currentRow.isEmpty {
-            rows.append(currentRow)
-        }
-
-        return VStack(alignment: .leading, spacing: lineSpacing) {
-            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
-                if mode == .scrollable {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: itemSpacing) {
-                            ForEach(row, id: \.0) { idx, item in
-                                content(idx, item)
-                            }
-                        }
-                    }
-                } else {
-                    HStack(spacing: itemSpacing) {
-                        ForEach(row, id: \.0) { idx, item in
-                            content(idx, item)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-#Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(
-            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-    let previewUserManager = UserManager(context: container.mainContext)
+    // Lightweight preview managers
     let previewHealthManager = HealthManager()
-    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
     let previewWeatherManager = WeatherManager()
-    let previewNotificationManager = NotificationManager()
-    let previewLocationManager = LocationManager()
-    let previewInsightManager = InsightManager(userManager: previewUserManager, migraineManager: previewMigraineManager, weatherManager: previewWeatherManager, healthManager: previewHealthManager)
 
-    let now = Date()
-    let twoHoursAgo = Calendar.current.date(byAdding: .hour, value: -2, to: now)!
-
-    _ = previewMigraineManager.create(
-        startDate: twoHoursAgo,
-        endDate: nil,
-        painLevel: 7,
-        stressLevel: 6,
-        pinned: true,
-        note: "Ongoing for preview",
-        insight: nil,
-        triggers: [],
-        foodsEaten: []
-    )
-
-    return MigraineEntryView(onMigraineSaved: { _ in })
-        .modelContainer(container)
-        .environment(previewUserManager)
-        .environment(previewMigraineManager)
-        .environment(previewWeatherManager)
-        .environment(previewHealthManager)
-        .environment(previewLocationManager)
-        .environment(previewNotificationManager)
-        .environment(previewInsightManager)
+    return MigraineEntryView(onMigraineSaved: { migraine, _ in
+        // For previews, just log the result.
+        print("Saved migraine in preview: start=\(migraine.startDate), pain=\(migraine.painLevel)")
+    })
+    .modelContainer(container)
+    .environment(previewWeatherManager)
+    .environment(previewHealthManager)
+    .environment(\.locale, .init(identifier: "en_US"))
 }
-
