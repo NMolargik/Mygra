@@ -239,7 +239,7 @@ struct MigraineListView: View {
                     }
                 )
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
             .interactiveDismissDisabled()
         }
         // Pull-to-refresh to re-run the manager query

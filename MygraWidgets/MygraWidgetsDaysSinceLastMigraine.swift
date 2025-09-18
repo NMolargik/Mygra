@@ -9,6 +9,8 @@ import Foundation
 import WidgetKit
 import SwiftUI
 
+private let WidgetAppGroupID = "group.com.molargiksoftware.Mygra"
+
 struct DaysSinceLastMigraineEntry: TimelineEntry {
     let date: Date
     let daysSince: Int
@@ -33,7 +35,7 @@ private struct DaysSinceLastMigraineProvider: TimelineProvider {
     }
 
     private func makeEntry() -> DaysSinceLastMigraineEntry {
-        let defaults = UserDefaults(suiteName: AppGroup.id)
+        let defaults = UserDefaults(suiteName: WidgetAppGroupID)
         let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
         let lastStart = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
         let days = Self.daysSince(lastStart)
@@ -72,14 +74,13 @@ private struct DaysSinceLastMigraineView: View {
     var body: some View {
         ZStack {
             VStack(alignment: .center, spacing: 4) {
-                Text("Days Since\nLast Migraine")
+                Text("Days Since Last Migraine")
                     .font(.caption2)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
                     .lineSpacing(1.5)
                     .textCase(.uppercase)
                     .tracking(0.5)
-                    .foregroundStyle(.background)
                     .frame(maxWidth: .infinity, alignment: .center)
 
                 Spacer(minLength: 0)
@@ -102,7 +103,6 @@ private struct DaysSinceLastMigraineView: View {
                         .minimumScaleFactor(0.8)
                         .padding(.top, 2)
                         .frame(maxWidth: .infinity, alignment: .center)
-                        .foregroundStyle(.background)
                 }
             }
             .padding(12)
@@ -147,3 +147,4 @@ struct MygraWidgetsDaysSinceLastMigraine: Widget {
     DaysSinceLastMigraineEntry(date: .now, daysSince: 2)
     DaysSinceLastMigraineEntry(date: .now, daysSince: 21)
 }
+

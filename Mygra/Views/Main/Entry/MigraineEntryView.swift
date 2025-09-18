@@ -513,7 +513,7 @@ struct MigraineEntryView: View {
         }, message: {
             Text(viewModel.validationMessage)
         })
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.large])
         // Snap water to new step/range whenever unit preference changes
         .onChange(of: useMetricUnits) { _, _ in
             // Use the stored viewModel here to avoid dynamicMember binding confusion

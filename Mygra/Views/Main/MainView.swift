@@ -66,7 +66,7 @@ struct MainView: View {
                                     Button {
                                         showingSettingsSheet = true
                                     } label: {
-                                        Image(systemName: "gearshape")
+                                        Image(systemName: "gearshape.fill")
                                     }
                                     .accessibilityLabel("Settings")
                                     .tint(.orange)

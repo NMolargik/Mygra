@@ -13,7 +13,7 @@ import UIKit
 import WidgetKit
 
 enum AppGroup {
-    static let id = "group.com.molargiksoftware.mygra"
+    static let id = "group.com.molargiksoftware.Mygra"
 }
 
 @MainActor
@@ -194,12 +194,29 @@ final class MigraineManager {
 
     // MARK: - Widgets sync
     private func updateWidgetSharedState() {
-        // Persist the latest migraine start date for the widget, and trigger a reload.
+        // Persist the latest migraine start date for the widget, and trigger a reload only if it changed.
         let defaults = UserDefaults(suiteName: AppGroup.id)
+
+        // Determine the newest migraine start (newest-first array)
         let latestStart = self.migraines.first?.startDate
-        let timestamp = latestStart?.timeIntervalSince1970 ?? 0
-        defaults?.set(timestamp, forKey: "lastMigraineStart")
-        WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+
+        // Read the previously stored value (if any)
+        let previous = defaults?.double(forKey: "lastMigraineStart")
+
+        // Only write when we have a valid date; avoid overwriting with 0 during early/empty refreshes.
+        if let latestStart {
+            let newValue = latestStart.timeIntervalSince1970
+            // Normalize any previously stored milliseconds just in case
+            let prev = (previous ?? 0) > 10_000_000_000 ? ((previous ?? 0) / 1000.0) : (previous ?? 0)
+
+            if abs(newValue - prev) > 0.5 {
+                defaults?.set(newValue, forKey: "lastMigraineStart")
+                WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+            }
+        } else {
+             defaults?.removeObject(forKey: "lastMigraineStart")
+             WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+        }
     }
 
     // MARK: - Persistence
@@ -253,3 +270,4 @@ final class MigraineManager {
         }
     }
 }
+

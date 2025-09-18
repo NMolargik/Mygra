@@ -219,8 +219,9 @@ struct MigraineDetailView: View {
                     seedEditState()
                     showingModifySheet = true
                 } label: {
-                    Label("Modify", systemImage: "slider.horizontal.3")
+                    Label("Modify", systemImage: "pencil")
                 }
+                .tint(.green)
                 .accessibilityIdentifier("modifyMigraineButton")
             }
         }
@@ -241,7 +242,7 @@ struct MigraineDetailView: View {
                 },
                 onCancel: { /* simply closes */ }
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
         }
         .sheet(isPresented: $showingModifySheet) {
             NavigationStack {
@@ -353,6 +354,7 @@ struct MigraineDetailView: View {
                             Haptics.lightImpact()
                             showingModifySheet = false
                         }
+                        .tint(.red)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {
@@ -399,10 +401,12 @@ struct MigraineDetailView: View {
 
                             showingModifySheet = false
                         }
+                        .tint(.blue)
                     }
                 }
             }
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
+            .interactiveDismissDisabled()
         }
         
 .onChange(of: showingModifySheet) { _, newValue in
@@ -616,3 +620,4 @@ struct MigraineDetailView: View {
         }
     }
 }
+

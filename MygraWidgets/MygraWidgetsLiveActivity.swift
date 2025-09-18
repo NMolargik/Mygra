@@ -75,9 +75,8 @@ struct MygraWidgetsLiveActivity: Widget {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Mygra")
                                 .font(.subheadline.bold())
-                                .foregroundStyle(.secondary)
-                            // New: Compact severity display
-                            Text("Pain: \(context.state.severity)/10")
+                                .foregroundStyle(.primary)
+                            Text("Pain: \(context.state.severity)")
                                 .font(.caption.bold())
                                 .foregroundStyle(severityColor(severity: context.state.severity))
                         }
@@ -88,7 +87,7 @@ struct MygraWidgetsLiveActivity: Widget {
                     Text(context.state.startDate, style: .timer)
                         .monospacedDigit()
                         .font(.title3)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.primary)
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text("Ongoing Migraine")
@@ -126,23 +125,22 @@ struct MygraWidgetsLiveActivity: Widget {
                     .foregroundStyle(.red)
                     .font(.caption)
             } compactTrailing: {
-                // Compact trailing - Timer with severity hint via color
-                Text(context.state.startDate, style: .timer)
-                    .monospacedDigit()
-                    .font(.caption2)
-                    .foregroundStyle(severityColor(severity: context.state.severity))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-                    .frame(maxWidth: .infinity, alignment: .trailing)
+                // Compact trailing - Ultra-compact severity chip to avoid stretching width
+                Text("\(context.state.severity)")
+                    .font(.caption2.bold())
+                    .foregroundStyle(.black)
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 2)
+                    .background(severityColor(severity: context.state.severity))
+                    .clipShape(Capsule())
             } minimal: {
                 // Minimal - Icon with severity color overlay
                 Image(systemName: "brain.head.profile.fill")
-                    .foregroundStyle(severityColor(severity: context.state.severity))
-                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .padding()
             }
-            .widgetURL(URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)")) // New: Deep link on tap
+            .widgetURL(URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)"))
             .keylineTint(.red.opacity(0.5))
-            //.contentMargins(.all, 4, for: .) // New: Slight margins for better spacing
         }
     }
 }
@@ -163,3 +161,22 @@ private func severityColor(severity: Int) -> Color {
 } contentStates: {
     MigraineActivityAttributes.ContentState.sample
 }
+
+#Preview("Dynamic Island - Expanded", as: .dynamicIsland(.expanded), using: MigraineActivityAttributes()) {
+    MygraWidgetsLiveActivity()
+} contentStates: {
+    MigraineActivityAttributes.ContentState.sample
+}
+
+#Preview("Dynamic Island - Compact", as: .dynamicIsland(.compact), using: MigraineActivityAttributes()) {
+    MygraWidgetsLiveActivity()
+} contentStates: {
+    MigraineActivityAttributes.ContentState.sample
+}
+
+#Preview("Dynamic Island - Minimal", as: .dynamicIsland(.minimal), using: MigraineActivityAttributes()) {
+    MygraWidgetsLiveActivity()
+} contentStates: {
+    MigraineActivityAttributes.ContentState.sample
+}
+

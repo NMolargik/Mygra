@@ -163,6 +163,7 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                             editingUser = false
                             Haptics.lightImpact()
                         }
+                        .tint(.red)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {

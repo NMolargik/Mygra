@@ -59,6 +59,7 @@ struct TodayCardView: View {
                             .animation(.easeInOut(duration: 0.2), value: isQuickAddExpanded)
                     }
                 }
+                .tint(.red)
                 .buttonStyle(.bordered)
                 .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
             }

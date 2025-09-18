@@ -94,7 +94,7 @@ struct SplashView: View {
                     showReturningUserModal = false
                 }
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
         }
         .padding(.top, 80)
     }
