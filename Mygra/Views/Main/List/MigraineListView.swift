@@ -10,9 +10,9 @@ import SwiftData
 
 struct MigraineListView: View {
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
-    
-    @Bindable var viewModel: MigraineListView.ViewModel = MigraineListView.ViewModel()
     @Binding var showingEntrySheet: Bool
+
+    @Bindable var viewModel: MigraineListView.ViewModel = MigraineListView.ViewModel()
 
     var body: some View {
         Group {
@@ -47,7 +47,7 @@ struct MigraineListView: View {
                             HStack(spacing: 12) {
                                 if f.pinnedOnly {
                                     Button {
-                                        lightTap()
+                                        Haptics.lightImpact()
                                         var new = f
                                         new.pinnedOnly = false
                                         migraineManager.filter = new
@@ -59,7 +59,7 @@ struct MigraineListView: View {
                                     .accessibilityIdentifier("emptyShowAllButton")
                                 }
                                 Button {
-                                    successTap()
+                                    Haptics.success()
                                     migraineManager.filter = .init()
                                 } label: {
                                     Label("Clear Filters", systemImage: "xmark.circle")
@@ -72,7 +72,7 @@ struct MigraineListView: View {
                         }
                     } actions: {
                         Button {
-                            lightTap()
+                            Haptics.lightImpact()
                             viewModel.showingFilterSheet = true
                         } label: {
                             Label("Adjust Filters", systemImage: "slider.horizontal.3")
@@ -113,7 +113,7 @@ struct MigraineListView: View {
                         // Leading swipe: pin/unpin
                         .swipeActions(edge: .leading, allowsFullSwipe: true) {
                             Button {
-                                lightTap()
+                                Haptics.lightImpact()
                                 migraineManager.togglePinned(migraine)
                             } label: {
                                 Label(migraine.pinned ? "Unpin" : "Pin",
@@ -124,7 +124,7 @@ struct MigraineListView: View {
                         // Trailing swipe: delete
                         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                             Button(role: .destructive) {
-                                warningTap()
+                                Haptics.error()
                                 migraineManager.delete(migraine)
                             } label: {
                                 Label("Delete", systemImage: "trash")
@@ -149,7 +149,7 @@ struct MigraineListView: View {
                                 VStack(alignment: .leading, spacing: 10) {
                                     if f.pinnedOnly {
                                         Button {
-                                            lightTap()
+                                            Haptics.lightImpact()
                                             var new = f
                                             new.pinnedOnly = false
                                             migraineManager.filter = new
@@ -168,7 +168,7 @@ struct MigraineListView: View {
                                             .accessibilityIdentifier("footerTriggerSummary")
                                     }
                                     Button {
-                                        successTap()
+                                        Haptics.success()
                                         migraineManager.filter = .init()
                                     } label: {
                                         Label("Clear Filters", systemImage: "xmark.circle")
@@ -179,7 +179,7 @@ struct MigraineListView: View {
                                     .accessibilityIdentifier("footerClearFiltersButton")
                                     
                                     Button {
-                                        lightTap()
+                                        Haptics.lightImpact()
                                         viewModel.showingFilterSheet = true
                                     } label: {
                                         Label("Adjust", systemImage: "slider.horizontal.3")
@@ -198,7 +198,7 @@ struct MigraineListView: View {
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    lightTap()
+                    Haptics.lightImpact()
                     viewModel.showingFilterSheet = true
                 } label: {
                     Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
@@ -208,7 +208,7 @@ struct MigraineListView: View {
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
-                    lightTap()
+                    Haptics.lightImpact()
                     var f = migraineManager.filter
                     f.pinnedOnly.toggle()
                     migraineManager.filter = f
@@ -245,7 +245,7 @@ struct MigraineListView: View {
         // Pull-to-refresh to re-run the manager query
         .refreshable {
             await migraineManager.refresh()
-            successTap()
+            Haptics.success()
         }
     }
 
@@ -259,34 +259,11 @@ struct MigraineListView: View {
             return "Triggers: " + shown.joined(separator: ", ") + " +\(names.count - 3)"
         }
     }
-
-    // MARK: - Haptics
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
-    }
-
-    private func warningTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.warning)
-        #endif
-    }
 }
 
 #Preview {
     let container: ModelContainer
     do {
-        // Mirror the app schema but use an in-memory store for previews
         container = try ModelContainer(
             for: User.self, Migraine.self, WeatherData.self, HealthData.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)

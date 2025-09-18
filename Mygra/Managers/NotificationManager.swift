@@ -14,11 +14,14 @@ final class NotificationManager {
     private let center = UNUserNotificationCenter.current()
     
     /// Requests authorization for local notifications.
-    func requestAuthorization() async {
+    func requestAuthorization() async throws {
         do {
-            try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            if !granted {
+                throw NotificationError.authorizationDenied
+            }
         } catch {
-            print("Failed to request notification authorization: \(error)")
+            throw NotificationError.authorizationRequestFailed(underlying: error)
         }
     }
     
@@ -55,7 +58,7 @@ final class NotificationManager {
         body: String,
         category: LocalNotificationCategory = .alert,
         identifier: String = UUID().uuidString
-    ) async {
+    ) async throws {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
@@ -67,7 +70,7 @@ final class NotificationManager {
         do {
             try await center.add(request)
         } catch {
-            print("Failed to schedule notification: \(error)")
+            throw NotificationError.schedulingFailed(underlying: error)
         }
     }
 }

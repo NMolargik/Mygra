@@ -31,7 +31,7 @@ struct OnboardingView: View {
                 HStack {
                     if viewModel.currentPage != .health && viewModel.currentPage != .complete {
                         Button("Back") {
-                            lightTap()
+                            Haptics.lightImpact()
                             viewModel.isMovingForward = false
                             let previous = viewModel.currentPage.previous
                             withAnimation {
@@ -49,7 +49,7 @@ struct OnboardingView: View {
                     
                     if viewModel.currentPage != .complete {
                         Button("Next") {
-                            lightTap()
+                            Haptics.lightImpact()
                             if viewModel.currentPage == .user {
                                 userManager.createOrReplace(newUser: viewModel.newUser)
                             }
@@ -60,7 +60,7 @@ struct OnboardingView: View {
                                 viewModel.currentPage = next
                             }
                             if allowed {
-                                successTap()
+                                Haptics.success()
                             }
                         }
                         .frame(width: 80)
@@ -96,26 +96,10 @@ struct OnboardingView: View {
             OnboardingUserView(viewModel: viewModel)
         case .complete:
             OnboardingCompleteView(viewModel: viewModel, finishOnboarding: {
-                successTap()
+                Haptics.success()
                 proceedForward()
             })
         }
-    }
-    
-    // MARK: - Haptics
-    
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-    
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
     }
 }
 

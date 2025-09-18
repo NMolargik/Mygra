@@ -52,8 +52,8 @@ struct SplashView: View {
                 .animation(.easeOut(duration: 0.6).delay(1.1), value: viewModel.subtitleVisible)
 
             Button("Get Started") {
-                lightTap()
-                successTap()
+                Haptics.lightImpact()
+                Haptics.success()
                 proceedForward()
             }
             .foregroundStyle(.white)
@@ -67,7 +67,7 @@ struct SplashView: View {
             .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
             
             Button("No, I'm not new!") {
-                lightTap()
+                Haptics.lightImpact()
                 lastSyncError = nil
                 showReturningUserModal = true
                 Task { await attemptCloudRefresh() }
@@ -86,32 +86,17 @@ struct SplashView: View {
                 isSyncing: $isSyncingFromCloud,
                 errorMessage: $lastSyncError,
                 onRetry: {
-                    lightTap()
+                    Haptics.lightImpact()
                     Task { await attemptCloudRefresh() }
                 },
                 onClose: {
-                    lightTap()
+                    Haptics.lightImpact()
                     showReturningUserModal = false
                 }
             )
             .presentationDetents([.medium, .large])
         }
         .padding(.top, 80)
-    }
-
-    // MARK: - Haptics
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
     }
 
     @MainActor
@@ -126,7 +111,7 @@ struct SplashView: View {
         await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
 
         if userManager.currentUser != nil {
-            successTap()
+            Haptics.success()
             // Let outer flow proceed (mirrors ContentView.refreshUser behavior)
             await refreshUser()
         } else {

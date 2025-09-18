@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct UserEditView: View {
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+
     @Binding var user: User
     @Binding var userFormComplete: Bool
+    
     var dismiss: () -> Void
     
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
     @State private var newCondition: String = ""
     @State private var newDietaryRestriction: String = ""
 
@@ -29,6 +31,8 @@ struct UserEditView: View {
 
         Section("Anatomy") {
             Toggle("Use Metric Units", isOn: $useMetricUnits)
+                .tint(.green)
+
             
             Picker("Biological Sex", selection: $user.biologicalSex) {
                 ForEach(BiologicalSex.allCases, id: \.self) { sex in
@@ -197,19 +201,6 @@ struct UserEditView: View {
     }
 }
 
-/// Convenience wrapper that embeds UserEditView inside a Form for quick use.
-struct UserEditForm: View {
-    @Binding var user: User
-    @Binding var userFormComplete: Bool
-    var dismiss: () -> Void
-    
-    var body: some View {
-        Form {
-            UserEditView(user: $user, userFormComplete: $userFormComplete, dismiss: dismiss)
-        }
-    }
-}
-
 #Preview {
-    UserEditForm(user: .constant(User()), userFormComplete: .constant(false), dismiss: {})
+    UserEditView(user: .constant(User()), userFormComplete: .constant(false), dismiss: {})
 }

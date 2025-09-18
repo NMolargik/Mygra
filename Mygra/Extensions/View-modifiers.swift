@@ -1,5 +1,5 @@
 //
-//  ShimmerModifier.swift
+//  View-modifiers.swift
 //  Mygra
 //
 //  Created by Nick Molargik on 9/14/25.
@@ -7,8 +7,15 @@
 
 import SwiftUI
 
+extension View {
+    func shimmer() -> some View {
+        self.modifier(ShimmerModifier())
+    }
+}
+
 struct ShimmerModifier: ViewModifier {
     @State private var phase: CGFloat = -1
+    
     func body(content: Content) -> some View {
         content
             .overlay(
@@ -24,5 +31,20 @@ struct ShimmerModifier: ViewModifier {
                     phase = 1.2
                 }
             }
+    }
+}
+ 
+struct DrawOnOffEffect: ViewModifier {
+    let drawOn: Bool
+    let drawOff: Bool
+
+    func body(content: Content) -> some View {
+        #if compiler(>=6.0)
+        content
+            .symbolEffect(.pulse, options: .repeating, value: drawOn)
+        #else
+        content
+            .symbolEffect(.pulse, options: .repeating, value: drawOn)
+        #endif
     }
 }

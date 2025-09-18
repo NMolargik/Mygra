@@ -55,7 +55,7 @@ final class HealthManager {
     
     func requestAuthorization() async {
         guard HKHealthStore.isHealthDataAvailable() else {
-            let err = HKError(.errorHealthDataUnavailable)
+            let err = HealthError.healthDataUnavailable
             self.lastError = err
             self.isAuthorized = false
             print("[Health] Health data unavailable on this device: \(err)")
@@ -79,7 +79,7 @@ final class HealthManager {
             self.lastError = nil
         } catch {
             self.isAuthorized = false
-            self.lastError = error
+            self.lastError = HealthError.authorizationFailed(underlying: error)
             print("[Health] requestAuthorization failed: \(error)")
         }
     }
@@ -96,6 +96,7 @@ final class HealthManager {
             }
         } catch {
             print("[Health] Failed to get overall read request status: \(error)")
+            self.lastError = HealthError.readRequestStatusFailed(underlying: error)
         }
 
         if !shareTypes.isEmpty {
@@ -109,6 +110,7 @@ final class HealthManager {
                 }
             } catch {
                 print("[Health] Failed to get share request status: \(error)")
+                self.lastError = HealthError.shareRequestStatusFailed(underlying: error)
             }
         }
 
@@ -144,7 +146,7 @@ final class HealthManager {
             await requestAuthorization()
             if !isAuthorized {
                 print("HEALTH NOT AUTHORIZED (isAuthorized=false). lastError=\(lastError?.localizedDescription ?? "nil")")
-                throw HKError(.errorAuthorizationDenied)
+                throw HealthError.authorizationDenied
             }
         }
     }
@@ -205,7 +207,7 @@ final class HealthManager {
         } catch {
             print("Refresh of Health Data failed! error=\(error)")
             self.latestData = nil
-            self.lastError = error
+            self.lastError = HealthError.snapshotFailed(underlying: error)
         }
     }
 
@@ -279,7 +281,7 @@ final class HealthManager {
             try await saveHeadache(start: migraine.startDate, end: end, severity: migraine.severity)
         } catch {
             print("[Health] Failed to save headache for migraine \(migraine.id): \(error)")
-            self.lastError = error
+            self.lastError = HealthError.saveFailed(kind: "headache", underlying: error)
         }
     }
 

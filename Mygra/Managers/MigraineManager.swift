@@ -10,6 +10,11 @@ import SwiftData
 import Observation
 import StoreKit
 import UIKit
+import WidgetKit
+
+enum AppGroup {
+    static let id = "group.com.molargiksoftware.mygra"
+}
 
 @MainActor
 @Observable
@@ -33,7 +38,7 @@ final class MigraineManager {
     var filter: MigraineFilter = MigraineFilter() {
         didSet { Task { await refresh() } }
     }
-
+ 
     // Derived, filter-applied list for the UI
     var visibleMigraines: [Migraine] {
         applyFilter(to: migraines)
@@ -61,69 +66,49 @@ final class MigraineManager {
             self.migraines = fetched
             // Update the ongoing migraine reference (first ongoing in newest-first list)
             self.ongoingMigraine = fetched.first(where: { $0.isOngoing })
+
+            // Keep the widget up to date with the newest migraine start
+            self.updateWidgetSharedState()
         } catch {
-            print("MigraineManager.refresh() fetch error: \(error)")
+            print(MigraineError.fetchFailed(underlying: error).localizedDescription)
             self.migraines = []
             self.ongoingMigraine = nil
         }
     }
 
     // MARK: - Create
-    @discardableResult
     func create(
-        startDate: Date,
-        endDate: Date? = nil,
-        painLevel: Int,
-        stressLevel: Int,
-        pinned: Bool = false,
-        note: String? = nil,
-        insight: String? = nil,
-        triggers: [MigraineTrigger] = [],
-        customTriggers: [String] = [],
-        foodsEaten: [String] = [],
-        weather: WeatherData? = nil,
-        health: HealthData? = nil,
+        migraine: Migraine,
         reviewScene: UIWindowScene? = nil
-    ) -> Migraine {
-        let model = Migraine(
-            pinned: pinned,
-            startDate: startDate,
-            endDate: endDate,
-            painLevel: painLevel,
-            stressLevel: stressLevel,
-            note: note,
-            insight: insight,
-            triggers: triggers,
-            customTriggers: customTriggers,
-            foodsEaten: foodsEaten,
-            weather: weather,
-            health: health
-        )
-        context.insert(model)
+    ) {
+        context.insert(migraine)
 
         // If this is an ongoing migraine, track it immediately
-        if model.isOngoing {
-            self.ongoingMigraine = model
+        if migraine.isOngoing {
+            self.ongoingMigraine = migraine
         }
 
         // Post creation notification for observers (e.g., InsightManager)
         NotificationCenter.default.post(
             name: MigraineManager.migraineCreatedNotification,
             object: self,
-            userInfo: ["migraine": model]
+            userInfo: ["migraine": migraine]
         )
 
         // If completed at creation time, write to HealthKit immediately
-        if let hm = healthManager, model.endDate != nil {
-            Task { await hm.saveHeadacheForMigraine(model) }
+        if let hm = healthManager, migraine.endDate != nil {
+            Task { await hm.saveHeadacheForMigraine(migraine) }
         }
 
         saveAndReload()
 
         // Review prompt on the 5th-ever migraine
         Task { await maybeRequestReviewIfFifthEver(in: reviewScene) }
+        
+        if migraine.isOngoing {
+            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate, severity: migraine.painLevel, notes: migraine.note ?? "")
+        }
 
-        return model
     }
 
     // MARK: - Update (mutate in place)
@@ -207,12 +192,22 @@ final class MigraineManager {
         }
     }
 
+    // MARK: - Widgets sync
+    private func updateWidgetSharedState() {
+        // Persist the latest migraine start date for the widget, and trigger a reload.
+        let defaults = UserDefaults(suiteName: AppGroup.id)
+        let latestStart = self.migraines.first?.startDate
+        let timestamp = latestStart?.timeIntervalSince1970 ?? 0
+        defaults?.set(timestamp, forKey: "lastMigraineStart")
+        WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+    }
+
     // MARK: - Persistence
     private func saveAndReload() {
         do {
             try context.save()
         } catch {
-            print("MigraineManager.save error: \(error)")
+            print(MigraineError.saveFailed(underlying: error).localizedDescription)
         }
         Task { await refresh() }
     }
@@ -234,7 +229,7 @@ final class MigraineManager {
             guard count == 5 else { return }
         } catch {
             // If counting fails, do not attempt to prompt
-            print("Failed to fetch migraine count for review prompt: \(error)")
+            print(MigraineError.fetchFailed(underlying: error).localizedDescription)
             return
         }
 

@@ -33,7 +33,15 @@ struct OnboardingNotificationView: View {
             
             Button("Continue") {
                 Task {
-                    await notificationManager.requestAuthorization()
+                    do {
+                        try await notificationManager.requestAuthorization()
+                    } catch let error as NotificationError {
+                        // Handle specific notification errors as needed
+                        print(error.localizedDescription)
+                    } catch {
+                        // Handle any unexpected errors
+                        print("Unexpected error requesting notification authorization: \(error)")
+                    }
                 }
             }
             .foregroundStyle(.white)

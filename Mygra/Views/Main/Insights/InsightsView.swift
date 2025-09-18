@@ -9,15 +9,13 @@ import SwiftUI
 import WeatherKit
 
 struct InsightsView: View {
-    @Binding var showingEntrySheet: Bool
-
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(HealthManager.self) private var healthManager: HealthManager
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
-    @Environment(MigraineManager.self) private var migraineManager: MigraineManager
 
     @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
     
+    @Binding var showingEntrySheet: Bool
     @State private var viewModel: InsightsView.ViewModel = InsightsView.ViewModel()
 
     var body: some View {
@@ -33,16 +31,16 @@ struct InsightsView: View {
                         isFetching: weatherManager.isFetching,
                         error: weatherManager.error,
                         onRefresh: {
-                            lightTap()
+                            Haptics.lightImpact()
                             Task { await weatherManager.refresh() }
                         },
-                        locationString: weatherManager.locationString // <-- pass location from WeatherManager
+                        locationString: weatherManager.locationString
                     )
                     
                     if insightManager.intelligenceManager.supportsAppleIntelligence {
                         IntelligenceCardView(
                             onOpen: {
-                                lightTap()
+                                Haptics.lightImpact()
                                 viewModel.isShowingMigraineAssistant = true
                                 Task { await insightManager.startCounselorChat() }
                             }
@@ -56,26 +54,26 @@ struct InsightsView: View {
                         isQuickAddExpanded: $viewModel.isQuickAddExpanded,
                         addWater: $viewModel.addWater,
                         addCaffeine: $viewModel.addCaffeine,
-                        addCalories: $viewModel.addCalories,
+                        addFood: $viewModel.addFood,
                         addSleepHours: $viewModel.addSleepHours,
                         isSavingIntake: viewModel.isSavingIntake,
                         intakeError: viewModel.intakeError,
                         allIntakeAddsAreZero: viewModel.allIntakeAddsAreZero,
                         // Actions
                         onConnectHealth: {
-                            lightTap()
+                            Haptics.lightImpact()
                             Task { await healthManager.requestAuthorization() }
                         },
                         onRefreshHealth: {
-                            lightTap()
+                            Haptics.lightImpact()
                             Task { await healthManager.refreshLatestForToday() }
                         },
                         onSaveIntake: {
-                            lightTap()
+                            Haptics.lightImpact()
                             Task { await saveIntake() }
                         },
                         onCancelIntake: {
-                            lightTap()
+                            Haptics.lightImpact()
                             viewModel.resetIntakeInputs()
                         }
                     )
@@ -85,7 +83,7 @@ struct InsightsView: View {
                         isRefreshing: insightManager.isRefreshing,
                         errors: insightManager.errors,
                         onRefresh: {
-                            lightTap()
+                            Haptics.lightImpact()
                             Task { await insightManager.refresh() }
                         }
                     )
@@ -97,7 +95,7 @@ struct InsightsView: View {
             }
             .refreshable {
                 await refreshAll()
-                successTap()
+                Haptics.success()
             }
             .task {
                 await initialLoadIfNeeded()
@@ -107,9 +105,8 @@ struct InsightsView: View {
                     .environment(insightManager)
                     .ignoresSafeArea()
             }
-            // Haptics on expand/collapse of Quick Add
             .onChange(of: viewModel.isQuickAddExpanded) { _, _ in
-                lightTap()
+                Haptics.lightImpact()
             }
         }
     }
@@ -128,8 +125,8 @@ struct InsightsView: View {
             if viewModel.addCaffeine > 0 {
                 try await healthManager.saveCaffeine(mg: viewModel.addCaffeine)
             }
-            if viewModel.addCalories > 0 {
-                try await healthManager.saveEnergy(kcal: viewModel.addCalories)
+            if viewModel.addFood > 0 {
+                try await healthManager.saveEnergy(kcal: viewModel.addFood)
             }
             if viewModel.addSleepHours > 0 {
                 // Save a simple sleep interval ending now
@@ -140,10 +137,10 @@ struct InsightsView: View {
 
             viewModel.resetIntakeInputs()
             await healthManager.refreshLatestForToday()
-            successTap()
+            Haptics.success()
         } catch {
             viewModel.intakeError = error.localizedDescription
-            errorTap()
+            Haptics.error()
         }
     }
 
@@ -152,7 +149,6 @@ struct InsightsView: View {
         async let b: Void = weatherManager.refresh()
         async let c: Void = healthManager.refreshLatestForToday()
         _ = await (a, b, c)
-        // No haptic here to avoid surprise on first open
     }
 
     private func refreshAll() async {
@@ -161,28 +157,5 @@ struct InsightsView: View {
             group.addTask { await weatherManager.refresh() }
             group.addTask { await healthManager.refreshLatestForToday() }
         }
-    }
-
-    // MARK: - Haptics
-
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
-    }
-
-    private func errorTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.error)
-        #endif
     }
 }

@@ -8,19 +8,16 @@
 import SwiftUI
 
 struct TodayCardView: View {
-    // Health summary
     let isAuthorized: Bool
     let latestData: HealthData?
     let useMetricUnits: Bool
 
-    // Quick Add expand/collapse
     @Binding var isQuickAddExpanded: Bool
-
-    // Intake editor bindings/state
     @Binding var addWater: Double
     @Binding var addCaffeine: Double
-    @Binding var addCalories: Double
+    @Binding var addFood: Double
     @Binding var addSleepHours: Double
+    
     let isSavingIntake: Bool
     let intakeError: String?
     let allIntakeAddsAreZero: Bool
@@ -70,7 +67,15 @@ struct TodayCardView: View {
                 // Precompute display strings so we can use them both for value and as stable tokens
                 let waterStr = waterDisplay(from: data)
                 let sleepStr = data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—"
-                let foodStr = data.energyKilocalories.map { "\(Int($0)) cal" } ?? "—"
+                let foodStr: String = {
+                    guard let kcal = data.energyKilocalories else { return "—" }
+                    if useMetricUnits {
+                        let kJ = (kcal * 4.184).rounded()
+                        return "\(Int(kJ)) kJ"
+                    } else {
+                        return "\(Int(kcal)) cal"
+                    }
+                }()
                 let caffeineStr = data.caffeineMg.map { "\(Int($0)) mg" } ?? "—"
 
                 HStack(spacing: 12) {
@@ -122,7 +127,7 @@ struct TodayCardView: View {
                 IntakeEditorView(
                     addWater: $addWater,
                     addCaffeine: $addCaffeine,
-                    addCalories: $addCalories,
+                    addFood: $addFood,
                     addSleepHours: $addSleepHours,
                     useMetricUnits: useMetricUnits,
                     waterRange: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
@@ -162,3 +167,73 @@ struct TodayCardView: View {
         }
     }
 }
+
+// MARK: - Previews
+
+private struct TodayCardPreviewWrapper: View {
+    // Local state to satisfy TodayCardView bindings
+    @State var isQuickAddExpanded: Bool = false
+    @State var addWater: Double = 0.5     // liters (used for imperial too; formatter converts)
+    @State var addCaffeine: Double = 120
+    @State var addFood: Double = 400
+    @State var addSleepHours: Double = 0.5
+
+    // Config
+    var isAuthorized: Bool
+    var latestData: HealthData?
+    var useMetricUnits: Bool
+    var isSavingIntake: Bool = false
+    var intakeError: String? = nil
+    var allIntakeAddsAreZero: Bool = false
+
+    var body: some View {
+        TodayCardView(
+            isAuthorized: isAuthorized,
+            latestData: latestData,
+            useMetricUnits: useMetricUnits,
+            isQuickAddExpanded: $isQuickAddExpanded,
+            addWater: $addWater,
+            addCaffeine: $addCaffeine,
+            addFood: $addFood,
+            addSleepHours: $addSleepHours,
+            isSavingIntake: isSavingIntake,
+            intakeError: intakeError,
+            allIntakeAddsAreZero: allIntakeAddsAreZero,
+            onConnectHealth: {},
+            onRefreshHealth: {},
+            onSaveIntake: {},
+            onCancelIntake: { isQuickAddExpanded = false }
+        )
+        .padding()
+        .previewLayout(.sizeThatFits)
+    }
+}
+
+#Preview("Collapsed, Not Authorized") {
+    TodayCardPreviewWrapper(
+        isAuthorized: false,
+        latestData: nil,
+        useMetricUnits: false
+    )
+}
+
+#Preview("Expanded Quick Add (Imperial)") {
+    TodayCardPreviewWrapper(
+        isQuickAddExpanded: true,
+        isAuthorized: true,
+        latestData: nil,
+        useMetricUnits: false
+    )
+}
+
+#Preview("Expanded Quick Add (Metric + Error)") {
+    TodayCardPreviewWrapper(
+        isQuickAddExpanded: true,
+        isAuthorized: true,
+        latestData: nil,
+        useMetricUnits: true,
+        intakeError: "Example error",
+        allIntakeAddsAreZero: false
+    )
+}
+

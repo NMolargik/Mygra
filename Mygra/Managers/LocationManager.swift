@@ -8,6 +8,7 @@
 import Foundation
 import CoreLocation
 import Observation
+import os
 
 @MainActor
 @Observable
@@ -72,13 +73,16 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
         // If not authorized, throw a standard error
         guard isAuthorized else {
-            throw CLError(.denied)
+            throw LocationError.notAuthorized
         }
 
-        // Ask for a one-time location update
+        // Prevent multiple simultaneous requests
         if oneShotContinuation != nil {
-            // Prevent multiple simultaneous requests
-            throw CLError(.network)
+            throw LocationError.requestInProgress
+        }
+
+        guard CLLocationManager.locationServicesEnabled() else {
+            throw LocationError.unavailable
         }
 
         manager.requestLocation()
@@ -114,7 +118,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         updateAuth(from: manager.authorizationStatus)
         // Optionally, if a caller is awaiting a one-shot and user denies mid-flow, fail it.
         if oneShotContinuation != nil, !isAuthorized {
-            oneShotContinuation?.resume(throwing: CLError(.denied))
+            oneShotContinuation?.resume(throwing: LocationError.notAuthorized)
             oneShotContinuation = nil
         }
     }
@@ -137,7 +141,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // If one-shot is waiting, fail it
         if let cont = oneShotContinuation {
             oneShotContinuation = nil
-            cont.resume(throwing: error)
+            cont.resume(throwing: LocationError.updateFailed(underlying: error))
         }
 
         // For stream: choose policy. Here we don’t finish the stream on transient errors.
@@ -145,6 +149,25 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     // MARK: - Helpers
+
+    private func map(error: Error) -> LocationError {
+        // If it's already a LocationError, pass it through
+        if let locErr = error as? LocationError { return locErr }
+        // Prefer underlying CLError codes when possible
+        let ns = error as NSError
+        if ns.domain == kCLErrorDomain {
+            // Map some common CLError codes
+            switch CLError.Code(rawValue: ns.code) {
+            case .denied?:
+                return .notAuthorized
+            case .locationUnknown?:
+                return .updateFailed(underlying: error)
+            default:
+                return .updateFailed(underlying: error)
+            }
+        }
+        return .updateFailed(underlying: error)
+    }
 
     private func updateAuth(from status: CLAuthorizationStatus) {
         authorizationStatus = status

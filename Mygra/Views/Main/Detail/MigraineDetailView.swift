@@ -9,38 +9,55 @@ import SwiftUI
 import WeatherKit
 
 struct MigraineDetailView: View {
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
-
+    
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
+    
     let migraine: Migraine
     var onClose: (() -> Void)? = nil
-
-    // End Migraine flow
+    
     @State private var showingEndSheet = false
     @State private var proposedEndDate: Date = Date()
     @State private var endError: String?
-
-    // Delete flow
     @State private var showDeleteConfirm = false
+    @State private var showingModifySheet = false
+    @State private var editStartDate: Date = Date()
+    @State private var editEndDate: Date = Date()
+    @State private var editIsOngoing: Bool = false
+    @State private var editPainLevel: Int = 0
+    @State private var editStressLevel: Int = 0
+    @State private var selectedEditTriggers: Set<MigraineTrigger> = []
+    @State private var modifyError: String?
+    
+    // Helper to seed edit state from migraine
+    private func seedEditState() {
+        editStartDate = migraine.startDate
+        editEndDate = migraine.endDate ?? Date()
+        editIsOngoing = (migraine.endDate == nil)
+        editPainLevel = migraine.painLevel
+        editStressLevel = migraine.stressLevel
+        selectedEditTriggers = Set(migraine.triggers)
+        modifyError = nil
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
                 header
-
+                
                 insightSection
-
+                
                 if migraine.note?.isEmpty == false {
                     infoCard(title: "Note") {
                         Text(migraine.note!)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 if !migraine.triggers.isEmpty || !migraine.customTriggers.isEmpty {
                     infoCard(title: "Triggers") {
                         VStack(alignment: .leading, spacing: 8) {
@@ -58,7 +75,7 @@ struct MigraineDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 if let wx = migraine.weather {
                     infoCard(title: "Weather", trailing: {
                         HStack(spacing: 6) {
@@ -97,7 +114,7 @@ struct MigraineDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 if let h = migraine.health {
                     infoCard(title: "Health") {
                         VStack(alignment: .leading, spacing: 8) {
@@ -150,9 +167,9 @@ struct MigraineDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                     }
                 }
-
+                
                 Spacer(minLength: 12)
-
+                
                 // Delete button at the very bottom
                 Button(role: .destructive) {
                     showDeleteConfirm = true
@@ -192,9 +209,19 @@ struct MigraineDetailView: View {
                     migraineManager.togglePinned(migraine)
                 } label: {
                     Image(systemName: migraine.pinned ? "pin.fill" : "pin")
-                        .foregroundStyle(migraine.pinned ? .orange : .secondary)
+                        .foregroundStyle(migraine.pinned ? .yellow : .secondary)
                 }
                 .accessibilityLabel(migraine.pinned ? "Unpin" : "Pin")
+            }
+            
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    seedEditState()
+                    showingModifySheet = true
+                } label: {
+                    Label("Modify", systemImage: "slider.horizontal.3")
+                }
+                .accessibilityIdentifier("modifyMigraineButton")
             }
         }
         .sheet(isPresented: $showingEndSheet) {
@@ -216,6 +243,173 @@ struct MigraineDetailView: View {
             )
             .presentationDetents([.medium, .large])
         }
+        .sheet(isPresented: $showingModifySheet) {
+            NavigationStack {
+                Form {
+                    Section("Duration") {
+                        DatePicker(
+                            "Start",
+                            selection: $editStartDate,
+                            in: (Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date())...Date(),
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                        Toggle("Ongoing", isOn: $editIsOngoing)
+                        if !editIsOngoing {
+                            DatePicker(
+                                "End",
+                                selection: $editEndDate,
+                                in: editStartDate...Date(),
+                                displayedComponents: [.date, .hourAndMinute]
+                            )
+                        }
+                        if let err = modifyError {
+                            Text(err).font(.footnote).foregroundStyle(.red)
+                        }
+                    }
+
+                    Section("Experience") {
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Pain Level")
+                                Spacer()
+                                Text("\(editPainLevel)")
+                                    .bold()
+                                    .foregroundStyle(Severity.from(painLevel: editPainLevel).color)
+                            }
+                            Slider(
+                                value: Binding(
+                                    get: { Double(editPainLevel) },
+                                    set: { editPainLevel = Int(round($0)) }
+                                ),
+                                in: 0...10,
+                                step: 1
+                            )
+                            .tint(Severity.from(painLevel: editPainLevel).color)
+                        }
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Stress Level")
+                                Spacer()
+                                Text("\(editStressLevel)")
+                                    .bold()
+                                    .foregroundStyle(.indigo)
+                            }
+                            Slider(
+                                value: Binding(
+                                    get: { Double(editStressLevel) },
+                                    set: { editStressLevel = Int(round($0)) }
+                                ),
+                                in: 0...10,
+                                step: 1
+                            )
+                            .tint(.indigo)
+                        }
+                    }
+
+                    Section("Triggers") {
+                        ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
+                            let items = MigraineTrigger.allCases.filter { $0.group == group }
+                            if !items.isEmpty {
+                                DisclosureGroup(group.displayName) {
+                                    ForEach(items, id: \.self) { trig in
+                                        Button {
+                                            if selectedEditTriggers.contains(trig) {
+                                                selectedEditTriggers.remove(trig)
+                                            } else {
+                                                selectedEditTriggers.insert(trig)
+                                            }
+                                            Haptics.lightImpact()
+                                        } label: {
+                                            HStack {
+                                                Text(trig.displayName)
+                                                Spacer()
+                                                if selectedEditTriggers.contains(trig) {
+                                                    Image(systemName: "checkmark.circle.fill")
+                                                        .foregroundStyle(.red)
+                                                } else {
+                                                    Image(systemName: "circle")
+                                                        .foregroundStyle(.red)
+                                                }
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                            }
+                        }
+                        if selectedEditTriggers.isEmpty {
+                            Text("No triggers selected").foregroundStyle(.secondary)
+                        } else {
+                            Text("\(selectedEditTriggers.count) selected")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                .navigationTitle("Modify Migraine")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            Haptics.lightImpact()
+                            showingModifySheet = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            Haptics.lightImpact()
+                            modifyError = nil
+                            let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
+                            let now = Date()
+                            guard editStartDate >= earliest else {
+                                modifyError = "Start time cannot be more than 1 day in the past."
+                                Haptics.error()
+                                return
+                            }
+                            guard editStartDate <= now else {
+                                modifyError = "Start time cannot be in the future."
+                                Haptics.error()
+                                return
+                            }
+                            if !editIsOngoing {
+                                if editEndDate < editStartDate {
+                                    modifyError = "End time must be after the start time."
+                                    Haptics.error()
+                                    return
+                                }
+                                if editEndDate > now {
+                                    modifyError = "End time cannot be in the future."
+                                    Haptics.error()
+                                    return
+                                }
+                            }
+
+                            // Persist edits and refresh via manager
+                            migraineManager.update(migraine) { m in
+                                m.startDate = editStartDate
+                                m.endDate = editIsOngoing ? nil : editEndDate
+                                m.painLevel = editPainLevel
+                                m.stressLevel = editStressLevel
+                                m.triggers = Array(selectedEditTriggers)
+                            }
+
+                            // Re-generate insight
+                            Task {
+                                await insightManager.handleJustCreatedMigraine(migraine)
+                            }
+
+                            showingModifySheet = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium, .large])
+        }
+        
+.onChange(of: showingModifySheet) { _, newValue in
+    if newValue {
+        seedEditState()
+    }
+}
         .alert("Delete this migraine?", isPresented: $showDeleteConfirm) {
             Button("Delete", role: .destructive) {
                 migraineManager.delete(migraine)
@@ -234,7 +428,7 @@ struct MigraineDetailView: View {
             proposedEndDate = defaultEndDate
         }
     }
-
+    
     // MARK: - Insight section (Apple Intelligence)
     private var insightSection: some View {
         Group {
@@ -245,7 +439,14 @@ struct MigraineDetailView: View {
                         // Header row indicating Apple Intelligence
                         HStack(spacing: 6) {
                             Image(systemName: "apple.intelligence")
-                                .foregroundStyle(.pink)
+                                .foregroundStyle(
+                                    AngularGradient(
+                                        colors: [.orange, .red, .purple, .blue, .purple, .red, .orange, .orange],
+                                        center: .center,
+                                        startAngle: .degrees(-90),
+                                        endAngle: .degrees(270)
+                                    )
+                                )
                             Text("Powered by Apple Intelligence")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
@@ -255,7 +456,7 @@ struct MigraineDetailView: View {
                                     .controlSize(.small)
                             }
                         }
-
+                        
                         if isGenerating && (migraine.insight?.isEmpty ?? true) {
                             // Loading placeholder while generating
                             VStack(alignment: .leading, spacing: 8) {
@@ -283,7 +484,7 @@ struct MigraineDetailView: View {
             }
         }
     }
-
+    
     private var header: some View {
         VStack(spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
@@ -293,7 +494,7 @@ struct MigraineDetailView: View {
                 }
                 Spacer()
             }
-
+            
             HStack(spacing: 12) {
                 infoPill(
                     title: "Pain",
@@ -308,7 +509,7 @@ struct MigraineDetailView: View {
                     tint: .purple
                 )
             }
-
+            
             VStack(alignment: .leading, spacing: 6) {
                 LabeledRow("Start", value: DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates))
                 LabeledRow("End", value: migraine.endDate.map { DateFormatting.dateTime($0, useDMY: useDayMonthYearDates) } ?? "Ongoing")
@@ -321,7 +522,7 @@ struct MigraineDetailView: View {
             }
             .padding(12)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-
+            
             if migraine.isOngoing {
                 Button {
                     proposedEndDate = defaultEndDate
@@ -335,7 +536,7 @@ struct MigraineDetailView: View {
                 .tint(.pink)
                 .accessibilityIdentifier("endMigraineButton")
             }
-
+            
             if let error = endError {
                 Text(error)
                     .font(.footnote)
@@ -349,7 +550,7 @@ struct MigraineDetailView: View {
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
     }
-
+    
     private func infoCard<Content: View, Trailing: View>(title: String, @ViewBuilder trailing: () -> Trailing = { EmptyView() }, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
@@ -366,7 +567,7 @@ struct MigraineDetailView: View {
                 .fill(Color(uiColor: .secondarySystemBackground))
         )
     }
-
+    
     private func infoPill(title: String, value: String, icon: String, tint: Color) -> some View {
         HStack(spacing: 8) {
             Image(systemName: icon)
@@ -385,12 +586,12 @@ struct MigraineDetailView: View {
         )
         .contentShape(Rectangle())
     }
-
+    
     private var defaultEndDate: Date {
         let now = Date()
         return max(now, migraine.startDate.addingTimeInterval(60)) // ensure at least 1 min after start
     }
-
+    
     private func formatDuration(from start: Date, to end: Date) -> String {
         let interval = max(0, Int(end.timeIntervalSince(start)))
         let hours = interval / 3600
@@ -402,7 +603,7 @@ struct MigraineDetailView: View {
             return String(format: "%dm %02ds", minutes, seconds)
         }
     }
-
+    
     private func formatLiveDuration(since start: Date) -> String {
         let interval = max(0, Int(Date().timeIntervalSince(start)))
         let hours = interval / 3600
@@ -415,35 +616,3 @@ struct MigraineDetailView: View {
         }
     }
 }
-
-// MARK: - Small helper row
-private struct LabeledRow<Value: View>: View {
-    let title: String
-    let valueView: Value
-
-    init(_ title: String, @ViewBuilder value: () -> Value) {
-        self.title = title
-        self.valueView = value()
-    }
-
-    init(_ title: String, value: String) where Value == Text {
-        self.title = title
-        self.valueView = Text(value)
-    }
-
-    var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .foregroundStyle(.secondary)
-            Spacer()
-            valueView
-        }
-    }
-}
-
-
-
-#Preview {
-    MigraineDetailView(migraine: Migraine(startDate: Date.now, painLevel: 5, stressLevel: 6))
-}
-

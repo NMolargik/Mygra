@@ -9,14 +9,13 @@ import SwiftUI
 import SwiftData
 
 struct SettingsView: View {
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
     @Environment(UserManager.self) private var userManager: UserManager
     @Environment(\.modelContext) private var modelContext
 
-    @State private var editingUser: Bool = false
+    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
 
-    // Document export
+    @State private var editingUser: Bool = false
     @State private var exportTempURL: URL?
     @State private var showDocumentPicker: Bool = false
     @State private var isExporting: Bool = false
@@ -35,7 +34,6 @@ struct SettingsView: View {
     var body: some View {
         @Bindable var manager = userManager
 
-        // Provide a safe Binding<User> for the editor.
         let userBinding: Binding<User> = Binding(
             get: {
                 manager.currentUser ?? User()
@@ -61,59 +59,31 @@ struct SettingsView: View {
                 get: { useMetricUnits },
                 set: { newValue in
                     useMetricUnits = newValue
-                    lightTap()
+                    Haptics.lightImpact()
                 }
             ))
+            .tint(.green)
 
             Toggle("Use Day–Month–Year Dates", isOn: Binding(
                 get: { useDayMonthYearDates },
                 set: { newValue in
                     useDayMonthYearDates = newValue
-                    lightTap()
+                    Haptics.lightImpact()
                 }
             ))
+            .tint(.green)
             .accessibilityHint("Switch between Month–Day–Year and Day–Month–Year formats for dates.")
 
-            // Edit/Save button replaces the toggle
             Button {
-                if editingUser {
-                    // Save changes explicitly and exit editing mode
-                    let updated = userBinding.wrappedValue
-                    manager.update { existing in
-                        existing.name = updated.name
-                        existing.birthday = updated.birthday
-                        existing.biologicalSex = updated.biologicalSex
-                        existing.heightMeters = updated.heightMeters
-                        existing.weightKilograms = updated.weightKilograms
-                        existing.averageSleepHours = updated.averageSleepHours
-                        existing.averageCaffeineMg = updated.averageCaffeineMg
-                        existing.chronicConditions = updated.chronicConditions
-                        existing.dietaryRestrictions = updated.dietaryRestrictions
-                    }
-                    editingUser = false
-                    successTap()
-                } else {
-                    // Enter editing mode
-                    editingUser = true
-                    lightTap()
-                }
+                editingUser = true
+                Haptics.lightImpact()
             } label: {
-                Text(editingUser ? "Save User" : "Edit User")
+                Text("Edit User")
                     .bold()
                     .foregroundStyle(.blue)
             }
             .buttonStyle(.plain)
 
-            if (editingUser) {
-                UserEditView(
-                    user: userBinding,
-                    userFormComplete: .constant(true),
-                    dismiss: {
-                        // If you want dismiss to cancel, you could:
-                        // editingUser = false
-                    }
-                )
-            }
 
             // Export button
             Button {
@@ -174,6 +144,49 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                 .fixedSize(horizontal: false, vertical: true)
             }
         }
+        .sheet(isPresented: $editingUser) {
+            NavigationStack {
+                Form {
+                    UserEditView(
+                        user: userBinding,
+                        userFormComplete: .constant(true),
+                        dismiss: {
+                            editingUser = false
+                        }
+                    )
+                }
+                .padding(.horizontal)
+                .navigationTitle("Edit User")
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            editingUser = false
+                            Haptics.lightImpact()
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            // Save changes explicitly and exit editing mode
+                            let updated = userBinding.wrappedValue
+                            manager.update { existing in
+                                existing.name = updated.name
+                                existing.birthday = updated.birthday
+                                existing.biologicalSex = updated.biologicalSex
+                                existing.heightMeters = updated.heightMeters
+                                existing.weightKilograms = updated.weightKilograms
+                                existing.averageSleepHours = updated.averageSleepHours
+                                existing.averageCaffeineMg = updated.averageCaffeineMg
+                                existing.chronicConditions = updated.chronicConditions
+                                existing.dietaryRestrictions = updated.dietaryRestrictions
+                            }
+                            editingUser = false
+                            Haptics.success()
+                        }
+                        .tint(.blue)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - Export logic
@@ -212,7 +225,7 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
             // Present system Files save prompt
             exportTempURL = fileURL
             showDocumentPicker = true
-            successTap()
+            Haptics.success()
         } catch {
             exportError = "Could not export PDF. \(error.localizedDescription)"
         }
@@ -225,21 +238,6 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
             try? FileManager.default.removeItem(at: url)
         }
         exportTempURL = nil
-    }
-
-    // MARK: - Haptics
-    private func lightTap() {
-        #if os(iOS)
-        let gen = UIImpactFeedbackGenerator(style: .light)
-        gen.impactOccurred()
-        #endif
-    }
-
-    private func successTap() {
-        #if os(iOS)
-        let gen = UINotificationFeedbackGenerator()
-        gen.notificationOccurred(.success)
-        #endif
     }
 }
 

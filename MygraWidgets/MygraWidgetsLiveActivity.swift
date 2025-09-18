@@ -29,7 +29,7 @@ struct MygraWidgetsLiveActivity: Widget {
                 HStack(spacing: 12) {
                     Image(systemName: "brain.head.profile.fill")
                         .symbolRenderingMode(.multicolor)
-                        .foregroundStyle(.pink.gradient)
+                        .foregroundStyle(.red)
                         .font(.system(size: 24))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Ongoing Migraine")
@@ -59,9 +59,9 @@ struct MygraWidgetsLiveActivity: Widget {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(LinearGradient(gradient: Gradient(colors: [.clear, .pink.opacity(0.05)]), startPoint: .top, endPoint: .bottom))
+            .background(LinearGradient(gradient: Gradient(colors: [.clear, .red.opacity(0.05)]), startPoint: .top, endPoint: .bottom))
             .activityBackgroundTint(.clear)
-            .activitySystemActionForegroundColor(.pink)
+            .activitySystemActionForegroundColor(.red)
 
         } dynamicIsland: { context in
             DynamicIsland {
@@ -69,7 +69,7 @@ struct MygraWidgetsLiveActivity: Widget {
                     HStack(spacing: 8) {
                         Image(systemName: "brain.head.profile.fill")
                             .symbolRenderingMode(.multicolor)
-                            .foregroundStyle(.pink.gradient)
+                            .foregroundStyle(.red)
                             .font(.title3)
                             .accessibilityLabel("Migraine Indicator")
                         VStack(alignment: .leading, spacing: 2) {
@@ -88,7 +88,7 @@ struct MygraWidgetsLiveActivity: Widget {
                     Text(context.state.startDate, style: .timer)
                         .monospacedDigit()
                         .font(.title3)
-                        .foregroundStyle(.pink)
+                        .foregroundStyle(.red)
                 }
                 DynamicIslandExpandedRegion(.center) {
                     Text("Ongoing Migraine")
@@ -112,10 +112,10 @@ struct MygraWidgetsLiveActivity: Widget {
                                     .font(.headline.bold())
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 8)
-                                    .background(.pink.opacity(0.1))
+                                    .background(.red.opacity(0.1))
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
-                            .tint(.pink)
+                            .tint(.red)
                             .buttonStyle(.borderedProminent)
                         }
                     }
@@ -123,7 +123,7 @@ struct MygraWidgetsLiveActivity: Widget {
             } compactLeading: {
                 // Compact leading - Minimal icon with subtle animation if possible (but static here)
                 Image(systemName: "brain.head.profile.fill")
-                    .foregroundStyle(.pink)
+                    .foregroundStyle(.red)
                     .font(.caption)
             } compactTrailing: {
                 // Compact trailing - Timer with severity hint via color
@@ -141,7 +141,7 @@ struct MygraWidgetsLiveActivity: Widget {
                     .font(.caption)
             }
             .widgetURL(URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)")) // New: Deep link on tap
-            .keylineTint(.pink.opacity(0.5))
+            .keylineTint(.red.opacity(0.5))
             //.contentMargins(.all, 4, for: .) // New: Slight margins for better spacing
         }
     }
@@ -154,16 +154,9 @@ private func severityColor(severity: Int) -> Color {
     case 4...6: return .yellow
     case 7...8: return .orange
     case 9...10: return .red
-    default: return .pink
+    default: return .red
     }
 }
-
-extension MigraineActivityAttributes.ContentState {
-    static var sample: MigraineActivityAttributes.ContentState {
-        .init(migraineID: UUID(), startDate: Date().addingTimeInterval(-3600), severity: 7, notes: "Triggered by stress")
-    }
-}
-
 
 #Preview("Lock Screen", as: .content, using: MigraineActivityAttributes()) {
     MygraWidgetsLiveActivity()

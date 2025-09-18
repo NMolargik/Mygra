@@ -23,7 +23,7 @@ final class WeatherManager {
     // MARK: - State
     private(set) var isFetching = false
     private(set) var lastUpdated: Date?
-    private(set) var error: Error?
+    var error: Error?
 
     private(set) var temperature: Measurement<UnitTemperature>?
     private(set) var pressure: Measurement<UnitPressure>?
@@ -100,12 +100,22 @@ final class WeatherManager {
             return
         }
         do {
-            let loc = try await provider.currentLocation()
+            let loc: CLLocation
+            do {
+                loc = try await provider.currentLocation()
+            } catch {
+                self.error = WeatherError.locationUnavailable
+                return
+            }
             try await fetch(for: loc)
             print("Got latest weather")
         } catch {
+            if error is WeatherError {
+                self.error = error
+            } else {
+                self.error = WeatherError.weatherServiceFailed
+            }
             print("WeatherManager: Failed to refresh: \(error)")
-            self.error = error
         }
     }
 
@@ -179,6 +189,7 @@ final class WeatherManager {
         } catch {
             // Non-fatal; we simply won't show a location string
             // Optionally store the error if needed
+            self.error = WeatherError.geocodingFailed
         }
     }
 

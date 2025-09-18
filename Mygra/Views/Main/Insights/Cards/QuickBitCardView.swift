@@ -64,3 +64,39 @@ struct QuickBitsSectionView: View {
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
+
+#Preview("Empty") {
+    QuickBitsSectionView(
+        insights: [],
+        isRefreshing: false,
+        errors: [],
+        onRefresh: {}
+    )
+    .padding()
+}
+
+#Preview("Refreshing") {
+    QuickBitsSectionView(
+        insights: [],
+        isRefreshing: true,
+        errors: [],
+        onRefresh: {}
+    )
+    .padding()
+}
+
+#Preview("With Error Banner") {
+    let sampleError = NSError(
+        domain: "Preview",
+        code: 1,
+        userInfo: [NSLocalizedDescriptionKey: "Failed to fetch latest insights. Please try again."]
+    ) as Error
+
+    return QuickBitsSectionView(
+        insights: [],
+        isRefreshing: false,
+        errors: [sampleError],
+        onRefresh: {}
+    )
+    .padding()
+}

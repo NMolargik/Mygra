@@ -44,10 +44,10 @@ extension MigraineEntryView {
         var isSavingHealthEdits: Bool = false
         var healthEditErrorMessage: String?
         var addWater: Double = 0.0
-        var addCalories: Double = 0.0
+        var addFood: Double = 0.0
         var addCaffeine: Double = 0.0
         var addSleepHours: Double = 0.0
-        var allAddsAreZero: Bool { addWater == 0 && addCalories == 0 && addCaffeine == 0 && addSleepHours == 0 }
+        var allAddsAreZero: Bool { addWater == 0 && addFood == 0 && addCaffeine == 0 && addSleepHours == 0 }
 
         // Dynamic empathetic/helpful greeting
         var greeting: String = ""
@@ -124,6 +124,126 @@ extension MigraineEntryView {
 
         func resetGreeting() {
             greeting = greetingOptions.randomElement() ?? ""
+        }
+
+        // MARK: - Formatting & Display
+
+        func displayWater(_ liters: Double, useMetricUnits: Bool) -> String {
+            if useMetricUnits {
+                return String(format: "%.1f L water", liters)
+            } else {
+                let ounces = liters * 33.814
+                return String(format: "%.0f fl oz water", ounces.rounded())
+            }
+        }
+
+        func displayGlucose(mgPerdL: Double, useMetricUnits: Bool) -> String {
+            if useMetricUnits {
+                let mmol = mgPerdL / 18.0
+                return String(format: "%.1f mmol/L glucose", mmol)
+            } else {
+                return String(format: "%.0f mg/dL glucose", mgPerdL.rounded())
+            }
+        }
+
+        func displayMenstrualPhase(_ phase: MenstrualPhase) -> String {
+            switch phase {
+            case .menstrual: return "Menstrual phase"
+            case .follicular: return "Follicular phase"
+            case .ovulatory: return "Ovulatory phase"
+            case .luteal: return "Luteal phase"
+            }
+        }
+
+        func menstrualPhaseIcon(_ phase: MenstrualPhase) -> String {
+            switch phase {
+            case .menstrual: return "drop.circle.fill"
+            case .follicular: return "leaf.fill"
+            case .ovulatory: return "sparkles"
+            case .luteal: return "circle.lefthalf.filled"
+            }
+        }
+
+        func menstrualPhaseColor(_ phase: MenstrualPhase) -> Color {
+            switch phase {
+            case .menstrual: return .pink
+            case .follicular: return .green
+            case .ovulatory: return .yellow
+            case .luteal: return .orange
+            }
+        }
+
+        func displayTemperature(_ temp: Measurement<UnitTemperature>, useMetricUnits: Bool) -> String {
+            let value: Double
+            let unit: String
+            if useMetricUnits {
+                value = temp.converted(to: .celsius).value
+                unit = "°C"
+            } else {
+                value = temp.converted(to: .fahrenheit).value
+                unit = "°F"
+            }
+            return "\(Int(round(value))) \(unit)"
+        }
+
+        func displayPressure(_ pressure: Measurement<UnitPressure>, useMetricUnits: Bool) -> String {
+            if useMetricUnits {
+                let hpa = pressure.converted(to: .hectopascals).value
+                return String(format: "%.0f hPa", hpa)
+            } else {
+                let inHg = pressure.converted(to: .inchesOfMercury).value
+                return String(format: "%.2f inHg", inHg)
+            }
+        }
+
+        // MARK: - Triggers
+
+        func filteredTriggers(for group: MigraineTrigger.Group, search: String) -> [MigraineTrigger] {
+            let all = MigraineTrigger.cases(for: group)
+            let trimmed = search.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty else { return all }
+            let lower = trimmed.lowercased()
+            return all.filter { $0.displayName.lowercased().contains(lower) }
+        }
+
+        // MARK: - Intake sliders
+
+        var waterRangeMetric: ClosedRange<Double> { 0.0...5.0 }
+        var waterRangeImperial: ClosedRange<Double> { 0.0...170.0 }
+
+        func waterRange(useMetricUnits: Bool) -> ClosedRange<Double> {
+            useMetricUnits ? waterRangeMetric : waterRangeImperial
+        }
+
+        func waterStep(useMetricUnits: Bool) -> Double {
+            useMetricUnits ? 0.1 : 1.0
+        }
+
+        func waterDisplay(_ value: Double, useMetricUnits: Bool) -> String {
+            if useMetricUnits {
+                return String(format: "+%.1f L", value)
+            } else {
+                return String(format: "+%.0f fl oz", value)
+            }
+        }
+
+        func snap(_ value: Double, toStep step: Double, in range: ClosedRange<Double>) -> Double {
+            guard step > 0 else { return min(max(value, range.lowerBound), range.upperBound) }
+            let snapped = (value / step).rounded() * step
+            return min(max(snapped, range.lowerBound), range.upperBound)
+        }
+
+        // MARK: - Experience color
+
+        func gradientColor(for value: Int) -> Color {
+            let v = max(0, min(10, value))
+            if v <= 5 {
+                let t = Double(v) / 5.0
+                return Color(red: t, green: 1.0, blue: 0.0)
+            } else {
+                let t = Double(v - 5) / 5.0
+                return Color(red: 1.0, green: 1.0 - t, blue: 0.0)
+            }
         }
     }
 }
