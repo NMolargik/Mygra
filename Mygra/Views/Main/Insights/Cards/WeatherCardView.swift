@@ -24,6 +24,7 @@ struct WeatherCardView: View {
 
     @State private var bounceFlag: Bool = false
     @State private var previousCondition: WeatherCondition?
+    @State private var showErrorOverlay: Bool = false
 
     var body: some View {
         Group {
@@ -96,7 +97,7 @@ struct WeatherCardView: View {
                 .padding(14)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
-                    if let message = userFacingErrorMessage(from: error) {
+                    if showErrorOverlay, let message = userFacingErrorMessage(from: error) {
                         VStack {
                             Spacer()
                             HStack(spacing: 8) {
@@ -127,6 +128,13 @@ struct WeatherCardView: View {
                         break
                     }
                     previousCondition = condition
+                }
+                .onChange(of: userFacingErrorMessage(from: error)) { message in
+                    guard message != nil else { return }
+                    showErrorOverlay = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        withAnimation { showErrorOverlay = false }
+                    }
                 }
                 // Initialize previousCondition and optionally bounce on appear
                 .onAppear {

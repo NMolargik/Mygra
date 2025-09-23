@@ -118,6 +118,7 @@ final class IntelligenceManager {
         }
         // Initialize/replace the session to begin a new multi-turn chat context
         chatSessionBox = LanguageModelSession(instructions: instructions)
+        isChatActive = true
     }
 
     /// Sends a user message and returns the assistant reply using Apple Intelligence.
