@@ -16,7 +16,7 @@ struct MygraApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage("bgWeatherTaskScheduled") private var bgWeatherTaskScheduled: Bool = false
     
-    private let container: ModelContainer
+    private let sharedModelContainer: ModelContainer
     private let userManager: UserManager
     private let weatherManager: WeatherManager
     private let healthManager: HealthManager
@@ -33,7 +33,7 @@ struct MygraApp: App {
                 cloudKitDatabase: .private(cloudKitContainerID)
             )
 
-            container = try ModelContainer(
+            sharedModelContainer = try ModelContainer(
                 for: User.self, Migraine.self, WeatherData.self, HealthData.self,
                 configurations: config
             )
@@ -42,7 +42,7 @@ struct MygraApp: App {
         }
 
         // Initialize managers with the shared ModelContext
-        userManager = UserManager(context: container.mainContext)
+        userManager = UserManager(context: sharedModelContainer.mainContext)
         weatherManager = WeatherManager()
         healthManager = HealthManager()
         notificationManager = NotificationManager()
@@ -51,8 +51,7 @@ struct MygraApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(container)
-                .environment(userManager)
+                .modelContainer(sharedModelContainer)
                 .environment(weatherManager)
                 .environment(healthManager)
                 .environment(notificationManager)

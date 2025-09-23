@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum MigraineError: Error, LocalizedError, Sendable {
+enum MigraineError: LocalizedError, Sendable {
     case fetchFailed(underlying: Error)
     case saveFailed(underlying: Error)
     case deleteFailed(underlying: Error)

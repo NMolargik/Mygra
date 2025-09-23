@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum InsightError: LocalizedError, Equatable {
+enum InsightError: LocalizedError {
     case refreshFailed(underlying: Error)
     case generateAllFailed(underlying: Error)
     case trendsFailed(underlying: Error)
@@ -50,30 +50,6 @@ enum InsightError: LocalizedError, Equatable {
             return "Failed to start counselor chat."
         case .chatSendFailed:
             return "Failed to send counselor message."
-        }
-    }
-
-    static func == (lhs: InsightError, rhs: InsightError) -> Bool {
-        switch (lhs, rhs) {
-        case (.refreshFailed(let le), .refreshFailed(let re)),
-             (.generateAllFailed(let le), .generateAllFailed(let re)),
-             (.trendsFailed(let le), .trendsFailed(let re)),
-             (.triggersFailed(let le), .triggersFailed(let re)),
-             (.foodsFailed(let le), .foodsFailed(let re)),
-             (.intakeFailed(let le), .intakeFailed(let re)),
-             (.sleepFailed(let le), .sleepFailed(let re)),
-             (.weatherFailed(let le), .weatherFailed(let re)),
-             (.phasesFailed(let le), .phasesFailed(let re)),
-             (.intelligenceAnalysisFailed(let le), .intelligenceAnalysisFailed(let re)),
-             (.chatStartFailed(let le), .chatStartFailed(let re)),
-             (.chatSendFailed(let le), .chatSendFailed(let re)):
-            let ln = le as NSError
-            let rn = re as NSError
-            return ln.domain == rn.domain && ln.code == rn.code
-        case (.intelligenceUnavailable, .intelligenceUnavailable):
-            return true
-        default:
-            return false
         }
     }
 }

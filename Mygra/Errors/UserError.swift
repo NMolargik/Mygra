@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum UserError: Error, LocalizedError, CustomStringConvertible {
+enum UserError: LocalizedError, CustomStringConvertible {
     case fetchFailed(underlying: Error)
     case saveFailed(underlying: Error)
     case deleteFailed(underlying: Error)

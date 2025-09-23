@@ -12,15 +12,46 @@ import HealthKit
 @Observable
 final class HealthManager {
 
+    // MARK: - Testable abstraction over HKHealthStore
+    protocol Store {
+        static func isHealthDataAvailable() -> Bool
+        func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws
+        func statusForAuthorizationRequest(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws -> HKAuthorizationRequestStatus
+        func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
+        func execute(_ query: HKQuery)
+        func save(_ object: HKObject) async throws
+    }
+
+    // Default conformance to HKHealthStore
+    private struct LiveStore: Store {
+        static func isHealthDataAvailable() -> Bool { HKHealthStore.isHealthDataAvailable() }
+        private let inner = HKHealthStore()
+        func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws {
+            try await inner.requestAuthorization(toShare: typesToShare, read: typesToRead)
+        }
+        func statusForAuthorizationRequest(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws -> HKAuthorizationRequestStatus {
+            try await inner.statusForAuthorizationRequest(toShare: typesToShare, read: typesToRead)
+        }
+        func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus {
+            inner.authorizationStatus(for: type as! HKSampleType)
+        }
+        func execute(_ query: HKQuery) { inner.execute(query) }
+        func save(_ object: HKObject) async throws { try await inner.save(object as! HKSample) }
+    }
+
+    // MARK: - Init
+    init(store: Store = LiveStore()) {
+        self.store = store
+    }
+
     // MARK: - Public state
+    private let store: Store
+
     private(set) var isAuthorized = false
     private(set) var lastError: Error?
 
     /// The most recently fetched HealthData snapshot (cached for UI).
     private(set) var latestData: HealthData?
-
-    // MARK: - Private
-    private let store = HKHealthStore()
 
     // MARK: - Types we care about
 
@@ -54,7 +85,7 @@ final class HealthManager {
     // MARK: - Authorization
     
     func requestAuthorization() async {
-        guard HKHealthStore.isHealthDataAvailable() else {
+        guard type(of: store).isHealthDataAvailable() else {
             let err = HealthError.healthDataUnavailable
             self.lastError = err
             self.isAuthorized = false

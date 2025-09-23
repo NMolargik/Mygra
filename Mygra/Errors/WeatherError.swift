@@ -12,6 +12,7 @@ enum WeatherError: LocalizedError {
     case locationUnavailable
     case weatherServiceFailed
     case geocodingFailed
+    
     var errorDescription: String? {
         switch self {
             case .locationProviderMissing: return "No location provider has been set."

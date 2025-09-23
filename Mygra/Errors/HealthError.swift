@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum HealthError: LocalizedError, Equatable {
+enum HealthError: LocalizedError {
     case healthDataUnavailable
     case authorizationDenied
     case authorizationFailed(underlying: Error)
@@ -45,30 +45,6 @@ enum HealthError: LocalizedError, Equatable {
             return underlying.localizedDescription
         default:
             return nil
-        }
-    }
-    
-    // Custom Equatable conformance because associated value `Error` is not Equatable
-    static func == (lhs: HealthError, rhs: HealthError) -> Bool {
-        switch (lhs, rhs) {
-        case (.healthDataUnavailable, .healthDataUnavailable):
-            return true
-        case (.authorizationDenied, .authorizationDenied):
-            return true
-        case (.authorizationFailed, .authorizationFailed):
-            // Ignore underlying error; we only care about the case
-            return true
-        case (.readRequestStatusFailed, .readRequestStatusFailed):
-            return true
-        case (.shareRequestStatusFailed, .shareRequestStatusFailed):
-            return true
-        case (.snapshotFailed, .snapshotFailed):
-            return true
-        case let (.saveFailed(kindL, _), .saveFailed(kindR, _)):
-            // Compare only the kind, ignore underlying error
-            return kindL == kindR
-        default:
-            return false
         }
     }
 }
