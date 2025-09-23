@@ -14,35 +14,50 @@ struct OnboardingLocationView: View {
     @State var locationManager = LocationManager()
     
     var body: some View {
-        VStack {
-            Spacer()
-            
-            Text("Location")
-                .font(.largeTitle)
-                .bold()
-            
+        VStack(spacing: 20) {
+            Spacer(minLength: 12)
+
+            VStack(spacing: 8) {
+                Text("Location")
+                    .font(.largeTitle).bold()
+                Text("Mygra uses your location to track local weather conditions and warn you when migraines may be more likely.")
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+            }
+
             Image(systemName: "location.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 200, height: 200)
+                .frame(width: 180, height: 180)
                 .foregroundStyle(.red)
-                .shadow(radius: 5)
-            
-            Text("Mygra uses your location to track local weather conditions and warn you when migraines may be more likely.")
-                .padding()
-            
-            Spacer()
-            
-            Button("Continue") {
+                .shadow(radius: 8)
+                .padding(.vertical, 8)
+
+            Spacer(minLength: 12)
+
+            Button(action: {
                 locationManager.requestAuthorization()
                 onLocationAuthorized(locationManager)
+            }) {
+                HStack(spacing: 10) {
+                    Image(systemName: "location.circle.fill")
+                        .imageScale(.large)
+                    Text("Continue")
+                        .font(.title3).bold()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
             }
-            .foregroundStyle(.white)
-            .padding()
-            .font(.title)
-            .bold()
-            .frame(width: 200)
-            .glassEffect(.regular.interactive().tint(.red))
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+            .adaptiveGlass(tint: .red)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal)
+            .shadow(radius: 6, y: 3)
+
+            Spacer(minLength: 8)
         }
     }
 }

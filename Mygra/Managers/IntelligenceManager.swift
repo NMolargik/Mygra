@@ -25,7 +25,7 @@ final class IntelligenceManager {
     // MARK: - Chat state (ephemeral)
     private(set) var conversation: [ChatMessage] = []
     private(set) var isChatActive: Bool = false
-    private var chatSession: LanguageModelSession?  // Maintains multi-turn context
+    private var chatSessionBox: AnyObject?  // Holds LanguageModelSession on supported OS versions
 
     // MARK: - Init
     init(userManager: UserManager, migraineManager: MigraineManager) {
@@ -36,7 +36,7 @@ final class IntelligenceManager {
     // MARK: - Capability
 
     var supportsAppleIntelligence: Bool {
-        if #available(iOS 18.0, macOS 15.0, *) {
+        if #available(iOS 26.0, macOS 26.0, *) {
             // Check whether the on-device system language model is available (Apple Intelligence enabled & ready)
             return SystemLanguageModel.default.isAvailable
         } else {
@@ -48,33 +48,31 @@ final class IntelligenceManager {
 
     /// Uses Apple Intelligence (Foundation Models) to produce a concise, user-facing explanation
     /// of likely contributing factors from the given migraine’s properties.
+    @available(iOS 26.0, *)
     func analyze(migraine: Migraine, user: User?) async throws -> String? {
         guard supportsAppleIntelligence else { return nil }
         let prompt = buildSingleMigrainePrompt(migraine: migraine, user: user)
 
-        if #available(iOS 18.0, macOS 15.0, *) {
-            // Build instructions to shape the assistant's tone and task
-            let instructions = """
-            You are a data analyst for health logs.
-            Provide a concise explanation of likely contributing factors for this single migraine event based ONLY on the provided fields.
-            Then offer up to two non-clinical, everyday mitigation ideas tied to those factors (e.g., hydration, sleep regularity, screen breaks, balanced meals, stress-reduction techniques, indoor air/lighting adjustments).
-            Do NOT provide medical diagnoses, prescriptions, or treatment plans. Use conditional, non-prescriptive language (e.g., "you could try", "might help").
-            Keep it to 2–4 sentences, neutral and practical.
-            End with: "This is general, non-medical guidance and not a diagnosis."
-            """
+        // Build instructions to shape the assistant's tone and task
+        let instructions = """
+        You are a data analyst for health logs.
+        Provide a concise explanation of likely contributing factors for this single migraine event based ONLY on the provided fields.
+        Then offer up to two non-clinical, everyday mitigation ideas tied to those factors (e.g., hydration, sleep regularity, screen breaks, balanced meals, stress-reduction techniques, indoor air/lighting adjustments).
+        Do NOT provide medical diagnoses, prescriptions, or treatment plans. Use conditional, non-prescriptive language (e.g., "you could try", "might help").
+        Keep it to 2–4 sentences, neutral and practical.
+        End with: "This is general, non-medical guidance and not a diagnosis."
+        """
 
-            // Create a fresh on-device session and ask for a response
-            let session = LanguageModelSession(instructions: instructions)
-            let response = try await session.respond(to: prompt)
-            return response.content
-        } else {
-            return nil
-        }
+        // Create a fresh on-device session and ask for a response
+        let session = LanguageModelSession(instructions: instructions)
+        let response = try await session.respond(to: prompt)
+        return response.content
     }
 
     // MARK: - Feature 2: Counselor chat
 
     /// Seeds a chat session with compact summaries of the user and migraine history.
+    @available(iOS 26.0, *)
     func startChat(migraines: [Migraine], user: User?) async {
         guard supportsAppleIntelligence else { return }
         conversation.removeAll()
@@ -119,11 +117,11 @@ final class IntelligenceManager {
             instructions += "\nMigraine history summary: \(historySummary)"
         }
         // Initialize/replace the session to begin a new multi-turn chat context
-        chatSession = LanguageModelSession(instructions: instructions)
-        isChatActive = true
+        chatSessionBox = LanguageModelSession(instructions: instructions)
     }
 
     /// Sends a user message and returns the assistant reply using Apple Intelligence.
+    @available(iOS 26.0, *)
     func send(message: String) async throws -> String {
         guard supportsAppleIntelligence else { return "Apple Intelligence is not available on this device." }
         guard isChatActive else {
@@ -131,25 +129,20 @@ final class IntelligenceManager {
         }
 
         conversation.append(.user(message))
-
-        if #available(iOS 18.0, macOS 15.0, *) {
-            guard let session = chatSession else {
-                let reply = "Chat session is not active. Please start a new analysis chat."
-                conversation.append(.assistant(reply))
-                return reply
-            }
-            let response = try await session.respond(to: message)
-            let reply = response.content
+        guard let session = chatSessionBox as? LanguageModelSession else {
+            let reply = "Chat session is not active. Please start a new analysis chat."
             conversation.append(.assistant(reply))
             return reply
-        } else {
-            return "Apple Intelligence is not available on this device."
         }
+        let response = try await session.respond(to: message)
+        let reply = response.content
+        conversation.append(.assistant(reply))
+        return reply
     }
 
     /// Clears the chat state.
     func resetChat() {
-        chatSession = nil
+        chatSessionBox = nil
         conversation.removeAll()
         isChatActive = false
     }
@@ -274,3 +267,4 @@ final class IntelligenceManager {
         return "count=\(total); recentAvgPain=\(String(format: "%.1f", avgPain)); commonTriggers=\(triggersFlat.joined(separator: ", "))"
     }
 }
+

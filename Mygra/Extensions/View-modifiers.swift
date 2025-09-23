@@ -11,7 +11,38 @@ extension View {
     func shimmer() -> some View {
         self.modifier(ShimmerModifier())
     }
+    
+    /// Applies a glass effect with the provided tint on iOS 26+,
+    /// and falls back to a simple tinted background on earlier iOS versions.
+    func adaptiveGlass(tint: Color) -> some View {
+        self.modifier(AdaptiveGlassModifier(tint: tint))
+    }
 }
+
+#if os(iOS)
+public extension View {
+    @ViewBuilder
+    func tabViewBottomAccessoryIfAvailable<Accessory: View>(@ViewBuilder _ accessory: () -> Accessory) -> some View {
+        if #available(iOS 26.0, *) {
+            // Only use the new API when available at runtime
+            self.tabViewBottomAccessory(content: accessory)
+        } else {
+            // On earlier OS versions, do nothing
+            self
+        }
+    }
+}
+#else
+public extension View {
+    @ViewBuilder
+    func tabViewBottomAccessoryIfAvailable<Accessory: View>(@ViewBuilder _ accessory: () -> Accessory) -> some View {
+        // Non-iOS platforms: no-op to keep API usage consistent
+        self
+    }
+}
+#endif
+
+
 
 struct ShimmerModifier: ViewModifier {
     @State private var phase: CGFloat = -1

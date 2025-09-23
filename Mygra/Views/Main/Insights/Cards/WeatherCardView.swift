@@ -139,35 +139,32 @@ struct WeatherCardView: View {
                     Image(systemName: "location")
                         .font(.system(size: 28))
                         .foregroundStyle(.blue)
+
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Weather Unavailable")
                             .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.9)
+                            .allowsTightening(true)
                         Text(unavailableSubtitle(for: error))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
-                            .truncationMode(.tail)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 8) {
-                        HStack {
-                            Spacer()
-                            
-                        }
+                    .layoutPriority(1)
 
-                        if isFetching {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Button(action: onRefresh) {
-                                Image(systemName: "arrow.clockwise")
-                            }
-                            .buttonStyle(.borderless)
+                    Spacer()
+
+                    if isFetching {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Button(action: onRefresh) {
+                            Image(systemName: "arrow.clockwise")
                         }
-                    }
-                    Button("Refresh", action: onRefresh)
                         .buttonStyle(.bordered)
+                    }
                 }
                 .padding(14)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -430,3 +427,4 @@ struct WeatherCardView: View {
     )
     .padding()
 }
+

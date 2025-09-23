@@ -12,76 +12,99 @@ struct OnboardingCompleteView: View {
     var finishOnboarding: () -> Void
     
     var body: some View {
-        VStack {
-            Spacer()
-            
-            Text("All Done!")
-                .font(.largeTitle)
-                .bold()
-                .frame(maxWidth: .infinity, alignment: .center)
-            
-            HStack(spacing: 16) {
-                Image(systemName: "brain.head.profile.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(.blue)
-                Text("Track your migraines.")
-                    .font(.title3)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 8)
+        VStack(spacing: 24) {
+            Spacer(minLength: 12)
 
-            HStack(spacing: 16) {
-                Image(systemName: "lightbulb.max.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(.yellow)
-                Text("Get intelligent insights.")
-                    .font(.title3)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 8)
-
-            HStack(spacing: 16) {
-                Image(systemName: "chart.xyaxis.line")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
-                    .foregroundStyle(.green)
-                Text("View trends and likely migraine causes.")
-                    .font(.title3)
-            }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 8)
-            
-            HStack(spacing: 16) {
-                Image(systemName: "icloud.fill")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 40, height: 40)
+            VStack(spacing: 8) {
+                Text("All Done!")
+                    .font(.largeTitle).bold()
+                    .frame(maxWidth: .infinity, alignment: .center)
+                Text("You’re set. Here’s what Mygra can do for you:")
+                    .font(.callout)
                     .foregroundStyle(.secondary)
-                Text("All of your data syncs automatically wherever you're signed into iCloud!")
-                    .font(.title3)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
             }
-            .frame(maxWidth: .infinity, alignment: .center)
-            .padding(.vertical, 8)
 
-            Spacer()
-            
-            Button("Enter Mygra") {
-                finishOnboarding()
+            // Feature cards
+            VStack(spacing: 14) {
+                FeatureRow(
+                    systemImage: "brain.head.profile.fill",
+                    title: "Track your migraines.",
+                    tint: .blue
+                )
+                FeatureRow(
+                    systemImage: "lightbulb.max.fill",
+                    title: "Get intelligent insights.",
+                    tint: .yellow
+                )
+                FeatureRow(
+                    systemImage: "chart.xyaxis.line",
+                    title: "View trends and likely migraine causes.",
+                    tint: .green
+                )
+                FeatureRow(
+                    systemImage: "icloud.fill",
+                    title: "All of your data syncs automatically wherever you're signed into iCloud!",
+                    tint: .secondary
+                )
             }
-            .foregroundStyle(.white)
-            .padding()
-            .font(.title)
-            .bold()
-            .frame(width: 200)
-            .glassEffect(.regular.interactive().tint(.red))
-            .frame(maxWidth: .infinity, alignment: .center)
+            .padding(.horizontal)
+
+            Spacer(minLength: 12)
+
+            // Primary action
+            Button(action: finishOnboarding) {
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .imageScale(.large)
+                    Text("Enter Mygra")
+                        .font(.title3).bold()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+            .adaptiveGlass(tint: .red)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal)
+            .shadow(radius: 8, y: 3)
+
+            Spacer(minLength: 8)
         }
-        .padding(.horizontal)
+    }
+}
+
+private struct FeatureRow: View {
+    let systemImage: String
+    let title: String
+    let tint: Color
+
+    var body: some View {
+        HStack(spacing: 14) {
+            ZStack {
+                Circle()
+                    .fill(tint.opacity(0.18))
+                    .frame(width: 44, height: 44)
+                Image(systemName: systemImage)
+                    .symbolRenderingMode(.hierarchical)
+                    .frame(width: 40, height: 40)
+                    .font(.title3)
+                    .foregroundStyle(tint)
+            }
+            Text(title)
+                .font(.title3.weight(.semibold))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(16)
+        .background(.ultraThinMaterial)
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(.white.opacity(0.12))
+        )
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .shadow(radius: 6, y: 2)
     }
 }
 

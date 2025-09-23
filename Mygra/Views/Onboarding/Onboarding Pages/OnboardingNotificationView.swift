@@ -12,44 +12,57 @@ struct OnboardingNotificationView: View {
     @Environment(NotificationManager.self) var notificationManager: NotificationManager
 
     var body: some View {
-        VStack {
-            Spacer()
-            
-            Text("Notifications")
-                .font(.largeTitle)
-                .bold()
-            
+        VStack(spacing: 20) {
+            Spacer(minLength: 12)
+
+            VStack(spacing: 8) {
+                Text("Notifications")
+                    .font(.largeTitle).bold()
+                Text("Allow notifications so Mygra can remind you to log migraines and alert you about weather conditions that might trigger them.")
+                    .font(.callout)
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal)
+            }
+
             Image(systemName: "bell.fill")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: 200, height: 200)
+                .frame(width: 180, height: 180)
                 .foregroundStyle(.green)
-                .shadow(radius: 5)
-            
-            Text("Mygra connects directly to Apple Health to read and write critical health data, allowing us to track your migraines.\n\nPlease authorize all options.")
-                .padding()
-            
-            Spacer()
-            
-            Button("Continue") {
+                .shadow(radius: 8)
+                .padding(.vertical, 8)
+
+            Spacer(minLength: 12)
+
+            Button(action: {
                 Task {
                     do {
                         try await notificationManager.requestAuthorization()
                     } catch let error as NotificationError {
-                        // Handle specific notification errors as needed
                         print(error.localizedDescription)
                     } catch {
-                        // Handle any unexpected errors
                         print("Unexpected error requesting notification authorization: \(error)")
                     }
                 }
+            }) {
+                HStack(spacing: 10) {
+                    Image(systemName: "bell.circle.fill")
+                        .imageScale(.large)
+                    Text("Continue")
+                        .font(.title3).bold()
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 14)
             }
-            .foregroundStyle(.white)
-            .padding()
-            .font(.title)
-            .bold()
-            .frame(width: 200)
-            .glassEffect(.regular.interactive().tint(.red))
+            .buttonStyle(.borderedProminent)
+            .tint(.red)
+            .adaptiveGlass(tint: .red)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .padding(.horizontal)
+            .shadow(radius: 6, y: 3)
+
+            Spacer(minLength: 8)
         }
     }
 }
