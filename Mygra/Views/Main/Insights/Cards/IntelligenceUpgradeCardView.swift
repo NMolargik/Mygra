@@ -6,8 +6,12 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct IntelligenceUpgradeCardView: View {
+    private var platformName: String {
+        UIDevice.current.userInterfaceIdiom == .pad ? "iPadOS 26" : "iOS 26"
+    }
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: "sparkles")
@@ -18,7 +22,7 @@ struct IntelligenceUpgradeCardView: View {
                 Text("Apple Intelligence")
                     .font(.headline)
                     .bold()
-                Text("Update to iOS 26 to use the Migraine Assistant and AI‑powered Insights.")
+                Text("Update to \(platformName) to use the Migraine Assistant and AI‑powered Insights.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -31,7 +35,7 @@ struct IntelligenceUpgradeCardView: View {
         .padding(14)
         .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Apple Intelligence. Update to iOS 26 to access these features.")
+        .accessibilityLabel("Apple Intelligence. Update to \(platformName) to access these features.")
     }
 }
 
@@ -39,3 +43,4 @@ struct IntelligenceUpgradeCardView: View {
 #Preview {
     IntelligenceUpgradeCardView()
 }
+
