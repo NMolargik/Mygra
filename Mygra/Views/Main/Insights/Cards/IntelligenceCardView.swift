@@ -11,9 +11,9 @@ struct IntelligenceCardView: View {
     let onOpen: () -> Void
     
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: 15) {
             Image(systemName: "apple.intelligence")
-                .font(.system(size: 28, weight: .semibold))
+                .font(.system(size: 32))
                 .foregroundStyle(
                     AngularGradient(
                         colors: [.orange, .red, .purple, .blue, .purple, .red, .orange, .orange],
@@ -22,7 +22,6 @@ struct IntelligenceCardView: View {
                         endAngle: .degrees(270)
                     )
                 )
-                .frame(width: 34, height: 34)
             
             VStack(alignment: .leading, spacing: 4) {
                 Text("Migraine Assistant")
@@ -35,7 +34,7 @@ struct IntelligenceCardView: View {
             Spacer()
             
             Button(action: onOpen) {
-                Text("Open")
+                Text("Chat")
             }
             .buttonStyle(.borderedProminent)
             .tint(.red)

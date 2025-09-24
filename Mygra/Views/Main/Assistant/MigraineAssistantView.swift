@@ -146,7 +146,7 @@ struct MigraineAssistantView: View {
                                     .frame(width: 34, height: 34)
                                     .background(
                                         Circle()
-                                            .fill(sendEnabled ? Color.red : Color.secondary.opacity(0.25))
+                                            .fill(sendEnabled ? Color.blue : Color.secondary.opacity(0.25))
                                     )
                             }
                             .buttonStyle(.plain)
@@ -178,6 +178,7 @@ struct MigraineAssistantView: View {
                         } label: {
                             Label("Close", systemImage: "xmark")
                         }
+                        .tint(.red)
                     }
                 }
             }

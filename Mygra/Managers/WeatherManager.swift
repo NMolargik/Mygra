@@ -44,7 +44,8 @@ final class WeatherManager {
 
     /// Global cooldown to avoid costly WeatherKit hits from any trigger (manual, initial load, streaming).
     /// Only successful requests advance this cooldown. If a successful request was made less than this interval ago, we skip new requests.
-    var refreshCooldownInterval: TimeInterval = 5 * 60 // 5 minutes
+    /// Set to 1 hour to limit updates and reduce WeatherKit costs.
+    var refreshCooldownInterval: TimeInterval = 60 * 60 // 1 hour
 
     // Internal
     @ObservationIgnored
@@ -87,10 +88,16 @@ final class WeatherManager {
 
     /// One-off refresh using the current provider’s current location.
     func refresh() async {
-        // Global cooldown gate
+        // Global cooldown gate (manual refresh): show transient error indicating next eligible time
         if let lastAttempt = lastRequestAttempt,
            Date().timeIntervalSince(lastAttempt) < refreshCooldownInterval {
-            print("Too soon to refresh weather")
+            let next = lastAttempt.addingTimeInterval(refreshCooldownInterval)
+            let df = DateFormatter()
+            df.timeStyle = .short
+            df.dateStyle = .none
+            let msg = "You can refresh weather again at \(df.string(from: next))."
+            setTransientError(CooldownError(message: msg), duration: 3.0)
+            print("Too soon to refresh weather. Next eligible: \(next)")
             return
         }
 
@@ -154,6 +161,20 @@ final class WeatherManager {
 
         // Kick off reverse geocoding (non-blocking)
         await reverseGeocodeIfNeeded(for: location)
+    }
+
+    // MARK: - Transient error helper
+    private func setTransientError(_ error: Error, duration: TimeInterval) {
+        self.error = error
+        let currentDescription = (error as NSError).localizedDescription
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+            guard let self else { return }
+            // Only clear if the error hasn't changed since
+            let existingDescription = (self.error as NSError?)?.localizedDescription
+            if existingDescription == currentDescription {
+                self.error = nil
+            }
+        }
     }
 
     // MARK: - Stream listening
@@ -237,6 +258,11 @@ final class WeatherManager {
         }
         return pm.locality ?? pm.name
     }
+}
+
+private struct CooldownError: LocalizedError {
+    let message: String
+    var errorDescription: String? { message }
 }
 
 @MainActor

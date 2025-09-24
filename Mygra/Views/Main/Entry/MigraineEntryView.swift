@@ -208,21 +208,25 @@ struct MigraineEntryView: View {
                             if viewModel.isPullingWeather {
                                 ProgressView()
                                     .controlSize(.small)
-                            } else if viewModel.weatherError != nil {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.red)
                             } else if viewModel.didPullWeather {
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)
+                            } else if viewModel.weatherError != nil {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.red)
                             }
                             
                             VStack {
-                                Text(viewModel.isPullingWeather
-                                     ? "Pulling local weather"
-                                     : (viewModel.weatherError == nil ? "Pulled local weather" : "Failed to pull weather"))
-                                .foregroundStyle(viewModel.weatherError == nil ? .primary : .secondary)
+                                Text(
+                                    viewModel.isPullingWeather
+                                        ? "Pulling local weather"
+                                        : (viewModel.didPullWeather
+                                            ? (viewModel.weatherError == nil ? "Pulled local weather" : "Using recent weather")
+                                            : "Failed to pull weather")
+                                )
+                                .foregroundStyle(viewModel.didPullWeather ? .primary : .secondary)
                                 .font(.subheadline)
-                                .bold(viewModel.weatherError != nil)
+                                .bold(!viewModel.didPullWeather && viewModel.weatherError != nil)
                                 
                                 Spacer(minLength: 0)
                             }
@@ -252,7 +256,7 @@ struct MigraineEntryView: View {
                             .fill(.thinMaterial)
                     )
 
-                    if viewModel.didPullWeather, viewModel.weatherError == nil {
+                    if viewModel.didPullWeather {
                         // Single row with two columns, both leading aligned
                         
                         
@@ -604,16 +608,16 @@ struct MigraineEntryView: View {
 
         await weatherManager.refresh()
 
-        // Reflect results
+        // Consider it "pulled" if we have at least one of the core readings, even if refresh errored.
+        let hasAny = weatherManager.temperature != nil ||
+                     weatherManager.pressure != nil ||
+                     weatherManager.humidity != nil ||
+                     weatherManager.condition != nil
+
         if let error = weatherManager.error {
             viewModel.weatherError = error
-            viewModel.didPullWeather = false
+            viewModel.didPullWeather = hasAny
         } else {
-            // Consider it "pulled" if we got at least one of the core readings
-            let hasAny = weatherManager.temperature != nil ||
-                         weatherManager.pressure != nil ||
-                         weatherManager.humidity != nil ||
-                         weatherManager.condition != nil
             viewModel.didPullWeather = hasAny
         }
         viewModel.isPullingWeather = false
@@ -636,7 +640,7 @@ struct MigraineEntryView: View {
 
         // Build WeatherData from current WeatherManager readings if available
         let weatherModel: WeatherData? = {
-            guard viewModel.didPullWeather, viewModel.weatherError == nil else { return nil }
+            guard viewModel.didPullWeather else { return nil }
             let pressureHpa: Double? = {
                 guard let p = weatherManager.pressure else { return nil }
                 let hPa = p.converted(to: .hectopascals).value

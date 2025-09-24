@@ -29,6 +29,7 @@ struct QuickBitsSectionView: View {
                     .foregroundStyle(.red)
                 }
             }
+            .padding(.bottom, 8)
 
             if insights.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {

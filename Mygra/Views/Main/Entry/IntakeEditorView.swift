@@ -52,7 +52,7 @@ struct IntakeEditorView: View {
                         .onChange(of: addWater) { _, _ in sliderTick(\.waterHapticGate) }
                     Text(waterDisplay(addWater))
                         .monospacedDigit()
-                        .frame(width: 90, alignment: .trailing)
+                        .frame(width: 100, alignment: .trailing)
                 }
                 
                 // Caffeine
@@ -64,7 +64,7 @@ struct IntakeEditorView: View {
                         .onChange(of: addCaffeine) { _, _ in sliderTick(\.caffeineHapticGate) }
                     Text("+\(Int(addCaffeine)) mg")
                         .monospacedDigit()
-                        .frame(width: 90, alignment: .trailing)
+                        .frame(width: 100, alignment: .trailing)
                 }
                 
                 // Energy (Calories/Joules)
@@ -89,7 +89,7 @@ struct IntakeEditorView: View {
 
                         Text("+\(Int((addFood * 4.184).rounded())) kJ")
                             .monospacedDigit()
-                            .frame(width: 90, alignment: .trailing)
+                            .frame(width: 100, alignment: .trailing)
                     } else {
                         Slider(value: $addFood, in: 0...2500, step: 50)
                             .tint(.orange)
@@ -97,7 +97,7 @@ struct IntakeEditorView: View {
 
                         Text("+\(Int(addFood)) kcal")
                             .monospacedDigit()
-                            .frame(width: 90, alignment: .trailing)
+                            .frame(width: 100, alignment: .trailing)
                     }
                 }
                 
@@ -110,24 +110,24 @@ struct IntakeEditorView: View {
                         .onChange(of: addSleepHours) { _, _ in sliderTick(\.sleepHapticGate) }
                     Text(String(format: "+%.1f h", addSleepHours))
                         .monospacedDigit()
-                        .frame(width: 90, alignment: .trailing)
+                        .frame(width: 100, alignment: .trailing)
                 }
             }
             
             HStack {
                 Spacer()
-                Button(isSaving ? "Adding..." : "Add") {
-                    // Only fire success haptic if the action is actually going to run
-                    if !isSaving && !allAddsAreZero {
-                        Haptics.success()
-                    } else {
-                        Haptics.lightImpact()
+                if !allAddsAreZero {
+                    Button(isSaving ? "Adding..." : "Add") {
+                        // Only fire success haptic if the action is actually going to run
+                        if !isSaving {
+                            Haptics.success()
+                        }
+                        onAdd()
                     }
-                    onAdd()
+                    .disabled(isSaving)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.green)
                 }
-                .disabled(isSaving || allAddsAreZero)
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
                 
                 Button("Cancel") {
                     Haptics.lightImpact()
@@ -235,3 +235,4 @@ struct IntakeEditorView_Previews: PreviewProvider {
     }
 }
 #endif
+

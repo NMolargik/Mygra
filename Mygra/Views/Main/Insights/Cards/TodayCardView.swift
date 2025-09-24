@@ -124,31 +124,38 @@ struct TodayCardView: View {
             }
 
             if isQuickAddExpanded {
-                Divider().padding(.vertical, 2)
+                VStack(spacing: 0) {
+                    Divider().padding(.vertical, 2)
 
-                IntakeEditorView(
-                    addWater: $addWater,
-                    addCaffeine: $addCaffeine,
-                    addFood: $addFood,
-                    addSleepHours: $addSleepHours,
-                    useMetricUnits: useMetricUnits,
-                    waterRange: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
-                    waterStep: 0.1,
-                    waterDisplay: { liters in
-                        if useMetricUnits {
-                            return String(format: "+%.1f L", liters)
-                        } else {
-                            let oz = liters * 33.814
-                            return String(format: "+%.0f oz", oz)
+                    IntakeEditorView(
+                        addWater: $addWater,
+                        addCaffeine: $addCaffeine,
+                        addFood: $addFood,
+                        addSleepHours: $addSleepHours,
+                        useMetricUnits: useMetricUnits,
+                        waterRange: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
+                        waterStep: 0.1,
+                        waterDisplay: { liters in
+                            if useMetricUnits {
+                                return String(format: "+%.1f L", liters)
+                            } else {
+                                let oz = liters * 33.814
+                                return String(format: "+%.0f oz", oz)
+                            }
+                        },
+                        isSaving: isSavingIntake,
+                        errorMessage: intakeError,
+                        allAddsAreZero: allIntakeAddsAreZero,
+                        onAdd: onSaveIntake,
+                        onCancel: {
+                            withAnimation {
+                                onCancelIntake()
+                                isQuickAddExpanded = false
+                            }
                         }
-                    },
-                    isSaving: isSavingIntake,
-                    errorMessage: intakeError,
-                    allAddsAreZero: allIntakeAddsAreZero,
-                    onAdd: onSaveIntake,
-                    onCancel: onCancelIntake
-                )
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                    )
+                }
+                .transition(.verticalScaleFromTop)
             }
         }
         .padding(14)
@@ -167,6 +174,27 @@ struct TodayCardView: View {
                 return String(format: "%.0f oz", oz)
             } else { return "—" }
         }
+    }
+}
+
+fileprivate struct VerticalScaleModifier: ViewModifier {
+    let scaleY: CGFloat
+    let anchor: UnitPoint
+    let opacity: Double
+
+    func body(content: Content) -> some View {
+        content
+            .scaleEffect(x: 1, y: scaleY, anchor: anchor)
+            .opacity(opacity)
+    }
+}
+
+fileprivate extension AnyTransition {
+    static var verticalScaleFromTop: AnyTransition {
+        .modifier(
+            active: VerticalScaleModifier(scaleY: 0.001, anchor: .top, opacity: 0),
+            identity: VerticalScaleModifier(scaleY: 1.0, anchor: .top, opacity: 1)
+        )
     }
 }
 

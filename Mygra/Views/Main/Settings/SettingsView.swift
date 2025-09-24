@@ -129,7 +129,7 @@ struct SettingsView: View {
                     Link("Nick Molargik", destination: URL(string: "https://www.linkedin.com/in/nicholas-molargik/")!)
                         .foregroundStyle(.blue)
                 }
-                LabeledContent("Business") {
+                LabeledContent("Publisher") {
                     Link("Molargik Software LLC", destination: URL(string: "https://www.molargiksoftware.com")!)
                         .foregroundStyle(.blue)
                 }
