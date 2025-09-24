@@ -200,7 +200,7 @@ struct MainView: View {
                     }
                     .tag(AppTab.settings)
                 }
-                .tint(.red)
+                .tint(appTab.color())
                 .tabViewBottomAccessoryIfAvailable { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(

@@ -17,16 +17,20 @@ struct UserEditView: View {
     
     @State private var newCondition: String = ""
     @State private var newDietaryRestriction: String = ""
+    @FocusState private var isFirstNameFocused: Bool
 
     var body: some View {
         Section("First Name") {
             TextField("First Name", text: $user.name)
+                .focused($isFirstNameFocused)
         }
         
         Section("Birthday") {
             DatePicker("Birthday", selection: $user.birthday, displayedComponents: .date)
                 .datePickerStyle(.graphical)
                 .tint(.red)
+                .onTapGesture { isFirstNameFocused = false }
+                .onChange(of: user.birthday) { isFirstNameFocused = false }
         }
 
         Section("Anatomy") {
@@ -204,3 +208,4 @@ struct UserEditView: View {
 #Preview {
     UserEditView(user: .constant(User()), userFormComplete: .constant(false), dismiss: {})
 }
+

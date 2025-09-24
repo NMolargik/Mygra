@@ -129,8 +129,8 @@ struct WeatherCardView: View {
                     }
                     previousCondition = condition
                 }
-                .onChange(of: userFacingErrorMessage(from: error)) { message in
-                    guard message != nil else { return }
+                .onChange(of: userFacingErrorMessage(from: error)) { _, newMessage in
+                    guard newMessage != nil else { return }
                     showErrorOverlay = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                         withAnimation { showErrorOverlay = false }
@@ -172,6 +172,7 @@ struct WeatherCardView: View {
                             Image(systemName: "arrow.clockwise")
                         }
                         .buttonStyle(.bordered)
+                        .foregroundStyle(.red)
                     }
                 }
                 .padding(14)
