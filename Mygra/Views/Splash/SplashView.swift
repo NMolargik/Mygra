@@ -61,7 +61,7 @@ struct SplashView: View {
             .font(.title)
             .bold()
             .frame(width: 200)
-            .glassEffect(.regular.interactive().tint(.red))
+            .adaptiveGlass(tint: .red)
             .opacity(viewModel.buttonVisible ? 1 : 0)
             .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
             .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)

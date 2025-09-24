@@ -24,4 +24,15 @@ enum AppTab: String, CaseIterable, Identifiable {
             return Image(systemName: "gearshape.2")
         }
     }
+    
+    func color() -> Color {
+        switch self {
+        case .insights:
+            return Color.yellow
+        case .list:
+            return Color.red
+        case .settings:
+            return Color.orange
+        }
+    }
 }

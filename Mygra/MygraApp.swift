@@ -52,6 +52,7 @@ struct MygraApp: App {
         WindowGroup {
             ContentView()
                 .modelContainer(sharedModelContainer)
+                .environment(userManager)
                 .environment(weatherManager)
                 .environment(healthManager)
                 .environment(notificationManager)

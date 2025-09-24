@@ -43,7 +43,7 @@ final class WeatherManager {
     var minDistanceChange: CLLocationDistance = 500 // meters
 
     /// Global cooldown to avoid costly WeatherKit hits from any trigger (manual, initial load, streaming).
-    /// If a request was made less than this interval ago, we skip new requests.
+    /// Only successful requests advance this cooldown. If a successful request was made less than this interval ago, we skip new requests.
     var refreshCooldownInterval: TimeInterval = 5 * 60 // 5 minutes
 
     // Internal
@@ -135,9 +135,6 @@ final class WeatherManager {
             if !farEnough && !oldEnough { return }
         }
 
-        // Mark the attempt now to protect against races/spikes
-        lastRequestAttempt = Date()
-
         isFetching = true
         error = nil
         defer { isFetching = false }
@@ -151,6 +148,9 @@ final class WeatherManager {
         self.condition   = current.condition
         self.lastUpdated = now
         self.lastLocation = location
+
+        // Record successful fetch time for cooldown gating
+        self.lastRequestAttempt = now
 
         // Kick off reverse geocoding (non-blocking)
         await reverseGeocodeIfNeeded(for: location)
@@ -241,12 +241,11 @@ final class WeatherManager {
 
 @MainActor
 private final class GeocoderHolder {
-    // Retain the active MapKit reverse-geocoding request so we can cancel it.
-    private var currentRequest: MKReverseGeocodingRequest?
+    // Use CoreLocation's geocoder for broad iOS compatibility.
+    private let geocoder = CLGeocoder()
 
     func cancel() {
-        currentRequest?.cancel()
-        currentRequest = nil
+        geocoder.cancelGeocode()
     }
 
     // Keep reverse geocoding on the main actor (it feeds UI state).
@@ -254,19 +253,28 @@ private final class GeocoderHolder {
         // Cancel any in-flight request before starting a new one
         cancel()
 
-        // Create a new MapKit reverse geocoding request for the given location
-        guard let request = MKReverseGeocodingRequest(location: location) else {
-            return nil
+        // Prefer the async/await API when available; fall back to continuation otherwise.
+        if #available(iOS 15.0, *) {
+            let placemarks = try await geocoder.reverseGeocodeLocation(location)
+            if let first = placemarks.first {
+                return MKPlacemark(placemark: first)
+            } else {
+                return nil
+            }
+        } else {
+            return try await withCheckedThrowingContinuation { continuation in
+                geocoder.reverseGeocodeLocation(location) { placemarks, error in
+                    if let error = error {
+                        continuation.resume(throwing: error)
+                        return
+                    }
+                    if let first = placemarks?.first {
+                        continuation.resume(returning: MKPlacemark(placemark: first))
+                    } else {
+                        continuation.resume(returning: nil)
+                    }
+                }
+            }
         }
-        // Store the request so callers can cancel any in-flight work before starting a new one
-        currentRequest = request
-
-        // Await the results and then clear the retained request
-        let items = try await request.mapItems
-        // Clear request regardless of outcome
-        currentRequest = nil
-
-        // Return the first map item's placemark
-        return items.first?.placemark
     }
 }

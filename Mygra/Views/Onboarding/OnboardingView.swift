@@ -17,61 +17,70 @@ struct OnboardingView: View {
     @Environment(UserManager.self) private var userManager: UserManager
     
     var body: some View {
-        VStack {
-            Group {
-                ZStack {
-                    pageView()
-                        .id(viewModel.currentPage) // important for transition
-                        .transition(viewModel.isMovingForward ? viewModel.forwardTransition : viewModel.backwardTransition)
-                }
-                .animation(.easeInOut(duration: 0.3), value: viewModel.currentPage)
-                
-                Spacer()
-                
-                HStack {
-                    if viewModel.currentPage != .health && viewModel.currentPage != .complete {
-                        Button("Back") {
-                            Haptics.lightImpact()
-                            viewModel.isMovingForward = false
-                            let previous = viewModel.currentPage.previous
-                            withAnimation {
-                                viewModel.currentPage = previous
-                            }
-                        }
-                        .frame(width: 80)
-                        .foregroundStyle(.white)
-                        .bold()
-                        .padding()
-                        .glassEffect(.regular.interactive().tint(.red))
+        ZStack {
+            LinearGradient(
+                colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25), Color.black.opacity(0.15)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
+            
+            VStack {
+                Group {
+                    ZStack {
+                        pageView()
+                            .id(viewModel.currentPage) // important for transition
+                            .transition(viewModel.isMovingForward ? viewModel.forwardTransition : viewModel.backwardTransition)
                     }
+                    .animation(.easeInOut(duration: 0.3), value: viewModel.currentPage)
                     
                     Spacer()
                     
-                    if viewModel.currentPage != .complete {
-                        Button("Next") {
-                            Haptics.lightImpact()
-                            if viewModel.currentPage == .user {
-                                userManager.createOrReplace(newUser: viewModel.newUser)
+                    HStack {
+                        if viewModel.currentPage != .health && viewModel.currentPage != .complete {
+                            Button("Back") {
+                                Haptics.lightImpact()
+                                viewModel.isMovingForward = false
+                                let previous = viewModel.currentPage.previous
+                                withAnimation {
+                                    viewModel.currentPage = previous
+                                }
                             }
-                            let allowed = viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager)
-                            viewModel.isMovingForward = true
-                            let next = viewModel.currentPage.next
-                            withAnimation {
-                                viewModel.currentPage = next
-                            }
-                            if allowed {
-                                Haptics.success()
-                            }
+                            .frame(width: 80)
+                            .foregroundStyle(.white)
+                            .bold()
+                            .padding()
+                            .adaptiveGlass(tint: .red)
                         }
-                        .frame(width: 80)
-                        .foregroundStyle(.white)
-                        .bold()
-                        .padding()
-                        .glassEffect(.regular.interactive().tint(viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager) ? .blue : .gray))
-                        .disabled(!viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager))
+                        
+                        Spacer()
+                        
+                        if viewModel.currentPage != .complete {
+                            Button("Next") {
+                                Haptics.lightImpact()
+                                if viewModel.currentPage == .user {
+                                    userManager.createOrReplace(newUser: viewModel.newUser)
+                                }
+                                let allowed = viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager)
+                                viewModel.isMovingForward = true
+                                let next = viewModel.currentPage.next
+                                withAnimation {
+                                    viewModel.currentPage = next
+                                }
+                                if allowed {
+                                    Haptics.success()
+                                }
+                            }
+                            .frame(width: 80)
+                            .foregroundStyle(.white)
+                            .bold()
+                            .padding()
+                            .adaptiveGlass(tint: viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager) ? .blue : .gray)
+                            .disabled(!viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager))
+                        }
                     }
+                    .padding()
                 }
-                .padding()
             }
         }
     }
@@ -124,3 +133,4 @@ struct OnboardingView: View {
         .environment(previewLocationManager)
         .environment(previewNotificationManager)
 }
+

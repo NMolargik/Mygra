@@ -40,8 +40,12 @@ final class HealthManager {
     }
 
     // MARK: - Init
-    init(store: Store = LiveStore()) {
+    init(store: Store) {
         self.store = store
+    }
+
+    convenience init() {
+        self.init(store: LiveStore())
     }
 
     // MARK: - Public state
@@ -425,4 +429,3 @@ final class HealthManager {
         }
     }
 }
-

@@ -155,7 +155,6 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                         }
                     )
                 }
-                .padding(.horizontal)
                 .navigationTitle("Edit User")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
@@ -260,3 +259,4 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
         .modelContainer(container)
         .environment(previewUserManager)
 }
+

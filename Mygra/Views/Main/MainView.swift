@@ -104,7 +104,7 @@ struct MainView: View {
                             }
                     }
                 }
-                .tabViewBottomAccessory { ongoingAccessory }
+                .tabViewBottomAccessoryIfAvailable { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(onMigraineSaved: { migraine, reviewScene in
                         createNewMigraine(migraine: migraine, reviewScene: reviewScene)
@@ -200,8 +200,8 @@ struct MainView: View {
                     }
                     .tag(AppTab.settings)
                 }
-                .tint(.red)
-                .tabViewBottomAccessory { ongoingAccessory }
+                .tint(appTab.color())
+                .tabViewBottomAccessoryIfAvailable { ongoingAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(
                         onMigraineSaved: { migraine, reviewScene in
@@ -374,3 +374,4 @@ struct MainView: View {
         pendingDeepLinkAction = nil
     }
 }
+

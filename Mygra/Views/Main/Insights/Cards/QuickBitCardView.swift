@@ -26,6 +26,7 @@ struct QuickBitsSectionView: View {
                         Image(systemName: "arrow.clockwise")
                     }
                     .buttonStyle(.borderless)
+                    .foregroundStyle(.red)
                 }
             }
 

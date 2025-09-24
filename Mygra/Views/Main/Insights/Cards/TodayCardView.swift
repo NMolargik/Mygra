@@ -45,6 +45,7 @@ struct TodayCardView: View {
                         Image(systemName: "arrow.clockwise")
                     }
                     .buttonStyle(.borderless)
+                    .foregroundStyle(.red)
                 }
 
                 Button {

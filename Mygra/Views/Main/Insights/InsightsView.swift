@@ -37,14 +37,19 @@ struct InsightsView: View {
                         locationString: weatherManager.locationString
                     )
                     
-                    if insightManager.intelligenceManager.supportsAppleIntelligence {
-                        IntelligenceCardView(
-                            onOpen: {
-                                Haptics.lightImpact()
-                                viewModel.isShowingMigraineAssistant = true
-                                Task { await insightManager.startCounselorChat() }
-                            }
-                        )
+                    
+                    if #available(iOS 26.0, *) {
+                        if insightManager.intelligenceManager.supportsAppleIntelligence {
+                            IntelligenceCardView(
+                                onOpen: {
+                                    Haptics.lightImpact()
+                                    viewModel.isShowingMigraineAssistant = true
+                                    Task { await insightManager.startCounselorChat() }
+                                }
+                            )
+                        }
+                    } else {
+                        IntelligenceUpgradeCardView()
                     }
                     
                     TodayCardView(
@@ -101,9 +106,13 @@ struct InsightsView: View {
                 await initialLoadIfNeeded()
             }
             .fullScreenCover(isPresented: $viewModel.isShowingMigraineAssistant) {
-                MigraineAssistantView()
-                    .environment(insightManager)
-                    .ignoresSafeArea()
+                if #available(iOS 26.0, *) {
+                    MigraineAssistantView()
+                        .environment(insightManager)
+                        .ignoresSafeArea()
+                } else {
+                    // TODO: alert user of need for iOS 26
+                }
             }
             .onChange(of: viewModel.isQuickAddExpanded) { _, _ in
                 Haptics.lightImpact()

@@ -24,6 +24,7 @@ struct WeatherCardView: View {
 
     @State private var bounceFlag: Bool = false
     @State private var previousCondition: WeatherCondition?
+    @State private var showErrorOverlay: Bool = false
 
     var body: some View {
         Group {
@@ -96,7 +97,7 @@ struct WeatherCardView: View {
                 .padding(14)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 .overlay {
-                    if let message = userFacingErrorMessage(from: error) {
+                    if showErrorOverlay, let message = userFacingErrorMessage(from: error) {
                         VStack {
                             Spacer()
                             HStack(spacing: 8) {
@@ -128,6 +129,13 @@ struct WeatherCardView: View {
                     }
                     previousCondition = condition
                 }
+                .onChange(of: userFacingErrorMessage(from: error)) { _, newMessage in
+                    guard newMessage != nil else { return }
+                    showErrorOverlay = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        withAnimation { showErrorOverlay = false }
+                    }
+                }
                 // Initialize previousCondition and optionally bounce on appear
                 .onAppear {
                     if previousCondition == nil {
@@ -139,35 +147,33 @@ struct WeatherCardView: View {
                     Image(systemName: "location")
                         .font(.system(size: 28))
                         .foregroundStyle(.blue)
+
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Weather Unavailable")
                             .font(.headline)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.9)
+                            .allowsTightening(true)
                         Text(unavailableSubtitle(for: error))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .lineLimit(2)
-                            .truncationMode(.tail)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
-                    Spacer()
-                    
-                    VStack(alignment: .trailing, spacing: 8) {
-                        HStack {
-                            Spacer()
-                            
-                        }
+                    .layoutPriority(1)
 
-                        if isFetching {
-                            ProgressView()
-                                .controlSize(.small)
-                        } else {
-                            Button(action: onRefresh) {
-                                Image(systemName: "arrow.clockwise")
-                            }
-                            .buttonStyle(.borderless)
+                    Spacer()
+
+                    if isFetching {
+                        ProgressView()
+                            .controlSize(.small)
+                    } else {
+                        Button(action: onRefresh) {
+                            Image(systemName: "arrow.clockwise")
                         }
-                    }
-                    Button("Refresh", action: onRefresh)
                         .buttonStyle(.bordered)
+                        .foregroundStyle(.red)
+                    }
                 }
                 .padding(14)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
@@ -430,3 +436,4 @@ struct WeatherCardView: View {
     )
     .padding()
 }
+

@@ -569,19 +569,23 @@ final class InsightManager {
 
         let user = userManager.currentUser
         do {
-            if let text = try await intelligenceManager.analyze(migraine: migraine, user: user) {
-                migraineManager.update(migraine) { m in
-                    m.insight = text
+            if #available(iOS 26.0, *) {
+                if let text = try await intelligenceManager.analyze(migraine: migraine, user: user) {
+                    migraineManager.update(migraine) { m in
+                        m.insight = text
+                    }
+                    generatedGuidance[migraine.id] = text
+                    let card = Insight(
+                        category: .generative,
+                        title: "Migraine explanation",
+                        message: text,
+                        priority: .medium,
+                        tags: ["migraineID": migraine.id]
+                    )
+                    insights.insert(card, at: 0)
                 }
-                generatedGuidance[migraine.id] = text
-                let card = Insight(
-                    category: .generative,
-                    title: "Migraine explanation",
-                    message: text,
-                    priority: .medium,
-                    tags: ["migraineID": migraine.id]
-                )
-                insights.insert(card, at: 0)
+            } else {
+                // Fallback on earlier versions
             }
         } catch {
             errors.append(.intelligenceAnalysisFailed(underlying: error))
@@ -595,9 +599,14 @@ final class InsightManager {
         }
         let all = migraineManager.migraines
         let user = userManager.currentUser
-        await intelligenceManager.startChat(migraines: all, user: user)
+        if #available(iOS 26.0, *) {
+            await intelligenceManager.startChat(migraines: all, user: user)
+        } else {
+            // Fallback on earlier versions
+        }
     }
 
+    @available(iOS 26.0, *)
     func sendCounselorMessage(_ text: String) async -> String {
         guard intelligenceManager.supportsAppleIntelligence else {
             errors.append(.intelligenceUnavailable)

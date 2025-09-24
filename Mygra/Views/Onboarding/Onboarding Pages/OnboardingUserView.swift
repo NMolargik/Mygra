@@ -32,37 +32,40 @@ struct OnboardingUserView: View {
             }
             
             if !showingEdit {
-                VStack {
-                    Spacer()
+                VStack(spacing: 20) {
+                    Spacer(minLength: 12)
                     
-                    Text("You")
-                        .font(.largeTitle)
-                        .bold()
+                    VStack(spacing: 8) {
+                        Text("You")
+                            .font(.largeTitle).bold()
+                        Text("Mygra requires some information about you to best tailor the experience and draw insights from your migraines. Again, all of your data will be stored on your device or encrypted in iCloud.")
+                            .font(.callout)
+                            .multilineTextAlignment(.center)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal)
+                    }
                     
                     Image(systemName: "person.fill")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
+                        .frame(width: 180, height: 180)
                         .foregroundStyle(.orange)
-                        .shadow(radius: 5)
+                        .shadow(radius: 8)
+                        .padding(.vertical, 8)
                     
-                    Text("Mygra requires some information about you to best tailor the experience and draw insights from your migraines.\n\nAgain, all of your data will be stored on your device or encrypted in iCloud.")
-                        .padding()
+                    Spacer(minLength: 12)
                     
-                    Spacer()
-                    
-                    VStack(spacing: 2) {
+                    VStack(spacing: 4) {
                         Image(systemName: "chevron.up")
-                            .font(.title)
+                            .font(.title2)
                             .foregroundColor(.orange)
                             .shadow(radius: 2)
                         SparkleText(text: "Swipe Up To Continue")
+                            .font(.headline)
                     }
-                    .padding()
+                    .padding(.bottom, 20)
                 }
-                .background(Color(.systemBackground))
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .zIndex(1)
                 .offset(y: dragOffset)
                 .gesture(
                     DragGesture()
@@ -75,7 +78,6 @@ struct OnboardingUserView: View {
                             }
                         }
                 )
-                .padding(.bottom, 20)
             }
         }
         .animation(.spring(), value: showingEdit)
