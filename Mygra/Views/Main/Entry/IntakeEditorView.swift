@@ -50,9 +50,10 @@ struct IntakeEditorView: View {
                     Slider(value: $addWater, in: waterRange, step: waterStep)
                         .tint(.blue)
                         .onChange(of: addWater) { _, _ in sliderTick(\.waterHapticGate) }
-                    Text(waterDisplay(addWater))
-                        .monospacedDigit()
-                        .frame(width: 100, alignment: .trailing)
+                    AmountPill(text: waterDisplay(addWater), tint: .blue)
+                        .frame(width: 140, alignment: .trailing)
+                        .animation(.snappy(duration: 0.2), value: addWater)
+                        .accessibilityLabel(useMetricUnits ? "Add \(Int(addWater)) milliliters of water" : "Add \(Int(addWater)) fluid ounces of water")
                 }
                 
                 // Caffeine
@@ -62,9 +63,10 @@ struct IntakeEditorView: View {
                     Slider(value: $addCaffeine, in: 0...1000, step: 10)
                         .tint(.brown)
                         .onChange(of: addCaffeine) { _, _ in sliderTick(\.caffeineHapticGate) }
-                    Text("+\(Int(addCaffeine)) mg")
-                        .monospacedDigit()
-                        .frame(width: 100, alignment: .trailing)
+                    AmountPill(text: "+\(Int(addCaffeine)) mg", tint: .brown)
+                        .frame(width: 140, alignment: .trailing)
+                        .animation(.snappy(duration: 0.2), value: addCaffeine)
+                        .accessibilityLabel("Add \(Int(addCaffeine)) milligrams of caffeine")
                 }
                 
                 // Energy (Calories/Joules)
@@ -87,17 +89,19 @@ struct IntakeEditorView: View {
                         .tint(.orange)
                         .onChange(of: addFood) { _, _ in sliderTick(\.caloriesHapticGate) }
 
-                        Text("+\(Int((addFood * 4.184).rounded())) kJ")
-                            .monospacedDigit()
-                            .frame(width: 100, alignment: .trailing)
+                        AmountPill(text: "+\(Int((addFood * 4.184).rounded())) kJ", tint: .orange)
+                            .frame(width: 140, alignment: .trailing)
+                            .animation(.snappy(duration: 0.2), value: addFood)
+                            .accessibilityLabel("Add \(Int((addFood * 4.184).rounded())) kilojoules of energy")
                     } else {
                         Slider(value: $addFood, in: 0...2500, step: 50)
                             .tint(.orange)
                             .onChange(of: addFood) { _, _ in sliderTick(\.caloriesHapticGate) }
 
-                        Text("+\(Int(addFood)) kcal")
-                            .monospacedDigit()
-                            .frame(width: 100, alignment: .trailing)
+                        AmountPill(text: "+\(Int(addFood)) kcal", tint: .orange)
+                            .frame(width: 140, alignment: .trailing)
+                            .animation(.snappy(duration: 0.2), value: addFood)
+                            .accessibilityLabel("Add \(Int(addFood)) kilocalories of energy")
                     }
                 }
                 
@@ -108,9 +112,13 @@ struct IntakeEditorView: View {
                     Slider(value: $addSleepHours, in: 0...12, step: 0.5)
                         .tint(.indigo)
                         .onChange(of: addSleepHours) { _, _ in sliderTick(\.sleepHapticGate) }
-                    Text(String(format: "+%.1f h", addSleepHours))
-                        .monospacedDigit()
-                        .frame(width: 100, alignment: .trailing)
+                    AmountPill(
+                        text: "+" + Duration.seconds(Int(addSleepHours * 3600)).formatted(.time(pattern: .hourMinute)),
+                        tint: .indigo
+                    )
+                    .frame(width: 140, alignment: .trailing)
+                    .animation(.snappy(duration: 0.2), value: addSleepHours)
+                    .accessibilityLabel("Add " + Duration.seconds(Int(addSleepHours * 3600)).formatted(.time(pattern: .hourMinute)) + " of sleep")
                 }
             }
             
@@ -162,17 +170,30 @@ struct IntakeEditorView: View {
     }
 }
 
-#if DEBUG
-import SwiftUI
+// MARK: - Amount Pill
+private struct AmountPill: View {
+    let text: String
+    let tint: Color
 
-struct IntakeEditorView_Previews: PreviewProvider {
-    // Wrapper to supply @State bindings required by IntakeEditorView
-    struct ImperialWrapper: View {
+    var body: some View {
+        Text(text)
+            .font(.callout.weight(.semibold))
+            .monospacedDigit()
+            .foregroundStyle(tint)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(.thinMaterial, in: Capsule())
+            .contentTransition(.numericText())
+    }
+}
+
+#Preview("Imperial (kcal)") {
+    struct PreviewView: View {
         @State var addWater: Double = 16
         @State var addCaffeine: Double = 120
         @State var addFood: Double = 500
         @State var addSleepHours: Double = 1.0
-        
+
         var body: some View {
             IntakeEditorView(
                 addWater: $addWater,
@@ -192,17 +213,19 @@ struct IntakeEditorView_Previews: PreviewProvider {
                 onAdd: {},
                 onCancel: {}
             )
-            .padding()
-            .previewDisplayName("Imperial (kcal)")
         }
     }
+    return PreviewView()
+        .padding()
+}
 
-    struct MetricWrapper: View {
+#Preview("Metric + Error Banner (kJ)") {
+    struct PreviewView: View {
         @State var addWater: Double = 250
         @State var addCaffeine: Double = 200
         @State var addFood: Double = 600
         @State var addSleepHours: Double = 0.5
-        
+
         var body: some View {
             IntakeEditorView(
                 addWater: $addWater,
@@ -222,17 +245,9 @@ struct IntakeEditorView_Previews: PreviewProvider {
                 onAdd: {},
                 onCancel: {}
             )
-            .padding()
-            .previewDisplayName("Metric + Error Banner (kJ)")
         }
     }
-
-    static var previews: some View {
-        Group {
-            ImperialWrapper()
-            MetricWrapper()
-        }
-    }
+    return PreviewView()
+        .padding()
 }
-#endif
 

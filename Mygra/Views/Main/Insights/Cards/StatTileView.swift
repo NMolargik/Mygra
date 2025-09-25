@@ -63,7 +63,6 @@ struct StatTileView: View {
         systemImage: "drop.fill",
         color: .blue
     )
-    .padding()
 }
 
 #Preview("Metric Stat Tile") {
@@ -73,5 +72,4 @@ struct StatTileView: View {
         systemImage: "drop.fill",
         color: .blue
     )
-    .padding()
 }

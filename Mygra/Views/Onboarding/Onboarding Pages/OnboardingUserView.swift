@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OnboardingUserView: View {
     @Bindable var viewModel: OnboardingView.ViewModel
+    
     @State private var showingEdit = false
     @GestureState private var dragOffset: CGFloat = 0
     

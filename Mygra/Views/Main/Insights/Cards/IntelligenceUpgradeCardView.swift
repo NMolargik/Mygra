@@ -13,9 +13,9 @@ struct IntelligenceUpgradeCardView: View {
         UIDevice.current.userInterfaceIdiom == .pad ? "iPadOS 26" : "iOS 26"
     }
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 15) {
             Image(systemName: "sparkles")
-                .font(.system(size: 28))
+                .font(.title)
                 .foregroundStyle(.red)
 
             VStack(alignment: .leading, spacing: 4) {

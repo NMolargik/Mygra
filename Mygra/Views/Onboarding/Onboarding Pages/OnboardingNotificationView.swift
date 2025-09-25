@@ -69,4 +69,5 @@ struct OnboardingNotificationView: View {
 
 #Preview {
     OnboardingNotificationView(viewModel: OnboardingView.ViewModel())
+        .environment(NotificationManager())
 }

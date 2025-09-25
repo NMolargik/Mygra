@@ -60,7 +60,7 @@ struct EndMigraineSheet: View {
 
 #Preview("Sample EndMigraineSheet") {
     EndMigraineSheet(
-        startDate: Date().addingTimeInterval(-3600), // 1 hour ago
+        startDate: Date().addingTimeInterval(-3600),
         initialEndDate: Date(),
         onConfirm: { _ in },
         onCancel: {}

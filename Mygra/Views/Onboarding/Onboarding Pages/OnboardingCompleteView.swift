@@ -19,6 +19,7 @@ struct OnboardingCompleteView: View {
                 Text("All Done!")
                     .font(.largeTitle).bold()
                     .frame(maxWidth: .infinity, alignment: .center)
+                
                 Text("You’re set. Here’s what Mygra can do for you:")
                     .font(.callout)
                     .foregroundStyle(.secondary)
@@ -28,22 +29,22 @@ struct OnboardingCompleteView: View {
 
             // Feature cards
             VStack(spacing: 14) {
-                FeatureRow(
+                FeatureRowView(
                     systemImage: "brain.head.profile.fill",
                     title: "Track your migraines.",
                     tint: .blue
                 )
-                FeatureRow(
+                FeatureRowView(
                     systemImage: "lightbulb.max.fill",
                     title: "Get intelligent insights.",
                     tint: .yellow
                 )
-                FeatureRow(
+                FeatureRowView(
                     systemImage: "chart.xyaxis.line",
                     title: "View trends and likely migraine causes.",
                     tint: .green
                 )
-                FeatureRow(
+                FeatureRowView(
                     systemImage: "icloud.fill",
                     title: "All of your data syncs automatically wherever you're signed into iCloud!",
                     tint: .secondary
@@ -73,38 +74,6 @@ struct OnboardingCompleteView: View {
 
             Spacer(minLength: 8)
         }
-    }
-}
-
-private struct FeatureRow: View {
-    let systemImage: String
-    let title: String
-    let tint: Color
-
-    var body: some View {
-        HStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(tint.opacity(0.18))
-                    .frame(width: 44, height: 44)
-                Image(systemName: systemImage)
-                    .symbolRenderingMode(.hierarchical)
-                    .frame(width: 40, height: 40)
-                    .font(.title3)
-                    .foregroundStyle(tint)
-            }
-            Text(title)
-                .font(.title3.weight(.semibold))
-                .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .padding(16)
-        .background(.ultraThinMaterial)
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .strokeBorder(.white.opacity(0.12))
-        )
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .shadow(radius: 6, y: 2)
     }
 }
 

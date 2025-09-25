@@ -8,28 +8,32 @@
 import SwiftUI
 
 struct TypingIndicator: View {
-    @State private var phase: CGFloat = 0
+    
     var body: some View {
-        HStack(spacing: 6) {
-            ForEach(0..<3, id: \.self) { i in
-                Circle()
-                    .fill(.secondary)
-                    .frame(width: 6, height: 6)
-                    .opacity(opacity(for: i))
+        TimelineView(.animation) { timeline in
+            let duration: TimeInterval = 1.5
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            // Normalize to 0...1 repeating phase
+            let phase = CGFloat((t / duration).truncatingRemainder(dividingBy: 1))
+
+            HStack(spacing: 6) {
+                ForEach(0..<3, id: \.self) { i in
+                    let progress = wave(phase: phase, index: i)
+                    Circle()
+                        .fill(.secondary)
+                        .frame(width: 6, height: 6)
+                        .scaleEffect(0.95 + 0.20 * progress)
+                        .opacity(0.6 + 0.4 * progress)
+                }
             }
-        }
-        .accessibilityLabel("Assistant is typing")
-        .onAppear {
-            withAnimation(.easeInOut(duration: 0.9).repeatForever(autoreverses: true)) {
-                phase = 1
-            }
+            .accessibilityLabel("Assistant is typing")
         }
     }
-
-    private func opacity(for index: Int) -> Double {
-        let base = (Double(index) * 0.3)
-        let t = (sin((phase * 2 * .pi) + base) + 1) / 2
-        return 0.35 + t * 0.65
+    
+    private func wave(phase: CGFloat, index: Int) -> CGFloat {
+        let offset = Double(index) * (2 * .pi / 3) // 0°, 120°, 240°
+        let t = sin(Double(phase) * 2 * .pi - offset)
+        return CGFloat((t + 1) / 2)
     }
 }
 

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import SwiftData
 
 @available(iOS 26.0, *)
 struct MigraineAssistantView: View {
@@ -208,6 +209,40 @@ struct MigraineAssistantView: View {
             }
         } else {
             proxy.scrollTo(id, anchor: .bottom)
+        }
+    }
+}
+
+#Preview("Migraine Assistant") {
+    return Group {
+        if #available(iOS 26.0, *) {
+            let container: ModelContainer = {
+                do {
+                    return try ModelContainer(
+                        for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+                    )
+                } catch {
+                    fatalError("Preview ModelContainer setup failed: \(error)")
+                }
+            }()
+
+            let previewHealthManager = HealthManager()
+            let previewWeatherManager = WeatherManager()
+            let previewUserManager = UserManager(context: container.mainContext)
+            let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
+            let previewInsightManager = InsightManager(
+                userManager: previewUserManager,
+                migraineManager: previewMigraineManager,
+                weatherManager: previewWeatherManager,
+                healthManager: previewHealthManager
+            )
+
+            MigraineAssistantView()
+                .modelContainer(container)
+                .environment(previewInsightManager)
+        } else {
+            Text("Requires iOS 18 (Apple Intelligence)")
         }
     }
 }

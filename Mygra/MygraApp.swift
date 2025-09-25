@@ -14,7 +14,10 @@ import CoreLocation
 @main
 struct MygraApp: App {
     @Environment(\.scenePhase) private var scenePhase
-    @AppStorage("bgWeatherTaskScheduled") private var bgWeatherTaskScheduled: Bool = false
+    
+    @AppStorage(AppStorageKeys.bgWeatherTaskScheduled) private var bgWeatherTaskScheduled: Bool = false
+    @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     
     private let sharedModelContainer: ModelContainer
     private let userManager: UserManager
@@ -50,7 +53,9 @@ struct MygraApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(
+                resetApplication: self.resetApplication
+            )
                 .modelContainer(sharedModelContainer)
                 .environment(userManager)
                 .environment(weatherManager)
@@ -188,6 +193,14 @@ struct MygraApp: App {
             await runOneWeatherCheckAndNotifyIfHighRisk()
             try? await Task.sleep(nanoseconds: 90 * 60 * 1_000_000_000)
         }
+    }
+    
+    // MARK: - Reset the application following data deletion
+    
+    private func resetApplication() {
+        bgWeatherTaskScheduled = false
+        useMetricUnits = false
+        useDayMonthYearDates = false
     }
 }
 

@@ -119,12 +119,12 @@ class UserManager {
 
     // MARK: - Delete
     func deleteUser() {
-        guard let u = currentUser else {
+        guard let user = currentUser else {
             handle(UserError.notFound)
             return
         }
         do {
-            context.delete(u)
+            context.delete(user)
             try context.save()
             Task { await refresh() }
         } catch {

@@ -7,13 +7,14 @@
 
 import SwiftUI
 import WeatherKit
+import SwiftData
 
 struct InsightsView: View {
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(HealthManager.self) private var healthManager: HealthManager
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
 
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     
     @Binding var showingEntrySheet: Bool
     @State private var viewModel: InsightsView.ViewModel = InsightsView.ViewModel()
@@ -167,4 +168,43 @@ struct InsightsView: View {
             group.addTask { await healthManager.refreshLatestForToday() }
         }
     }
+}
+
+#Preview("Insights – Basic") {
+    // Register AppStorage defaults for preview
+    UserDefaults.standard.register(defaults: [
+        AppStorageKeys.useMetricUnits: false
+    ])
+
+    // In-memory model container for preview
+    let container: ModelContainer = {
+        do {
+            return try ModelContainer(
+                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+        } catch {
+            fatalError("Preview ModelContainer setup failed: \(error)")
+        }
+    }()
+
+    // Lightweight managers for environment
+    let previewHealthManager = HealthManager()
+    let previewWeatherManager = WeatherManager()
+    let previewUserManager = UserManager(context: container.mainContext)
+    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
+    let previewInsightManager = InsightManager(
+        userManager: previewUserManager,
+        migraineManager: previewMigraineManager,
+        weatherManager: previewWeatherManager,
+        healthManager: previewHealthManager
+    )
+
+    // Note: InsightManager.insights has a restricted setter; leaving insights empty for preview.
+
+    return InsightsView(showingEntrySheet: .constant(false))
+        .modelContainer(container)
+        .environment(previewInsightManager)
+        .environment(previewHealthManager)
+        .environment(previewWeatherManager)
 }

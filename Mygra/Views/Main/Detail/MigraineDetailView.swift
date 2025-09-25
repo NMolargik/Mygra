@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WeatherKit
+import SwiftData
 
 struct MigraineDetailView: View {
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
@@ -14,8 +15,8 @@ struct MigraineDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.horizontalSizeClass) private var hSizeClass
     
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
+    @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
     
     let migraine: Migraine
     var onClose: (() -> Void)? = nil
@@ -43,7 +44,7 @@ struct MigraineDetailView: View {
         selectedEditTriggers = Set(migraine.triggers)
         modifyError = nil
     }
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -88,6 +89,7 @@ struct MigraineDetailView: View {
                                 .foregroundStyle(.secondary)
                             Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
                                 .font(.caption2)
+                                .foregroundStyle(.red)
                         }
                     }) {
                         VStack(alignment: .leading, spacing: 8) {
@@ -95,19 +97,71 @@ struct MigraineDetailView: View {
                                 LabeledRow("Location", value: place)
                             }
                             
-                            LabeledRow("Condition", value: wx.condition.description)
+                            LabeledRow("Condition") {
+                                HStack(spacing: 8) {
+                                    wx.condition.mygraSymbolView()
+                                    Text(wx.condition.description)
+                                        .font(.callout).bold()
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            Capsule(style: .continuous)
+                                                .fill(Color.secondary.opacity(0.14))
+                                        )
+                                }
+                            }
+                            
                             LabeledRow("Temperature") {
                                 let temp = wx.displayTemperature(useMetricUnits: useMetricUnits)
                                 let unit = useMetricUnits ? "°C" : "°F"
-                                Text("\(Int(round(temp))) \(unit)")
+                                HStack(spacing: 8) {
+                                    Image(systemName: "thermometer.medium")
+                                        .foregroundStyle(.red)
+                                    Text("\(Int(round(temp))) \(unit)")
+                                        .font(.callout).bold()
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            Capsule(style: .continuous)
+                                                .fill(Color.red.opacity(0.14))
+                                        )
+                                }
                             }
-                            LabeledRow("Humidity", value: "\(Int(wx.humidityPercent))%")
+                            
+                            LabeledRow("Humidity") {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "drop.fill")
+                                        .foregroundStyle(.blue)
+                                    Text("\(Int(wx.humidityPercent))%")
+                                        .font(.callout).bold()
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(
+                                            Capsule(style: .continuous)
+                                                .fill(Color.blue.opacity(0.14))
+                                        )
+                                }
+                            }
+                            
                             LabeledRow("Pressure") {
                                 let pressure = wx.displayBarometricPressure(useMetricUnits: useMetricUnits)
-                                if useMetricUnits {
-                                    Text(String(format: "%.0f hPa", pressure))
-                                } else {
-                                    Text(String(format: "%.2f inHg", pressure))
+                                HStack(spacing: 8) {
+                                    Image(systemName: "gauge.medium")
+                                        .foregroundStyle(.teal)
+                                    Group {
+                                        if useMetricUnits {
+                                            Text(String(format: "%.0f hPa", pressure))
+                                        } else {
+                                            Text(String(format: "%.2f inHg", pressure))
+                                        }
+                                    }
+                                    .font(.callout).bold()
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 6)
+                                    .background(
+                                        Capsule(style: .continuous)
+                                            .fill(Color.teal.opacity(0.14))
+                                    )
                                 }
                             }
                         }
@@ -119,48 +173,154 @@ struct MigraineDetailView: View {
                     infoCard(title: "Health") {
                         VStack(alignment: .leading, spacing: 8) {
                             if let w = h.waterLiters {
-                                if useMetricUnits {
-                                    LabeledRow("Water", value: String(format: "%.1f L", w))
-                                } else {
-                                    let flOz = w * 33.8140227
-                                    LabeledRow("Water", value: String(format: "%.0f fl oz", flOz))
+                                LabeledRow("Water") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "drop.fill")
+                                            .foregroundStyle(.blue)
+                                        Group {
+                                            if useMetricUnits {
+                                                Text(String(format: "%.1f L", w))
+                                            } else {
+                                                let flOz = w * 33.8140227
+                                                Text(String(format: "%.0f fl oz", flOz))
+                                            }
+                                        }
+                                        .font(.callout).bold()
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Capsule().fill(Color.blue.opacity(0.14)))
+                                    }
                                 }
                             }
                             if let s = h.sleepHours {
-                                LabeledRow("Sleep", value: String(format: "%.1f h", s))
+                                LabeledRow("Sleep") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "bed.double.fill")
+                                            .foregroundStyle(.indigo)
+                                        Text(String(format: "%.1f h", s))
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.indigo.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let kcal = h.energyKilocalories {
-                                LabeledRow("Food", value: String(format: "%.0f cal", kcal))
+                                LabeledRow("Food") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "fork.knife")
+                                            .foregroundStyle(.orange)
+                                        Text(String(format: "%.0f cal", kcal))
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.orange.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let caf = h.caffeineMg {
-                                LabeledRow("Caffeine", value: String(format: "%.0f mg", caf))
+                                LabeledRow("Caffeine") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "cup.and.saucer.fill")
+                                            .foregroundStyle(.brown)
+                                        Text(String(format: "%.0f mg", caf))
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.brown.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let steps = h.stepCount {
-                                LabeledRow("Steps", value: "\(steps)")
+                                LabeledRow("Steps") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "figure.walk")
+                                            .foregroundStyle(.green)
+                                        Text("\(steps)")
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.green.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let rhr = h.restingHeartRate {
-                                LabeledRow("Resting HR", value: "\(rhr) bpm")
+                                LabeledRow("Resting HR") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "heart.fill")
+                                            .foregroundStyle(.red)
+                                        Text("\(rhr) bpm")
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.red.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let ahr = h.activeHeartRate {
-                                LabeledRow("Active HR", value: "\(ahr) bpm")
+                                LabeledRow("Active HR") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "bolt.heart.fill")
+                                            .foregroundStyle(.pink)
+                                        Text("\(ahr) bpm")
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.pink.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let phase = h.menstrualPhase {
-                                LabeledRow("Menstrual Phase", value: phase.rawValue)
+                                LabeledRow("Menstrual Phase") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "drop.triangle.fill")
+                                            .foregroundStyle(.purple)
+                                        Text(phase.rawValue)
+                                            .font(.callout).bold()
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(Capsule().fill(Color.purple.opacity(0.14)))
+                                    }
+                                }
                             }
                             if let glucose = h.glucoseMgPerdL {
-                                if useMetricUnits {
-                                    let mmol = glucose / 18.0
-                                    LabeledRow("Glucose", value: String(format: "%.1f mmol/L", mmol))
-                                } else {
-                                    LabeledRow("Glucose", value: String(format: "%.0f mg/dL", glucose.rounded()))
+                                LabeledRow("Glucose") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "cross.case.fill")
+                                            .foregroundStyle(.mint)
+                                        Group {
+                                            if useMetricUnits {
+                                                let mmol = glucose / 18.0
+                                                Text(String(format: "%.1f mmol/L", mmol))
+                                            } else {
+                                                Text(String(format: "%.0f mg/dL", glucose.rounded()))
+                                            }
+                                        }
+                                        .font(.callout).bold()
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Capsule().fill(Color.mint.opacity(0.14)))
+                                    }
                                 }
                             }
                             if let spo2Fraction = h.bloodOxygenPercent {
                                 let percent = spo2Fraction * 100.0
-                                if percent.truncatingRemainder(dividingBy: 1) == 0 {
-                                    LabeledRow("Oxygen Saturation", value: "\(Int(percent))%")
-                                } else {
-                                    LabeledRow("Oxygen Saturation", value: String(format: "%.1f%%", percent))
+                                LabeledRow("Oxygen Saturation") {
+                                    HStack(spacing: 8) {
+                                        Image(systemName: "lungs.fill")
+                                            .foregroundStyle(.cyan)
+                                        Group {
+                                            if percent.truncatingRemainder(dividingBy: 1) == 0 {
+                                                Text("\(Int(percent))%")
+                                            } else {
+                                                Text(String(format: "%.1f%%", percent))
+                                            }
+                                        }
+                                        .font(.callout).bold()
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 6)
+                                        .background(Capsule().fill(Color.cyan.opacity(0.14)))
+                                    }
                                 }
                             }
                         }
@@ -267,7 +427,7 @@ struct MigraineDetailView: View {
                             Text(err).font(.footnote).foregroundStyle(.red)
                         }
                     }
-
+                    
                     Section("Experience") {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
@@ -306,7 +466,7 @@ struct MigraineDetailView: View {
                             .tint(.indigo)
                         }
                     }
-
+                    
                     Section("Triggers") {
                         ForEach(MigraineTrigger.Group.allCases, id: \.self) { group in
                             let items = MigraineTrigger.allCases.filter { $0.group == group }
@@ -384,7 +544,7 @@ struct MigraineDetailView: View {
                                     return
                                 }
                             }
-
+                            
                             // Persist edits and refresh via manager
                             migraineManager.update(migraine) { m in
                                 m.startDate = editStartDate
@@ -393,12 +553,12 @@ struct MigraineDetailView: View {
                                 m.stressLevel = editStressLevel
                                 m.triggers = Array(selectedEditTriggers)
                             }
-
+                            
                             // Re-generate insight
                             Task {
                                 await insightManager.handleJustCreatedMigraine(migraine)
                             }
-
+                            
                             showingModifySheet = false
                         }
                         .tint(.blue)
@@ -409,11 +569,11 @@ struct MigraineDetailView: View {
             .interactiveDismissDisabled()
         }
         
-.onChange(of: showingModifySheet) { _, newValue in
-    if newValue {
-        seedEditState()
-    }
-}
+        .onChange(of: showingModifySheet) { _, newValue in
+            if newValue {
+                seedEditState()
+            }
+        }
         .alert("Delete this migraine?", isPresented: $showDeleteConfirm) {
             Button("Delete", role: .destructive) {
                 migraineManager.delete(migraine)
@@ -462,7 +622,7 @@ struct MigraineDetailView: View {
                                             .controlSize(.small)
                                     }
                                 }
-
+                                
                                 if isGenerating && (migraine.insight?.isEmpty ?? true) {
                                     // Loading placeholder while generating
                                     VStack(alignment: .leading, spacing: 8) {
@@ -483,6 +643,7 @@ struct MigraineDetailView: View {
                                     }
                                 } else if let text = migraine.insight, !text.isEmpty {
                                     Text(text)
+                                        .textSelection(.enabled)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                 }
                             }
@@ -626,4 +787,86 @@ struct MigraineDetailView: View {
         }
     }
 }
-
+    
+#Preview("Migraine Detail – Sample") {
+    let container: ModelContainer = {
+        do {
+            return try ModelContainer(
+                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+        } catch {
+            fatalError("Preview ModelContainer setup failed: \(error)")
+        }
+    }()
+    
+    // Provide defaults for AppStorage-backed preferences in preview
+    UserDefaults.standard.register(defaults: [
+        AppStorageKeys.useMetricUnits: false,
+        AppStorageKeys.useDayMonthYearDates: false
+    ])
+    
+    // Lightweight preview managers
+    let previewHealthManager = HealthManager()
+    let previewWeatherManager = WeatherManager()
+    let previewUserManager = UserManager(context: container.mainContext)
+    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
+    let previewInsightManager = InsightManager(
+        userManager: previewUserManager,
+        migraineManager: previewMigraineManager,
+        weatherManager: previewWeatherManager,
+        healthManager: previewHealthManager
+    )
+    
+    // Sample associated data
+    let sampleWeather = WeatherData(
+        barometricPressureHpa: 1008,
+        temperatureCelsius: 22,
+        humidityPercent: 65,
+        condition: .partlyCloudy,
+        createdAt: Date(),
+        locationDescription: "Seattle, WA"
+    )
+    
+    let sampleHealth = HealthData(
+        waterLiters: 1.2,
+        sleepHours: 6.5,
+        energyKilocalories: 1800,
+        caffeineMg: 120,
+        stepCount: 5400,
+        restingHeartRate: 58,
+        activeHeartRate: 102,
+        glucoseMgPerdL: 95,
+        bloodOxygenPercent: 0.97,
+        menstrualPhase: nil,
+        migraine: nil,
+        createdAt: Date()
+    )
+    
+    let sampleMigraine = Migraine(
+        pinned: false,
+        startDate: Date().addingTimeInterval(-3*3600),
+        endDate: Date().addingTimeInterval(-30*60),
+        painLevel: 6,
+        stressLevel: 5,
+        note: "Flickering lights and skipped lunch.",
+        insight: "Lower sleep and higher stress may have contributed. You could try keeping a more regular meal schedule and short screen breaks. This is general, non-medical guidance and not a diagnosis.",
+        triggers: [],
+        customTriggers: ["Bright lights", "Skipped lunch"],
+        foodsEaten: ["Coffee", "Salad"],
+        weather: sampleWeather,
+        health: sampleHealth
+    )
+    
+    container.mainContext.insert(sampleMigraine)
+    
+    return NavigationStack {
+        MigraineDetailView(migraine: sampleMigraine)
+    }
+    .modelContainer(container)
+    .environment(previewMigraineManager)
+    .environment(previewInsightManager)
+    .environment(previewWeatherManager)
+    .environment(previewHealthManager)
+    .environment(\.locale, .init(identifier: "en_US"))
+}

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct MigraineRowView: View {
     @Environment(\.horizontalSizeClass) private var hSizeClass
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
+    @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
     
     var migraine: Migraine
     var viewModel: MigraineListView.ViewModel
@@ -33,13 +33,23 @@ struct MigraineRowView: View {
                 HStack(alignment: .firstTextBaseline) {
                     // Removed TimelineView to ensure immediate updates when date format preference changes
                     Text(primaryTitle)
-                        .font(.headline)
+                        .font(.subheadline)
+                        .monospacedDigit()
+                        .fontWeight(.bold)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                     
                     Spacer()
 
+                    // Show duration chip for ongoing migraines
+                    if migraine.isOngoing {
+                        durationPill()
+                    }
+
                     // Pain and stress badges
+                    // Localized in Localizable.xcstrings:
+                    // "migraine_pain" = "Pain";
+                    // "migraine_stress" = "Stress";
                     HStack(spacing: 8) {
                         metricPill(
                             label: "Pain",
@@ -59,11 +69,19 @@ struct MigraineRowView: View {
                 // Secondary line: triggers as dots + note
                 HStack(spacing: 8) {
                     if migraine.pinned {
-                        Text("Pinned")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
+                        // Localized in Localizable.xcstrings:
+                        // "migraine_pinned" = "Pinned";
+                        Label {
+                            Text("Pinned")
+                                .font(.caption).bold()
+                        } icon: {
+                            Image(systemName: "pin.fill")
+                        }
+                        .labelStyle(.iconOnly)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .foregroundStyle(.yellow)
+                        .accessibilityLabel(Text("Pinned"))
                     }
                     let triggerCount = migraine.triggers.count + migraine.customTriggers.count
                     if triggerCount > 0 {
@@ -86,7 +104,6 @@ struct MigraineRowView: View {
 
     // MARK: - Derived strings
 
-    // Consolidate the displayed title to ensure it depends on AppStorage directly
     private var primaryTitle: String {
         if migraine.isOngoing {
             return "Ongoing"
@@ -154,6 +171,7 @@ struct MigraineRowView: View {
             }
             Text(value)
                 .font(.caption).bold()
+                .monospacedDigit()
                 .foregroundStyle(tint)
         }
         .padding(.horizontal, 8)
@@ -181,6 +199,28 @@ struct MigraineRowView: View {
         }
         .accessibilityLabel("\(count) triggers")
         .font(.caption)
+    }
+    
+    
+    @ViewBuilder
+    private func durationPill() -> some View {
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+            let now = context.date
+            HStack(spacing: 6) {
+                Image(systemName: "clock.fill")
+                    .imageScale(.small)
+                Text(liveDurationString(now: now))
+                    .font(.caption).bold()
+                    .monospacedDigit()
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(
+                Capsule(style: .continuous).fill(Color.red.opacity(0.15))
+            )
+            .foregroundStyle(.red)
+            .accessibilityLabel("Ongoing duration \(liveDurationString(now: now))")
+        }
     }
 }
 

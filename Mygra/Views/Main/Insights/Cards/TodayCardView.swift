@@ -29,139 +29,159 @@ struct TodayCardView: View {
     let onCancelIntake: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Label("Today", systemImage: "calendar")
-                    .font(.headline)
+        if isAuthorized {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Label("Today", systemImage: "calendar")
+                        .font(.headline)
 
-                Spacer()
+                    Spacer()
 
-                if !isAuthorized {
+                    if !isAuthorized {
+                        Button("Connect Health", action: onConnectHealth)
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
+                    } else {
+                        Button(action: onRefreshHealth) {
+                            Image(systemName: "arrow.clockwise")
+                        }
+                        .buttonStyle(.borderless)
+                        .foregroundStyle(.red)
+                    }
+
+                    if isAuthorized {
+                        Button {
+                            withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
+                                isQuickAddExpanded.toggle()
+                            }
+                        } label: {
+                            HStack(spacing: 6) {
+                                Text("Quick Add")
+                                Image(systemName: "chevron.down")
+                                    .rotationEffect(.degrees(isQuickAddExpanded ? 180 : 0))
+                                    .animation(.easeInOut(duration: 0.2), value: isQuickAddExpanded)
+                            }
+                        }
+                        .tint(.red)
+                        .buttonStyle(.bordered)
+                        .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
+                    }
+                }
+
+                if let data = latestData {
+                    // Precompute display strings so we can use them both for value and as stable tokens
+                    let waterStr = waterDisplay(from: data)
+                    let sleepStr = data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—"
+                    let foodStr: String = {
+                        guard let kcal = data.energyKilocalories else { return "—" }
+                        if useMetricUnits {
+                            let kJ = (kcal * 4.184).rounded()
+                            return "\(Int(kJ)) kJ"
+                        } else {
+                            return "\(Int(kcal)) cal"
+                        }
+                    }()
+                    let caffeineStr = data.caffeineMg.map { "\(Int($0)) mg" } ?? "—"
+
+                    HStack(spacing: 12) {
+                        StatTileView(
+                            title: "Water",
+                            value: waterStr,
+                            systemImage: "drop.fill",
+                            color: .blue,
+                            valueToken: AnyHashable(waterStr)
+                        )
+                        StatTileView(
+                            title: "Sleep",
+                            value: sleepStr,
+                            systemImage: "bed.double.fill",
+                            color: .indigo,
+                            valueToken: AnyHashable(sleepStr)
+                        )
+                    }
+                    HStack(spacing: 12) {
+                        StatTileView(
+                            title: "Food",
+                            value: foodStr,
+                            systemImage: "fork.knife",
+                            color: .orange,
+                            valueToken: AnyHashable(foodStr)
+                        )
+                        StatTileView(
+                            title: "Caffeine",
+                            value: caffeineStr,
+                            systemImage: "cup.and.saucer.fill",
+                            color: .brown,
+                            valueToken: AnyHashable(caffeineStr)
+                        )
+                    }
+                } else {
+                    HStack {
+                        Text("No health data yet for today.")
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Fetch", action: onRefreshHealth)
+                            .buttonStyle(.bordered)
+                            .tint(.blue)
+                    }
+                    .padding(.top, 4)
+                }
+
+                if isAuthorized && isQuickAddExpanded {
+                    VStack(spacing: 0) {
+                        Divider().padding(.vertical, 2)
+
+                        IntakeEditorView(
+                            addWater: $addWater,
+                            addCaffeine: $addCaffeine,
+                            addFood: $addFood,
+                            addSleepHours: $addSleepHours,
+                            useMetricUnits: useMetricUnits,
+                            waterRange: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
+                            waterStep: 0.1,
+                            waterDisplay: { liters in
+                                if useMetricUnits {
+                                    return String(format: "+%.1f L", liters)
+                                } else {
+                                    let oz = liters * 33.814
+                                    return String(format: "+%.0f oz", oz)
+                                }
+                            },
+                            isSaving: isSavingIntake,
+                            errorMessage: intakeError,
+                            allAddsAreZero: allIntakeAddsAreZero,
+                            onAdd: onSaveIntake,
+                            onCancel: {
+                                withAnimation {
+                                    onCancelIntake()
+                                    isQuickAddExpanded = false
+                                }
+                            }
+                        )
+                    }
+                    .transition(.verticalScaleFromTop)
+                }
+            }
+            .padding(14)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .clipped()
+            .accessibilityElement(children: .contain)
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    Label("Today", systemImage: "calendar")
+                        .font(.headline)
+                    Spacer()
                     Button("Connect Health", action: onConnectHealth)
                         .buttonStyle(.borderedProminent)
                         .tint(.green)
-                } else {
-                    Button(action: onRefreshHealth) {
-                        Image(systemName: "arrow.clockwise")
-                    }
-                    .buttonStyle(.borderless)
-                    .foregroundStyle(.red)
                 }
-
-                Button {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.85)) {
-                        isQuickAddExpanded.toggle()
-                    }
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("Quick Add")
-                        Image(systemName: "chevron.down")
-                            .rotationEffect(.degrees(isQuickAddExpanded ? 180 : 0))
-                            .animation(.easeInOut(duration: 0.2), value: isQuickAddExpanded)
-                    }
-                }
-                .tint(.red)
-                .buttonStyle(.bordered)
-                .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
+                Text("Connect Apple Health to see your daily stats.")
+                    .foregroundStyle(.secondary)
             }
-
-            if let data = latestData {
-                // Precompute display strings so we can use them both for value and as stable tokens
-                let waterStr = waterDisplay(from: data)
-                let sleepStr = data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—"
-                let foodStr: String = {
-                    guard let kcal = data.energyKilocalories else { return "—" }
-                    if useMetricUnits {
-                        let kJ = (kcal * 4.184).rounded()
-                        return "\(Int(kJ)) kJ"
-                    } else {
-                        return "\(Int(kcal)) cal"
-                    }
-                }()
-                let caffeineStr = data.caffeineMg.map { "\(Int($0)) mg" } ?? "—"
-
-                HStack(spacing: 12) {
-                    StatTileView(
-                        title: "Water",
-                        value: waterStr,
-                        systemImage: "drop.fill",
-                        color: .blue,
-                        valueToken: AnyHashable(waterStr)
-                    )
-                    StatTileView(
-                        title: "Sleep",
-                        value: sleepStr,
-                        systemImage: "bed.double.fill",
-                        color: .indigo,
-                        valueToken: AnyHashable(sleepStr)
-                    )
-                }
-                HStack(spacing: 12) {
-                    StatTileView(
-                        title: "Food",
-                        value: foodStr,
-                        systemImage: "fork.knife",
-                        color: .orange,
-                        valueToken: AnyHashable(foodStr)
-                    )
-                    StatTileView(
-                        title: "Caffeine",
-                        value: caffeineStr,
-                        systemImage: "cup.and.saucer.fill",
-                        color: .brown,
-                        valueToken: AnyHashable(caffeineStr)
-                    )
-                }
-            } else {
-                HStack {
-                    Text("No health data yet for today.")
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Button("Fetch", action: onRefreshHealth)
-                        .buttonStyle(.bordered)
-                }
-                .padding(.top, 4)
-            }
-
-            if isQuickAddExpanded {
-                VStack(spacing: 0) {
-                    Divider().padding(.vertical, 2)
-
-                    IntakeEditorView(
-                        addWater: $addWater,
-                        addCaffeine: $addCaffeine,
-                        addFood: $addFood,
-                        addSleepHours: $addSleepHours,
-                        useMetricUnits: useMetricUnits,
-                        waterRange: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
-                        waterStep: 0.1,
-                        waterDisplay: { liters in
-                            if useMetricUnits {
-                                return String(format: "+%.1f L", liters)
-                            } else {
-                                let oz = liters * 33.814
-                                return String(format: "+%.0f oz", oz)
-                            }
-                        },
-                        isSaving: isSavingIntake,
-                        errorMessage: intakeError,
-                        allAddsAreZero: allIntakeAddsAreZero,
-                        onAdd: onSaveIntake,
-                        onCancel: {
-                            withAnimation {
-                                onCancelIntake()
-                                isQuickAddExpanded = false
-                            }
-                        }
-                    )
-                }
-                .transition(.verticalScaleFromTop)
-            }
+            .padding(14)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
-        .padding(14)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .clipped()
-        .accessibilityElement(children: .contain)
     }
 
     private func waterDisplay(from data: HealthData) -> String {
@@ -266,4 +286,3 @@ private struct TodayCardPreviewWrapper: View {
         allIntakeAddsAreZero: false
     )
 }
-

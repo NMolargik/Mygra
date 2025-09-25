@@ -6,13 +6,14 @@
 //
 
 import SwiftUI
+internal import UniformTypeIdentifiers
 
 struct DocumentPickerView: UIViewControllerRepresentable {
     let url: URL
     let onDismiss: () -> Void
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(onDismiss: onDismiss)
+    func makeCoordinator() -> DocumentCoordinator {
+        DocumentCoordinator(onDismiss: onDismiss)
     }
 
     func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
@@ -24,21 +25,26 @@ struct DocumentPickerView: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) { }
+}
 
-    final class Coordinator: NSObject, UIDocumentPickerDelegate {
-        let onDismiss: () -> Void
-        init(onDismiss: @escaping () -> Void) {
-            self.onDismiss = onDismiss
+private struct DocumentPickerPreviewHost: View {
+    @State private var tmpURL: URL
+    init() {
+        let tmp = FileManager.default.temporaryDirectory
+            .appendingPathComponent("PreviewExport", conformingTo: .pdf)
+        // Ensure a small file exists for export
+        if !FileManager.default.fileExists(atPath: tmp.path) {
+            let sample = Data("%PDF-1.4\n%âãÏÓ\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF".utf8)
+            try? sample.write(to: tmp, options: .atomic)
         }
-        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-            onDismiss()
-        }
-        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            onDismiss()
-        }
+        _tmpURL = State(initialValue: tmp)
+    }
+    var body: some View {
+        DocumentPickerView(url: tmpURL, onDismiss: {})
+            .ignoresSafeArea() // so the UIKit picker can present correctly in preview
     }
 }
 
-#Preview {
-    DocumentPickerView(url: URL(string: "")!, onDismiss: {})
+#Preview("Document Export") {
+    DocumentPickerPreviewHost()
 }

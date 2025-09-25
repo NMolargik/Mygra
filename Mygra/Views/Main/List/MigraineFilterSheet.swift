@@ -77,7 +77,7 @@ struct MigraineFilterSheet: View {
                 ) {
                     Text("Minimum Pain: \(workingFilter.minPainLevel ?? 0)")
                 }
-                Text("0 means no minimum").font(.footnote).foregroundStyle(.secondary)
+                Text("Set to zero for no minimum").font(.footnote).foregroundStyle(.secondary)
             }
             
             Section("Search") {
@@ -202,5 +202,47 @@ struct MigraineFilterSheet: View {
         } else {
             workingFilter.requiredTriggers.insert(trigger)
         }
+    }
+}
+
+// MARK: - Previews
+private extension MigraineFilter {
+    static var previewValue: MigraineFilter {
+        var f = MigraineFilter()
+        // Example defaults for preview
+        f.minPainLevel = 3
+        f.searchText = ""
+        // Leave dateRange and requiredTriggers empty by default
+        return f
+    }
+
+    static var previewWithRange: MigraineFilter {
+        var f = MigraineFilter.previewValue
+        let now = Date()
+        let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: now) ?? now
+        f.dateRange = twoWeeksAgo...now
+        return f
+    }
+}
+
+#Preview("Default") {
+    NavigationStack {
+        MigraineFilterSheet(
+            initialFilter: .previewValue,
+            apply: { _ in },
+            reset: {},
+            cancel: {}
+        )
+    }
+}
+
+#Preview("With Date Range") {
+    NavigationStack {
+        MigraineFilterSheet(
+            initialFilter: .previewWithRange,
+            apply: { _ in },
+            reset: {},
+            cancel: {}
+        )
     }
 }

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SplashView: View {
     @Environment(UserManager.self) private var userManager: UserManager
@@ -30,6 +31,7 @@ struct SplashView: View {
 
             Text("Migraines tracked, insights generated!")
                 .font(.title3)
+                .fontWeight(.semibold)
                 .opacity(viewModel.subtitleVisible ? 1 : 0)
                 .offset(y: viewModel.subtitleVisible ? 0 : 20)
                 .animation(.easeOut(duration: 0.6).delay(0.8), value: viewModel.subtitleVisible)
@@ -57,11 +59,13 @@ struct SplashView: View {
                 proceedForward()
             }
             .foregroundStyle(.white)
+            .buttonStyle(.borderedProminent)
             .padding()
             .font(.title)
             .bold()
-            .frame(width: 200)
+            .tint(.red)
             .adaptiveGlass(tint: .red)
+            .shadow(radius: 8, y: 3)
             .opacity(viewModel.buttonVisible ? 1 : 0)
             .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
             .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
@@ -72,8 +76,9 @@ struct SplashView: View {
                 showReturningUserModal = true
                 Task { await attemptCloudRefresh() }
             }
-            .foregroundStyle(.blue)
-            .padding()
+            .padding(8)
+            .bold()
+            .adaptiveGlass(tint: .gray)
             .opacity(viewModel.buttonVisible ? 1 : 0)
             .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
             .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
@@ -82,7 +87,7 @@ struct SplashView: View {
             viewModel.activateAnimation()
         }
         .sheet(isPresented: $showReturningUserModal) {
-            ReturningUserModal(
+            ReturningUserView(
                 isSyncing: $isSyncingFromCloud,
                 errorMessage: $lastSyncError,
                 onRetry: {
@@ -94,7 +99,7 @@ struct SplashView: View {
                     showReturningUserModal = false
                 }
             )
-            .presentationDetents([.large])
+            .presentationDetents([.medium])
         }
         .padding(.top, 80)
     }
@@ -104,12 +109,12 @@ struct SplashView: View {
         isSyncingFromCloud = true
         lastSyncError = nil
         defer { isSyncingFromCloud = false }
-
+        
         // Re-fetch local state first
         await userManager.refresh()
         // Try another iCloud restore attempt (slightly longer timeout to improve chances)
         await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
-
+        
         if userManager.currentUser != nil {
             Haptics.success()
             // Let outer flow proceed (mirrors ContentView.refreshUser behavior)
@@ -119,62 +124,22 @@ struct SplashView: View {
             lastSyncError = "No user found yet. iCloud may take a bit longer to deliver your data."
         }
     }
-
-    private struct ReturningUserModal: View {
-        @Binding var isSyncing: Bool
-        @Binding var errorMessage: String?
-        var onRetry: () -> Void
-        var onClose: () -> Void
-
-        var body: some View {
-            NavigationStack {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("Welcome back!")
-                        .font(.title2).bold()
-                    Text("If you started on another Apple device, it can take up to 30 minutes for the initial sync to occur.")
-                        .foregroundStyle(.secondary)
-
-                    if isSyncing {
-                        HStack(spacing: 12) {
-                            ProgressView()
-                            Text("Checking iCloud for your data…")
-                                .font(.subheadline)
-                        }
-                        .padding(.vertical, 4)
-                    }
-
-                    if let msg = errorMessage {
-                        HStack(spacing: 8) {
-                            Image(systemName: "exclamationmark.triangle.fill")
-                                .foregroundStyle(.yellow)
-                            Text(msg)
-                                .font(.footnote)
-                        }
-                    }
-
-                    Spacer()
-
-                    HStack {
-                        Button("Close") { onClose() }
-                            .buttonStyle(.bordered)
-                            .foregroundStyle(.red)
-
-                        Spacer()
-
-                        Button("Retry") { onRetry() }
-                            .buttonStyle(.borderedProminent)
-                            .foregroundStyle(.blue)
-                            .disabled(isSyncing)
-                    }
-                }
-                .padding()
-                .navigationTitle("Sync from iCloud")
-                .navigationBarTitleDisplayMode(.inline)
-            }
-        }
-    }
 }
 
 #Preview {
-    SplashView(proceedForward: {}, refreshUser: {})
+    let container: ModelContainer
+    do {
+        container = try ModelContainer(
+            for: User.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+    } catch {
+        fatalError("Preview ModelContainer setup failed: \(error)")
+    }
+
+    let previewUserManager = UserManager(context: container.mainContext)
+
+    return SplashView(proceedForward: {}, refreshUser: {})
+        .modelContainer(container)
+        .environment(previewUserManager)
 }

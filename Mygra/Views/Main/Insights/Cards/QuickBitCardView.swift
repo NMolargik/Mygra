@@ -74,7 +74,6 @@ struct QuickBitsSectionView: View {
         errors: [],
         onRefresh: {}
     )
-    .padding()
 }
 
 #Preview("Refreshing") {
@@ -84,7 +83,6 @@ struct QuickBitsSectionView: View {
         errors: [],
         onRefresh: {}
     )
-    .padding()
 }
 
 #Preview("With Error Banner") {
@@ -100,5 +98,4 @@ struct QuickBitsSectionView: View {
         errors: [sampleError],
         onRefresh: {}
     )
-    .padding()
 }

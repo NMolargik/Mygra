@@ -167,6 +167,21 @@ final class MigraineManager {
         saveAndReload()
     }
 
+    /// Deletes all migraines from the store, ends any associated Live Activities,
+    /// clears the ongoing reference, and saves.
+    /// Intended for use by full data-deletion flows.
+    func deleteAllMigraines() {
+        // End any Live Activities and delete each migraine
+        for m in migraines {
+            MigraineActivityCenter.end(for: m.id)
+            context.delete(m)
+        }
+        // Clear ongoing reference since none will remain
+        ongoingMigraine = nil
+        // Persist and refresh state
+        saveAndReload()
+    }
+
     // MARK: - Filtering helpers
     private func applyFilter(to items: [Migraine]) -> [Migraine] {
         items.filter { m in

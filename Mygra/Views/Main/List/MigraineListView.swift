@@ -242,7 +242,6 @@ struct MigraineListView: View {
             .presentationDetents([.large])
             .interactiveDismissDisabled()
         }
-        // Pull-to-refresh to re-run the manager query
         .refreshable {
             await migraineManager.refresh()
             Haptics.success()

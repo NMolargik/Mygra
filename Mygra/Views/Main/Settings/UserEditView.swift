@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct UserEditView: View {
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
     @Binding var user: User
     @Binding var userFormComplete: Bool
@@ -18,6 +18,8 @@ struct UserEditView: View {
     @State private var newCondition: String = ""
     @State private var newDietaryRestriction: String = ""
     @FocusState private var isFirstNameFocused: Bool
+    @FocusState private var isAddingConditionFocused: Bool
+    @FocusState private var isAddingRestrictionFocused: Bool
 
     var body: some View {
         Section("First Name") {
@@ -27,6 +29,14 @@ struct UserEditView: View {
         
         Section("Birthday") {
             DatePicker("Birthday", selection: $user.birthday, displayedComponents: .date)
+                .onAppear {
+                    let now = Date()
+                    let sixteenYearsAgo = Calendar.current.date(byAdding: .year, value: -16, to: now) ?? now
+                    // Only set default if birthday is near now or in the future (unrealistic)
+                    if user.birthday > now || user.birthday < Calendar.current.date(byAdding: .year, value: -120, to: now)! {
+                        user.birthday = sixteenYearsAgo
+                    }
+                }
                 .datePickerStyle(.graphical)
                 .tint(.red)
                 .onTapGesture { isFirstNameFocused = false }
@@ -137,6 +147,16 @@ struct UserEditView: View {
         Section("Chronic Conditions") {
             HStack {
                 TextField("Add Condition", text: $newCondition)
+                    .focused($isAddingConditionFocused)
+                    .onSubmit {
+                        let trimmed = newCondition.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !trimmed.isEmpty {
+                            user.chronicConditions.append(trimmed)
+                            newCondition = ""
+                        }
+                        // Keep focus after submitting
+                        isAddingConditionFocused = true
+                    }
                 if (!newCondition.isEmpty) {
                     Button(action: {
                         let trimmed = newCondition.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -171,6 +191,16 @@ struct UserEditView: View {
         Section("Dietary Restrictions") {
             HStack {
                 TextField("Add Restriction", text: $newDietaryRestriction)
+                    .focused($isAddingRestrictionFocused)
+                    .onSubmit {
+                        let trimmed = newDietaryRestriction.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if !trimmed.isEmpty {
+                            user.dietaryRestrictions.append(trimmed)
+                            newDietaryRestriction = ""
+                        }
+                        // Keep focus after submitting
+                        isAddingRestrictionFocused = true
+                    }
                 if (!newDietaryRestriction.isEmpty) {
                     Button(action: {
                         let trimmed = newDietaryRestriction.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -208,4 +238,3 @@ struct UserEditView: View {
 #Preview {
     UserEditView(user: .constant(User()), userFormComplete: .constant(false), dismiss: {})
 }
-

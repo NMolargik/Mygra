@@ -32,5 +32,5 @@ struct LabeledRow<Value: View>: View {
 }
 
 #Preview {
-    LabeledRow("Labaled Row", value: "")
+    LabeledRow("Labeled Row", value: "")
 }

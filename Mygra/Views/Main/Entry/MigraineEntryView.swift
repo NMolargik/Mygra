@@ -11,10 +11,11 @@ import WeatherKit
 import UIKit
 
 struct MigraineEntryView: View {
+    @Environment(\.dismiss) private var dismiss
     @Environment(HealthManager.self) private var healthManager
     @Environment(WeatherManager.self) private var weatherManager
-    @Environment(\.dismiss) private var dismiss
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
     var onMigraineSaved: (Migraine, UIWindowScene?) -> Void
     
@@ -496,9 +497,9 @@ struct MigraineEntryView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Finish") {
+                    Button("Submit") {
                         Haptics.lightImpact()
-                        finishTapped()
+                        submitTapped()
                     }
                     .foregroundStyle(.blue)
                 }
@@ -624,7 +625,7 @@ struct MigraineEntryView: View {
     }
 
     // MARK: - Save
-    private func finishTapped() {
+    private func submitTapped() {
         // Basic validations
         let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
         if viewModel.startDate < earliest {

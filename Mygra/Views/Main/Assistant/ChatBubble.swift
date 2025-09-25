@@ -23,6 +23,8 @@ struct ChatBubble: View {
                         .fill(isUser ? Color.accentColor.opacity(0.18) : Color(uiColor: .secondarySystemBackground))
                 )
                 .foregroundStyle(.primary)
+                .textSelection(.enabled)
+                .accessibilityAddTraits(.isStaticText)
                 .frame(maxWidth: .infinity, alignment: isUser ? .trailing : .leading)
             if !isUser { Spacer(minLength: 40) }
         }

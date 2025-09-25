@@ -13,6 +13,8 @@ struct ContentView: View {
     @Environment(HealthManager.self) private var healthManager: HealthManager
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
     
+    var resetApplication: () -> Void
+    
     @State private var viewModel: ContentView.ViewModel = ViewModel()
     @State private var migraineManager: MigraineManager?
     @State private var insightManager: InsightManager?
@@ -21,13 +23,13 @@ struct ContentView: View {
         let base: Content
         let migraineManager: MigraineManager?
         let insightManager: InsightManager?
-
+        
         init(base: Content, migraineManager: MigraineManager?, insightManager: InsightManager?) {
             self.base = base
             self.migraineManager = migraineManager
             self.insightManager = insightManager
         }
-
+        
         var body: some View {
             var view: AnyView = AnyView(base)
             if let migraineManager {
@@ -39,7 +41,7 @@ struct ContentView: View {
             return view
         }
     }
-
+    
     var body: some View {
         ZStack {
             switch (viewModel.appStage) {
@@ -85,9 +87,9 @@ struct ContentView: View {
             case .main:
                 ConditionalEnvironmentMainView(
                     base: MainView(
-                        returnToAppStage: { stage in
+                        resetApplication: {
                             withAnimation(.easeInOut(duration: 0.3)) {
-                                viewModel.appStage = stage
+                                self.resetApplicationStage()
                             }
                         },
                         pendingDeepLinkID: $viewModel.pendingDeepLinkID,
@@ -118,16 +120,16 @@ struct ContentView: View {
     private func prepareApp() async {
         // Initial local fetch
         await userManager.refresh()
-
+        
         // If no user yet, attempt a restore window from iCloud before deciding onboarding
         if userManager.currentUser == nil {
             await userManager.restoreFromCloud(timeout: 1, pollInterval: 1.0)
         }
-
+        
         if userManager.currentUser != nil {
             // Perform any data refreshes before transitioning
             await healthManager.refreshLatestForToday()
-
+            
             await MainActor.run {
                 if self.migraineManager == nil {
                     self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
@@ -162,15 +164,15 @@ struct ContentView: View {
         await userManager.refresh()
         // Try another iCloud restore attempt (slightly longer timeout to improve chances)
         await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
-
+        
         guard userManager.currentUser != nil else {
             // Stay on splash if we still don't have a user
             return
         }
-
+        
         // Initialize managers and move to main, mirroring prepareApp happy path
         await healthManager.refreshLatestForToday()
-
+        
         await MainActor.run {
             if self.migraineManager == nil {
                 self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
@@ -186,11 +188,16 @@ struct ContentView: View {
                     healthManager: healthManager
                 )
             }
-
+            
             withAnimation(.easeInOut(duration: 0.3)) {
                 viewModel.appStage = .main
             }
         }
+    }
+    
+    private func resetApplicationStage() {
+        viewModel.appStage = .splash
+        self.resetApplication()
     }
 }
 
@@ -205,7 +212,9 @@ struct ContentView: View {
     let previewHealthManager = HealthManager()
     let previewWeatherManager = WeatherManager()
     let previewNotificationManager = NotificationManager()
-    return ContentView()
+    return ContentView(
+        resetApplication: {}
+    )
         .modelContainer(container)
         .environment(previewUserManager)
         .environment(previewHealthManager)

@@ -13,7 +13,7 @@ struct IntelligenceCardView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 15) {
             Image(systemName: "apple.intelligence")
-                .font(.system(size: 32))
+                .font(.title)
                 .foregroundStyle(
                     AngularGradient(
                         colors: [.orange, .red, .purple, .blue, .purple, .red, .orange, .orange],

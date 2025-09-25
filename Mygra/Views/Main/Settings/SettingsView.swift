@@ -7,19 +7,26 @@
 
 import SwiftUI
 import SwiftData
+import Network
 
 struct SettingsView: View {
-    @Environment(UserManager.self) private var userManager: UserManager
     @Environment(\.modelContext) private var modelContext
+    @Environment(UserManager.self) private var userManager: UserManager
 
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
-    @AppStorage("useDayMonthYearDates") private var useDayMonthYearDates: Bool = false
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
+    @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
+    
+    var onDeletionTriggered: () -> Void
 
     @State private var editingUser: Bool = false
     @State private var exportTempURL: URL?
     @State private var showDocumentPicker: Bool = false
     @State private var isExporting: Bool = false
     @State private var exportError: String?
+    @State private var showDeleteConfirmation: Bool = false
+    @State private var showingFarewell: Bool = false
+    @State private var isOnline: Bool = true
+    @State private var networkMonitor: NWPathMonitor?
 
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
@@ -119,6 +126,43 @@ struct SettingsView: View {
                     }
                 }
             }
+            
+            Button {
+                showDeleteConfirmation = true
+                Haptics.lightImpact()
+            } label: {
+                Text("Delete All Data")
+                    .bold()
+                    .foregroundStyle(.red)
+            }
+            .buttonStyle(.plain)
+            .disabled(!isOnline)
+            .accessibilityHint("Requires an internet connection to delete your iCloud data.")
+            .alert("Are you sure?", isPresented: $showDeleteConfirmation) {
+                Button("Cancel", role: .cancel) { }
+                    .tint(.blue)
+                Button("Proceed", role: .destructive) {
+                    presentFarewellFlow()
+                }
+            } message: {
+                Text("""
+All migraines will be deleted from all of your iCloud-enabled devices. Some entries may linger on devices until they are refreshed.
+Your user information will also be deleted from iCloud. Any future attempt to use Mygra will require a new registration.
+
+Data contributed to Apple Health will remain in Apple Health. Even deletion of the application from your device will not remove that data. Apple Health data must be removed manually from within the Apple Health application.
+
+Are you sure you want to proceed?
+""")
+            }
+            if !isOnline {
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "wifi.slash")
+                        .foregroundStyle(.secondary)
+                    Text("Deleting your data requires an internet connection because it’s stored in iCloud. Connect to the internet to proceed.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
 
             Section("Mygra") {
                 LabeledContent("App") {
@@ -187,6 +231,61 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                 }
             }
         }
+        .sheet(isPresented: $showingFarewell) {
+            ZStack {
+                LinearGradient(
+                    colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25), Color.black.opacity(0.15)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+                .ignoresSafeArea()
+                
+                VStack(spacing: 16) {
+                    Text("Thank you for using Mygra. We hoped we helped, even a little.")
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    Text("We're deleting your data from iCloud now. This may take a moment.")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                    ProgressView()
+                }
+                .padding()
+            }
+        }
+        .onAppear { startNetworkMonitoring() }
+        .onDisappear { stopNetworkMonitoring() }
+    }
+
+    // MARK: - Network monitoring
+
+    private func startNetworkMonitoring() {
+        let monitor = NWPathMonitor()
+        monitor.pathUpdateHandler = { path in
+            DispatchQueue.main.async {
+                self.isOnline = (path.status == .satisfied)
+            }
+        }
+        let queue = DispatchQueue(label: "NetworkMonitor")
+        monitor.start(queue: queue)
+        self.networkMonitor = monitor
+    }
+
+    private func stopNetworkMonitoring() {
+        networkMonitor?.cancel()
+        networkMonitor = nil
+    }
+
+    // MARK: - Delete flow
+
+    private func presentFarewellFlow() {
+        showingFarewell = true
+        onDeletionTriggered()
+    }
+
+    private func deletionFlowCompleted() {
+        // TODO: Intentionally left empty; to be implemented later.
     }
 
     // MARK: - Export logic
@@ -255,8 +354,9 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
 
     let previewUserManager = UserManager(context: container.mainContext)
 
-    return SettingsView()
+    return SettingsView(
+            onDeletionTriggered: {}
+        )
         .modelContainer(container)
         .environment(previewUserManager)
 }
-

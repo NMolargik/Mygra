@@ -9,7 +9,7 @@ import SwiftUI
 
 struct InsightRowView: View {
     let insight: Insight
-    @AppStorage("useMetricUnits") private var useMetricUnits: Bool = false
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
@@ -99,4 +99,52 @@ struct InsightRowView: View {
         case .biometrics: return "waveform.path.ecg.text.clipboard"
         }
     }
+}
+
+#Preview("Hydration – Metric") {
+    // Ensure AppStorage-backed units default to metric for this preview
+    UserDefaults.standard.register(defaults: [
+        AppStorageKeys.useMetricUnits: true
+    ])
+
+    let hydrationInsight = Insight(
+        category: .intakeHydration,
+        title: "Low hydration on migraine days",
+        message: "Average water intake: 1.1 L on migraine days.",
+        priority: .high,
+        tags: ["avgLiters": 1.1]
+    )
+
+    return InsightRowView(insight: hydrationInsight)
+        .padding()
+}
+
+#Preview("Hydration – Imperial") {
+    // Ensure AppStorage-backed units default to imperial for this preview
+    UserDefaults.standard.register(defaults: [
+        AppStorageKeys.useMetricUnits: false
+    ])
+
+    let hydrationInsight = Insight(
+        category: .intakeHydration,
+        title: "Low hydration on migraine days",
+        message: "Average water intake: 37 fl oz on migraine days.",
+        priority: .medium,
+        tags: ["avgLiters": 1.1]
+    )
+
+    return InsightRowView(insight: hydrationInsight)
+        .padding()
+}
+
+#Preview("Trigger – Medium Priority") {
+    let triggerInsight = Insight(
+        category: .triggers,
+        title: "Common trigger: Screen time",
+        message: "53% of migraines included Screen time",
+        priority: .medium
+    )
+
+    return InsightRowView(insight: triggerInsight)
+        .padding()
 }

@@ -11,19 +11,21 @@ import WeatherKit
 import Combine
 
 struct MainView: View {
-    var returnToAppStage: (AppStage) -> Void
+    var resetApplication: () -> Void
 
     // Deep link inputs provided by ContentView so we can act once mounted
     @Binding var pendingDeepLinkID: UUID?
     @Binding var pendingDeepLinkAction: String?
 
     @Environment(\.modelContext) private var modelContext
-    @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
     @Environment(\.scenePhase) private var scenePhase
+    
+    @Environment(MigraineManager.self) private var migraineManager: MigraineManager
+    @Environment(UserManager.self) private var userManager: UserManager
 
-    @State private var appTab: AppTab = .insights // iPhone / compact-only
+    @State private var appTab: AppTab = .insights
     @State private var showingEntrySheet: Bool = false
     @State private var showingSettingsSheet: Bool = false
     @State private var showingOngoingAlert: Bool = false
@@ -92,16 +94,20 @@ struct MainView: View {
                 }
                 .sheet(isPresented: $showingSettingsSheet) {
                     NavigationStack {
-                        SettingsView()
-                            .presentationDetents([.large])
-                            .navigationTitle("Settings")
-                            .toolbar {
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button("Close") {
-                                        showingSettingsSheet = false
-                                    }
+                        SettingsView(
+                            onDeletionTriggered: {
+                                self.deleteAllData()
+                            }
+                        )
+                        .presentationDetents([.large])
+                        .navigationTitle("Settings")
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("Close") {
+                                    showingSettingsSheet = false
                                 }
                             }
+                        }
                     }
                 }
                 .tabViewBottomAccessoryIfAvailable { ongoingAccessory }
@@ -191,7 +197,11 @@ struct MainView: View {
                     .tag(AppTab.list)
 
                     NavigationStack {
-                        SettingsView()
+                        SettingsView(
+                            onDeletionTriggered: {
+                                self.deleteAllData()
+                            }
+                        )
                             .navigationTitle(AppTab.settings.rawValue)
                     }
                     .tabItem {
@@ -373,5 +383,75 @@ struct MainView: View {
         pendingDeepLinkID = nil
         pendingDeepLinkAction = nil
     }
+    
+    private func deleteAllData() {
+        let start = Date()
+        
+        Task {
+            // Delete all migraines via manager
+            await MainActor.run {
+                migraineManager.deleteAllMigraines()
+            }
+            
+            // Delete the user
+            await MainActor.run {
+                userManager.deleteUser()
+            }
+            
+            // Ensure at least 4 seconds elapsed
+            let elapsed = Date().timeIntervalSince(start)
+            if elapsed < 4.0 {
+                let remaining = UInt64((4.0 - elapsed) * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: remaining)
+            }
+            
+            // Reset app state
+            await MainActor.run {
+                resetApplication()
+            }
+        }
+    }
 }
 
+#Preview("Main – Basic") {
+    // Register AppStorage defaults for preview
+    UserDefaults.standard.register(defaults: [
+        AppStorageKeys.useMetricUnits: false
+    ])
+
+    // In-memory model container for preview
+    let container: ModelContainer = {
+        do {
+            return try ModelContainer(
+                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+        } catch {
+            fatalError("Preview ModelContainer setup failed: \(error)")
+        }
+    }()
+
+    // Lightweight managers for environment
+    let previewHealthManager = HealthManager()
+    let previewWeatherManager = WeatherManager()
+    let previewUserManager = UserManager(context: container.mainContext)
+    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
+    let previewInsightManager = InsightManager(
+        userManager: previewUserManager,
+        migraineManager: previewMigraineManager,
+        weatherManager: previewWeatherManager,
+        healthManager: previewHealthManager
+    )
+
+    return MainView(
+        resetApplication: {},
+        pendingDeepLinkID: .constant(nil),
+        pendingDeepLinkAction: .constant(nil)
+    )
+    .modelContainer(container)
+    .environment(previewInsightManager)
+    .environment(previewHealthManager)
+    .environment(previewWeatherManager)
+    .environment(previewUserManager)
+    .environment(previewMigraineManager)
+}
