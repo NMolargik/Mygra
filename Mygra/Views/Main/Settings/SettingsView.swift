@@ -87,7 +87,7 @@ struct SettingsView: View {
             } label: {
                 Text("Edit User")
                     .bold()
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.green)
             }
             .buttonStyle(.plain)
 

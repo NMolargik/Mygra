@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct TypingIndicator: View {
-    
     var body: some View {
         TimelineView(.animation) { timeline in
             let duration: TimeInterval = 1.5

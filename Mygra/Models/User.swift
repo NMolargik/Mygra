@@ -17,8 +17,12 @@ final class User {
     var singletonKey: String = "USER_SINGLETON"
 
     // MARK: - Identity
+    /// Default birthday used for new users: 18 years ago from today
+    static var defaultBirthday: Date {
+        Calendar.current.date(byAdding: .year, value: -18, to: Date()) ?? Date()
+    }
     var name: String = ""
-    var birthday: Date = Date.now
+    var birthday: Date = User.defaultBirthday
 
     // MARK: - Body characteristics (store in SI units)
     /// Biological sex as declared by the user. Keep this app-local to avoid
@@ -48,7 +52,7 @@ final class User {
     // MARK: - Init
     init(
         name: String = "",
-        birthday: Date = Date.now,
+        birthday: Date = User.defaultBirthday,
         biologicalSex: BiologicalSex = BiologicalSex.female,
         heightMeters: Double = 1.75,
         weightKilograms: Double = 70,

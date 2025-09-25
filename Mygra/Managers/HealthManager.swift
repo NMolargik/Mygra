@@ -232,6 +232,19 @@ final class HealthManager {
 
     // MARK: - Latest snapshot convenience
 
+    /// Convenience: refresh the latest snapshot for a migraine window.
+    /// Uses the start of the day for `start` as the beginning of the window, and
+    /// ends at `end` if provided (and >= start), otherwise at `start`.
+    func refreshLatestForMigraine(start: Date, end: Date?) async {
+        let cal = Calendar.current
+        let windowStart = cal.startOfDay(for: start)
+        let windowEnd: Date = {
+            if let e = end, e >= start { return e }
+            return start
+        }()
+        await refreshLatest(from: windowStart, to: windowEnd)
+    }
+
     /// Populate and cache the latest health snapshot for a given date range.
     /// Assigns `latestData` on success and sets `lastError` on failure.
     func refreshLatest(from start: Date, to end: Date) async {
@@ -252,6 +265,18 @@ final class HealthManager {
         let now = Date()
         let startOfDay = calendar.startOfDay(for: now)
         await refreshLatest(from: startOfDay, to: now)
+    }
+
+    /// Fetch a `HealthData` snapshot for a migraine window (without caching to `latestData`).
+    /// The window begins at the start of the day for `start` and ends at `end` if provided (and >= start), otherwise at `start`.
+    func fetchSnapshotForMigraine(start: Date, end: Date?) async throws -> HealthData {
+        let cal = Calendar.current
+        let windowStart = cal.startOfDay(for: start)
+        let windowEnd: Date = {
+            if let e = end, e >= start { return e }
+            return start
+        }()
+        return try await fetchSnapshot(from: windowStart, to: windowEnd)
     }
 
     // MARK: - Writes

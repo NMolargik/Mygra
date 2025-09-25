@@ -499,7 +499,7 @@ struct MigraineEntryView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Submit") {
                         Haptics.lightImpact()
-                        submitTapped()
+                        Task { await submitTappedAsync() }
                     }
                     .foregroundStyle(.blue)
                 }
@@ -507,9 +507,9 @@ struct MigraineEntryView: View {
         }
         .task {
             viewModel.resetGreeting()
+            if viewModel.endDate < viewModel.startDate { viewModel.endDate = viewModel.startDate }
             await startHealthFetch()
             await startWeatherFetch()
-            if viewModel.endDate < viewModel.startDate { viewModel.endDate = viewModel.startDate }
         }
         .alert("Cannot Save", isPresented: $viewModel.showValidationAlert, actions: {
             Button("OK", role: .cancel) {
@@ -518,11 +518,29 @@ struct MigraineEntryView: View {
         }, message: {
             Text(viewModel.validationMessage)
         })
+        .alert("Weather Not Attached", isPresented: $viewModel.showWeatherBackdateAlert, actions: {
+            Button("OK", role: .cancel) {
+                Haptics.lightImpact()
+            }
+        }, message: {
+            Text(viewModel.weatherBackdateMessage)
+        })
         .presentationDetents([.large])
         // Snap water to new step/range whenever unit preference changes
         .onChange(of: useMetricUnits) { _, _ in
             // Use the stored viewModel here to avoid dynamicMember binding confusion
             viewModel.addWater = viewModel.snap(viewModel.addWater, toStep: viewModel.waterStep(useMetricUnits: useMetricUnits), in: viewModel.waterRange(useMetricUnits: useMetricUnits))
+        }
+        .onChange(of: viewModel.startDate) { _, _ in
+            Task { await startHealthFetch(); await startWeatherFetch() }
+        }
+        .onChange(of: viewModel.isOngoing) { _, _ in
+            Task { await startHealthFetch(); await startWeatherFetch() }
+        }
+        .onChange(of: viewModel.endDate) { _, _ in
+            if !viewModel.isOngoing {
+                Task { await startHealthFetch(); await startWeatherFetch() }
+            }
         }
     }
 
@@ -589,8 +607,8 @@ struct MigraineEntryView: View {
         viewModel.didPullHealth = false
         viewModel.healthError = nil
 
-        // Kick off authorization + snapshot for today
-        await healthManager.refreshLatestForToday()
+        // Use the selected start/end to fetch a migraine-window snapshot
+        await healthManager.refreshLatestForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
 
         // Reflect results
         if let error = healthManager.lastError {
@@ -606,6 +624,17 @@ struct MigraineEntryView: View {
         viewModel.isPullingWeather = true
         viewModel.didPullWeather = false
         viewModel.weatherError = nil
+
+        // If the selected start date is not today, skip weather and alert the user.
+        let cal = Calendar.current
+        if !cal.isDateInToday(viewModel.startDate) {
+            viewModel.isPullingWeather = false
+            viewModel.didPullWeather = false
+            viewModel.weatherError = nil
+            viewModel.showWeatherBackdateAlert = true
+            viewModel.weatherBackdateMessage = "Weather isn't attached for past dates. We only attach current conditions for migraines started today."
+            return
+        }
 
         await weatherManager.refresh()
 
@@ -624,65 +653,89 @@ struct MigraineEntryView: View {
         viewModel.isPullingWeather = false
     }
 
+    private func buildWeatherData(forDate date: Date) -> WeatherData? {
+        let pressureHpa: Double? = {
+            guard let p = weatherManager.pressure else { return nil }
+            let hPa = p.converted(to: .hectopascals).value
+            return hPa
+        }()
+        let tempC: Double? = weatherManager.temperature?.converted(to: .celsius).value
+        let humidityPercent: Double? = weatherManager.humidity.map { $0 * 100.0 }
+        let condition: WeatherCondition? = weatherManager.condition
+        let location: String? = weatherManager.locationString
+
+        if let ph = pressureHpa, let tc = tempC, let hp = humidityPercent, let cond = condition {
+            return WeatherData(
+                barometricPressureHpa: ph,
+                temperatureCelsius: tc,
+                humidityPercent: hp,
+                condition: cond,
+                createdAt: date,
+                locationDescription: location
+            )
+        } else if tempC != nil || pressureHpa != nil || humidityPercent != nil || condition != nil {
+            return WeatherData(
+                barometricPressureHpa: pressureHpa ?? 0,
+                temperatureCelsius: tempC ?? 0,
+                humidityPercent: humidityPercent ?? 0,
+                condition: condition ?? .clear,
+                createdAt: date,
+                locationDescription: location
+            )
+        } else {
+            return nil
+        }
+    }
+
     // MARK: - Save
-    private func submitTapped() {
+    private func submitTappedAsync() async {
         // Basic validations
         let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
         if viewModel.startDate < earliest {
-            viewModel.validationMessage = "Start time cannot be more than 1 day in the past."
-            viewModel.showValidationAlert = true
+            await MainActor.run {
+                viewModel.validationMessage = "Start time cannot be more than 1 day in the past."
+                viewModel.showValidationAlert = true
+            }
+            Haptics.error()
             return
         }
-        
+
         guard viewModel.validateBeforeSave() else {
             Haptics.error()
             return
         }
 
-        // Build WeatherData from current WeatherManager readings if available
-        let weatherModel: WeatherData? = {
-            guard viewModel.didPullWeather else { return nil }
-            let pressureHpa: Double? = {
-                guard let p = weatherManager.pressure else { return nil }
-                let hPa = p.converted(to: .hectopascals).value
-                return hPa
-            }()
-            let tempC: Double? = weatherManager.temperature?.converted(to: .celsius).value
-            let humidityPercent: Double? = weatherManager.humidity.map { $0 * 100.0 }
-            let condition: WeatherCondition? = weatherManager.condition
-            let location: String? = weatherManager.locationString
+        // Attempt to fetch a Health snapshot for the migraine window
+        var healthModel: HealthData? = nil
+        do {
+            let snapshot = try await healthManager.fetchSnapshotForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
+            healthModel = snapshot
+        } catch {
+            // If this fails (e.g., not authorized), proceed without health
+            print("Failed to fetch Health snapshot for migraine window: \(error)")
+        }
 
-            if let ph = pressureHpa, let tc = tempC, let hp = humidityPercent, let cond = condition {
-                return WeatherData(
-                    barometricPressureHpa: ph,
-                    temperatureCelsius: tc,
-                    humidityPercent: hp,
-                    condition: cond,
-                    createdAt: Date(),
-                    locationDescription: location
-                )
-            } else if tempC != nil || pressureHpa != nil || humidityPercent != nil || condition != nil {
-                return WeatherData(
-                    barometricPressureHpa: pressureHpa ?? 0,
-                    temperatureCelsius: tempC ?? 0,
-                    humidityPercent: humidityPercent ?? 0,
-                    condition: condition ?? .clear,
-                    createdAt: Date(),
-                    locationDescription: location
-                )
-            } else {
-                return nil
+        // Ensure we have a recent weather reading; then build a WeatherData using the migraine's start date
+        let cal = Calendar.current
+        let weatherModel: WeatherData?
+        if cal.isDateInToday(viewModel.startDate) {
+            await weatherManager.refresh()
+            weatherModel = buildWeatherData(forDate: viewModel.startDate)
+        } else {
+            weatherModel = nil
+            // Ensure the user sees why weather won't be attached
+            viewModel.showWeatherBackdateAlert = true
+            if viewModel.weatherBackdateMessage.isEmpty {
+                viewModel.weatherBackdateMessage = "Weather isn't attached for past dates. We only attach current conditions for migraines started today."
             }
-        }()
-
-        // Health: reuse the snapshot object if available (already a SwiftData model)
-        let healthModel: HealthData? = viewModel.didPullHealth && viewModel.healthError == nil ? healthManager.latestData : nil
+        }
 
         // Foods parsing
         let foods: [String] = viewModel.parseFoods()
-        
+
         let newMigraine = Migraine(
-            pinned: viewModel.pinned, startDate: viewModel.startDate,
+            pinned: viewModel.pinned,
+            startDate: viewModel.startDate,
             endDate: viewModel.isOngoing ? nil : viewModel.endDate,
             painLevel: viewModel.painLevel,
             stressLevel: viewModel.stressLevel,
@@ -699,7 +752,6 @@ struct MigraineEntryView: View {
         onMigraineSaved(newMigraine, nil)
     }
 }
-
 
 #Preview("Entry View – Empty State") {
     let container: ModelContainer = {

@@ -28,19 +28,15 @@ struct UserEditView: View {
         }
         
         Section("Birthday") {
-            DatePicker("Birthday", selection: $user.birthday, displayedComponents: .date)
-                .onAppear {
-                    let now = Date()
-                    let sixteenYearsAgo = Calendar.current.date(byAdding: .year, value: -16, to: now) ?? now
-                    // Only set default if birthday is near now or in the future (unrealistic)
-                    if user.birthday > now || user.birthday < Calendar.current.date(byAdding: .year, value: -120, to: now)! {
-                        user.birthday = sixteenYearsAgo
-                    }
-                }
-                .datePickerStyle(.graphical)
-                .tint(.red)
-                .onTapGesture { isFirstNameFocused = false }
-                .onChange(of: user.birthday) { isFirstNameFocused = false }
+            DatePicker(
+                "Birthday",
+                selection: $user.birthday,
+                in: ...Date(),
+                displayedComponents: .date
+            )
+            .datePickerStyle(.graphical)
+            .tint(.red)
+            .onChange(of: user.birthday) { isFirstNameFocused = false }
         }
 
         Section("Anatomy") {
@@ -238,3 +234,4 @@ struct UserEditView: View {
 #Preview {
     UserEditView(user: .constant(User()), userFormComplete: .constant(false), dismiss: {})
 }
+

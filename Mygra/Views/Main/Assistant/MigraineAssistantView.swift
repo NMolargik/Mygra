@@ -124,13 +124,18 @@ struct MigraineAssistantView: View {
                 .safeAreaInset(edge: .bottom, spacing: 0) {
                     HStack {
                         HStack(spacing: 8) {
-                            TextField("Message", text: $inputText, axis: .vertical)
+                            TextField("Message", text: $inputText)
                                 .textFieldStyle(.plain)
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .lineLimit(1...4)
+                                .lineLimit(1)
                                 .disabled(insightManager.isGeneratingGuidance)
                                 .submitLabel(.send)
+                                .onChange(of: inputText) { _, newValue in
+                                    if newValue.contains(where: { $0.isNewline }) {
+                                        inputText = newValue.filter { !$0.isNewline }
+                                    }
+                                }
                                 .onSubmit {
                                     Haptics.lightImpact()
                                     send()
@@ -143,6 +148,7 @@ struct MigraineAssistantView: View {
                                 Image(systemName: "paperplane.fill")
                                     .font(.system(size: 16, weight: .semibold))
                                     .symbolVariant(.fill)
+                                    .symbolEffect(.wiggle, value: sendEnabled)
                                     .foregroundStyle(.white.gradient)
                                     .frame(width: 34, height: 34)
                                     .background(
@@ -246,3 +252,4 @@ struct MigraineAssistantView: View {
         }
     }
 }
+

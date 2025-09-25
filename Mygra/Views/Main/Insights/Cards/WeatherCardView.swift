@@ -145,6 +145,7 @@ struct WeatherCardView: View {
                     if isFetching {
                         ProgressView()
                             .controlSize(.small)
+                            .tint(.red)
                     } else {
                         Button(action: onRefresh) {
                             Image(systemName: "arrow.clockwise")

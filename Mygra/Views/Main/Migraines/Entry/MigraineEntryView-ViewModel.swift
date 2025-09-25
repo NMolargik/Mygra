@@ -20,6 +20,10 @@ extension MigraineEntryView {
         var didPullWeather = false
         var weatherError: Error?
 
+        // Weather backdate alert state
+        var showWeatherBackdateAlert: Bool = false
+        var weatherBackdateMessage: String = ""
+
         // Entry form state
         var startDate: Date = Date()
         var isOngoing: Bool = false
