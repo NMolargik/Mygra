@@ -22,10 +22,20 @@ struct MigraineRowView: View {
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             // Leading status indicator
-            ZStack {
+            if migraine.isOngoing {
+                // Animate the leading status bar through severity colors
+                TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { context in
+                    let tint = animatedSeverityColor(at: context.date)
+                    RoundedRectangle(cornerRadius: 4, style: .continuous)
+                        .fill(tint)
+                        .frame(width: 8)
+                        .accessibilityHidden(true)
+                }
+            } else {
                 RoundedRectangle(cornerRadius: 4, style: .continuous)
                     .fill(migraine.severity.color)
                     .frame(width: 8)
+                    .accessibilityHidden(true)
             }
 
             VStack(alignment: .leading, spacing: 6) {
@@ -137,6 +147,47 @@ struct MigraineRowView: View {
             return String(format: "%dm %02ds", m, sec)
         }
     }
+    
+    // MARK: - Ongoing color cycling helpers
+    /// Colors to cycle through when a migraine is ongoing (ordered by rising severity)
+    private let severityCycle: [Color] = [
+        .green, .yellow, .orange, .red, .pink
+    ]
+
+    /// Returns a smoothly animated color that cycles through `severityCycle`.
+    private func animatedSeverityColor(at time: Date, secondsPerStep: Double = 1.5) -> Color {
+        guard severityCycle.count >= 2 else { return migraine.severity.color }
+        let t = time.timeIntervalSinceReferenceDate / secondsPerStep
+        let phase = t - floor(t) // 0...1 within current step
+        let idx = Int(floor(t)) % severityCycle.count
+        let nextIdx = (idx + 1) % severityCycle.count
+        return interpolate(severityCycle[idx], severityCycle[nextIdx], phase: phase)
+    }
+
+    /// Linearly interpolate between two `Color`s using sRGB components.
+    private func interpolate(_ a: Color, _ b: Color, phase: Double) -> Color {
+        // Extract RGBA components from Color via UIColor
+        let (ar, ag, ab, aa) = rgbaComponents(from: a)
+        let (br, bg, bb, ba) = rgbaComponents(from: b)
+        let p = max(0, min(1, phase))
+        let r = ar + (br - ar) * p
+        let g = ag + (bg - ag) * p
+        let bl = ab + (bb - ab) * p
+        let al = aa + (ba - aa) * p
+        return Color(red: Double(r), green: Double(g), blue: Double(bl), opacity: Double(al))
+    }
+
+    /// Safely get sRGB RGBA components for a SwiftUI Color.
+    private func rgbaComponents(from color: Color) -> (CGFloat, CGFloat, CGFloat, CGFloat) {
+        #if canImport(UIKit)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
+        return (r, g, b, a)
+        #else
+        return (0, 0, 0, 1)
+        #endif
+    }
+
 
     private var accessibilitySummary: String {
         var parts: [String] = []

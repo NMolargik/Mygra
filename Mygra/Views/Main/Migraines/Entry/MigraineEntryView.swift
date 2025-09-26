@@ -295,7 +295,7 @@ struct MigraineEntryView: View {
                     DatePicker(
                         "Started",
                         selection: $viewModel.startDate,
-                        in: (Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date())...,
+                        in: ...Date(),
                         displayedComponents: [.date, .hourAndMinute]
                     )
 
@@ -566,7 +566,9 @@ struct MigraineEntryView: View {
         do {
             // Water
             if viewModel.addWater > 0 {
-                let liters = useMetricUnits ? viewModel.addWater : (viewModel.addWater / 33.814)
+                // Metric slider stages mL; imperial stages fl oz
+                let litersRaw = useMetricUnits ? (viewModel.addWater / 1000.0) : (viewModel.addWater / 33.814)
+                let liters = (litersRaw * 1000).rounded() / 1000
                 try await healthManager.saveWater(liters: liters)
                 current.waterLiters = (current.waterLiters ?? 0) + liters
             }
@@ -689,17 +691,6 @@ struct MigraineEntryView: View {
 
     // MARK: - Save
     private func submitTappedAsync() async {
-        // Basic validations
-        let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
-        if viewModel.startDate < earliest {
-            await MainActor.run {
-                viewModel.validationMessage = "Start time cannot be more than 1 day in the past."
-                viewModel.showValidationAlert = true
-            }
-            Haptics.error()
-            return
-        }
-
         guard viewModel.validateBeforeSave() else {
             Haptics.error()
             return

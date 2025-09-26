@@ -16,7 +16,7 @@ struct TriggersDetailView: View {
             VStack(alignment: .leading, spacing: 8) {
                 if !triggers.isEmpty {
                     ForEach(triggers, id: \.self) { t in
-                        Label(t.displayName, systemImage: "bolt.heart")
+                        Label(t.displayName, systemImage: "minus")
                     }
                 }
                 if !customTriggers.isEmpty {

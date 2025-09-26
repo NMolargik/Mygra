@@ -33,7 +33,6 @@ struct MainView: View {
     @State private var lastPushedMigraineID: UUID? = nil
     @State private var now: Date = Date()
     @State private var drawOn: Bool = false
-    @State private var drawOff: Bool = false
 
     var body: some View {
         Group {
@@ -272,10 +271,22 @@ struct MainView: View {
                 lastPushedMigraineID = ongoing.id
             } label: {
                 HStack(spacing: 8) {
-                    Image(systemName: "waveform.path.ecg")
-                        .symbolVariant(.fill)
-                        .foregroundStyle(.red)
-                        .modifier(DrawOnOffEffect(drawOn: drawOn, drawOff: drawOff))
+                    Group {
+                        if #available(iOS 26.0, *) {
+                            // iOS 26+: use SF Symbols draw/erase to repeatedly draw on and off
+                            Image(systemName: "waveform.path.ecg")
+                                .symbolVariant(.fill)
+                                .foregroundStyle(.red)
+                                .symbolEffect(.drawOn.wholeSymbol, isActive: drawOn)
+
+                        } else {
+                            // Older iOS: gentle pulse fallback
+                            Image(systemName: "waveform.path.ecg")
+                                .symbolVariant(.fill)
+                                .foregroundStyle(.red)
+                                .symbolEffect(.pulse, value: now)
+                        }
+                    }
 
                     Text("Ongoing Migraine")
                         .font(.headline)
@@ -296,7 +307,6 @@ struct MainView: View {
                 self.now = tick
                 withAnimation(.easeInOut(duration: 0.8)) {
                     self.drawOn.toggle()
-                    self.drawOff.toggle()
                 }
             }
         }
@@ -309,7 +319,7 @@ struct MainView: View {
     }
 
     private var timer: Publishers.Autoconnect<Timer.TimerPublisher> {
-        Timer.publish(every: 0.8, on: .main, in: .common).autoconnect()
+        Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
     }
 
     private func durationString(since start: Date, now: Date) -> String {

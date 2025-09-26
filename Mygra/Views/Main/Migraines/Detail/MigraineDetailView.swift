@@ -148,7 +148,7 @@ struct MigraineDetailView: View {
                 onCancel: {
                     showingModifySheet = false
                 },
-                onSave: { startDate, endDate, pain, stress, triggers in
+                onSave: { startDate, endDate, pain, stress, triggers, addedWater, addedCaffeine, addedFoodKcal, addedSleepHours in
                     // Persist edits and refresh via manager
                     migraineManager.update(migraine) { m in
                         m.startDate = startDate
@@ -157,12 +157,37 @@ struct MigraineDetailView: View {
                         m.stressLevel = stress
                         m.triggers = Array(triggers)
                     }
-                    
+
+                    // Persist staged intake adds to Apple Health at the migraine's start time
+                    Task {
+                        do {
+                            if addedWater > 0 {
+                                // Metric slider stages mL; imperial stages fl oz
+                                let litersRaw = useMetricUnits ? (addedWater / 1000.0) : (addedWater / 33.814)
+                                let liters = (litersRaw * 1000).rounded() / 1000 // keep to milliliter precision
+                                try await healthManager.saveWater(liters: liters, on: startDate)
+                            }
+                            if addedCaffeine > 0 {
+                                try await healthManager.saveCaffeine(mg: round(addedCaffeine), on: startDate)
+                            }
+                            if addedFoodKcal > 0 {
+                                try await healthManager.saveEnergy(kcal: round(addedFoodKcal), on: startDate)
+                            }
+                            if addedSleepHours > 0 {
+                                let end = startDate
+                                let begin = end.addingTimeInterval(-addedSleepHours * 3600.0)
+                                try await healthManager.saveSleep(from: begin, to: end)
+                            }
+                        } catch {
+                            print("[Detail] Failed to save staged HealthKit intake: \(error)")
+                        }
+                    }
+
                     // Re-generate insight
                     Task {
                         await insightManager.handleJustCreatedMigraine(migraine)
                     }
-                    
+
                     // Recompute health and weather for the edited window
                     Task { @MainActor in
                         // Health snapshot for the migraine window
@@ -195,7 +220,7 @@ struct MigraineDetailView: View {
                             showPendingWeatherAlert = true
                         }
                     }
-                    
+
                     showingModifySheet = false
                 }
             )

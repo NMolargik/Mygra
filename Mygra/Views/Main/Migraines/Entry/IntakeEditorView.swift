@@ -34,6 +34,18 @@ struct IntakeEditorView: View {
     @State private var caloriesHapticGate = false
     @State private var sleepHapticGate = false
 
+    // Snap any Double binding to a fixed step within a range (works around iOS 26 Slider step regression)
+    private func snappingBinding(for binding: Binding<Double>, step: Double, in range: ClosedRange<Double>) -> Binding<Double> {
+        Binding(
+            get: { binding.wrappedValue },
+            set: { newValue in
+                // Round to nearest step and clamp into range
+                let snapped = (newValue / step).rounded() * step
+                binding.wrappedValue = min(max(snapped, range.lowerBound), range.upperBound)
+            }
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if let msg = errorMessage {
@@ -47,7 +59,11 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "drop.fill").foregroundStyle(.blue.gradient)
                         .frame(width: 30)
-                    Slider(value: $addWater, in: waterRange, step: waterStep)
+                    Slider(
+                        value: snappingBinding(for: $addWater, step: waterStep, in: waterRange),
+                        in: waterRange,
+                        step: waterStep
+                    )
                         .tint(.blue)
                         .onChange(of: addWater) { _, _ in sliderTick(\.waterHapticGate) }
                     AmountPill(text: waterDisplay(addWater), tint: .blue)
@@ -60,7 +76,11 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "cup.and.saucer.fill").foregroundStyle(.brown.gradient)
                         .frame(width: 30)
-                    Slider(value: $addCaffeine, in: 0...1000, step: 10)
+                    Slider(
+                        value: snappingBinding(for: $addCaffeine, step: 10, in: 0...1000),
+                        in: 0...1000,
+                        step: 10
+                    )
                         .tint(.brown)
                         .onChange(of: addCaffeine) { _, _ in sliderTick(\.caffeineHapticGate) }
                     AmountPill(text: "+\(Int(addCaffeine)) mg", tint: .brown)
@@ -79,9 +99,13 @@ struct IntakeEditorView: View {
                         // Present kJ to the user, but keep `addFood` stored as kcal under the hood.
                         // 1 kcal = 4.184 kJ
                         Slider(
-                            value: Binding(
-                                get: { addFood * 4.184 },
-                                set: { addFood = $0 / 4.184 }
+                            value: snappingBinding(
+                                for: Binding(
+                                    get: { addFood * 4.184 },
+                                    set: { addFood = $0 / 4.184 }
+                                ),
+                                step: 50.0 * 4.184,
+                                in: 0...(2500.0 * 4.184)
                             ),
                             in: 0...(2500.0 * 4.184),
                             step: 50.0 * 4.184
@@ -94,7 +118,11 @@ struct IntakeEditorView: View {
                             .animation(.snappy(duration: 0.2), value: addFood)
                             .accessibilityLabel("Add \(Int((addFood * 4.184).rounded())) kilojoules of energy")
                     } else {
-                        Slider(value: $addFood, in: 0...2500, step: 50)
+                        Slider(
+                            value: snappingBinding(for: $addFood, step: 50, in: 0...2500),
+                            in: 0...2500,
+                            step: 50
+                        )
                             .tint(.orange)
                             .onChange(of: addFood) { _, _ in sliderTick(\.caloriesHapticGate) }
 
@@ -109,7 +137,11 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "bed.double.fill").foregroundStyle(.indigo.gradient)
                         .frame(width: 30)
-                    Slider(value: $addSleepHours, in: 0...12, step: 0.5)
+                    Slider(
+                        value: snappingBinding(for: $addSleepHours, step: 0.5, in: 0...12),
+                        in: 0...12,
+                        step: 0.5
+                    )
                         .tint(.indigo)
                         .onChange(of: addSleepHours) { _, _ in sliderTick(\.sleepHapticGate) }
                     AmountPill(
@@ -250,4 +282,3 @@ private struct AmountPill: View {
     return PreviewView()
         .padding()
 }
-

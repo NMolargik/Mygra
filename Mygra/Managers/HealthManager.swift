@@ -288,6 +288,11 @@ final class HealthManager {
         try await store.save(sample)
     }
 
+    /// Convenience alias: label `on` forwards to `date:` for readability at call sites
+    func saveWater(liters: Double, on date: Date) async throws {
+        try await saveWater(liters: liters, date: date)
+    }
+
     func saveCaffeine(mg: Double, date: Date = Date()) async throws {
         try await ensureAuthorized()
         let qty = HKQuantity(unit: unitMg, doubleValue: mg)
@@ -295,11 +300,21 @@ final class HealthManager {
         try await store.save(sample)
     }
 
+    /// Convenience alias: label `on` forwards to `date:` for readability at call sites
+    func saveCaffeine(mg: Double, on date: Date) async throws {
+        try await saveCaffeine(mg: mg, date: date)
+    }
+
     func saveEnergy(kcal: Double, date: Date = Date()) async throws {
         try await ensureAuthorized()
         let qty = HKQuantity(unit: unitKCal, doubleValue: kcal)
         let sample = HKQuantitySample(type: qtEnergy, quantity: qty, start: date, end: date)
         try await store.save(sample)
+    }
+
+    /// Convenience alias: label `on` forwards to `date:` for readability at call sites
+    func saveEnergy(kcal: Double, on date: Date) async throws {
+        try await saveEnergy(kcal: kcal, date: date)
     }
 
     /// Save a simple sleep interval (asleep-unspecified).

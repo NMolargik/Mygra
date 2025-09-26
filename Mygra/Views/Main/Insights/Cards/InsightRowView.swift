@@ -12,16 +12,25 @@ struct InsightRowView: View {
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
-            Image(systemName: iconName(for: insight.category))
-                .foregroundStyle(color(for: insight.priority).gradient)
-                .frame(width: 24)
+        HStack(alignment: .top, spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(color(for: insight.priority).opacity(0.12))
+                Image(systemName: iconName(for: insight.category))
+                    .symbolVariant(.fill)
+                    .foregroundStyle(color(for: insight.priority))
+            }
+            .frame(width: 30, height: 30)
+            .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(insight.title)
                     .font(.subheadline).bold()
+                    .minimumScaleFactor(0.9)
                 Text(displayMessage)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+                    .lineLimit(3)
+                    .multilineTextAlignment(.leading)
             }
             Spacer(minLength: 4)
             VStack(alignment: .trailing, spacing: 4) {
@@ -29,8 +38,11 @@ struct InsightRowView: View {
                 Spacer()
             }
         }
-        .padding(10)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .padding(12)
+        .background(
+            .thinMaterial,
+            in: RoundedRectangle(cornerRadius: 12, style: .continuous)
+        )
         .accessibilityElement(children: .combine)
     }
 
