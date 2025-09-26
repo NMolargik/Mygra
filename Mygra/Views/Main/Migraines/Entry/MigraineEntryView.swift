@@ -608,7 +608,7 @@ struct MigraineEntryView: View {
         viewModel.healthError = nil
 
         // Use the selected start/end to fetch a migraine-window snapshot
-        await healthManager.refreshLatestForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
+        await healthManager.refreshLatestForToday()
 
         // Reflect results
         if let error = healthManager.lastError {
@@ -708,7 +708,8 @@ struct MigraineEntryView: View {
         // Attempt to fetch a Health snapshot for the migraine window
         var healthModel: HealthData? = nil
         do {
-            let snapshot = try await healthManager.fetchSnapshotForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
+            try? await Task.sleep(nanoseconds: 200_000_000)
+            let snapshot = try await healthManager.fetchSnapshotForMigraine(start: Date(), end: nil)
             healthModel = snapshot
         } catch {
             // If this fails (e.g., not authorized), proceed without health

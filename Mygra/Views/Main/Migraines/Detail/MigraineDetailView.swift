@@ -167,7 +167,7 @@ struct MigraineDetailView: View {
                     Task { @MainActor in
                         // Health snapshot for the migraine window
                         do {
-                            let health = try await healthManager.fetchSnapshotForMigraine(start: startDate, end: endDate)
+                            let health = try await healthManager.fetchSnapshotForMigraine(start: startDate, end: endDate ?? Date())
                             migraineManager.update(migraine) { m in
                                 m.health = health
                             }
