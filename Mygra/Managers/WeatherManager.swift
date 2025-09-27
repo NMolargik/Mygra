@@ -57,6 +57,40 @@ final class WeatherManager {
     @ObservationIgnored
     private var geocoder: GeocoderHolder = GeocoderHolder()
 
+    // MARK: - Cached formatters
+    private static let shortTimeFormatter: DateFormatter = {
+        let df = DateFormatter()
+        df.timeStyle = .short
+        df.dateStyle = .none
+        return df
+    }()
+
+    private static let tempFormatter: MeasurementFormatter = {
+        let fmt = MeasurementFormatter()
+        fmt.unitOptions = .naturalScale
+        let nf = NumberFormatter()
+        nf.maximumFractionDigits = 0
+        nf.minimumFractionDigits = 0
+        fmt.numberFormatter = nf
+        return fmt
+    }()
+
+    private static let pressureFormatter: MeasurementFormatter = {
+        let fmt = MeasurementFormatter()
+        fmt.unitOptions = .providedUnit
+        let nf = NumberFormatter()
+        nf.maximumFractionDigits = 0
+        nf.minimumFractionDigits = 0
+        fmt.numberFormatter = nf
+        return fmt
+    }()
+
+    private static let percentFormatter: NumberFormatter = {
+        let nf = NumberFormatter()
+        nf.numberStyle = .percent
+        return nf
+    }()
+
     // MARK: - Init / deinit
     init(service: WeatherService = .shared, locationManager: LocationManager? = nil) {
         self.service = service
@@ -92,10 +126,7 @@ final class WeatherManager {
         if let lastAttempt = lastRequestAttempt,
            Date().timeIntervalSince(lastAttempt) < refreshCooldownInterval {
             let next = lastAttempt.addingTimeInterval(refreshCooldownInterval)
-            let df = DateFormatter()
-            df.timeStyle = .short
-            df.dateStyle = .none
-            let msg = "You can refresh weather again at \(df.string(from: next))."
+            let msg = "You can refresh weather again at \(Self.shortTimeFormatter.string(from: next))."
             setTransientError(CooldownError(message: msg), duration: 3.0)
             print("Too soon to refresh weather. Next eligible: \(next)")
             return
@@ -218,33 +249,17 @@ final class WeatherManager {
 
     var temperatureString: String? {
         guard let t = temperature else { return nil }
-        let fmt = MeasurementFormatter()
-        fmt.unitOptions = .naturalScale
-        // Configure number formatter to show zero decimal places
-        let nf = NumberFormatter()
-        nf.maximumFractionDigits = 0
-        nf.minimumFractionDigits = 0
-        fmt.numberFormatter = nf
-        return fmt.string(from: t)
+        return Self.tempFormatter.string(from: t)
     }
 
     var pressureString: String? {
         guard let p = pressure else { return nil }
-        let fmt = MeasurementFormatter()
-        fmt.unitOptions = .providedUnit
-        // Configure number formatter to show zero decimal places
-        let nf = NumberFormatter()
-        nf.maximumFractionDigits = 0
-        nf.minimumFractionDigits = 0
-        fmt.numberFormatter = nf
-        return fmt.string(from: p)
+        return Self.pressureFormatter.string(from: p)
     }
 
     var humidityPercentString: String? {
         guard let h = humidity else { return nil }
-        let nf = NumberFormatter()
-        nf.numberStyle = .percent
-        return nf.string(from: NSNumber(value: h))
+        return Self.percentFormatter.string(from: NSNumber(value: h))
     }
 
     // Human-readable location name (e.g., "Seattle, WA" or "Seattle, USA")

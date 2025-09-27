@@ -30,7 +30,7 @@ struct WeatherDetailView: View {
         }) {
             VStack(alignment: .leading, spacing: 8) {
                 if let place = weather.locationDescription, !place.isEmpty {
-                    LabeledRow("Location") {
+                    MetricRowView("Location") {
                         HStack(spacing: 8) {
                             Text(place)
                                 .font(.callout).bold()
@@ -48,7 +48,7 @@ struct WeatherDetailView: View {
                     }
                 }
                 
-                LabeledRow("Condition") {
+                MetricRowView("Condition") {
                     HStack(spacing: 8) {
                         Text(weather.condition.description)
                             .font(.callout).bold()
@@ -63,7 +63,7 @@ struct WeatherDetailView: View {
                     }
                 }
                 
-                LabeledRow("Temperature") {
+                MetricRowView("Temperature") {
                     let temp = weather.displayTemperature(useMetricUnits: useMetricUnits)
                     let unit = useMetricUnits ? "°C" : "°F"
                     HStack(spacing: 8) {
@@ -81,7 +81,7 @@ struct WeatherDetailView: View {
                     }
                 }
                 
-                LabeledRow("Humidity") {
+                MetricRowView("Humidity") {
                     HStack(spacing: 8) {
                         Text("\(Int(weather.humidityPercent))%")
                             .font(.callout).bold()
@@ -97,7 +97,7 @@ struct WeatherDetailView: View {
                     }
                 }
                 
-                LabeledRow("Pressure") {
+                MetricRowView("Pressure") {
                     let pressure = weather.displayBarometricPressure(useMetricUnits: useMetricUnits)
                     HStack(spacing: 8) {
                         Group {

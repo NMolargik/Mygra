@@ -215,7 +215,7 @@ struct MigraineListView: View {
                 } label: {
                     Label(
                         migraineManager.filter.pinnedOnly ? "Show All" : "Show Pinned",
-                        systemImage: migraineManager.filter.pinnedOnly ? "pin.slash" : "pin"
+                        systemImage: migraineManager.filter.pinnedOnly ? "pin.fill" : "pin"
                     )
                 }
                 .accessibilityIdentifier("pinnedOnlyToggle")

@@ -20,9 +20,9 @@ struct MigraineDetailHeaderView: View {
         VStack(spacing: 14) {            
             // Timing details
             VStack(alignment: .leading, spacing: 8) {
-                LabeledRow("Start", value: startText)
-                LabeledRow("End", value: endText)
-                LabeledRow("Duration", value: durationText)
+                MetricRowView("Start", value: startText)
+                MetricRowView("End", value: endText)
+                MetricRowView("Duration", value: durationText)
             }
             .padding(12)
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))

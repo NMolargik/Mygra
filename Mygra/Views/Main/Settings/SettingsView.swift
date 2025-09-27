@@ -31,7 +31,7 @@ struct SettingsView: View {
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
         let build = Bundle.main.object(forInfoDictionaryKey: kCFBundleVersionKey as String) as? String ?? "—"
-        return "Version \(version) (Build \(build))"
+        return "\(version) (Build \(build))"
     }
 
     private var bundleIdentifier: String {
@@ -165,7 +165,7 @@ Are you sure you want to proceed?
             }
 
             Section("Mygra") {
-                LabeledContent("App") {
+                LabeledContent("Version") {
                     Text(appVersion)
                         .foregroundStyle(.secondary)
                 }

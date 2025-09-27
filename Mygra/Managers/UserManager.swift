@@ -72,8 +72,9 @@ class UserManager {
         // Poll with a timeout to allow CloudKit to bring down records
         let deadline = Date().addingTimeInterval(timeout)
         while Date() < deadline, currentUser == nil {
+            if Task.isCancelled { return }
             // Sleep for the poll interval
-            try? await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000))
+            try? await Task.sleep(nanoseconds: UInt64(pollInterval * 1_000_000_000))
             // Try another refresh
             await refresh()
             if currentUser != nil { break }
@@ -138,3 +139,4 @@ class UserManager {
         print("UserManager error: \(error.description)")
     }
 }
+

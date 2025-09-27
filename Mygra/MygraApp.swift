@@ -186,12 +186,15 @@ struct MygraApp: App {
 
     private func startPeriodicWeatherChecksInForeground() async {
         while weatherManager.locationManager == nil {
-            try? await Task.sleep(nanoseconds: 1_000_000_000) // 1s
+            if Task.isCancelled { return }
+            do { try await Task.sleep(nanoseconds: 1_000_000_000) } catch { return }
         }
 
         while true {
+            if Task.isCancelled { return }
             await runOneWeatherCheckAndNotifyIfHighRisk()
-            try? await Task.sleep(nanoseconds: 90 * 60 * 1_000_000_000)
+            if Task.isCancelled { return }
+            do { try await Task.sleep(nanoseconds: 90 * 60 * 1_000_000_000) } catch { return }
         }
     }
     
@@ -203,4 +206,3 @@ struct MygraApp: App {
         useDayMonthYearDates = false
     }
 }
-

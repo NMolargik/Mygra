@@ -140,7 +140,7 @@ struct MigraineDetailView: View {
                 },
                 onCancel: { /* simply closes */ }
             )
-            .presentationDetents([.large])
+            .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingModifySheet) {
             ModifyMigraineSheetView(

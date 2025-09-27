@@ -8,6 +8,119 @@
 import Foundation
 import HealthKit
 
+actor HealthQueryClient {
+    let store: HealthManager.Store
+
+    init(store: HealthManager.Store) {
+        self.store = store
+    }
+
+    func sumQuantity(_ type: HKQuantityType, unit: HKUnit, from start: Date, to end: Date) async throws -> Double {
+        try await withCheckedThrowingContinuation { cont in
+            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+            let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, stats, error in
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: 0.0)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
+                let total = stats?.sumQuantity()?.doubleValue(for: unit) ?? 0
+                cont.resume(returning: total)
+            }
+            self.store.execute(query)
+        }
+    }
+
+    func averageQuantity(_ type: HKQuantityType, unit: HKUnit, from start: Date, to end: Date) async throws -> Double {
+        try await withCheckedThrowingContinuation { cont in
+            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+            let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .discreteAverage) { _, stats, error in
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: 0.0)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
+                let avg = stats?.averageQuantity()?.doubleValue(for: unit) ?? 0
+                cont.resume(returning: avg)
+            }
+            self.store.execute(query)
+        }
+    }
+
+    func totalSleepHours(ctSleep: HKCategoryType, from start: Date, to end: Date) async throws -> Double {
+        try await withCheckedThrowingContinuation { cont in
+            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+            let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: true)
+            let query = HKSampleQuery(sampleType: ctSleep, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [sort]) { _, samples, error in
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: 0.0)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
+
+                let totalSeconds = (samples as? [HKCategorySample])?
+                    .filter { sample in
+                        let v = HKCategoryValueSleepAnalysis(rawValue: sample.value) ?? .inBed
+                        return v == .asleepUnspecified || v == .asleepCore || v == .asleepDeep || v == .asleepREM
+                    }
+                    .reduce(0.0) { $0 + $1.endDate.timeIntervalSince($1.startDate) } ?? 0.0
+
+                cont.resume(returning: totalSeconds / 3600.0)
+            }
+            self.store.execute(query)
+        }
+    }
+
+    func inferMenstrualPhase(ctMenstrualFlow: HKCategoryType?, from start: Date, to end: Date) async throws -> MenstrualPhase? {
+        guard let flowType = ctMenstrualFlow else { return nil }
+
+        return try await withCheckedThrowingContinuation { cont in
+            let predicate = HKQuery.predicateForSamples(withStart: start.addingTimeInterval(-28*24*3600), end: end, options: [])
+            let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+            let query = HKSampleQuery(sampleType: flowType, predicate: predicate, limit: 50, sortDescriptors: [sort]) { _, samples, error in
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    cont.resume(returning: nil)
+                    return
+                } else if let error {
+                    cont.resume(throwing: error)
+                    return
+                }
+
+                let recent = (samples as? [HKCategorySample]) ?? []
+
+                let sevenDaysAgo = Date().addingTimeInterval(-7*24*3600)
+                let hasRecentHeavy = recent.contains {
+                    $0.endDate >= sevenDaysAgo &&
+                    HKCategoryValueVaginalBleeding(rawValue: $0.value) == .heavy
+                }
+
+                if hasRecentHeavy {
+                    cont.resume(returning: .menstrual)
+                } else {
+                    if let lastFlow = recent.first {
+                        let days = Calendar.current.dateComponents([.day], from: lastFlow.endDate, to: Date()).day ?? 0
+                        switch days {
+                        case 0...7: cont.resume(returning: .menstrual)
+                        case 8...14: cont.resume(returning: .follicular)
+                        case 15...18: cont.resume(returning: .ovulatory)
+                        default: cont.resume(returning: .luteal)
+                        }
+                    } else {
+                        cont.resume(returning: nil)
+                    }
+                }
+            }
+            self.store.execute(query)
+        }
+    }
+}
+
 @MainActor
 @Observable
 final class HealthManager {
@@ -22,8 +135,9 @@ final class HealthManager {
         func save(_ object: HKObject) async throws
     }
 
-    // Default conformance to HKHealthStore
-    private struct LiveStore: Store {
+    // LiveStore is used across actors via HealthQueryClient; mark as unchecked Sendable.
+    // HKHealthStore is internally thread-safe for our usage patterns.
+    private struct LiveStore: Store, @unchecked Sendable {
         static func isHealthDataAvailable() -> Bool { HKHealthStore.isHealthDataAvailable() }
         private let inner = HKHealthStore()
         func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws {
@@ -42,6 +156,7 @@ final class HealthManager {
     // MARK: - Init
     init(store: Store) {
         self.store = store
+        self.queryClient = HealthQueryClient(store: store)
     }
 
     convenience init() {
@@ -50,6 +165,7 @@ final class HealthManager {
 
     // MARK: - Public state
     private let store: Store
+    private let queryClient: HealthQueryClient
 
     private(set) var isAuthorized = false
     private(set) var lastError: Error?
@@ -195,16 +311,16 @@ final class HealthManager {
     ) async throws -> HealthData {
         try await ensureAuthorized()
 
-        async let waterML = sumQuantity(qtWater, unit: unitLiter, from: start, to: end)
-        async let caffeineMg = sumQuantity(qtCaffeine, unit: unitMg, from: start, to: end)
-        async let kcal = sumQuantity(qtEnergy, unit: unitKCal, from: start, to: end)
-        async let stepsRaw = sumQuantity(qtSteps, unit: unitCount, from: start, to: end)
-        async let restHRAvgRaw = averageQuantity(qtRestingHR, unit: unitBPM, from: start, to: end)
-        async let activeHRAvgRaw = averageQuantity(qtHR, unit: unitBPM, from: start, to: end)
-        async let glucoseAvg = averageQuantity(qtGlucose, unit: unitMgPerdL, from: start, to: end)
-        async let spo2Avg = averageQuantity(qtBloodOxygen, unit: unitPercent, from: start, to: end)
-        async let sleepHours = totalSleepHours(from: start, to: end)
-        async let phase = inferMenstrualPhase(from: start, to: end)
+        async let waterML = queryClient.sumQuantity(qtWater, unit: unitLiter, from: start, to: end)
+        async let caffeineMg = queryClient.sumQuantity(qtCaffeine, unit: unitMg, from: start, to: end)
+        async let kcal = queryClient.sumQuantity(qtEnergy, unit: unitKCal, from: start, to: end)
+        async let stepsRaw = queryClient.sumQuantity(qtSteps, unit: unitCount, from: start, to: end)
+        async let restHRAvgRaw = queryClient.averageQuantity(qtRestingHR, unit: unitBPM, from: start, to: end)
+        async let activeHRAvgRaw = queryClient.averageQuantity(qtHR, unit: unitBPM, from: start, to: end)
+        async let glucoseAvg = queryClient.averageQuantity(qtGlucose, unit: unitMgPerdL, from: start, to: end)
+        async let spo2Avg = queryClient.averageQuantity(qtBloodOxygen, unit: unitPercent, from: start, to: end)
+        async let sleepHours = queryClient.totalSleepHours(ctSleep: ctSleep, from: start, to: end)
+        async let phase = queryClient.inferMenstrualPhase(ctMenstrualFlow: ctMenstrualFlow, from: start, to: end)
 
         let steps = Int(try await stepsRaw)
         let restHRAvg = Int((try await restHRAvgRaw).rounded())
@@ -355,115 +471,6 @@ final class HealthManager {
         } catch {
             print("[Health] Failed to save headache for migraine \(migraine.id): \(error)")
             self.lastError = HealthError.saveFailed(kind: "headache", underlying: error)
-        }
-    }
-
-    // MARK: - Granular helpers (reads)
-
-    func sumQuantity(_ type: HKQuantityType, unit: HKUnit, from start: Date, to end: Date) async throws -> Double {
-        try await withCheckedThrowingContinuation { cont in
-            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
-            let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, stats, error in
-                if let hkError = error as? HKError, hkError.code == .errorNoData {
-                    cont.resume(returning: 0.0)
-                    return
-                } else if let error {
-                    cont.resume(throwing: error)
-                    return
-                }
-                let total = stats?.sumQuantity()?.doubleValue(for: unit) ?? 0
-                cont.resume(returning: total)
-            }
-            store.execute(query)
-        }
-    }
-
-    func averageQuantity(_ type: HKQuantityType, unit: HKUnit, from start: Date, to end: Date) async throws -> Double {
-        try await withCheckedThrowingContinuation { cont in
-            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
-            let query = HKStatisticsQuery(quantityType: type, quantitySamplePredicate: predicate, options: .discreteAverage) { _, stats, error in
-                if let hkError = error as? HKError, hkError.code == .errorNoData {
-                    cont.resume(returning: 0.0)
-                    return
-                } else if let error {
-                    cont.resume(throwing: error)
-                    return
-                }
-                let avg = stats?.averageQuantity()?.doubleValue(for: unit) ?? 0
-                cont.resume(returning: avg)
-            }
-            store.execute(query)
-        }
-    }
-
-    private func totalSleepHours(from start: Date, to end: Date) async throws -> Double {
-        try await withCheckedThrowingContinuation { cont in
-            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
-            let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: true)
-            let query = HKSampleQuery(sampleType: ctSleep, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [sort]) { _, samples, error in
-                if let hkError = error as? HKError, hkError.code == .errorNoData {
-                    cont.resume(returning: 0.0)
-                    return
-                } else if let error {
-                    cont.resume(throwing: error)
-                    return
-                }
-
-                let totalSeconds = (samples as? [HKCategorySample])?
-                    .filter { sample in
-                        let v = HKCategoryValueSleepAnalysis(rawValue: sample.value) ?? .inBed
-                        return v == .asleepUnspecified || v == .asleepCore || v == .asleepDeep || v == .asleepREM
-                    }
-                    .reduce(0.0) { $0 + $1.endDate.timeIntervalSince($1.startDate) } ?? 0.0
-
-                cont.resume(returning: totalSeconds / 3600.0)
-            }
-            store.execute(query)
-        }
-    }
-
-    // MARK: - Menstrual phase (optional & naive)
-
-    private func inferMenstrualPhase(from start: Date, to end: Date) async throws -> MenstrualPhase? {
-        guard let flowType = ctMenstrualFlow else { return nil }
-
-        return try await withCheckedThrowingContinuation { cont in
-            let predicate = HKQuery.predicateForSamples(withStart: start.addingTimeInterval(-28*24*3600), end: end, options: [])
-            let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
-            let query = HKSampleQuery(sampleType: flowType, predicate: predicate, limit: 50, sortDescriptors: [sort]) { _, samples, error in
-                if let hkError = error as? HKError, hkError.code == .errorNoData {
-                    cont.resume(returning: nil)
-                    return
-                } else if let error {
-                    cont.resume(throwing: error)
-                    return
-                }
-
-                let recent = (samples as? [HKCategorySample]) ?? []
-
-                let sevenDaysAgo = Date().addingTimeInterval(-7*24*3600)
-                let hasRecentHeavy = recent.contains {
-                    $0.endDate >= sevenDaysAgo &&
-                    HKCategoryValueVaginalBleeding(rawValue: $0.value) == .heavy
-                }
-
-                if hasRecentHeavy {
-                    cont.resume(returning: .menstrual)
-                } else {
-                    if let lastFlow = recent.first {
-                        let days = Calendar.current.dateComponents([.day], from: lastFlow.endDate, to: Date()).day ?? 0
-                        switch days {
-                        case 0...7: cont.resume(returning: .menstrual)
-                        case 8...14: cont.resume(returning: .follicular)
-                        case 15...18: cont.resume(returning: .ovulatory)
-                        default: cont.resume(returning: .luteal)
-                        }
-                    } else {
-                        cont.resume(returning: nil)
-                    }
-                }
-            }
-            store.execute(query)
         }
     }
 }
