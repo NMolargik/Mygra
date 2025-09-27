@@ -49,6 +49,27 @@ struct ModifyMigraineSheetView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section("Duration") {
+                    DatePicker(
+                        "Start",
+                        selection: $editStartDate,
+                        in: Date.distantPast...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                    Toggle("Ongoing", isOn: $editIsOngoing)
+                    if !editIsOngoing {
+                        DatePicker(
+                            "End",
+                            selection: $editEndDate,
+                            in: editStartDate...Date(),
+                            displayedComponents: [.date, .hourAndMinute]
+                        )
+                    }
+                    if let err = modifyError {
+                        Text(err).font(.footnote).foregroundStyle(.red)
+                    }
+                }
+
                 Section("Intake") {
                     // Display two-column summary mirroring the Entry screen, but sourced from the Migraine's saved snapshot.
                     let h = migraine.health
@@ -149,31 +170,20 @@ struct ModifyMigraineSheetView: View {
                                 },
                                 onCancel: {
                                     Haptics.lightImpact()
+                                    addWater = 0
+                                    addCaffeine = 0
+                                    addFoodKcal = 0
+                                    addSleepHours = 0
+                                    intakeErrorMessage = nil
                                     withAnimation { isEditingIntake = false }
                                 }
                             )
-                            .transition(.asymmetric(insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
+                            .transition(.asymmetric(
+                                insertion: .scale,
+                                removal: .scale
+                            ))
+                            .animation(.snappy(duration: 0.25), value: isEditingIntake)
                         }
-                    }
-                }
-                Section("Duration") {
-                    DatePicker(
-                        "Start",
-                        selection: $editStartDate,
-                        in: (Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date())...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-                    Toggle("Ongoing", isOn: $editIsOngoing)
-                    if !editIsOngoing {
-                        DatePicker(
-                            "End",
-                            selection: $editEndDate,
-                            in: editStartDate...Date(),
-                            displayedComponents: [.date, .hourAndMinute]
-                        )
-                    }
-                    if let err = modifyError {
-                        Text(err).font(.footnote).foregroundStyle(.red)
                     }
                 }
                 
@@ -300,13 +310,7 @@ struct ModifyMigraineSheetView: View {
 
     private func validateAndSave() {
         modifyError = nil
-        let earliest = Calendar.current.date(byAdding: .day, value: -1, to: Date()) ?? Date()
         let now = Date()
-        guard editStartDate >= earliest else {
-            modifyError = "Start time cannot be more than 1 day in the past."
-            Haptics.error()
-            return
-        }
         guard editStartDate <= now else {
             modifyError = "Start time cannot be in the future."
             Haptics.error()

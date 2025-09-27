@@ -135,11 +135,8 @@ struct MainView: View {
                                     Button {
                                         handleAddTapped()
                                     } label: {
-                                        HStack(spacing: 6) {
-                                            Image(systemName: "plus")
-                                            Text("New Migraine")
-                                                .bold()
-                                        }
+                                        Text("New Migraine")
+                                            .bold()
                                         .foregroundStyle(.blue)
                                     }
                                     .accessibilityIdentifier("addEntryButton")

@@ -26,6 +26,28 @@ struct MigraineEntryView: View {
             Form {
                 Text(viewModel.greeting.isEmpty ? "We’ve got you." : viewModel.greeting)
                     .font(.title2).bold()
+                
+                Section("Duration") {
+                    DatePicker(
+                        "Started",
+                        selection: $viewModel.startDate,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+
+                    Toggle("Ongoing", isOn: $viewModel.isOngoing)
+                        .onChange(of: $viewModel.isOngoing.wrappedValue) { _, new in
+                            Haptics.lightImpact()
+                            viewModel.setOngoing(new)
+                        }
+
+                    if !viewModel.isOngoing {
+                        DatePicker("End", selection: $viewModel.endDate, in: $viewModel.startDate.wrappedValue..., displayedComponents: [.date, .hourAndMinute])
+                    } else {
+                        Text("We'll start a neat little Live Activity to help you track duration!")
+                            .foregroundStyle(.gray)
+                    }
+                }
 
                 Section("Data Retreival") {
                     // Health capsule
@@ -55,12 +77,24 @@ struct MigraineEntryView: View {
                             }
                         }
 
-                        Text(viewModel.isPullingHealth
-                             ? "Pulling from Apple Health"
-                             : (viewModel.healthError == nil ? "Pulled from Apple Health" : "Failed to pull from Apple Health"))
+                        Text(
+                            viewModel.isPullingHealth
+                            ? "Pulling from Apple Health"
+                            : (
+                                viewModel.healthError == nil
+                                ? (
+                                    Calendar.current.isDateInToday(viewModel.startDate)
+                                    ? "Pulled from Apple Health"
+                                    : "Health data from \(viewModel.startDate.formatted(date: .abbreviated, time: .omitted))"
+                                  )
+                                : "Failed to pull from Apple Health"
+                              )
+                        )
                         .foregroundStyle(viewModel.healthError == nil ? .primary : .secondary)
                         .font(.subheadline)
                         .bold(viewModel.healthError != nil)
+                        .transition(.opacity)
+                        .animation(.easeInOut(duration: 0.2), value: viewModel.startDate)
 
                         Spacer(minLength: 0)
                     }
@@ -80,7 +114,7 @@ struct MigraineEntryView: View {
                                             Text(viewModel.displayWater(w, useMetricUnits: useMetricUnits))
                                         } icon: {
                                             Image(systemName: "drop.fill")
-                                                .foregroundStyle(w == 0 ? .red : .secondary)
+                                                .foregroundStyle(w == 0 ? .yellow : .secondary)
                                         }
                                     }
                                     if let s = h.sleepHours {
@@ -88,7 +122,7 @@ struct MigraineEntryView: View {
                                             Text("\(String(format: "%.1f", s)) h sleep")
                                         } icon: {
                                             Image(systemName: "bed.double.fill")
-                                                .foregroundStyle(s == 0 ? .red : .secondary)
+                                                .foregroundStyle(s == 0 ? .yellow : .secondary)
                                         }
                                     }
                                     if let rhr = h.restingHeartRate {
@@ -132,7 +166,7 @@ struct MigraineEntryView: View {
                                             }
                                         } icon: {
                                             Image(systemName: "fork.knife")
-                                                .foregroundStyle(kcal == 0 ? .red : .secondary)
+                                                .foregroundStyle(kcal == 0 ? .yellow : .secondary)
                                         }
                                     }
                                     if let caf = h.caffeineMg {
@@ -140,7 +174,7 @@ struct MigraineEntryView: View {
                                             Text("\(Int(caf)) mg caffeine")
                                         } icon: {
                                             Image(systemName: "cup.and.saucer.fill")
-                                                .foregroundStyle(caf == 0 ? .red : .secondary)
+                                                .foregroundStyle(caf == 0 ? .yellow : .secondary)
                                         }
                                     }
                                     if let steps = h.stepCount {
@@ -165,10 +199,11 @@ struct MigraineEntryView: View {
                             if (!viewModel.isEditingHealthValues) {
                                 HStack {
                                     Spacer()
-                                    Button(viewModel.isEditingHealthValues ? "Cancel Editing" : "Edit Intake Values") {
+                                    Button("Edit Intake Values") {
                                         Haptics.lightImpact()
                                         toggleHealthEditor()
                                     }
+                                    .buttonStyle(.bordered)
                                     .tint(.blue)
                                     Spacer()
                                 }
@@ -176,6 +211,8 @@ struct MigraineEntryView: View {
                             }
                             
                             if viewModel.isEditingHealthValues {
+                                Divider()
+                                
                                 IntakeEditorView(
                                     addWater: $viewModel.addWater,
                                     addCaffeine: $viewModel.addCaffeine,
@@ -198,7 +235,10 @@ struct MigraineEntryView: View {
                                     }
                                 )
                                 .transition(.asymmetric(
-                                    insertion: .move(edge: .bottom).combined(with: .opacity), removal: .opacity))
+                                    insertion: .scale,
+                                    removal: .scale
+                                ))
+                                .animation(.snappy(duration: 0.25), value: viewModel.isEditingHealthValues)
                             }
                         }
                     }
@@ -288,28 +328,6 @@ struct MigraineEntryView: View {
                         }
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                    }
-                }
-
-                Section("Duration") {
-                    DatePicker(
-                        "Started",
-                        selection: $viewModel.startDate,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
-                    )
-
-                    Toggle("Ongoing", isOn: $viewModel.isOngoing)
-                        .onChange(of: $viewModel.isOngoing.wrappedValue) { _, new in
-                            Haptics.lightImpact()
-                            viewModel.setOngoing(new)
-                        }
-
-                    if !viewModel.isOngoing {
-                        DatePicker("End", selection: $viewModel.endDate, in: $viewModel.startDate.wrappedValue..., displayedComponents: [.date, .hourAndMinute])
-                    } else {
-                        Text("We'll start a neat little Live Activity to help you track duration!")
-                            .foregroundStyle(.gray)
                     }
                 }
 
@@ -590,8 +608,8 @@ struct MigraineEntryView: View {
                 current.sleepHours = (current.sleepHours ?? 0) + viewModel.addSleepHours
             }
 
-            // Refresh snapshot to reconcile with HealthKit aggregates
-            await healthManager.refreshLatestForToday()
+            // Refresh snapshot to reconcile with HealthKit aggregates for the selected migraine window
+            await healthManager.refreshLatestForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
 
             viewModel.healthEditErrorMessage = nil
             withAnimation { viewModel.isEditingHealthValues = false }
@@ -609,8 +627,8 @@ struct MigraineEntryView: View {
         viewModel.didPullHealth = false
         viewModel.healthError = nil
 
-        // Use the selected start/end to fetch a migraine-window snapshot
-        await healthManager.refreshLatestForToday()
+        // Use the selected start/end to fetch a migraine-window snapshot (start-of-day to selected end/start)
+        await healthManager.refreshLatestForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
 
         // Reflect results
         if let error = healthManager.lastError {
@@ -700,7 +718,7 @@ struct MigraineEntryView: View {
         var healthModel: HealthData? = nil
         do {
             try? await Task.sleep(nanoseconds: 200_000_000)
-            let snapshot = try await healthManager.fetchSnapshotForMigraine(start: Date(), end: nil)
+            let snapshot = try await healthManager.fetchSnapshotForMigraine(start: viewModel.startDate, end: viewModel.isOngoing ? nil : viewModel.endDate)
             healthModel = snapshot
         } catch {
             // If this fails (e.g., not authorized), proceed without health

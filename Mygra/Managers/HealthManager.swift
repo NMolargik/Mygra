@@ -233,16 +233,15 @@ final class HealthManager {
     // MARK: - Latest snapshot convenience
 
     /// Convenience: refresh the latest snapshot for a migraine window.
-    /// Uses the start of the day for `start` as the beginning of the window, and
-    /// ends at `end` if provided (and >= start), otherwise at `start`.
+    /// Fetches for the calendar day of `start` (midnight to start-of-next-day), or up to now if `start` is today.
     func refreshLatestForMigraine(start: Date, end: Date?) async {
         let cal = Calendar.current
-        let windowStart = cal.startOfDay(for: start)
-        let windowEnd: Date = {
-            if let e = end, e >= start { return e }
-            return start
-        }()
-        await refreshLatest(from: windowStart, to: windowEnd)
+        let dayStart = cal.startOfDay(for: start)
+        let dayEndExclusive = cal.date(byAdding: .day, value: 1, to: dayStart) ?? start
+        let now = Date()
+        // If the chosen start date is today, cap at now; otherwise use the full day.
+        let effectiveEnd = cal.isDateInToday(start) ? min(now, dayEndExclusive) : dayEndExclusive
+        await refreshLatest(from: dayStart, to: effectiveEnd)
     }
 
     /// Populate and cache the latest health snapshot for a given date range.
@@ -268,15 +267,14 @@ final class HealthManager {
     }
 
     /// Fetch a `HealthData` snapshot for a migraine window (without caching to `latestData`).
-    /// The window begins at the start of the day for `start` and ends at `end` if provided (and >= start), otherwise at `start`.
+    /// Returns a snapshot for the selected start date’s calendar day (midnight to next midnight), or up to now if today.
     func fetchSnapshotForMigraine(start: Date, end: Date?) async throws -> HealthData {
         let cal = Calendar.current
-        let windowStart = cal.startOfDay(for: start)
-        let windowEnd: Date = {
-            if let e = end, e >= start { return e }
-            return start
-        }()
-        return try await fetchSnapshot(from: windowStart, to: windowEnd)
+        let dayStart = cal.startOfDay(for: start)
+        let dayEndExclusive = cal.date(byAdding: .day, value: 1, to: dayStart) ?? start
+        let now = Date()
+        let effectiveEnd = cal.isDateInToday(start) ? min(now, dayEndExclusive) : dayEndExclusive
+        return try await fetchSnapshot(from: dayStart, to: effectiveEnd)
     }
 
     // MARK: - Writes
