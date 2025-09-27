@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WeatherKit
 
 extension MigraineEntryView {
     @MainActor
@@ -26,7 +27,7 @@ extension MigraineEntryView {
 
         // Entry form state
         var startDate: Date = Date()
-        var isOngoing: Bool = false
+        var isOngoing: Bool = true
         var endDate: Date = Date()
         var painLevel: Int = 5
         var stressLevel: Int = 5
@@ -248,6 +249,196 @@ extension MigraineEntryView {
                 let t = Double(v - 5) / 5.0
                 return Color(red: 1.0, green: 1.0 - t, blue: 0.0)
             }
+        }
+        
+        // MARK: - Editor & fetch orchestration moved from View
+        func toggleHealthEditor() {
+            if !isEditingHealthValues {
+                addWater = 0
+                addFood = 0
+                addCaffeine = 0
+                addSleepHours = 0
+                healthEditErrorMessage = nil
+            }
+            isEditingHealthValues.toggle()
+        }
+
+        @MainActor
+        func saveHealthEdits(using healthManager: HealthManager, useMetricUnits: Bool) async {
+            guard let current = healthManager.latestData else { return }
+            isSavingHealthEdits = true
+            defer { isSavingHealthEdits = false }
+
+            do {
+                // Water
+                if addWater > 0 {
+                    // Metric slider stages mL; imperial stages fl oz
+                    let litersRaw = useMetricUnits ? (addWater / 1000.0) : (addWater / 33.814)
+                    let liters = (litersRaw * 1000).rounded() / 1000
+                    try await healthManager.saveWater(liters: liters)
+                    current.waterLiters = (current.waterLiters ?? 0) + liters
+                }
+                // Calories
+                if addFood > 0 {
+                    try await healthManager.saveEnergy(kcal: addFood)
+                    current.energyKilocalories = (current.energyKilocalories ?? 0) + addFood
+                }
+                // Caffeine
+                if addCaffeine > 0 {
+                    try await healthManager.saveCaffeine(mg: addCaffeine)
+                    current.caffeineMg = (current.caffeineMg ?? 0) + addCaffeine
+                }
+                // Sleep
+                if addSleepHours > 0 {
+                    let end = Date()
+                    let start = end.addingTimeInterval(-addSleepHours * 3600.0)
+                    try await healthManager.saveSleep(from: start, to: end)
+                    current.sleepHours = (current.sleepHours ?? 0) + addSleepHours
+                }
+
+                // Refresh snapshot to reconcile with HealthKit aggregates for the selected migraine window
+                await healthManager.refreshLatestForMigraine(start: startDate, end: isOngoing ? nil : endDate)
+
+                healthEditErrorMessage = nil
+                isEditingHealthValues = false
+                Haptics.success()
+            } catch {
+                healthEditErrorMessage = "Failed to save to Apple Health: \(error.localizedDescription)"
+                Haptics.error()
+            }
+        }
+
+        @MainActor
+        func startHealthFetch(using healthManager: HealthManager) async {
+            isPullingHealth = true
+            didPullHealth = false
+            healthError = nil
+
+            // Use the selected start/end to fetch a migraine-window snapshot
+            await healthManager.refreshLatestForMigraine(start: startDate, end: isOngoing ? nil : endDate)
+
+            // Reflect results
+            if let error = healthManager.lastError {
+                healthError = error
+                didPullHealth = false
+            } else {
+                didPullHealth = (healthManager.latestData != nil)
+            }
+            isPullingHealth = false
+        }
+
+        @MainActor
+        func startWeatherFetch(using weatherManager: WeatherManager) async {
+            isPullingWeather = true
+            didPullWeather = false
+            weatherError = nil
+
+            // If the selected start date is not today, skip weather and alert the user.
+            let cal = Calendar.current
+            if !cal.isDateInToday(startDate) {
+                isPullingWeather = false
+                didPullWeather = false
+                weatherError = nil
+                showWeatherBackdateAlert = true
+                weatherBackdateMessage = "Weather isn't attached for past dates. We only attach current conditions for migraines started today."
+                return
+            }
+
+            await weatherManager.refresh()
+
+            // Consider it "pulled" if we have at least one of the core readings, even if refresh errored.
+            let hasAny = weatherManager.temperature != nil ||
+                         weatherManager.pressure != nil ||
+                         weatherManager.humidity != nil ||
+                         weatherManager.condition != nil
+
+            if let error = weatherManager.error {
+                weatherError = error
+                didPullWeather = hasAny
+            } else {
+                didPullWeather = hasAny
+            }
+            isPullingWeather = false
+        }
+
+        func buildWeatherData(from weatherManager: WeatherManager, for date: Date) -> WeatherData? {
+            let pressureHpa: Double? = {
+                guard let p = weatherManager.pressure else { return nil }
+                let hPa = p.converted(to: .hectopascals).value
+                return hPa
+            }()
+            let tempC: Double? = weatherManager.temperature?.converted(to: .celsius).value
+            let humidityPercent: Double? = weatherManager.humidity.map { $0 * 100.0 }
+            let condition: WeatherCondition? = weatherManager.condition
+            let location: String? = weatherManager.locationString
+
+            if let ph = pressureHpa, let tc = tempC, let hp = humidityPercent, let cond = condition {
+                return WeatherData(
+                    barometricPressureHpa: ph,
+                    temperatureCelsius: tc,
+                    humidityPercent: hp,
+                    condition: cond,
+                    createdAt: date,
+                    locationDescription: location
+                )
+            } else if tempC != nil || pressureHpa != nil || humidityPercent != nil || condition != nil {
+                return WeatherData(
+                    barometricPressureHpa: pressureHpa ?? 0,
+                    temperatureCelsius: tempC ?? 0,
+                    humidityPercent: humidityPercent ?? 0,
+                    condition: condition ?? .clear,
+                    createdAt: date,
+                    locationDescription: location
+                )
+            } else {
+                return nil
+            }
+        }
+
+        @MainActor
+        func createMigraine(using healthManager: HealthManager, weatherManager: WeatherManager, useMetricUnits: Bool) async -> Migraine {
+            // Attempt to fetch a Health snapshot for the migraine window
+            var healthModel: HealthData? = nil
+            do {
+                try? await Task.sleep(nanoseconds: 200_000_000)
+                let snapshot = try await healthManager.fetchSnapshotForMigraine(start: startDate, end: isOngoing ? nil : endDate)
+                healthModel = snapshot
+            } catch {
+                // proceed without health
+                print("Failed to fetch Health snapshot for migraine window: \(error)")
+            }
+
+            // Ensure we have a recent weather reading; then build a WeatherData using the migraine's start date
+            let cal = Calendar.current
+            let weatherModel: WeatherData?
+            if cal.isDateInToday(startDate) {
+                await weatherManager.refresh()
+                weatherModel = buildWeatherData(from: weatherManager, for: startDate)
+            } else {
+                weatherModel = nil
+                showWeatherBackdateAlert = true
+                if weatherBackdateMessage.isEmpty {
+                    weatherBackdateMessage = "Weather isn't attached for past dates. We only attach current conditions for migraines started today."
+                }
+            }
+
+            // Foods parsing
+            let foods: [String] = parseFoods()
+
+            return Migraine(
+                pinned: pinned,
+                startDate: startDate,
+                endDate: isOngoing ? nil : endDate,
+                painLevel: painLevel,
+                stressLevel: stressLevel,
+                note: noteText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? nil : noteText,
+                insight: nil,
+                triggers: Array(selectedTriggers),
+                customTriggers: customTriggers,
+                foodsEaten: foods,
+                weather: weatherModel,
+                health: healthModel
+            )
         }
     }
 }

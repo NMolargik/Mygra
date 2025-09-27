@@ -238,11 +238,6 @@ struct MigraineDetailView: View {
         } message: {
             Text("This action cannot be undone.")
         }
-        .alert("Weather Not Attached", isPresented: $showPendingWeatherAlert) {
-            Button("OK", role: .cancel) { Haptics.lightImpact() }
-        } message: {
-            Text(pendingWeatherAlertMessage)
-        }
         .onAppear {
             // Initialize proposed end date when showing the view
             proposedEndDate = defaultEndDate

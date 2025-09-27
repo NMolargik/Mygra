@@ -1,5 +1,5 @@
 //
-//  LabeledRow.swift
+//  MetricRowView.swift
 //  Mygra
 //
 //  Created by Nick Molargik on 9/16/25.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct LabeledRow<Value: View>: View {
+struct MetricRowView<Value: View>: View {
     let title: String
     let valueView: Value
 
@@ -32,5 +32,5 @@ struct LabeledRow<Value: View>: View {
 }
 
 #Preview {
-    LabeledRow("Labeled Row", value: "")
+    MetricRowView("Labeled Row", value: "")
 }

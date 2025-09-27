@@ -9,16 +9,11 @@ import SwiftUI
 
 struct MigraineFilterSheet: View {
     @State private var workingFilter: MigraineFilter
-    
-    // Simple date range controls
     @State private var useDateRange: Bool
     @State private var startDate: Date
     @State private var endDate: Date
-
-    // Triggers UI state
     @State private var triggerSearchText: String = ""
     
-    // Callbacks
     var apply: (MigraineFilter) -> Void
     var reset: () -> Void
     var cancel: () -> Void
@@ -202,26 +197,6 @@ struct MigraineFilterSheet: View {
         } else {
             workingFilter.requiredTriggers.insert(trigger)
         }
-    }
-}
-
-// MARK: - Previews
-private extension MigraineFilter {
-    static var previewValue: MigraineFilter {
-        var f = MigraineFilter()
-        // Example defaults for preview
-        f.minPainLevel = 3
-        f.searchText = ""
-        // Leave dateRange and requiredTriggers empty by default
-        return f
-    }
-
-    static var previewWithRange: MigraineFilter {
-        var f = MigraineFilter.previewValue
-        let now = Date()
-        let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: now) ?? now
-        f.dateRange = twoWeeksAgo...now
-        return f
     }
 }
 

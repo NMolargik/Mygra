@@ -33,6 +33,7 @@ struct OnboardingView: View {
                             .transition(viewModel.isMovingForward ? viewModel.forwardTransition : viewModel.backwardTransition)
                     }
                     .animation(.easeInOut(duration: 0.3), value: viewModel.currentPage)
+                    .padding(.bottom)
                     
                     Spacer()
                     
@@ -79,7 +80,7 @@ struct OnboardingView: View {
                             .disabled(!viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager))
                         }
                     }
-                    .padding()
+                    .padding(.horizontal)
                 }
             }
         }

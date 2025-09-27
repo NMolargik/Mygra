@@ -15,7 +15,7 @@ struct HealthDetailView: View {
         InfoDetailView(title: "Health") {
             VStack(alignment: .leading, spacing: 8) {
                 if let w = health.waterLiters {
-                    LabeledRow("Water") {
+                    MetricRowView("Water") {
                         HStack(spacing: 8) {
                             Group {
                                 if useMetricUnits {
@@ -36,7 +36,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let s = health.sleepHours {
-                    LabeledRow("Sleep") {
+                    MetricRowView("Sleep") {
                         HStack(spacing: 8) {
                             Text(String(format: "%.1f h", s))
                                 .font(.callout).bold()
@@ -50,7 +50,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let kcal = health.energyKilocalories {
-                    LabeledRow("Food") {
+                    MetricRowView("Food") {
                         HStack(spacing: 8) {
                             Text(String(format: "%.0f cal", kcal))
                                 .font(.callout).bold()
@@ -64,7 +64,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let caf = health.caffeineMg {
-                    LabeledRow("Caffeine") {
+                    MetricRowView("Caffeine") {
                         HStack(spacing: 8) {
                             Text(String(format: "%.0f mg", caf))
                                 .font(.callout).bold()
@@ -78,7 +78,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let steps = health.stepCount {
-                    LabeledRow("Steps") {
+                    MetricRowView("Steps") {
                         HStack(spacing: 8) {
                             Text("\(steps)")
                                 .font(.callout).bold()
@@ -92,7 +92,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let rhr = health.restingHeartRate {
-                    LabeledRow("Resting HR") {
+                    MetricRowView("Resting HR") {
                         HStack(spacing: 8) {
                             Text("\(rhr) bpm")
                                 .font(.callout).bold()
@@ -106,7 +106,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let ahr = health.activeHeartRate {
-                    LabeledRow("Active HR") {
+                    MetricRowView("Active HR") {
                         HStack(spacing: 8) {
                             Text("\(ahr) bpm")
                                 .font(.callout).bold()
@@ -120,7 +120,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let phase = health.menstrualPhase {
-                    LabeledRow("Menstrual Phase") {
+                    MetricRowView("Menstrual Phase") {
                         HStack(spacing: 8) {
                             Text(phase.rawValue)
                                 .font(.callout).bold()
@@ -134,7 +134,7 @@ struct HealthDetailView: View {
                     }
                 }
                 if let glucose = health.glucoseMgPerdL {
-                    LabeledRow("Glucose") {
+                    MetricRowView("Glucose") {
                         HStack(spacing: 8) {
                             Group {
                                 if useMetricUnits {
@@ -156,7 +156,7 @@ struct HealthDetailView: View {
                 }
                 if let spo2Fraction = health.bloodOxygenPercent {
                     let percent = spo2Fraction * 100.0
-                    LabeledRow("Oxygen Saturation") {
+                    MetricRowView("Oxygen Saturation") {
                         HStack(spacing: 8) {
                             Group {
                                 if percent.truncatingRemainder(dividingBy: 1) == 0 {

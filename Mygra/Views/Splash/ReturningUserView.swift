@@ -18,7 +18,7 @@ struct ReturningUserView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text("Welcome back!")
                     .font(.title2).bold()
-                Text("If you started on another Apple device, it can take up to 30 minutes for the initial sync to occur.")
+                Text("If you started on another Apple device, it can take up to 30 minutes for the initial sync to occur. Hang tight!")
                     .foregroundStyle(.secondary)
 
                 if isSyncing {

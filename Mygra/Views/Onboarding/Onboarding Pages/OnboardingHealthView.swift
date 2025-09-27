@@ -49,11 +49,8 @@ struct OnboardingHealthView: View {
             .buttonStyle(.borderedProminent)
             .tint(.red)
             .adaptiveGlass(tint: .red)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-            .padding(.horizontal)
             .shadow(radius: 6, y: 3)
-
-            Spacer(minLength: 8)
+            .padding(.horizontal)
         }
     }
 }

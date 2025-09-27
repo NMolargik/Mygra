@@ -50,140 +50,50 @@ struct ModifyMigraineSheetView: View {
         NavigationStack {
             Form {
                 Section("Duration") {
-                    DatePicker(
-                        "Start",
-                        selection: $editStartDate,
-                        in: Date.distantPast...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
+                    DurationSection(
+                        titleStart: "Start",
+                        startDate: $editStartDate,
+                        isOngoing: $editIsOngoing,
+                        endDate: $editEndDate,
+                        showLiveActivityNote: false
                     )
-                    Toggle("Ongoing", isOn: $editIsOngoing)
-                    if !editIsOngoing {
-                        DatePicker(
-                            "End",
-                            selection: $editEndDate,
-                            in: editStartDate...Date(),
-                            displayedComponents: [.date, .hourAndMinute]
-                        )
-                    }
                     if let err = modifyError {
                         Text(err).font(.footnote).foregroundStyle(.red)
                     }
                 }
 
                 Section("Intake") {
-                    // Display two-column summary mirroring the Entry screen, but sourced from the Migraine's saved snapshot.
-                    let h = migraine.health
-                    VStack {
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading, spacing: 8) {
-                                if let baseWater = h?.waterLiters {
-                                    let addedLiters = useMetricUnits ? (addWater / 1000.0) : (addWater / 33.814)
-                                    let litersTotal = baseWater + addedLiters
-                                    let text = useMetricUnits
-                                        ? String(format: "%.1f L", litersTotal)
-                                        : String("\(Int((litersTotal * 33.814).rounded())) fl oz")
-                                    Label(text, systemImage: "drop.fill")
-                                        .foregroundStyle((addWater > 0) ? .yellow : .secondary)
-                                }
-                                if let baseSleep = h?.sleepHours {
-                                    let total = baseSleep + addSleepHours
-                                    Label("\(String(format: "%.1f", total)) h sleep", systemImage: "bed.double.fill")
-                                        .foregroundStyle((addSleepHours > 0) ? .yellow : .secondary)
-                                }
-                                if let rhr = h?.restingHeartRate {
-                                    Label("\(rhr) bpm RHR", systemImage: "heart.fill")
-                                        .foregroundStyle(.secondary)
-                                }
-                                if let spo2 = h?.bloodOxygenPercent {
-                                    let percent = spo2 * 100.0
-                                    let s = percent.truncatingRemainder(dividingBy: 1) == 0 ? "\(Int(percent))% SpO₂" : String(format: "%.1f%% SpO₂", percent)
-                                    Label(s, systemImage: "lungs.fill")
-                                        .foregroundStyle(.secondary)
-                                }
+                    if let h = migraine.health {
+                        IntakeSection(
+                            baseHealth: h,
+                            isEditing: $isEditingIntake,
+                            addWater: $addWater,
+                            addCaffeine: $addCaffeine,
+                            addFoodKcal: $addFoodKcal,
+                            addSleepHours: $addSleepHours,
+                            useMetricUnits: useMetricUnits,
+                            waterRange: waterRange(useMetricUnits: useMetricUnits),
+                            waterStep: waterStep(useMetricUnits: useMetricUnits),
+                            waterDisplay: { waterDisplay($0, useMetricUnits: useMetricUnits) },
+                            isSaving: false,
+                            errorMessage: intakeErrorMessage,
+                            allAddsAreZero: allAddsAreZero,
+                            onConfirmAdd: {
+                                Haptics.success()
+                                withAnimation { isEditingIntake = false }
+                            },
+                            onCancel: {
+                                Haptics.lightImpact()
+                                addWater = 0
+                                addCaffeine = 0
+                                addFoodKcal = 0
+                                addSleepHours = 0
+                                intakeErrorMessage = nil
+                                withAnimation { isEditingIntake = false }
                             }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-
-                            VStack(alignment: .leading, spacing: 8) {
-                                if let baseKcal = h?.energyKilocalories {
-                                    let totalKcal = baseKcal + addFoodKcal
-                                    let text: String = {
-                                        if useMetricUnits {
-                                            let kJ = (totalKcal * 4.184).rounded()
-                                            return "\(Int(kJ)) kJ"
-                                        } else {
-                                            return "\(Int(totalKcal)) kcal"
-                                        }
-                                    }()
-                                    Label(text, systemImage: "fork.knife")
-                                        .foregroundStyle((addFoodKcal > 0) ? .yellow : .secondary)
-                                }
-                                if let baseCaf = h?.caffeineMg {
-                                    let totalMgRounded = (baseCaf + addCaffeine).rounded()
-                                    Label("\(Int(totalMgRounded)) mg caffeine", systemImage: "cup.and.saucer.fill")
-                                        .foregroundStyle((addCaffeine > 0) ? .yellow : .secondary)
-                                }
-                                if let steps = h?.stepCount {
-                                    Label("\(steps) steps", systemImage: "figure.walk")
-                                        .foregroundStyle(.secondary)
-                                }
-                                if let glucose = h?.glucoseMgPerdL {
-                                    Label("\(Int(glucose)) mg/dL", systemImage: "syringe")
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-
-                        // Intake editor toggle + editor
-                        if !isEditingIntake {
-                            HStack {
-                                Spacer()
-                                Button("Edit Intake Values") {
-                                    Haptics.lightImpact()
-                                    withAnimation { isEditingIntake = true }
-                                }
-                                .tint(.blue)
-                                Spacer()
-                            }
-                            .padding([.top, .horizontal])
-                        }
-
-                        if isEditingIntake {
-                            IntakeEditorView(
-                                addWater: $addWater,
-                                addCaffeine: $addCaffeine,
-                                addFood: $addFoodKcal,
-                                addSleepHours: $addSleepHours,
-                                useMetricUnits: useMetricUnits,
-                                waterRange: waterRange(useMetricUnits: useMetricUnits),
-                                waterStep: waterStep(useMetricUnits: useMetricUnits),
-                                waterDisplay: { waterDisplay($0, useMetricUnits: useMetricUnits) },
-                                isSaving: false,
-                                errorMessage: intakeErrorMessage,
-                                allAddsAreZero: allAddsAreZero,
-                                onAdd: {
-                                    // Stage values only; do not write to HealthKit here.
-                                    Haptics.success()
-                                    withAnimation { isEditingIntake = false }
-                                },
-                                onCancel: {
-                                    Haptics.lightImpact()
-                                    addWater = 0
-                                    addCaffeine = 0
-                                    addFoodKcal = 0
-                                    addSleepHours = 0
-                                    intakeErrorMessage = nil
-                                    withAnimation { isEditingIntake = false }
-                                }
-                            )
-                            .transition(.asymmetric(
-                                insertion: .scale,
-                                removal: .scale
-                            ))
-                            .animation(.snappy(duration: 0.25), value: isEditingIntake)
-                        }
+                        )
+                    } else {
+                        Text("No health data was captured with this migraine.").foregroundStyle(.secondary)
                     }
                 }
                 

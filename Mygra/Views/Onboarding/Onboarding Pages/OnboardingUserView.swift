@@ -11,7 +11,6 @@ struct OnboardingUserView: View {
     @Bindable var viewModel: OnboardingView.ViewModel
     
     @State private var showingEdit = false
-    @GestureState private var dragOffset: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -56,29 +55,25 @@ struct OnboardingUserView: View {
                     
                     Spacer(minLength: 12)
                     
-                    VStack(spacing: 4) {
-                        Image(systemName: "chevron.up")
-                            .font(.title2)
-                            .foregroundColor(.orange)
-                            .shadow(radius: 2)
-                        SparkleText(text: "Swipe Up To Continue")
-                            .font(.headline)
+                    Button(action: {
+                        showingEdit = true
+                    }) {
+                        HStack(spacing: 10) {
+                            Image(systemName: "person.fill")
+                                .imageScale(.large)
+                            Text("Continue")
+                                .font(.title3).bold()
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
                     }
-                    .padding(.bottom, 20)
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+                    .adaptiveGlass(tint: .red)
+                    .padding(.horizontal)
+                    .shadow(radius: 6, y: 3)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .offset(y: dragOffset)
-                .gesture(
-                    DragGesture()
-                        .updating($dragOffset) { value, state, _ in
-                            if value.translation.height < 0 { state = value.translation.height }
-                        }
-                        .onEnded { value in
-                            if value.translation.height < -200 && !showingEdit {
-                                showingEdit = true
-                            }
-                        }
-                )
             }
         }
         .animation(.spring(), value: showingEdit)

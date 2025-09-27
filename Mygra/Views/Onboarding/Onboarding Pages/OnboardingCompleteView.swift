@@ -23,7 +23,7 @@ struct OnboardingCompleteView: View {
                     .font(.largeTitle).bold()
                     .frame(maxWidth: .infinity, alignment: .center)
                 
-                Text("You’re set. Here’s what Mygra can do for you:")
+                Text("Here's what you've got to look forward to.")
                     .font(.callout)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -32,7 +32,8 @@ struct OnboardingCompleteView: View {
 
             // Feature cards
             VStack(spacing: 14) {
-                FeatureRowView(
+                DetailRowView(
+                    style: .feature,
                     systemImage: "brain.head.profile.fill",
                     title: "Track your migraines.",
                     tint: .blue
@@ -42,7 +43,8 @@ struct OnboardingCompleteView: View {
                 .animation(.spring(response: 1.2, dampingFraction: 0.85), value: shownRows[0])
                 .symbolEffect(.bounce, value: shownRows[0])
 
-                FeatureRowView(
+                DetailRowView(
+                    style: .feature,
                     systemImage: "lightbulb.max.fill",
                     title: "Get intelligent insights.",
                     tint: .yellow
@@ -52,7 +54,8 @@ struct OnboardingCompleteView: View {
                 .animation(.spring(response: 1.2, dampingFraction: 0.85), value: shownRows[1])
                 .symbolEffect(.bounce, value: shownRows[1])
 
-                FeatureRowView(
+                DetailRowView(
+                    style: .feature,
                     systemImage: "chart.xyaxis.line",
                     title: "View trends and likely migraine causes.",
                     tint: .green
@@ -62,9 +65,10 @@ struct OnboardingCompleteView: View {
                 .animation(.spring(response: 1.2, dampingFraction: 0.85), value: shownRows[2])
                 .symbolEffect(.bounce, value: shownRows[2])
 
-                FeatureRowView(
+                DetailRowView(
+                    style: .feature,
                     systemImage: "icloud.fill",
-                    title: "All of your data syncs automatically wherever you're signed into iCloud!",
+                    title: "All of your data syncs to iPhones and iPads signed into iCloud!",
                     tint: .secondary
                 )
                 .opacity(shownRows[3] ? 1 : 0)
@@ -75,8 +79,7 @@ struct OnboardingCompleteView: View {
             .padding(.horizontal)
 
             Spacer(minLength: 12)
-
-            // Primary action
+            
             Button(action: finishOnboarding) {
                 HStack(spacing: 10) {
                     Image(systemName: "checkmark.circle.fill")
@@ -91,14 +94,11 @@ struct OnboardingCompleteView: View {
             .buttonStyle(.borderedProminent)
             .tint(.red)
             .adaptiveGlass(tint: .red)
-            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
             .padding(.horizontal)
             .opacity(showButton ? 1 : 0)
             .offset(y: showButton ? 0 : 12)
             .animation(.spring(response: 1.2, dampingFraction: 0.85), value: showButton)
             .shadow(radius: 8, y: 3)
-
-            Spacer(minLength: 8)
         }
         .task {
             for i in 0..<shownRows.count {

@@ -37,5 +37,15 @@ extension MigraineListView {
             }
             return text
         }
+        
+        func triggerSummary(for set: Set<MigraineTrigger>) -> String {
+            let names = Array(set).map { $0.displayName }.sorted()
+            let shown = names.prefix(3)
+            if names.count <= 3 {
+                return "Triggers: " + shown.joined(separator: ", ")
+            } else {
+                return "Triggers: " + shown.joined(separator: ", ") + " +\(names.count - 3)"
+            }
+        }
     }
 }

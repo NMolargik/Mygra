@@ -51,7 +51,8 @@ struct SplashView: View {
                 .font(.headline)
                 .opacity(viewModel.subtitleVisible ? 1 : 0)
                 .offset(y: viewModel.subtitleVisible ? 0 : 30)
-                .animation(.easeOut(duration: 0.6).delay(1.1), value: viewModel.subtitleVisible)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(1.1), value: viewModel.subtitleVisible)
 
             Button("Get Started") {
                 Haptics.lightImpact()
@@ -60,7 +61,7 @@ struct SplashView: View {
             }
             .foregroundStyle(.white)
             .buttonStyle(.borderedProminent)
-            .padding()
+            .padding(5)
             .font(.title)
             .bold()
             .tint(.red)
@@ -76,6 +77,7 @@ struct SplashView: View {
                 showReturningUserModal = true
                 Task { await attemptCloudRefresh() }
             }
+            .foregroundStyle(.white)
             .padding(8)
             .bold()
             .adaptiveGlass(tint: .gray)

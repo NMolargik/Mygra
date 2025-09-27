@@ -267,9 +267,9 @@ struct MigraineRowView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
-                Capsule(style: .continuous).fill(Color.red.opacity(0.15))
+                Capsule(style: .continuous).fill(Color.blue.opacity(0.15))
             )
-            .foregroundStyle(.red)
+            .foregroundStyle(.blue)
             .accessibilityLabel("Ongoing duration \(liveDurationString(now: now))")
         }
     }
@@ -280,6 +280,7 @@ struct MigraineRowView: View {
         migraine: Migraine(pinned: true, startDate: Date.now, painLevel: 7, stressLevel: 6),
         viewModel: MigraineListView.ViewModel()
     )
+    .frame(height: 60)
 }
 
 #Preview("Ongoing Migraine") {
@@ -293,4 +294,5 @@ struct MigraineRowView: View {
             triggers: []),
         viewModel: MigraineListView.ViewModel()
     )
+    .frame(height: 60)
 }
