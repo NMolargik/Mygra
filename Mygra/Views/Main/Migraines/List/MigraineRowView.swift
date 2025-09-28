@@ -60,18 +60,14 @@ struct MigraineRowView: View {
                     // Localized in Localizable.xcstrings:
                     // "migraine_pain" = "Pain";
                     // "migraine_stress" = "Stress";
-                    HStack(spacing: 8) {
+                    HStack(spacing: 4) {
                         metricPill(
-                            label: "Pain",
                             value: "\(migraine.painLevel)",
                             tint: migraine.severity.color,
-                            showTextLabel: !isRegularWidth // hide label on iPad/regular width
                         )
                         metricPill(
-                            label: "Stress",
                             value: "\(migraine.stressLevel)",
                             tint: .purple,
-                            showTextLabel: !isRegularWidth // hide label on iPad/regular width
                         )
                     }
                 }
@@ -105,6 +101,7 @@ struct MigraineRowView: View {
                             .truncationMode(.tail)
                     }
                 }
+                .frame(height: 30)
             }
         }
         .padding(.vertical, 8)
@@ -213,14 +210,9 @@ struct MigraineRowView: View {
 
     // MARK: - UI helpers
 
-    private func metricPill(label: String, value: String, tint: Color, showTextLabel: Bool = true) -> some View {
+    private func metricPill(value: String, tint: Color) -> some View {
         HStack(spacing: 4) {
-            if showTextLabel {
-                Text(label)
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-            Text(value)
+            Text("\(value) / 10")
                 .font(.caption).bold()
                 .monospacedDigit()
                 .foregroundStyle(tint)
