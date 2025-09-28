@@ -23,7 +23,7 @@ struct DurationSection: View {
         )
         Toggle("Ongoing", isOn: $isOngoing)
         if !isOngoing {
-            DatePicker("End", selection: $endDate, in: startDate...Date(), displayedComponents: [.date, .hourAndMinute])
+            DatePicker("Ended", selection: $endDate, in: startDate...Date(), displayedComponents: [.date, .hourAndMinute])
         } else if showLiveActivityNote {
             Text("We'll start a neat little Live Activity to help you track duration!")
                 .foregroundStyle(.gray)
