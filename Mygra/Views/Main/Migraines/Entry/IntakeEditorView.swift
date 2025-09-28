@@ -8,17 +8,13 @@
 import SwiftUI
 
 struct IntakeEditorView: View {
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
+
     @Binding var addWater: Double
     @Binding var addCaffeine: Double
     @Binding var addFood: Double
     @Binding var addSleepHours: Double
-
-    // Display/config
-    var useMetricUnits: Bool
-    var waterRange: ClosedRange<Double>
-    var waterStep: Double
-    var waterDisplay: (Double) -> String
-
+    
     // Status/flags
     var isSaving: Bool
     var errorMessage: String?
@@ -46,6 +42,18 @@ struct IntakeEditorView: View {
         )
     }
 
+    // Display helper for water amount
+    private func waterDisplay(_ liters: Double) -> String {
+        if useMetricUnits {
+            // Show liters to one decimal place
+            return String(format: "+%.1f L", liters)
+        } else {
+            // Convert liters to US fluid ounces
+            let ounces = liters * 33.814
+            return "+\(Int(ounces.rounded())) oz"
+        }
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             if let msg = errorMessage {
@@ -60,9 +68,9 @@ struct IntakeEditorView: View {
                     Image(systemName: "drop.fill").foregroundStyle(.blue.gradient)
                         .frame(width: 30)
                     Slider(
-                        value: snappingBinding(for: $addWater, step: waterStep, in: waterRange),
-                        in: waterRange,
-                        step: waterStep
+                        value: snappingBinding(for: $addWater, step: useMetricUnits ? 0.1 : (8.0 / 33.814), in: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814)),
+                        in: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
+                        step: useMetricUnits ? 0.1 : (8.0 / 33.814)
                     )
                         .tint(.blue)
                         .onChange(of: addWater) { _, _ in sliderTick(\.waterHapticGate) }
@@ -232,12 +240,6 @@ private struct AmountPill: View {
                 addCaffeine: $addCaffeine,
                 addFood: $addFood,
                 addSleepHours: $addSleepHours,
-                // Display/config
-                useMetricUnits: false,
-                waterRange: 0...128,
-                waterStep: 1,
-                waterDisplay: { value in "+\(Int(value)) oz" },
-                // Status/flags
                 isSaving: false,
                 errorMessage: nil,
                 allAddsAreZero: false,
@@ -264,12 +266,6 @@ private struct AmountPill: View {
                 addCaffeine: $addCaffeine,
                 addFood: $addFood,
                 addSleepHours: $addSleepHours,
-                // Display/config
-                useMetricUnits: true,
-                waterRange: 0...3000,
-                waterStep: 50,
-                waterDisplay: { value in "+\(Int(value)) mL" },
-                // Status/flags
                 isSaving: false,
                 errorMessage: "Example error",
                 allAddsAreZero: false,

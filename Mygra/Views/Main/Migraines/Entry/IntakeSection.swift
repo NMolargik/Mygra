@@ -8,16 +8,14 @@
 import SwiftUI
 
 struct IntakeSection: View {
+    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
+
     let baseHealth: HealthData
     @Binding var isEditing: Bool
     @Binding var addWater: Double
     @Binding var addCaffeine: Double
     @Binding var addFoodKcal: Double
     @Binding var addSleepHours: Double
-    let useMetricUnits: Bool
-    let waterRange: ClosedRange<Double>
-    let waterStep: Double
-    let waterDisplay: (Double) -> String
     let isSaving: Bool
     let errorMessage: String?
     let allAddsAreZero: Bool
@@ -30,8 +28,8 @@ struct IntakeSection: View {
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 8) {
                     if let baseWater = baseHealth.waterLiters {
-                        let addedLiters = useMetricUnits ? (addWater / 1000.0) : (addWater / 33.814)
-                        let litersTotal = baseWater + addedLiters
+                        // addWater is stored in liters regardless of unit preference; only convert for display
+                        let litersTotal = baseWater + addWater
                         let text = useMetricUnits
                             ? String(format: "%.1f L", litersTotal)
                             : String("\(Int((litersTotal * 33.814).rounded())) fl oz")
@@ -112,10 +110,6 @@ struct IntakeSection: View {
                     addCaffeine: $addCaffeine,
                     addFood: $addFoodKcal,
                     addSleepHours: $addSleepHours,
-                    useMetricUnits: useMetricUnits,
-                    waterRange: waterRange,
-                    waterStep: waterStep,
-                    waterDisplay: waterDisplay,
                     isSaving: isSaving,
                     errorMessage: errorMessage,
                     allAddsAreZero: allAddsAreZero,
@@ -140,3 +134,4 @@ struct IntakeSection: View {
         }
     }
 }
+

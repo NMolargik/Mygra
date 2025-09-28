@@ -211,17 +211,12 @@ extension MigraineEntryView {
             return all.filter { $0.displayName.lowercased().contains(lower) }
         }
 
-        // MARK: - Intake sliders
-
-        var waterRangeMetric: ClosedRange<Double> { 0.0...5.0 }
-        var waterRangeImperial: ClosedRange<Double> { 0.0...170.0 }
-
         func waterRange(useMetricUnits: Bool) -> ClosedRange<Double> {
-            useMetricUnits ? waterRangeMetric : waterRangeImperial
+            useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814)
         }
 
         func waterStep(useMetricUnits: Bool) -> Double {
-            useMetricUnits ? 0.1 : 1.0
+            return useMetricUnits ? 0.1 : (8.0 / 33.814)
         }
 
         func waterDisplay(_ value: Double, useMetricUnits: Bool) -> String {
@@ -272,9 +267,8 @@ extension MigraineEntryView {
             do {
                 // Water
                 if addWater > 0 {
-                    // Metric slider stages mL; imperial stages fl oz
-                    let litersRaw = useMetricUnits ? (addWater / 1000.0) : (addWater / 33.814)
-                    let liters = (litersRaw * 1000).rounded() / 1000
+                    // addWater is already stored in liters; round to nearest milliliter for HealthKit precision
+                    let liters = (addWater * 1000).rounded() / 1000
                     try await healthManager.saveWater(liters: liters)
                     current.waterLiters = (current.waterLiters ?? 0) + liters
                 }
@@ -442,3 +436,4 @@ extension MigraineEntryView {
         }
     }
 }
+

@@ -73,7 +73,7 @@ struct MigraineRowView: View {
                 }
 
                 // Secondary line: triggers as dots + note
-                HStack(spacing: 8) {
+                HStack(alignment: .center, spacing: 8) {
                     if migraine.pinned {
                         // Localized in Localizable.xcstrings:
                         // "migraine_pinned" = "Pinned";
@@ -84,7 +84,7 @@ struct MigraineRowView: View {
                             Image(systemName: "pin.fill")
                         }
                         .labelStyle(.iconOnly)
-                        .padding(.horizontal, 8)
+                        .padding(.trailing, 8)
                         .padding(.vertical, 4)
                         .foregroundStyle(.yellow)
                         .accessibilityLabel(Text("Pinned"))
@@ -94,14 +94,14 @@ struct MigraineRowView: View {
                         triggerDots(count: triggerCount)
                     }
                     if let note = migraine.note, !note.isEmpty {
-                        Text("• \(note)")
+                        Text("\"\(note)\"")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
                             .truncationMode(.tail)
                     }
                 }
-                .frame(height: 30)
+                .frame(height: 30, alignment: .center)
             }
         }
         .padding(.vertical, 8)
@@ -288,3 +288,4 @@ struct MigraineRowView: View {
     )
     .frame(height: 60)
 }
+

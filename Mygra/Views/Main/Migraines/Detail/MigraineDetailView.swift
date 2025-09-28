@@ -162,9 +162,8 @@ struct MigraineDetailView: View {
                     Task {
                         do {
                             if addedWater > 0 {
-                                // Metric slider stages mL; imperial stages fl oz
-                                let litersRaw = useMetricUnits ? (addedWater / 1000.0) : (addedWater / 33.814)
-                                let liters = (litersRaw * 1000).rounded() / 1000 // keep to milliliter precision
+                                // addWater is stored in liters; round to nearest milliliter for HealthKit
+                                let liters = (addedWater * 1000).rounded() / 1000
                                 try await healthManager.saveWater(liters: liters, on: startDate)
                             }
                             if addedCaffeine > 0 {
@@ -216,7 +215,7 @@ struct MigraineDetailView: View {
                             }
                             // Present a transient alert via print here; UI alert handled below
                             print("[Detail] Skipped attaching weather for past-dated migraine.")
-                            pendingWeatherAlertMessage = "Weather isn't attached for past dates. We only attach current conditions for migraines started today."
+                            pendingWeatherAlertMessage = "Weather isn't attached for past start dates."
                             showPendingWeatherAlert = true
                         }
                     }

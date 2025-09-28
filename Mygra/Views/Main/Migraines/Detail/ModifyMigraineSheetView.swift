@@ -71,10 +71,6 @@ struct ModifyMigraineSheetView: View {
                             addCaffeine: $addCaffeine,
                             addFoodKcal: $addFoodKcal,
                             addSleepHours: $addSleepHours,
-                            useMetricUnits: useMetricUnits,
-                            waterRange: waterRange(useMetricUnits: useMetricUnits),
-                            waterStep: waterStep(useMetricUnits: useMetricUnits),
-                            waterDisplay: { waterDisplay($0, useMetricUnits: useMetricUnits) },
                             isSaving: false,
                             errorMessage: intakeErrorMessage,
                             allAddsAreZero: allAddsAreZero,
@@ -203,11 +199,11 @@ struct ModifyMigraineSheetView: View {
     }
 
     private func waterRange(useMetricUnits: Bool) -> ClosedRange<Double> {
-        useMetricUnits ? (0...3000) : (0...128)
+        useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814)
     }
 
     private func waterStep(useMetricUnits: Bool) -> Double {
-        useMetricUnits ? 50 : 1
+        useMetricUnits ? 0.1 : (8.0 / 33.814)
     }
 
     private func waterDisplay(_ value: Double, useMetricUnits: Bool) -> String {
@@ -247,3 +243,4 @@ struct ModifyMigraineSheetView: View {
 //        print("Preview Save -> start: \(startDate), end: \(String(describing: endDate)), pain: \(painLevel), stress: \(stressLevel), triggers: \(triggers))")
 //    })
 //}
+

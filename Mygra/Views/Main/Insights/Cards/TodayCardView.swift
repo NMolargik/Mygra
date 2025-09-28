@@ -136,17 +136,6 @@ struct TodayCardView: View {
                             addCaffeine: $addCaffeine,
                             addFood: $addFood,
                             addSleepHours: $addSleepHours,
-                            useMetricUnits: useMetricUnits,
-                            waterRange: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
-                            waterStep: 0.1,
-                            waterDisplay: { liters in
-                                if useMetricUnits {
-                                    return String(format: "+%.1f L", liters)
-                                } else {
-                                    let oz = liters * 33.814
-                                    return String(format: "+%.0f oz", oz)
-                                }
-                            },
                             isSaving: isSavingIntake,
                             errorMessage: intakeError,
                             allAddsAreZero: allIntakeAddsAreZero,
@@ -286,3 +275,4 @@ private struct TodayCardPreviewWrapper: View {
         allIntakeAddsAreZero: false
     )
 }
+
