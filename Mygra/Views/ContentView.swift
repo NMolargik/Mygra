@@ -115,6 +115,12 @@ struct ContentView: View {
                 }
             }
         }
+        .onChange(of: userManager.currentUser != nil) { hasUser in
+            guard hasUser else { return }
+            Task {
+                await enterMainEnsuringManagers()
+            }
+        }
     }
     
     private func prepareApp() async {
@@ -127,28 +133,7 @@ struct ContentView: View {
         }
         
         if userManager.currentUser != nil {
-            // Perform any data refreshes before transitioning
-            await healthManager.refreshLatestForToday()
-            
-            await MainActor.run {
-                if self.migraineManager == nil {
-                    self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
-                }
-                if self.weatherManager.locationManager == nil {
-                    self.weatherManager.setLocationProvider(LocationManager())
-                }
-                if self.insightManager == nil {
-                    self.insightManager = InsightManager(
-                        userManager: userManager,
-                        migraineManager: migraineManager!,
-                        weatherManager: weatherManager,
-                        healthManager: healthManager
-                    )
-                }
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    viewModel.appStage = .main
-                }
-            }
+            await enterMainEnsuringManagers()
         } else {
             await MainActor.run {
                 withAnimation(.easeInOut(duration: 0.3)) {
@@ -170,7 +155,11 @@ struct ContentView: View {
             return
         }
         
-        // Initialize managers and move to main, mirroring prepareApp happy path
+        await enterMainEnsuringManagers()
+    }
+    
+    private func enterMainEnsuringManagers() async {
+        // Perform any data refreshes before transitioning
         await healthManager.refreshLatestForToday()
         
         await MainActor.run {
@@ -180,17 +169,18 @@ struct ContentView: View {
             if self.weatherManager.locationManager == nil {
                 self.weatherManager.setLocationProvider(LocationManager())
             }
-            if self.insightManager == nil {
+            if self.insightManager == nil, let migraineManager = self.migraineManager {
                 self.insightManager = InsightManager(
                     userManager: userManager,
-                    migraineManager: migraineManager!,
+                    migraineManager: migraineManager,
                     weatherManager: weatherManager,
                     healthManager: healthManager
                 )
             }
-            
-            withAnimation(.easeInOut(duration: 0.3)) {
-                viewModel.appStage = .main
+            if viewModel.appStage != .main {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    viewModel.appStage = .main
+                }
             }
         }
     }
@@ -221,3 +211,4 @@ struct ContentView: View {
         .environment(previewWeatherManager)
         .environment(previewNotificationManager)
 }
+
