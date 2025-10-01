@@ -20,70 +20,81 @@ struct SplashView: View {
     @State private var lastSyncError: String? = nil
 
     var body: some View {
-        VStack() {
-            Text("Mygra")
-                .font(.system(size: 60))
+        ZStack {
+            LinearGradient(
+                colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
+            )
+            .ignoresSafeArea()
+            
+            VStack() {
+                Text("Mygra")
+                    .font(.system(size: 60))
+                    .foregroundStyle(.white)
+                    .bold()
+                    .shadow(radius: 5, x: 1, y: -1)
+                    .opacity(viewModel.titleVisible ? 1 : 0)
+                    .scaleEffect(viewModel.titleVisible ? 1 : 0.7)
+                    .animation(.easeOut(duration: 0.6), value: viewModel.titleVisible)
+                    .padding(.bottom, 5)
+                
+                Text("Your Intelligent Migraine Journal")
+                    .font(.title3)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.secondary)
+                    .opacity(viewModel.subtitleVisible ? 1 : 0)
+                    .offset(y: viewModel.subtitleVisible ? 0 : 20)
+                    .animation(.easeOut(duration: 0.6).delay(0.8), value: viewModel.subtitleVisible)
+                
+                Spacer()
+                
+                Image("mygra_head")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxWidth: 350)
+                    .opacity(viewModel.subtitleVisible ? 1 : 0)
+                    .animation(.easeOut(duration: 0.6).delay(1.1), value: viewModel.subtitleVisible)
+                
+                Spacer()
+                
+                Text("Oh! You're new here.")
+                    .font(.headline)
+                    .opacity(viewModel.subtitleVisible ? 1 : 0)
+                    .offset(y: viewModel.subtitleVisible ? 0 : 30)
+                    .transition(.move(edge: .top).combined(with: .opacity))
+                    .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(1.1), value: viewModel.subtitleVisible)
+                
+                Button("Get Started") {
+                    Haptics.lightImpact()
+                    Haptics.success()
+                    proceedForward()
+                }
+                .foregroundStyle(.white)
+                .font(.title)
                 .bold()
-                .opacity(viewModel.titleVisible ? 1 : 0)
-                .scaleEffect(viewModel.titleVisible ? 1 : 0.7)
-                .animation(.easeOut(duration: 0.6), value: viewModel.titleVisible)
-                .padding(.bottom, 5)
-
-            Text("Migraines tracked, insights generated!")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .opacity(viewModel.subtitleVisible ? 1 : 0)
-                .offset(y: viewModel.subtitleVisible ? 0 : 20)
-                .animation(.easeOut(duration: 0.6).delay(0.8), value: viewModel.subtitleVisible)
-
-            Spacer()
-            
-            Image("mygra_head")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 250)
-                .opacity(viewModel.subtitleVisible ? 1 : 0)
-                .animation(.easeOut(duration: 0.6).delay(1.1), value: viewModel.subtitleVisible)
-            
-            Spacer()
-            
-            Text("Oh! You're new here.")
-                .font(.headline)
-                .opacity(viewModel.subtitleVisible ? 1 : 0)
-                .offset(y: viewModel.subtitleVisible ? 0 : 30)
-                .transition(.move(edge: .top).combined(with: .opacity))
-                .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(1.1), value: viewModel.subtitleVisible)
-
-            Button("Get Started") {
-                Haptics.lightImpact()
-                Haptics.success()
-                proceedForward()
+                .padding()
+                .adaptiveGlass(tint: .mygraPurple)
+                .shadow(radius: 8, y: 3)
+                .opacity(viewModel.buttonVisible ? 1 : 0)
+                .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
+                .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
+                
+                Button("No, I'm not new!") {
+                    Haptics.lightImpact()
+                    lastSyncError = nil
+                    showReturningUserModal = true
+                    Task { await attemptCloudRefresh() }
+                }
+                .foregroundStyle(.white)
+                .padding(8)
+                .bold()
+                .adaptiveGlass(tint: .gray)
+                .opacity(viewModel.buttonVisible ? 1 : 0)
+                .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
+                .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
             }
-            .foregroundStyle(.white)
-            .buttonStyle(.borderedProminent)
-            .padding(5)
-            .font(.title)
-            .bold()
-            .tint(.red)
-            .adaptiveGlass(tint: .red)
-            .shadow(radius: 8, y: 3)
-            .opacity(viewModel.buttonVisible ? 1 : 0)
-            .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
-            .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
-            
-            Button("No, I'm not new!") {
-                Haptics.lightImpact()
-                lastSyncError = nil
-                showReturningUserModal = true
-                Task { await attemptCloudRefresh() }
-            }
-            .foregroundStyle(.white)
-            .padding(8)
-            .bold()
-            .adaptiveGlass(tint: .gray)
-            .opacity(viewModel.buttonVisible ? 1 : 0)
-            .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
-            .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
+            .padding(.top, 80)
         }
         .onAppear {
             viewModel.activateAnimation()
@@ -103,7 +114,6 @@ struct SplashView: View {
             )
             .presentationDetents([.medium])
         }
-        .padding(.top, 80)
     }
 
     @MainActor

@@ -18,6 +18,9 @@ struct OnboardingNotificationView: View {
             VStack(spacing: 8) {
                 Text("Notifications")
                     .font(.largeTitle).bold()
+                    .foregroundStyle(.white)
+                    .shadow(radius: 5, x: 1, y: -1)
+                
                 Text("Allow notifications so Mygra can remind you to log migraines and alert you about weather conditions that might trigger them.")
                     .font(.callout)
                     .multilineTextAlignment(.center)
@@ -29,7 +32,7 @@ struct OnboardingNotificationView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 180, height: 180)
-                .foregroundStyle(.green)
+                .foregroundStyle(LinearGradient(colors: [.red, .red.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .shadow(radius: 8)
                 .padding(.vertical, 8)
 
@@ -53,13 +56,12 @@ struct OnboardingNotificationView: View {
                         .font(.title3).bold()
                 }
                 .frame(maxWidth: .infinity)
+                .foregroundStyle(.white)
                 .padding(.vertical, 14)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .adaptiveGlass(tint: .red)
-            .padding(.horizontal)
+            .adaptiveGlass(tint: .mygraPurple)
             .shadow(radius: 6, y: 3)
+            .padding(.horizontal)
         }
     }
 }

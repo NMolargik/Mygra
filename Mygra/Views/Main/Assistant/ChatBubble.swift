@@ -20,7 +20,7 @@ struct ChatBubble: View {
                 .padding(.vertical, 10)
                 .background(
                     RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(isUser ? Color.accentColor.opacity(0.18) : Color(uiColor: .secondarySystemBackground))
+                        .fill(isUser ? Color.mygraBlue.opacity(0.4) : Color(uiColor: .secondarySystemBackground))
                 )
                 .foregroundStyle(.primary)
                 .textSelection(.enabled)
@@ -32,5 +32,9 @@ struct ChatBubble: View {
 }
 
 #Preview {
-    ChatBubble(message: ChatMessage(role: .system, content: "Hey, man how are things going?"))
+    VStack {
+        ChatBubble(message: ChatMessage(role: .system, content: "Hey, man how are things going?"))
+        
+        ChatBubble(message: ChatMessage(role: .user, content: "Hey, man how are things going?"))
+    }
 }

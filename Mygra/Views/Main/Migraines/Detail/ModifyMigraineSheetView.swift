@@ -186,7 +186,7 @@ struct ModifyMigraineSheetView: View {
                         Haptics.lightImpact()
                         validateAndSave()
                     }
-                    .tint(.blue)
+                    .tint(.mygraBlue)
                 }
             }
         }

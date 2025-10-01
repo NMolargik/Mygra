@@ -65,7 +65,7 @@ struct MigraineListView: View {
                                     Label("Clear Filters", systemImage: "xmark.circle")
                                 }
                                 .buttonStyle(.bordered)
-                                .tint(.blue)
+                                .tint(.mygraBlue)
                                 .accessibilityIdentifier("emptyClearFiltersButton")
                             }
                             .padding(.top, 4)
@@ -174,7 +174,7 @@ struct MigraineListView: View {
                                         Label("Clear Filters", systemImage: "xmark.circle")
                                     }
                                     .buttonStyle(.bordered)
-                                    .tint(.blue)
+                                    .tint(.mygraBlue)
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerClearFiltersButton")
                                     
@@ -185,6 +185,7 @@ struct MigraineListView: View {
                                         Label("Adjust", systemImage: "slider.horizontal.3")
                                     }
                                     .buttonStyle(.bordered)
+                                    .tint(.green)
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerAdjustFiltersButton")
                                 }

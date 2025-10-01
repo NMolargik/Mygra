@@ -108,15 +108,11 @@ struct MigraineEntryView: View {
                             errorMessage: viewModel.healthEditErrorMessage,
                             allAddsAreZero: viewModel.allAddsAreZero,
                             onConfirmAdd: {
-                                Task { await viewModel.saveHealthEdits(using: healthManager, useMetricUnits: useMetricUnits) }
+                                Haptics.success()
+                                withAnimation { viewModel.isEditingHealthValues = false }
                             },
                             onCancel: {
                                 Haptics.lightImpact()
-                                viewModel.addWater = 0
-                                viewModel.addFood = 0
-                                viewModel.addCaffeine = 0
-                                viewModel.addSleepHours = 0
-                                viewModel.healthEditErrorMessage = nil
                                 withAnimation { viewModel.isEditingHealthValues = false }
                             }
                         )
@@ -165,6 +161,7 @@ struct MigraineEntryView: View {
                             Text("•")
                                 .accessibilityHidden(true)
                             Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+                                .foregroundStyle(.mygraPurple)
                             
                             Spacer()
                         }
@@ -391,6 +388,12 @@ struct MigraineEntryView: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") {
                         Haptics.lightImpact()
+                        // Clear any staged intake values when abandoning the entry entirely
+                        viewModel.addWater = 0
+                        viewModel.addFood = 0
+                        viewModel.addCaffeine = 0
+                        viewModel.addSleepHours = 0
+                        viewModel.healthEditErrorMessage = nil
                         dismiss()
                     }
                     .foregroundStyle(.red)
@@ -409,7 +412,7 @@ struct MigraineEntryView: View {
                             onMigraineSaved(migraine, nil)
                         }
                     }
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.mygraBlue)
                 }
             }
         }

@@ -8,10 +8,37 @@
 import Foundation
 import HealthKit
 
-actor HealthQueryClient {
-    let store: HealthManager.Store
+protocol HealthStore: Sendable {
+    static func isHealthDataAvailable() -> Bool
+    func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws
+    func statusForAuthorizationRequest(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws -> HKAuthorizationRequestStatus
+    func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
+    func execute(_ query: HKQuery)
+    func save(_ sample: HKSample) async throws
+}
 
-    init(store: HealthManager.Store) {
+// LiveHealthStore is used across actors via HealthQueryClient; mark as unchecked Sendable.
+// HKHealthStore is internally thread-safe for our usage patterns.
+struct LiveHealthStore: HealthStore, @unchecked Sendable {
+    static func isHealthDataAvailable() -> Bool { HKHealthStore.isHealthDataAvailable() }
+    private let inner = HKHealthStore()
+    func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws {
+        try await inner.requestAuthorization(toShare: typesToShare, read: typesToRead)
+    }
+    func statusForAuthorizationRequest(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws -> HKAuthorizationRequestStatus {
+        try await inner.statusForAuthorizationRequest(toShare: typesToShare, read: typesToRead)
+    }
+    func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus {
+        inner.authorizationStatus(for: type)
+    }
+    func execute(_ query: HKQuery) { inner.execute(query) }
+    func save(_ sample: HKSample) async throws { try await inner.save(sample) }
+}
+
+actor HealthQueryClient {
+    let store: HealthStore
+
+    init(store: HealthStore) {
         self.store = store
     }
 
@@ -125,46 +152,20 @@ actor HealthQueryClient {
 @Observable
 final class HealthManager {
 
-    // MARK: - Testable abstraction over HKHealthStore
-    protocol Store {
-        static func isHealthDataAvailable() -> Bool
-        func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws
-        func statusForAuthorizationRequest(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws -> HKAuthorizationRequestStatus
-        func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus
-        func execute(_ query: HKQuery)
-        func save(_ object: HKObject) async throws
-    }
-
-    // LiveStore is used across actors via HealthQueryClient; mark as unchecked Sendable.
-    // HKHealthStore is internally thread-safe for our usage patterns.
-    private struct LiveStore: Store, @unchecked Sendable {
-        static func isHealthDataAvailable() -> Bool { HKHealthStore.isHealthDataAvailable() }
-        private let inner = HKHealthStore()
-        func requestAuthorization(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws {
-            try await inner.requestAuthorization(toShare: typesToShare, read: typesToRead)
-        }
-        func statusForAuthorizationRequest(toShare typesToShare: Set<HKSampleType>, read typesToRead: Set<HKObjectType>) async throws -> HKAuthorizationRequestStatus {
-            try await inner.statusForAuthorizationRequest(toShare: typesToShare, read: typesToRead)
-        }
-        func authorizationStatus(for type: HKObjectType) -> HKAuthorizationStatus {
-            inner.authorizationStatus(for: type as! HKSampleType)
-        }
-        func execute(_ query: HKQuery) { inner.execute(query) }
-        func save(_ object: HKObject) async throws { try await inner.save(object as! HKSample) }
-    }
+    // MARK: - HealthStore abstraction is defined at top-level (see HealthStore and LiveHealthStore)
 
     // MARK: - Init
-    init(store: Store) {
+    init(store: HealthStore) {
         self.store = store
         self.queryClient = HealthQueryClient(store: store)
     }
 
     convenience init() {
-        self.init(store: LiveStore())
+        self.init(store: LiveHealthStore())
     }
 
     // MARK: - Public state
-    private let store: Store
+    private let store: HealthStore
     private let queryClient: HealthQueryClient
 
     private(set) var isAuthorized = false
@@ -474,3 +475,4 @@ final class HealthManager {
         }
     }
 }
+

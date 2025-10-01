@@ -21,7 +21,8 @@ struct OnboardingCompleteView: View {
             VStack(spacing: 8) {
                 Text("All Done!")
                     .font(.largeTitle).bold()
-                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundStyle(.white)
+                    .shadow(radius: 5, x: 1, y: -1)
                 
                 Text("Here's what you've got to look forward to.")
                     .font(.callout)
@@ -36,7 +37,7 @@ struct OnboardingCompleteView: View {
                     style: .feature,
                     systemImage: "brain.head.profile.fill",
                     title: "Track your migraines.",
-                    tint: .blue
+                    tint: .pink
                 )
                 .opacity(shownRows[0] ? 1 : 0)
                 .offset(x: shownRows[0] ? 0 : -32)
@@ -88,17 +89,16 @@ struct OnboardingCompleteView: View {
                     Text("Enter Mygra")
                         .font(.title3).bold()
                 }
+                .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .adaptiveGlass(tint: .red)
+            .adaptiveGlass(tint: .mygraPurple)
+            .shadow(radius: 6, y: 3)
             .padding(.horizontal)
             .opacity(showButton ? 1 : 0)
             .offset(y: showButton ? 0 : 12)
             .animation(.spring(response: 1.2, dampingFraction: 0.85), value: showButton)
-            .shadow(radius: 8, y: 3)
         }
         .task {
             for i in 0..<shownRows.count {

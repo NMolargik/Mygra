@@ -16,7 +16,7 @@ struct IntelligenceUpgradeCardView: View {
         HStack(spacing: 15) {
             Image(systemName: "sparkles")
                 .font(.title)
-                .foregroundStyle(.red)
+                .foregroundStyle(.yellow)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text("Apple Intelligence")

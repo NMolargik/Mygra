@@ -46,12 +46,14 @@ struct EndMigraineSheet: View {
                         onCancel()
                         dismiss()
                     }
+                    .tint(.red)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         onConfirm(endDate)
                     }
                     .bold()
+                    .tint(.mygraBlue)
                 }
             }
         }

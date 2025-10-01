@@ -140,7 +140,7 @@ struct SettingsView: View {
             .accessibilityHint("Requires an internet connection to delete your iCloud data.")
             .alert("Are you sure?", isPresented: $showDeleteConfirmation) {
                 Button("Cancel", role: .cancel) { }
-                    .tint(.blue)
+                
                 Button("Proceed", role: .destructive) {
                     presentFarewellFlow()
                 }
@@ -171,11 +171,11 @@ Are you sure you want to proceed?
                 }
                 LabeledContent("Developer") {
                     Link("Nick Molargik", destination: URL(string: "https://www.linkedin.com/in/nicholas-molargik/")!)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.mygraBlue)
                 }
                 LabeledContent("Publisher") {
                     Link("Molargik Software LLC", destination: URL(string: "https://www.molargiksoftware.com")!)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.mygraBlue)
                 }
             }
 
@@ -226,7 +226,7 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                             editingUser = false
                             Haptics.success()
                         }
-                        .tint(.blue)
+                        .tint(.mygraBlue)
                     }
                 }
             }
@@ -234,11 +234,10 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
         .sheet(isPresented: $showingFarewell) {
             ZStack {
                 LinearGradient(
-                    colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25), Color.black.opacity(0.15)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                    colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
                 )
-                .ignoresSafeArea()
                 
                 VStack(spacing: 16) {
                     Text("Thank you for using Mygra. We hoped we helped, even a little.")

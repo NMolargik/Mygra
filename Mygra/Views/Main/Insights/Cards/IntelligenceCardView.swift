@@ -26,6 +26,7 @@ struct IntelligenceCardView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Migraine Assistant")
                     .font(.headline)
+                
                 Text("Get personalized guidance powered by Apple Intelligence.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -35,9 +36,11 @@ struct IntelligenceCardView: View {
             
             Button(action: onOpen) {
                 Text("Chat")
+                    .padding(8)
+                    .padding(.horizontal, 5)
+                    .foregroundStyle(.white)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
+            .adaptiveGlass(tint: .mygraPurple)
             .accessibilityLabel("Open Migraine Assistant")
         }
         .padding(14)

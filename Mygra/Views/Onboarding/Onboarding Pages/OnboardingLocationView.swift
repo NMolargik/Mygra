@@ -20,6 +20,9 @@ struct OnboardingLocationView: View {
             VStack(spacing: 8) {
                 Text("Location")
                     .font(.largeTitle).bold()
+                    .foregroundStyle(.white)
+                    .shadow(radius: 5, x: 1, y: -1)
+                
                 Text("Mygra uses your location to track local weather conditions and warn you when migraines may be more likely.")
                     .font(.callout)
                     .multilineTextAlignment(.center)
@@ -31,7 +34,7 @@ struct OnboardingLocationView: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 180, height: 180)
-                .foregroundStyle(.red)
+                .foregroundStyle(LinearGradient(colors: [.blue, .mygraBlue], startPoint: .topLeading, endPoint: .bottomTrailing))
                 .shadow(radius: 8)
                 .padding(.vertical, 8)
 
@@ -49,12 +52,11 @@ struct OnboardingLocationView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
+                .foregroundStyle(.white)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .adaptiveGlass(tint: .red)
-            .padding(.horizontal)
+            .adaptiveGlass(tint: .mygraPurple)
             .shadow(radius: 6, y: 3)
+            .padding(.horizontal)
         }
     }
 }

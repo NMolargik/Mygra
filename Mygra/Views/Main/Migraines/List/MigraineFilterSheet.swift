@@ -173,7 +173,7 @@ struct MigraineFilterSheet: View {
                     Haptics.success()
                     apply(f)
                 }
-                .foregroundStyle(.blue)
+                .foregroundStyle(.mygraBlue)
             }
         }
     }

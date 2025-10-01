@@ -67,7 +67,7 @@ struct MigraineRowView: View {
                         )
                         metricPill(
                             value: "\(migraine.stressLevel)",
-                            tint: .purple,
+                            tint: .mygraPurple,
                         )
                     }
                 }
@@ -215,13 +215,13 @@ struct MigraineRowView: View {
             Text("\(value) / 10")
                 .font(.caption).bold()
                 .monospacedDigit()
-                .foregroundStyle(tint)
+                .foregroundStyle(.white)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(tint.opacity(0.12))
+                .fill(tint)
         )
     }
 
@@ -256,12 +256,12 @@ struct MigraineRowView: View {
                     .font(.caption).bold()
                     .monospacedDigit()
             }
+            .foregroundStyle(.white)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
-                Capsule(style: .continuous).fill(Color.blue.opacity(0.15))
+                Capsule(style: .continuous).fill(Color.mygraBlue)
             )
-            .foregroundStyle(.blue)
             .accessibilityLabel("Ongoing duration \(liveDurationString(now: now))")
         }
     }

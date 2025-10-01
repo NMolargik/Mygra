@@ -19,9 +19,9 @@ struct OnboardingView: View {
     var body: some View {
         ZStack {
             LinearGradient(
-                colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25), Color.black.opacity(0.15)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
             )
             .ignoresSafeArea()
             
@@ -76,7 +76,7 @@ struct OnboardingView: View {
                             .foregroundStyle(.white)
                             .bold()
                             .padding()
-                            .adaptiveGlass(tint: viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager) ? .blue : .gray)
+                            .adaptiveGlass(tint: viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager) ? .mygraBlue : .gray)
                             .disabled(!viewModel.criteriaMet(healthManager: healthManager, weatherManager: weatherManager))
                         }
                     }

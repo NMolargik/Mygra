@@ -276,12 +276,8 @@ final class MigraineManager {
                 SKStoreReviewController.requestReview(in: scene)
             }
         } else {
-            // No scene available; fall back to the process-wide request on older systems.
-            if #available(iOS 18.0, *) {
-                // No scene-less API on iOS 18+; silently skip.
-            } else {
-                SKStoreReviewController.requestReview()
-            }
+            // No scene available; the scene-less API is deprecated. Skip requesting a review.
+            return
         }
     }
 }

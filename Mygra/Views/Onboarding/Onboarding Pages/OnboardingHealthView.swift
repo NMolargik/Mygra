@@ -18,6 +18,9 @@ struct OnboardingHealthView: View {
             VStack(spacing: 8) {
                 Text("Apple Health")
                     .font(.largeTitle).bold()
+                    .foregroundStyle(.white)
+                    .shadow(radius: 5, x: 1, y: -1)
+
                 Text("Mygra connects directly to Apple Health to read and write critical health data. All data stays secure on your device or encrypted in iCloud. Please authorize all options!")
                     .font(.callout)
                     .multilineTextAlignment(.center)
@@ -45,10 +48,9 @@ struct OnboardingHealthView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
+                .foregroundStyle(.white)
             }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-            .adaptiveGlass(tint: .red)
+            .adaptiveGlass(tint: .mygraPurple)
             .shadow(radius: 6, y: 3)
             .padding(.horizontal)
         }

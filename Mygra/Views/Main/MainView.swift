@@ -137,7 +137,7 @@ struct MainView: View {
                                     } label: {
                                         Text("New Migraine")
                                             .bold()
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(.mygraBlue)
                                     }
                                     .accessibilityIdentifier("addEntryButton")
                                 }
@@ -179,7 +179,7 @@ struct MainView: View {
                                                 .bold()
 
                                         }
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(.mygraBlue)
                                     }
                                     .accessibilityIdentifier("addEntryButton")
                                 }
@@ -270,17 +270,15 @@ struct MainView: View {
                 HStack(spacing: 8) {
                     Group {
                         if #available(iOS 26.0, *) {
-                            // iOS 26+: use SF Symbols draw/erase to repeatedly draw on and off
                             Image(systemName: "waveform.path.ecg")
                                 .symbolVariant(.fill)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(LinearGradient(colors: [.mygraPurple, .mygraBlue], startPoint: .leading, endPoint: .trailing))
                                 .symbolEffect(.drawOn.wholeSymbol, isActive: drawOn)
 
                         } else {
-                            // Older iOS: gentle pulse fallback
                             Image(systemName: "waveform.path.ecg")
                                 .symbolVariant(.fill)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(LinearGradient(colors: [.mygraPurple, .mygraBlue], startPoint: .leading, endPoint: .trailing))
                                 .symbolEffect(.pulse, value: now)
                         }
                     }

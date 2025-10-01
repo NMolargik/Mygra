@@ -35,6 +35,7 @@ struct ReturningUserView: View {
                             .fill(.thinMaterial)
                             .shadow(radius: 5)
                     )
+                    .transition(.move(edge: .top).combined(with: .opacity))
                 }
 
                 if let msg = errorMessage {
@@ -42,7 +43,7 @@ struct ReturningUserView: View {
                         Image(systemName: "exclamationmark.triangle.fill")
                             .foregroundStyle(.yellow)
                         Text(msg)
-                            .font(.footnote)
+                            .font(.body)
                             .foregroundStyle(.primary)
                     }
                     .padding(10)
@@ -51,6 +52,7 @@ struct ReturningUserView: View {
                             .fill(.ultraThinMaterial)
                             .shadow(radius: 5)
                     )
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
 
                 Spacer()
@@ -70,12 +72,14 @@ struct ReturningUserView: View {
                         .bold()
                         .padding(.horizontal, 14)
                         .padding(.vertical, 10)
-                        .adaptiveGlass(tint: .red)
+                        .adaptiveGlass(tint: .mygraBlue)
                         .disabled(isSyncing)
                         .opacity(isSyncing ? 0.7 : 1.0)
                 }
             }
             .padding()
+            .animation(.easeInOut(duration: 0.25), value: isSyncing)
+            .animation(.easeInOut(duration: 0.25), value: errorMessage)
             .navigationTitle("Returning User")
             .navigationBarTitleDisplayMode(.inline)
         }

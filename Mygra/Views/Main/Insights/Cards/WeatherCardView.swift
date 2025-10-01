@@ -86,7 +86,7 @@ struct WeatherCardView: View {
                             Text("•")
                                 .accessibilityHidden(true)
                             Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
-                                .foregroundStyle(.red)
+                                .foregroundStyle(.mygraPurple)
                             
                             Spacer()
                         }

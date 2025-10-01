@@ -62,7 +62,7 @@ struct IntakeSection: View {
                                 let kJ = (totalKcal * 4.184).rounded()
                                 return "\(Int(kJ)) kJ"
                             } else {
-                                return "\(Int(totalKcal)) kcal"
+                                return "\(Int(totalKcal.rounded())) kcal"
                             }
                         }()
                         Label(text, systemImage: "fork.knife")
@@ -91,12 +91,14 @@ struct IntakeSection: View {
             if !isEditing {
                 HStack {
                     Spacer()
-                    Button("Edit Intake Values") {
+                    Button("Add Consumption") {
                         Haptics.lightImpact()
                         withAnimation { isEditing = true }
                     }
-                    .buttonStyle(.bordered)
-                    .tint(.blue)
+                    .padding(8)
+                    .padding(.horizontal, 5)
+                    .foregroundStyle(.white)
+                    .adaptiveGlass(tint: .mygraBlue)
                     Spacer()
                 }
                 .padding([.top, .horizontal])
@@ -118,10 +120,6 @@ struct IntakeSection: View {
                     },
                     onCancel: {
                         Haptics.lightImpact()
-                        addWater = 0
-                        addCaffeine = 0
-                        addFoodKcal = 0
-                        addSleepHours = 0
                         withAnimation { isEditing = false }
                     }
                 )

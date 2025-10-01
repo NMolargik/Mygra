@@ -164,6 +164,15 @@ struct IntakeEditorView: View {
             
             HStack {
                 Spacer()
+                
+                Button("Cancel") {
+                    Haptics.lightImpact()
+                    onCancel()
+                }
+                .foregroundStyle(.white)
+                .padding(8)
+                .adaptiveGlass(tint: .gray)
+                
                 if !allAddsAreZero {
                     Button(isSaving ? "Adding..." : "Add") {
                         // Only fire success haptic if the action is actually going to run
@@ -172,17 +181,14 @@ struct IntakeEditorView: View {
                         }
                         onAdd()
                     }
+                    .foregroundStyle(.black)
                     .disabled(isSaving)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.green)
+                    .padding(8)
+                    .padding(.horizontal, 10)
+                    .adaptiveGlass(tint: .mygraBlue)
                 }
+
                 
-                Button("Cancel") {
-                    Haptics.lightImpact()
-                    onCancel()
-                }
-                .buttonStyle(.bordered)
-                .tint(.gray)
                 Spacer()
             }
             .padding(.top, 4)

@@ -30,7 +30,7 @@ enum AppTab: String, CaseIterable, Identifiable {
         case .insights:
             return Color.yellow
         case .list:
-            return Color.red
+            return Color.mygraBlue
         case .settings:
             return Color.orange
         }

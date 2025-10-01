@@ -28,7 +28,7 @@ struct QuickBitsSectionView: View {
                         Image(systemName: "arrow.clockwise")
                     }
                     .buttonStyle(.borderless)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.mygraPurple)
                 }
             }
             .padding(.bottom, 8)

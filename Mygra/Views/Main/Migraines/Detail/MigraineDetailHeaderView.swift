@@ -41,7 +41,7 @@ struct MigraineDetailHeaderView: View {
                     value: Double(migraine.stressLevel) / 10.0,
                     display: "\(migraine.stressLevel)/10",
                     systemImage: "brain.head.profile",
-                    tint: .purple
+                    tint: .mygraPurple
                 )
             }
 
@@ -53,9 +53,11 @@ struct MigraineDetailHeaderView: View {
                     Label("End Migraine", systemImage: "stop.circle.fill")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
+                        .foregroundStyle(.white)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(migraine.severity.color)
+                .padding(8)
+                .padding(.horizontal, 5)
+                .adaptiveGlass(tint: .mygraBlue)
                 .accessibilityIdentifier("endMigraineButton")
             }
 

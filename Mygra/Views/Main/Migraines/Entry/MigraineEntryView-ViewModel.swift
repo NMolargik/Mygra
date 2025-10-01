@@ -391,7 +391,44 @@ extension MigraineEntryView {
 
         @MainActor
         func createMigraine(using healthManager: HealthManager, weatherManager: WeatherManager, useMetricUnits: Bool) async -> Migraine {
-            // Attempt to fetch a Health snapshot for the migraine window
+            // Persist any staged intake adds to HealthKit at the migraine start (or now if start is in the future)
+            // Only write if there are non-zero staged values
+            let hasStagedAdds = (addWater > 0) || (addFood > 0) || (addCaffeine > 0) || (addSleepHours > 0)
+            if hasStagedAdds {
+                do {
+                    let sampleDate = min(startDate, Date())
+                    // Water (liters)
+                    if addWater > 0 {
+                        // Round to nearest milliliter for precision
+                        let liters = (addWater * 1000).rounded() / 1000
+                        try await healthManager.saveWater(liters: liters, on: sampleDate)
+                    }
+                    // Energy (kcal)
+                    if addFood > 0 {
+                        try await healthManager.saveEnergy(kcal: round(addFood), on: sampleDate)
+                    }
+                    // Caffeine (mg)
+                    if addCaffeine > 0 {
+                        try await healthManager.saveCaffeine(mg: round(addCaffeine), on: sampleDate)
+                    }
+                    // Sleep (hours) — save an interval ending at the migraine start
+                    if addSleepHours > 0 {
+                        let end = sampleDate
+                        let begin = end.addingTimeInterval(-addSleepHours * 3600.0)
+                        try await healthManager.saveSleep(from: begin, to: end)
+                    }
+                    // Clear staged values after successful write so they don't leak into the next entry
+                    addWater = 0
+                    addFood = 0
+                    addCaffeine = 0
+                    addSleepHours = 0
+                } catch {
+                    // If saving staged intake fails, proceed without blocking migraine creation
+                    print("Failed to save staged intake to HealthKit during migraine submit: \(error)")
+                }
+            }
+
+            // Attempt to fetch a Health snapshot for the migraine window (after persisting staged adds)
             var healthModel: HealthData? = nil
             do {
                 try? await Task.sleep(nanoseconds: 200_000_000)

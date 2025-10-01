@@ -103,8 +103,6 @@ struct ContentView: View {
                 .zIndex(0)
             }
         }
-        // Removed global animation modifier here as per instructions
-        // Handle incoming deep links like mygra://migraine/<uuid>?action=end
         .onOpenURL { url in
             let shouldGoToMain = viewModel.handleOpenURL(url)
             if shouldGoToMain {
@@ -115,8 +113,8 @@ struct ContentView: View {
                 }
             }
         }
-        .onChange(of: userManager.currentUser != nil) { hasUser in
-            guard hasUser else { return }
+        .onChange(of: userManager.currentUser != nil) { oldValue, newValue in
+            guard newValue else { return }
             Task {
                 await enterMainEnsuringManagers()
             }

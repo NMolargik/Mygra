@@ -40,13 +40,13 @@ struct TodayCardView: View {
                     if !isAuthorized {
                         Button("Connect Health", action: onConnectHealth)
                             .buttonStyle(.borderedProminent)
-                            .tint(.green)
+                            .tint(.pink)
                     } else {
                         Button(action: onRefreshHealth) {
                             Image(systemName: "arrow.clockwise")
                         }
                         .buttonStyle(.borderless)
-                        .foregroundStyle(.red)
+                        .foregroundStyle(.mygraPurple)
                     }
 
                     if isAuthorized {
@@ -61,9 +61,11 @@ struct TodayCardView: View {
                                     .rotationEffect(.degrees(isQuickAddExpanded ? 180 : 0))
                                     .animation(.easeInOut(duration: 0.2), value: isQuickAddExpanded)
                             }
+                            .foregroundStyle(.white)
                         }
-                        .tint(.red)
-                        .buttonStyle(.bordered)
+                        .padding(8)
+                        .padding(.horizontal, 5)
+                        .adaptiveGlass(tint: .mygraPurple)
                         .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
                     }
                 }
@@ -122,7 +124,7 @@ struct TodayCardView: View {
                         Spacer()
                         Button("Fetch", action: onRefreshHealth)
                             .buttonStyle(.bordered)
-                            .tint(.blue)
+                            .tint(.mygraBlue)
                     }
                     .padding(.top, 4)
                 }
@@ -163,7 +165,7 @@ struct TodayCardView: View {
                     Spacer()
                     Button("Connect Health", action: onConnectHealth)
                         .buttonStyle(.borderedProminent)
-                        .tint(.green)
+                        .tint(.pink)
                 }
                 Text("Connect Apple Health to see your daily stats.")
                     .foregroundStyle(.secondary)

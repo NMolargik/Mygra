@@ -25,7 +25,7 @@ struct WeatherDetailView: View {
                     .foregroundStyle(.secondary)
                 Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
                     .font(.caption2)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.mygraPurple)
             }
         }) {
             VStack(alignment: .leading, spacing: 8) {

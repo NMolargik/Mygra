@@ -38,6 +38,9 @@ struct OnboardingUserView: View {
                     VStack(spacing: 8) {
                         Text("You")
                             .font(.largeTitle).bold()
+                            .foregroundStyle(.white)
+                            .shadow(radius: 5, x: 1, y: -1)
+                        
                         Text("Mygra requires some information about you to best tailor the experience and draw insights from your migraines. Again, all of your data will be stored on your device or encrypted in iCloud.")
                             .font(.callout)
                             .multilineTextAlignment(.center)
@@ -49,8 +52,7 @@ struct OnboardingUserView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 180, height: 180)
-                        .foregroundStyle(.orange)
-                        .shadow(radius: 8)
+                        .foregroundStyle(LinearGradient(colors: [.orange, .orange.opacity(0.5)], startPoint: .topLeading, endPoint: .bottomTrailing))                        .shadow(radius: 8)
                         .padding(.vertical, 8)
                     
                     Spacer(minLength: 12)
@@ -64,14 +66,13 @@ struct OnboardingUserView: View {
                             Text("Continue")
                                 .font(.title3).bold()
                         }
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(.red)
-                    .adaptiveGlass(tint: .red)
-                    .padding(.horizontal)
+                    .adaptiveGlass(tint: .mygraPurple)
                     .shadow(radius: 6, y: 3)
+                    .padding(.horizontal)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }

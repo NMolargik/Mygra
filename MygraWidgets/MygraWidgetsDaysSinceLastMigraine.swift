@@ -110,9 +110,9 @@ private struct DaysSinceLastMigraineView: View {
         }
         .containerBackground(for: .widget) {
             LinearGradient(
-                colors: [Color.red.opacity(0.4), Color.red.opacity(0.6), Color.red.opacity(0.9)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
+                startPoint: .topTrailing,
+                endPoint: .bottomLeading
             )
         }
     }

@@ -22,15 +22,19 @@
                                         <rect key="frame" x="0.0" y="0.0" width="300" height="300"/>
                                         <constraints>
                                             <constraint firstAttribute="width" constant="300" id="ItQ-LA-dCJ"/>
+                                            <constraint firstAttribute="height" constant="300" id="J8K-IJ-fWt"/>
+                                            <constraint firstAttribute="width" relation="greaterThanOrEqual" constant="300" id="Yxx-2N-C7g"/>
                                             <constraint firstAttribute="width" secondItem="eXH-xa-Bma" secondAttribute="height" multiplier="1:1" id="gZz-d5-cHZ"/>
                                         </constraints>
                                         <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="small"/>
                                     </imageView>
                                 </subviews>
                                 <constraints>
+                                    <constraint firstItem="eXH-xa-Bma" firstAttribute="centerY" secondItem="2Cw-qa-5Qf" secondAttribute="centerY" id="Lvd-Y1-Gqq"/>
                                     <constraint firstItem="eXH-xa-Bma" firstAttribute="centerY" secondItem="2Cw-qa-5Qf" secondAttribute="centerY" id="Qjh-oE-kZc"/>
                                     <constraint firstAttribute="height" constant="300" id="Zvg-BY-km8"/>
                                     <constraint firstAttribute="width" constant="300" id="de5-ME-xgY"/>
+                                    <constraint firstItem="eXH-xa-Bma" firstAttribute="centerX" secondItem="2Cw-qa-5Qf" secondAttribute="centerX" id="nPX-bP-Xf6"/>
                                     <constraint firstItem="eXH-xa-Bma" firstAttribute="centerX" secondItem="2Cw-qa-5Qf" secondAttribute="centerX" id="pqZ-17-qTT"/>
                                 </constraints>
                             </stackView>

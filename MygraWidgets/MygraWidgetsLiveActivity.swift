@@ -29,7 +29,12 @@ struct MygraWidgetsLiveActivity: Widget {
                 HStack(spacing: 12) {
                     Image(systemName: "brain.head.profile.fill")
                         .symbolRenderingMode(.multicolor)
-                        .foregroundStyle(.red)
+                    LinearGradient(
+                        colors: [Color.mygraPurple, Color.mygraBlue],
+                        startPoint: .topTrailing,
+                        endPoint: .bottomLeading
+                    )
+                        .ignoresSafeArea()
                         .font(.system(size: 24))
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Ongoing Migraine")
@@ -59,9 +64,6 @@ struct MygraWidgetsLiveActivity: Widget {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(LinearGradient(gradient: Gradient(colors: [.clear, .red.opacity(0.05)]), startPoint: .top, endPoint: .bottom))
-            .activityBackgroundTint(.clear)
-            .activitySystemActionForegroundColor(.red)
 
         } dynamicIsland: { context in
             DynamicIsland {
@@ -69,7 +71,13 @@ struct MygraWidgetsLiveActivity: Widget {
                     HStack(spacing: 8) {
                         Image(systemName: "brain.head.profile.fill")
                             .symbolRenderingMode(.multicolor)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [Color.mygraPurple, Color.mygraBlue],
+                                    startPoint: .topTrailing,
+                                    endPoint: .bottomLeading
+                                )
+                            )
                             .font(.title3)
                             .accessibilityLabel("Migraine Indicator")
                         VStack(alignment: .leading, spacing: 2) {
@@ -111,10 +119,9 @@ struct MygraWidgetsLiveActivity: Widget {
                                     .font(.headline.bold())
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 8)
-                                    .background(.red.opacity(0.1))
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
-                            .tint(.red)
+                            .tint(.mygraBlue)
                             .buttonStyle(.borderedProminent)
                         }
                     }
@@ -122,7 +129,11 @@ struct MygraWidgetsLiveActivity: Widget {
             } compactLeading: {
                 // Compact leading - Minimal icon with subtle animation if possible (but static here)
                 Image(systemName: "brain.head.profile.fill")
-                    .foregroundStyle(.red)
+                    LinearGradient(
+                        colors: [Color.mygraPurple, Color.mygraBlue],
+                        startPoint: .topTrailing,
+                        endPoint: .bottomLeading
+                    )
                     .font(.caption)
             } compactTrailing: {
                 // Compact trailing - Ultra-compact severity chip to avoid stretching width
@@ -136,7 +147,11 @@ struct MygraWidgetsLiveActivity: Widget {
             } minimal: {
                 // Minimal - Icon with severity color overlay
                 Image(systemName: "brain.head.profile.fill")
-                    .foregroundStyle(.red)
+                    LinearGradient(
+                        colors: [Color.mygraPurple, Color.mygraBlue],
+                        startPoint: .topTrailing,
+                        endPoint: .bottomLeading
+                    )
                     .padding()
             }
             .widgetURL(URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)"))

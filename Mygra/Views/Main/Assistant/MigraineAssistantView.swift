@@ -27,9 +27,9 @@ struct MigraineAssistantView: View {
         NavigationStack {
             ZStack {
                 LinearGradient(
-                    colors: [Color.blue.opacity(0.25), Color.purple.opacity(0.25), Color.black.opacity(0.15)],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
+                    colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
+                    startPoint: .topTrailing,
+                    endPoint: .bottomLeading
                 )
                 .ignoresSafeArea()
                 ScrollViewReader { proxy in
@@ -153,7 +153,7 @@ struct MigraineAssistantView: View {
                                     .frame(width: 34, height: 34)
                                     .background(
                                         Circle()
-                                            .fill(sendEnabled ? Color.blue : Color.secondary.opacity(0.25))
+                                            .fill(sendEnabled ? Color.mygraBlue : Color.secondary.opacity(0.25))
                                     )
                             }
                             .buttonStyle(.plain)

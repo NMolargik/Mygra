@@ -19,7 +19,7 @@ struct TypingIndicator: View {
                 ForEach(0..<3, id: \.self) { i in
                     let progress = wave(phase: phase, index: i)
                     Circle()
-                        .fill(.secondary)
+                        .fill(.red)
                         .frame(width: 6, height: 6)
                         .scaleEffect(0.95 + 0.20 * progress)
                         .opacity(0.6 + 0.4 * progress)
