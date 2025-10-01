@@ -165,7 +165,7 @@ struct MigraineAssistantView: View {
                         .padding(.vertical, 8)
                         .background(
                             Capsule(style: .continuous)
-                                .fill(.thinMaterial)
+                                .fill(.regularMaterial)
                         )
                         .overlay(
                             Capsule(style: .continuous)
