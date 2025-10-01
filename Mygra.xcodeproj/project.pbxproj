@@ -11,6 +11,10 @@
 		EB0E1B1B2E62838E0060F834 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */; };
 		EB0E1B282E62838F0060F834 /* MygraWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EB290BA22E2494AB0061B1D0 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = EB290BA12E2494AB0061B1D0 /* README.md */; };
+		EB5E66472E8D61FD009872C2 /* Mygra Wrist Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EBD0218C2E8D70C3007DDFC3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E62E59536C00AAA8C1 /* WidgetKit.framework */; };
+		EBD0218D2E8D70C3007DDFC3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */; };
+		EBD021982E8D70C4007DDFC3 /* Mygra Wrist WidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EBD0218B2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -21,23 +25,34 @@
 			remoteGlobalIDString = EB0E1B182E62838E0060F834;
 			remoteInfo = MygraWidgetsExtension;
 		};
-		EB290ADF2E244A210061B1D0 /* PBXContainerItemProxy */ = {
+		EB5E66452E8D61FD009872C2 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EB290AC52E244A200061B1D0 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = EB290ACC2E244A200061B1D0;
-			remoteInfo = Mygra;
+			remoteGlobalIDString = EB5E66262E8D61FC009872C2;
+			remoteInfo = "Mygra Wrist Watch App";
 		};
-		EB290AE92E244A210061B1D0 /* PBXContainerItemProxy */ = {
+		EBD021962E8D70C4007DDFC3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EB290AC52E244A200061B1D0 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = EB290ACC2E244A200061B1D0;
-			remoteInfo = Mygra;
+			remoteGlobalIDString = EBD0218A2E8D70C3007DDFC3;
+			remoteInfo = "Mygra Wrist WidgetsExtension";
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		EB5E66482E8D61FD009872C2 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				EB5E66472E8D61FD009872C2 /* Mygra Wrist Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EBB762FF2E59536D00AAA8C1 /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -49,17 +64,29 @@
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EBD0219D2E8D70C4007DDFC3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EBD021982E8D70C4007DDFC3 /* Mygra Wrist WidgetsExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		EB01AE952E7A01D900034627 /* MygraWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MygraWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MygraWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB290ACD2E244A200061B1D0 /* Mygra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mygra.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EB290ADE2E244A210061B1D0 /* MygraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MygraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		EB290AE82E244A210061B1D0 /* MygraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MygraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB290BA12E2494AB0061B1D0 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
+		EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mygra Wrist Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBB762E62E59536C00AAA8C1 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		EBD0218B2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Mygra Wrist WidgetsExtension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBD022C72E8D8B1D007DDFC3 /* Mygra Wrist WidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Mygra Wrist WidgetsExtension.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -82,6 +109,7 @@
 				Errors/HealthError.swift,
 				Errors/MigraineError.swift,
 				"Extensions/MigraineActivityAttributes.ContentState-sample.swift",
+				Managers/ComplicationSync.swift,
 				Managers/HealthManager.swift,
 				Managers/MigraineManager.swift,
 				Models/DedupeKey.swift,
@@ -109,6 +137,13 @@
 			);
 			target = EB290ACC2E244A200061B1D0 /* Mygra */;
 		};
+		EBD0219C2E8D70C4007DDFC3 /* Exceptions for "Mygra Wrist Widgets" folder in "Mygra Wrist WidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EBD0218A2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -130,14 +165,17 @@
 			path = Mygra;
 			sourceTree = "<group>";
 		};
-		EB290AE12E244A210061B1D0 /* MygraTests */ = {
+		EB5E66282E8D61FC009872C2 /* Mygra Wrist Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MygraTests;
+			path = "Mygra Wrist Watch App";
 			sourceTree = "<group>";
 		};
-		EB290AEB2E244A210061B1D0 /* MygraUITests */ = {
+		EBD0218E2E8D70C3007DDFC3 /* Mygra Wrist Widgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = MygraUITests;
+			exceptions = (
+				EBD0219C2E8D70C4007DDFC3 /* Exceptions for "Mygra Wrist Widgets" folder in "Mygra Wrist WidgetsExtension" target */,
+			);
+			path = "Mygra Wrist Widgets";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -159,17 +197,19 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB290ADB2E244A210061B1D0 /* Frameworks */ = {
+		EB5E66242E8D61FC009872C2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB290AE52E244A210061B1D0 /* Frameworks */ = {
+		EBD021882E8D70C3007DDFC3 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EBD0218D2E8D70C3007DDFC3 /* SwiftUI.framework in Frameworks */,
+				EBD0218C2E8D70C3007DDFC3 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,12 +219,13 @@
 		EB290AC42E244A200061B1D0 = {
 			isa = PBXGroup;
 			children = (
+				EBD022C72E8D8B1D007DDFC3 /* Mygra Wrist WidgetsExtension.entitlements */,
 				EB01AE952E7A01D900034627 /* MygraWidgetsExtension.entitlements */,
 				EB290BA12E2494AB0061B1D0 /* README.md */,
 				EB290ACF2E244A200061B1D0 /* Mygra */,
-				EB290AE12E244A210061B1D0 /* MygraTests */,
-				EB290AEB2E244A210061B1D0 /* MygraUITests */,
 				EB0E1B1C2E62838E0060F834 /* MygraWidgets */,
+				EB5E66282E8D61FC009872C2 /* Mygra Wrist Watch App */,
+				EBD0218E2E8D70C3007DDFC3 /* Mygra Wrist Widgets */,
 				EBB762E52E59536C00AAA8C1 /* Frameworks */,
 				EB290ACE2E244A200061B1D0 /* Products */,
 			);
@@ -194,9 +235,9 @@
 			isa = PBXGroup;
 			children = (
 				EB290ACD2E244A200061B1D0 /* Mygra.app */,
-				EB290ADE2E244A210061B1D0 /* MygraTests.xctest */,
-				EB290AE82E244A210061B1D0 /* MygraUITests.xctest */,
 				EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */,
+				EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */,
+				EBD0218B2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -243,11 +284,13 @@
 				EB290ACA2E244A200061B1D0 /* Frameworks */,
 				EB290ACB2E244A200061B1D0 /* Resources */,
 				EBB762FF2E59536D00AAA8C1 /* Embed Foundation Extensions */,
+				EB5E66482E8D61FD009872C2 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				EB0E1B272E62838F0060F834 /* PBXTargetDependency */,
+				EB5E66462E8D61FD009872C2 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EB290ACF2E244A200061B1D0 /* Mygra */,
@@ -259,51 +302,51 @@
 			productReference = EB290ACD2E244A200061B1D0 /* Mygra.app */;
 			productType = "com.apple.product-type.application";
 		};
-		EB290ADD2E244A210061B1D0 /* MygraTests */ = {
+		EB5E66262E8D61FC009872C2 /* Mygra Wrist Watch App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EB290AF62E244A210061B1D0 /* Build configuration list for PBXNativeTarget "MygraTests" */;
+			buildConfigurationList = EB5E664F2E8D61FD009872C2 /* Build configuration list for PBXNativeTarget "Mygra Wrist Watch App" */;
 			buildPhases = (
-				EB290ADA2E244A210061B1D0 /* Sources */,
-				EB290ADB2E244A210061B1D0 /* Frameworks */,
-				EB290ADC2E244A210061B1D0 /* Resources */,
+				EB5E66232E8D61FC009872C2 /* Sources */,
+				EB5E66242E8D61FC009872C2 /* Frameworks */,
+				EB5E66252E8D61FC009872C2 /* Resources */,
+				EBD0219D2E8D70C4007DDFC3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				EB290AE02E244A210061B1D0 /* PBXTargetDependency */,
+				EBD021972E8D70C4007DDFC3 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				EB290AE12E244A210061B1D0 /* MygraTests */,
+				EB5E66282E8D61FC009872C2 /* Mygra Wrist Watch App */,
 			);
-			name = MygraTests;
+			name = "Mygra Wrist Watch App";
 			packageProductDependencies = (
 			);
-			productName = MygraTests;
-			productReference = EB290ADE2E244A210061B1D0 /* MygraTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
+			productName = "Mygra Wrist Watch App";
+			productReference = EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */;
+			productType = "com.apple.product-type.application";
 		};
-		EB290AE72E244A210061B1D0 /* MygraUITests */ = {
+		EBD0218A2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EB290AF92E244A210061B1D0 /* Build configuration list for PBXNativeTarget "MygraUITests" */;
+			buildConfigurationList = EBD021992E8D70C4007DDFC3 /* Build configuration list for PBXNativeTarget "Mygra Wrist WidgetsExtension" */;
 			buildPhases = (
-				EB290AE42E244A210061B1D0 /* Sources */,
-				EB290AE52E244A210061B1D0 /* Frameworks */,
-				EB290AE62E244A210061B1D0 /* Resources */,
+				EBD021872E8D70C3007DDFC3 /* Sources */,
+				EBD021882E8D70C3007DDFC3 /* Frameworks */,
+				EBD021892E8D70C3007DDFC3 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				EB290AEA2E244A210061B1D0 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				EB290AEB2E244A210061B1D0 /* MygraUITests */,
+				EBD0218E2E8D70C3007DDFC3 /* Mygra Wrist Widgets */,
 			);
-			name = MygraUITests;
+			name = "Mygra Wrist WidgetsExtension";
 			packageProductDependencies = (
 			);
-			productName = MygraUITests;
-			productReference = EB290AE82E244A210061B1D0 /* MygraUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
+			productName = "Mygra Wrist WidgetsExtension";
+			productReference = EBD0218B2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -321,13 +364,11 @@
 					EB290ACC2E244A200061B1D0 = {
 						CreatedOnToolsVersion = 26.0;
 					};
-					EB290ADD2E244A210061B1D0 = {
+					EB5E66262E8D61FC009872C2 = {
 						CreatedOnToolsVersion = 26.0;
-						TestTargetID = EB290ACC2E244A200061B1D0;
 					};
-					EB290AE72E244A210061B1D0 = {
+					EBD0218A2E8D70C3007DDFC3 = {
 						CreatedOnToolsVersion = 26.0;
-						TestTargetID = EB290ACC2E244A200061B1D0;
 					};
 				};
 			};
@@ -346,9 +387,9 @@
 			projectRoot = "";
 			targets = (
 				EB290ACC2E244A200061B1D0 /* Mygra */,
-				EB290ADD2E244A210061B1D0 /* MygraTests */,
-				EB290AE72E244A210061B1D0 /* MygraUITests */,
 				EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */,
+				EB5E66262E8D61FC009872C2 /* Mygra Wrist Watch App */,
+				EBD0218A2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -369,14 +410,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB290ADC2E244A210061B1D0 /* Resources */ = {
+		EB5E66252E8D61FC009872C2 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB290AE62E244A210061B1D0 /* Resources */ = {
+		EBD021892E8D70C3007DDFC3 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -400,14 +441,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB290ADA2E244A210061B1D0 /* Sources */ = {
+		EB5E66232E8D61FC009872C2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		EB290AE42E244A210061B1D0 /* Sources */ = {
+		EBD021872E8D70C3007DDFC3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -422,15 +463,15 @@
 			target = EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */;
 			targetProxy = EB0E1B262E62838F0060F834 /* PBXContainerItemProxy */;
 		};
-		EB290AE02E244A210061B1D0 /* PBXTargetDependency */ = {
+		EB5E66462E8D61FD009872C2 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = EB290ACC2E244A200061B1D0 /* Mygra */;
-			targetProxy = EB290ADF2E244A210061B1D0 /* PBXContainerItemProxy */;
+			target = EB5E66262E8D61FC009872C2 /* Mygra Wrist Watch App */;
+			targetProxy = EB5E66452E8D61FD009872C2 /* PBXContainerItemProxy */;
 		};
-		EB290AEA2E244A210061B1D0 /* PBXTargetDependency */ = {
+		EBD021972E8D70C4007DDFC3 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = EB290ACC2E244A200061B1D0 /* Mygra */;
-			targetProxy = EB290AE92E244A210061B1D0 /* PBXContainerItemProxy */;
+			target = EBD0218A2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension */;
+			targetProxy = EBD021962E8D70C4007DDFC3 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -442,7 +483,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = MygraWidgetsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MygraWidgets/Info.plist;
@@ -476,7 +517,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = MygraWidgetsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MygraWidgets/Info.plist;
@@ -512,7 +553,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mygra/Mygra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -544,6 +585,7 @@
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -580,7 +622,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mygra/Mygra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 41;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -612,6 +654,7 @@
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
@@ -758,105 +801,143 @@
 			};
 			name = Release;
 		};
-		EB290AF72E244A210061B1D0 /* Debug */ = {
+		EB5E66492E8D61FD009872C2 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist Watch App/Mygra Wrist Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraTests;
+				INFOPLIST_FILE = "Mygra-Wrist-Watch-App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Mygra;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.molargiksoftware.Mygra;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mygra.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mygra";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
 			};
 			name = Debug;
 		};
-		EB290AF82E244A210061B1D0 /* Release */ = {
+		EB5E664A2E8D61FD009872C2 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist Watch App/Mygra Wrist Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
+				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraTests;
+				INFOPLIST_FILE = "Mygra-Wrist-Watch-App-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = Mygra;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.molargiksoftware.Mygra;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Mygra.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Mygra";
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
 			};
 			name = Release;
 		};
-		EB290AFA2E244A210061B1D0 /* Debug */ = {
+		EBD0219A2E8D70C4007DDFC3 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist WidgetsExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraUITests;
+				INFOPLIST_FILE = "Mygra Wrist Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Mygra Wrist Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.molargiksoftware.Mygra.watchkitapp.Mygra-Wrist-Widgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = Mygra;
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
 			};
 			name = Debug;
 		};
-		EB290AFB2E244A210061B1D0 /* Release */ = {
+		EBD0219B2E8D70C4007DDFC3 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist WidgetsExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 42;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
-				MACOSX_DEPLOYMENT_TARGET = 15.6;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraUITests;
+				INFOPLIST_FILE = "Mygra Wrist Widgets/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "Mygra Wrist Widgets";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MARKETING_VERSION = 1.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.molargiksoftware.Mygra.watchkitapp.Mygra-Wrist-Widgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = NO;
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2,7";
-				TEST_TARGET_NAME = Mygra;
-				XROS_DEPLOYMENT_TARGET = 26.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.6;
 			};
 			name = Release;
 		};
@@ -890,20 +971,20 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EB290AF62E244A210061B1D0 /* Build configuration list for PBXNativeTarget "MygraTests" */ = {
+		EB5E664F2E8D61FD009872C2 /* Build configuration list for PBXNativeTarget "Mygra Wrist Watch App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EB290AF72E244A210061B1D0 /* Debug */,
-				EB290AF82E244A210061B1D0 /* Release */,
+				EB5E66492E8D61FD009872C2 /* Debug */,
+				EB5E664A2E8D61FD009872C2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		EB290AF92E244A210061B1D0 /* Build configuration list for PBXNativeTarget "MygraUITests" */ = {
+		EBD021992E8D70C4007DDFC3 /* Build configuration list for PBXNativeTarget "Mygra Wrist WidgetsExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EB290AFA2E244A210061B1D0 /* Debug */,
-				EB290AFB2E244A210061B1D0 /* Release */,
+				EBD0219A2E8D70C4007DDFC3 /* Debug */,
+				EBD0219B2E8D70C4007DDFC3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

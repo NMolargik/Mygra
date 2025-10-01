@@ -115,6 +115,8 @@ struct ContentView: View {
         }
         .onChange(of: userManager.currentUser != nil) { oldValue, newValue in
             guard newValue else { return }
+            // Avoid auto-transitioning to Main while still in onboarding
+            guard viewModel.appStage != .onboarding else { return }
             Task {
                 await enterMainEnsuringManagers()
             }
@@ -209,4 +211,3 @@ struct ContentView: View {
         .environment(previewWeatherManager)
         .environment(previewNotificationManager)
 }
-

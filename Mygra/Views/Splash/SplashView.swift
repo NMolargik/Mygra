@@ -53,6 +53,7 @@ struct SplashView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(maxWidth: 350)
+                    .shadow(radius: 5)
                     .opacity(viewModel.subtitleVisible ? 1 : 0)
                     .animation(.easeOut(duration: 0.6).delay(1.1), value: viewModel.subtitleVisible)
                 
@@ -60,6 +61,7 @@ struct SplashView: View {
                 
                 Text("Oh! You're new here.")
                     .font(.headline)
+                    .foregroundStyle(.secondary)
                     .opacity(viewModel.subtitleVisible ? 1 : 0)
                     .offset(y: viewModel.subtitleVisible ? 0 : 30)
                     .transition(.move(edge: .top).combined(with: .opacity))

@@ -19,6 +19,7 @@ enum AppGroup {
 @MainActor
 @Observable
 final class MigraineManager {
+    static var shared: MigraineManager? = nil
 
     // MARK: - Notifications
     nonisolated static let migraineCreatedNotification = Notification.Name("MigraineManager.migraineCreated")
@@ -48,6 +49,8 @@ final class MigraineManager {
     init(context: ModelContext, healthManager: HealthManager? = nil) {
         self.context = context
         self.healthManager = healthManager
+        MigraineManager.shared = self
+        ComplicationSync.shared.activate()
         Task { await refresh() }
     }
 
@@ -65,7 +68,20 @@ final class MigraineManager {
             let fetched = try context.fetch(desc)
             self.migraines = fetched
             // Update the ongoing migraine reference (first ongoing in newest-first list)
-            self.ongoingMigraine = fetched.first(where: { $0.isOngoing })
+            let previousOngoingID = self.ongoingMigraine?.id
+            let newOngoing = fetched.first(where: { $0.isOngoing })
+            self.ongoingMigraine = newOngoing
+
+            // Centralize Live Activity lifecycle: end previous if changed, start new if needed
+            let currentID = newOngoing?.id
+            if previousOngoingID != currentID {
+                if let prev = previousOngoingID {
+                    MigraineActivityCenter.end(for: prev)
+                }
+                if let og = newOngoing {
+                    MigraineActivityCenter.ensureStarted(for: og.id, startDate: og.startDate, severity: og.painLevel, notes: og.note ?? "")
+                }
+            }
 
             // Keep the widget up to date with the newest migraine start
             self.updateWidgetSharedState()
@@ -83,11 +99,6 @@ final class MigraineManager {
     ) {
         context.insert(migraine)
 
-        // If this is an ongoing migraine, track it immediately
-        if migraine.isOngoing {
-            self.ongoingMigraine = migraine
-        }
-
         // Post creation notification for observers (e.g., InsightManager)
         NotificationCenter.default.post(
             name: MigraineManager.migraineCreatedNotification,
@@ -104,11 +115,6 @@ final class MigraineManager {
 
         // Review prompt on the 5th-ever migraine
         Task { await maybeRequestReviewIfFifthEver(in: reviewScene) }
-        
-        if migraine.isOngoing {
-            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate, severity: migraine.painLevel, notes: migraine.note ?? "")
-        }
-
     }
 
     // MARK: - Update (mutate in place)
@@ -117,21 +123,12 @@ final class MigraineManager {
         mutate(migraine)
         let isOngoingNow = migraine.isOngoing
 
-        // Keep ongoing tracking in sync:
-        if wasOngoing && !isOngoingNow, ongoingMigraine?.id == migraine.id {
-            ongoingMigraine = nil
-            // End any Live Activity for this migraine
+        // If this migraine just transitioned to completed, end any Live Activity and write to HealthKit
+        if wasOngoing && !isOngoingNow {
             MigraineActivityCenter.end(for: migraine.id)
-        }
-        if !wasOngoing && isOngoingNow {
-            ongoingMigraine = migraine
-            // Start a Live Activity if it became ongoing
-            MigraineActivityCenter.start(for: migraine.id, startDate: migraine.startDate, severity: migraine.painLevel, notes: migraine.note ?? "")
-        }
-
-        // If this migraine just transitioned to completed, write to HealthKit now
-        if wasOngoing && !isOngoingNow, let hm = healthManager {
-            Task { await hm.saveHeadacheForMigraine(migraine) }
+            if let hm = healthManager {
+                Task { await hm.saveHeadacheForMigraine(migraine) }
+            }
         }
 
         saveAndReload()
@@ -209,28 +206,44 @@ final class MigraineManager {
 
     // MARK: - Widgets sync
     private func updateWidgetSharedState() {
-        // Persist the latest migraine start date for the widget, and trigger a reload only if it changed.
+        // Persist the latest migraine start date for the widget, and trigger pushes when either
+        // the latest start OR the ongoing state changes. Also handle the empty state by pushing a reset.
         let defaults = UserDefaults(suiteName: AppGroup.id)
 
         // Determine the newest migraine start (newest-first array)
         let latestStart = self.migraines.first?.startDate
+        let hasOngoing = self.ongoingMigraine != nil
 
-        // Read the previously stored value (if any)
-        let previous = defaults?.double(forKey: "lastMigraineStart")
+        // Read previously stored values
+        let previousLast = defaults?.double(forKey: "lastMigraineStart")
+        let prevHasOngoing = defaults?.bool(forKey: "hasOngoingMigraine") ?? false
 
-        // Only write when we have a valid date; avoid overwriting with 0 during early/empty refreshes.
         if let latestStart {
             let newValue = latestStart.timeIntervalSince1970
             // Normalize any previously stored milliseconds just in case
-            let prev = (previous ?? 0) > 10_000_000_000 ? ((previous ?? 0) / 1000.0) : (previous ?? 0)
+            let prevLastNormalized = (previousLast ?? 0) > 10_000_000_000 ? ((previousLast ?? 0) / 1000.0) : (previousLast ?? 0)
+            let changedLastStart = abs(newValue - prevLastNormalized) > 0.5
+            let changedHasOngoing = prevHasOngoing != hasOngoing
 
-            if abs(newValue - prev) > 0.5 {
+            // Persist the current ongoing flag
+            defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
+
+            // Only write the last start if it actually changed
+            if changedLastStart {
                 defaults?.set(newValue, forKey: "lastMigraineStart")
                 WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
             }
+
+            // Push to watch if either last start or ongoing status changed
+            if changedLastStart || changedHasOngoing {
+                ComplicationSync.shared.pushStatus(lastMigraineStart: newValue, hasOngoing: hasOngoing)
+            }
         } else {
-             defaults?.removeObject(forKey: "lastMigraineStart")
-             WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+            // No migraines: clear last start, persist ongoing flag, reload widget, and push reset to watch
+            defaults?.removeObject(forKey: "lastMigraineStart")
+            defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
+            WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+            ComplicationSync.shared.pushStatus(lastMigraineStart: 0, hasOngoing: hasOngoing)
         }
     }
 
