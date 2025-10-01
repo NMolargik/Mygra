@@ -1,7 +1,7 @@
 {
   "images" : [
     {
-      "filename" : "MygraIcon_PNG.png",
+      "filename" : "MygraIcon_NoAlpha.png",
       "idiom" : "universal",
       "platform" : "watchos",
       "size" : "1024x1024"
