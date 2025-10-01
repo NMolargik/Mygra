@@ -57,7 +57,7 @@ struct MigraineDetailHeaderView: View {
                 }
                 .padding(8)
                 .padding(.horizontal, 5)
-                .adaptiveGlass(tint: .mygraBlue)
+                .adaptiveGlass(tint: .mygraPurple)
                 .accessibilityIdentifier("endMigraineButton")
             }
 

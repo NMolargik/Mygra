@@ -98,7 +98,7 @@ struct IntakeSection: View {
                     .padding(8)
                     .padding(.horizontal, 5)
                     .foregroundStyle(.white)
-                    .adaptiveGlass(tint: .mygraBlue)
+                    .adaptiveGlass(tint: .mygraPurple)
                     Spacer()
                 }
                 .padding([.top, .horizontal])

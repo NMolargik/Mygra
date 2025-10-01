@@ -69,6 +69,41 @@ final class IntelligenceManager {
         return response.content
     }
 
+    // MARK: - Feature 1b: QuickBit explanation
+
+    /// Uses Apple Intelligence to provide a short description and one practical recommendation for a given Insight (QuickBit).
+    /// Returns a QuickBitExplanation with `description` and `recommendation` fields.
+    @available(iOS 26.0, *)
+    func explain(insight: Insight, user: User?) async throws -> QuickBitExplanation? {
+        guard supportsAppleIntelligence else { return nil }
+
+        let prompt = buildQuickBitExplanationPrompt(insight: insight, user: user)
+        let instructions = """
+        You are a clear, neutral explainer for health logging insights. 
+        Based only on the provided fields, write:
+        1) a brief, 1-2 sentence description explaining the insight in everyday terms, and
+        2) one practical, non-medical recommendation relevant to this insight.
+        Avoid medical diagnoses or treatment advice. Keep tone supportive and neutral.
+        Output strictly as JSON with keys: {"description": string, "recommendation": string}. Do not wrap in markdown code fences; return only the JSON object.
+        """
+
+        let session = LanguageModelSession(instructions: instructions)
+        let response = try await session.respond(to: prompt)
+        let raw = response.content
+        let cleaned = extractJSON(from: raw) ?? raw
+        let data = Data(cleaned.utf8)
+        do {
+            let decoded = try JSONDecoder().decode(QuickBitExplanation.self, from: data)
+            return decoded
+        } catch {
+            // Fallback: if the model returns plain text, split into two parts heuristically
+            let parts = response.content.components(separatedBy: "\n").filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            let desc = parts.first ?? insight.message
+            let rec = parts.dropFirst().joined(separator: " ")
+            return QuickBitExplanation(description: desc, recommendation: rec.isEmpty ? "Consider small, everyday adjustments like hydration, sleep regularity, and balanced meals." : rec)
+        }
+    }
+
     // MARK: - Feature 2: Counselor chat
 
     /// Seeds a chat session with compact summaries of the user and migraine history.
@@ -197,6 +232,26 @@ final class IntelligenceManager {
         return lines.joined(separator: "\n")
     }
 
+    private func buildQuickBitExplanationPrompt(insight: Insight, user: User?) -> String {
+        var lines: [String] = []
+        lines.append("Task: Explain this insight in everyday terms and provide one non-medical recommendation.")
+        if let name = (user?.name.isEmpty == false ? user?.name : nil) {
+            lines.append("User: \(name)")
+        }
+        lines.append("Insight category: \(insight.category.rawValue)")
+        lines.append("Title: \(insight.title)")
+        if !insight.message.isEmpty {
+            lines.append("Message: \(insight.message)")
+        }
+        if !insight.tags.isEmpty {
+            let tags = insight.tags.map { "\($0.key)=\($0.value)" }.joined(separator: "; ")
+            lines.append("Tags: \(tags)")
+        }
+        lines.append("Priority: \(insight.priority.rawValue)")
+        lines.append("Output: JSON with keys {description, recommendation} only.")
+        return lines.joined(separator: "\n")
+    }
+
     /// Builds a compact Markdown table and a JSON array string for recent migraines.
     /// Keeps fields minimal to reduce token use but sufficient for trend questions.
     private func buildHistoryDataset(migraines: [Migraine], user: User?, limit: Int) -> (table: String, json: String) {
@@ -242,6 +297,38 @@ final class IntelligenceManager {
         let table = tableLines.joined(separator: "\n")
         let json = "[\n" + jsonItems.joined(separator: ",\n") + "\n]"
         return (table, json)
+    }
+
+    private func extractJSON(from text: String) -> String? {
+        // Trim whitespace and remove markdown code fences if present
+        var s = text.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // If fenced block, strip leading ```json or ``` and trailing ```
+        if s.hasPrefix("```") {
+            // Remove opening fence line
+            if let newlineRange = s.range(of: "\n") {
+                let firstLine = String(s[..<newlineRange.lowerBound])
+                if firstLine.lowercased().contains("```json") || firstLine.starts(with: "```") {
+                    s.removeSubrange(s.startIndex..<(newlineRange.upperBound))
+                }
+            }
+            // Remove trailing fence if present
+            if let range = s.range(of: "```", options: .backwards) {
+                s.removeSubrange(range.lowerBound..<s.endIndex)
+            }
+            s = s.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        // If there is extra prose around the JSON, try to slice from first { to last }
+        if let firstBrace = s.firstIndex(of: "{"), let lastBrace = s.lastIndex(of: "}") , firstBrace <= lastBrace {
+            let jsonSlice = s[firstBrace...lastBrace]
+            return String(jsonSlice)
+        }
+
+        // If it already looks like a JSON object, return as-is
+        if s.hasPrefix("{") && s.hasSuffix("}") { return s }
+
+        return nil
     }
 
     private func summarize(user: User?) -> String {

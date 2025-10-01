@@ -121,7 +121,7 @@ struct MygraWidgetsLiveActivity: Widget {
                                     .padding(.vertical, 8)
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
                             }
-                            .tint(.mygraBlue)
+                            .tint(.mygraPurple)
                             .buttonStyle(.borderedProminent)
                         }
                     }

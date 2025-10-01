@@ -73,35 +73,42 @@ struct MigraineRowView: View {
                 }
 
                 // Secondary line: triggers as dots + note
-                HStack(alignment: .center, spacing: 8) {
-                    if migraine.pinned {
-                        // Localized in Localizable.xcstrings:
-                        // "migraine_pinned" = "Pinned";
-                        Label {
-                            Text("Pinned")
-                                .font(.caption).bold()
-                        } icon: {
-                            Image(systemName: "pin.fill")
+                let triggerCount = migraine.triggers.count + migraine.customTriggers.count
+                let hasNote = (migraine.note?.isEmpty == false)
+                let hasSecondary = migraine.pinned || triggerCount > 0 || hasNote
+
+                if hasSecondary {
+                    HStack(alignment: .center, spacing: 8) {
+                        if migraine.pinned {
+                            // Localized in Localizable.xcstrings:
+                            // "migraine_pinned" = "Pinned";
+                            Label {
+                                Text("Pinned")
+                                    .font(.caption).bold()
+                            } icon: {
+                                Image(systemName: "pin.fill")
+                            }
+                            .labelStyle(.iconOnly)
+                            .padding(.trailing, 8)
+                            .padding(.vertical, 4)
+                            .foregroundStyle(.yellow)
+                            .accessibilityLabel(Text("Pinned"))
                         }
-                        .labelStyle(.iconOnly)
-                        .padding(.trailing, 8)
-                        .padding(.vertical, 4)
-                        .foregroundStyle(.yellow)
-                        .accessibilityLabel(Text("Pinned"))
+
+                        if triggerCount > 0 {
+                            triggerDots(count: triggerCount)
+                        }
+
+                        if hasNote, let note = migraine.note {
+                            Text("\"\(note)\"")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                                .lineLimit(1)
+                                .truncationMode(.tail)
+                        }
                     }
-                    let triggerCount = migraine.triggers.count + migraine.customTriggers.count
-                    if triggerCount > 0 {
-                        triggerDots(count: triggerCount)
-                    }
-                    if let note = migraine.note, !note.isEmpty {
-                        Text("\"\(note)\"")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    }
+                    .frame(height: 30, alignment: .center)
                 }
-                .frame(height: 30, alignment: .center)
             }
         }
         .padding(.vertical, 8)
@@ -215,13 +222,13 @@ struct MigraineRowView: View {
             Text("\(value) / 10")
                 .font(.caption).bold()
                 .monospacedDigit()
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 4)
         .background(
             RoundedRectangle(cornerRadius: 8, style: .continuous)
-                .fill(tint)
+                .fill(tint.opacity(0.5))
         )
     }
 
@@ -256,7 +263,7 @@ struct MigraineRowView: View {
                     .font(.caption).bold()
                     .monospacedDigit()
             }
-            .foregroundStyle(.white)
+            .foregroundStyle(.black)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(

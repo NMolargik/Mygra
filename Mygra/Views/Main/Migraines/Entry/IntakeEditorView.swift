@@ -181,11 +181,11 @@ struct IntakeEditorView: View {
                         }
                         onAdd()
                     }
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .disabled(isSaving)
                     .padding(8)
                     .padding(.horizontal, 10)
-                    .adaptiveGlass(tint: .mygraBlue)
+                    .adaptiveGlass(tint: .mygraPurple)
                 }
 
                 

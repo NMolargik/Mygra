@@ -56,7 +56,9 @@ actor HealthQueryClient {
                 let total = stats?.sumQuantity()?.doubleValue(for: unit) ?? 0
                 cont.resume(returning: total)
             }
-            self.store.execute(query)
+            Task { @MainActor in
+                self.store.execute(query)
+            }
         }
     }
 
@@ -74,7 +76,9 @@ actor HealthQueryClient {
                 let avg = stats?.averageQuantity()?.doubleValue(for: unit) ?? 0
                 cont.resume(returning: avg)
             }
-            self.store.execute(query)
+            Task { @MainActor in
+                self.store.execute(query)
+            }
         }
     }
 
@@ -100,7 +104,9 @@ actor HealthQueryClient {
 
                 cont.resume(returning: totalSeconds / 3600.0)
             }
-            self.store.execute(query)
+            Task { @MainActor in
+                self.store.execute(query)
+            }
         }
     }
 
@@ -143,7 +149,9 @@ actor HealthQueryClient {
                     }
                 }
             }
-            self.store.execute(query)
+            Task { @MainActor in
+                self.store.execute(query)
+            }
         }
     }
 }

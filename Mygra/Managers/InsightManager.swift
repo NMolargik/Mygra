@@ -29,6 +29,8 @@ final class InsightManager {
 
     // Cache of generated guidance per migraine
     private(set) var generatedGuidance: [UUID: String] = [:]
+    // Cache AI explanations for QuickBits (by insight dedupeKey hash)
+    private(set) var quickBitExplanations: [String: QuickBitExplanation] = [:]
     var isGeneratingGuidance: Bool = false
     var isGeneratingGuidanceFor: Migraine? = nil
 
@@ -627,5 +629,22 @@ final class InsightManager {
     func resetCounselorChat() {
         intelligenceManager.resetChat()
     }
-}
 
+    // MARK: - QuickBit explanations
+    @available(iOS 26.0, *)
+    func explanation(for insight: Insight) async -> QuickBitExplanation? {
+        guard intelligenceManager.supportsAppleIntelligence else { return nil }
+        let key = insight.dedupeKey.key
+        if let cached = quickBitExplanations[key] { return cached }
+        do {
+            let user = userManager.currentUser
+            if let exp = try await intelligenceManager.explain(insight: insight, user: user) {
+                quickBitExplanations[key] = exp
+                return exp
+            }
+        } catch {
+            errors.append(.intelligenceAnalysisFailed(underlying: error))
+        }
+        return nil
+    }
+}

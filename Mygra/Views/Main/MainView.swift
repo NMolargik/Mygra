@@ -50,7 +50,7 @@ struct MainView: View {
                                             HStack(spacing: 6) {
                                                 Image(systemName: "plus")
                                             }
-                                            .foregroundStyle(.blue)
+                                            .foregroundStyle(.mygraBlue)
                                         }
                                         .accessibilityIdentifier("addEntryButton")
                                         .tint(.blue)

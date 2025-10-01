@@ -285,10 +285,10 @@ struct MigraineEntryView: View {
                                             Spacer()
                                             if viewModel.selectedTriggers.contains(trig) {
                                                 Image(systemName: "checkmark.circle.fill")
-                                                    .foregroundStyle(.red)
+                                                    .foregroundStyle(.mygraBlue)
                                             } else {
                                                 Image(systemName: "circle")
-                                                    .foregroundStyle(.red)
+                                                    .foregroundStyle(.mygraBlue)
                                             }
                                         }
                                     }

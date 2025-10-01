@@ -8,12 +8,17 @@
 import SwiftUI
 
 struct QuickBitsSectionView: View {
+    @Environment(InsightManager.self) private var insightManager: InsightManager
     @AppStorage(AppStorageKeys.useMetricUnits) var useMetricUnits: Bool = false
     
     let insights: [Insight]
     let isRefreshing: Bool
     let errors: [Error]
     let onRefresh: () -> Void
+    
+    @State private var expandedIDs: Set<String> = []
+    @State private var loadingIDs: Set<String> = []
+    @State private var explanations: [String: QuickBitExplanation] = [:]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -47,14 +52,59 @@ struct QuickBitsSectionView: View {
                 let top = Array(insights.prefix(8))
                 LazyVStack(spacing: 10) {
                     ForEach(top) { insight in
-                        DetailRowView(
-                            style: .insight,
-                            systemImage: iconName(for: insight.category),
-                            title: insight.title,
-                            subtitle: displayMessage(for: insight),
-                            tint: color(for: insight.priority)
-                        ) {
-                            priorityBadge(for: insight.priority)
+                        let key = insight.dedupeKey.key
+                        VStack(alignment: .leading, spacing: 8) {
+                            DetailRowView(
+                                style: .insight,
+                                systemImage: iconName(for: insight.category),
+                                title: insight.title,
+                                subtitle: displayMessage(for: insight),
+                                tint: color(for: insight.priority)
+                            ) {
+                                priorityBadge(for: insight.priority)
+                            }
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                Haptics.lightImpact()
+                                let isExpanded = expandedIDs.contains(key)
+                                withAnimation(.spring(response: 0.45, dampingFraction: 0.86)) {
+                                    if isExpanded {
+                                        expandedIDs.remove(key)
+                                    } else {
+                                        expandedIDs.insert(key)
+                                    }
+                                }
+                                if !isExpanded {
+                                    // Load explanation when expanding
+                                    if explanations[key] == nil && !loadingIDs.contains(key) {
+                                        loadingIDs.insert(key)
+                                        Task {
+                                            var fetched: QuickBitExplanation?
+                                            if #available(iOS 26.0, *), insightManager.intelligenceManager.supportsAppleIntelligence {
+                                                fetched = await insightManager.explanation(for: insight)
+                                            }
+                                            await MainActor.run {
+                                                withAnimation(.easeInOut) {
+                                                    if let exp = fetched {
+                                                        explanations[key] = exp
+                                                    }
+                                                    loadingIDs.remove(key)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if expandedIDs.contains(key) {
+                                if loadingIDs.contains(key) || explanations[key] != nil {
+                                    QuickBitExplanationBubble(
+                                        isLoading: loadingIDs.contains(key),
+                                        explanation: explanations[key],
+                                        tint: color(for: insight.priority)
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -134,6 +184,60 @@ private extension QuickBitsSectionView {
             return insight.message
         default:
             return insight.message
+        }
+    }
+}
+
+private struct QuickBitExplanationBubble: View {
+    let isLoading: Bool
+    let explanation: QuickBitExplanation?
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 8) {
+            Spacer()
+
+            Image(systemName: "arrow.turn.down.right")
+                .foregroundStyle(tint)
+                .padding([.top, .leading], 5)
+
+            Group {
+                if isLoading {
+                    HStack(spacing: 8) {
+                        ProgressView()
+                            .controlSize(.small)
+                            .tint(tint)
+
+                        Text("Generating explanation…")
+                            .font(.body)
+                            .foregroundStyle(.secondary)
+                    }
+                    .transition(.scale.combined(with: .opacity))
+                } else if let exp = explanation {
+                    VStack(alignment: .leading, spacing: 8) {
+                        if !exp.description.isEmpty {
+                            Text(exp.description)
+                                .font(.body)
+                                .foregroundStyle(.primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                        if !exp.recommendation.isEmpty {
+                            HStack(alignment: .top, spacing: 8) {
+                                Image(systemName: "sparkles")
+                                    .foregroundStyle(.mygraPurple)
+                                Text(exp.recommendation)
+                                    .font(.body)
+                                    .foregroundStyle(.secondary)
+                                    .fixedSize(horizontal: false, vertical: true)
+                            }
+                        }
+                    }
+                    .transition(.scale.combined(with: .opacity))
+
+                }
+            }
+            .padding(8)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
         }
     }
 }
