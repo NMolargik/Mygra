@@ -145,13 +145,13 @@ struct WeatherCardView: View {
                     if isFetching {
                         ProgressView()
                             .controlSize(.small)
-                            .tint(.red)
+                            .tint(.mygraPurple)
                     } else {
                         Button(action: onRefresh) {
                             Image(systemName: "arrow.clockwise")
                         }
                         .buttonStyle(.bordered)
-                        .tint(.red)
+                        .tint(.mygraPurple)
                     }
                 }
                 .padding(14)

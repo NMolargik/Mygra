@@ -113,14 +113,16 @@ struct MigraineDetailView: View {
                 .accessibilityLabel(migraine.pinned ? "Unpin" : "Pin")
             }
             
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingModifySheet = true
-                } label: {
-                    Label("Modify", systemImage: "pencil")
+            if !migraine.isOngoing {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingModifySheet = true
+                    } label: {
+                        Label("Modify", systemImage: "pencil")
+                    }
+                    .tint(.green)
+                    .accessibilityIdentifier("modifyMigraineButton")
                 }
-                .tint(.green)
-                .accessibilityIdentifier("modifyMigraineButton")
             }
         }
         .sheet(isPresented: $showingEndSheet) {
@@ -140,7 +142,7 @@ struct MigraineDetailView: View {
                 },
                 onCancel: { /* simply closes */ }
             )
-            .presentationDetents([.fraction(0.3)])
+            .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingModifySheet) {
             ModifyMigraineSheetView(
