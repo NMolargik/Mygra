@@ -262,8 +262,8 @@ struct MigraineRowView: View {
                 Text(liveDurationString(now: now))
                     .font(.caption).bold()
                     .monospacedDigit()
+                    .lineLimit(1)
             }
-            .foregroundStyle(.black)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(

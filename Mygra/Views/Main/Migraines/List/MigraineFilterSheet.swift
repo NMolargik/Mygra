@@ -55,7 +55,11 @@ struct MigraineFilterSheet: View {
                 
                 if useDateRange {
                     DatePicker("Start", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                        .tint(.mygraPurple)
+
                     DatePicker("End", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
+                        .tint(.mygraPurple)
+
                 }
             }
             
@@ -110,7 +114,10 @@ struct MigraineFilterSheet: View {
                         } label: {
                             Label("Clear", systemImage: "circle.slash")
                         }
-                        .buttonStyle(.bordered)
+                        .padding(8)
+                        .padding(.horizontal, 5)
+                        .foregroundStyle(.white)
+                        .adaptiveGlass(tint: .mygraPurple)
                         .controlSize(.small)
                     }
                 }
@@ -130,10 +137,10 @@ struct MigraineFilterSheet: View {
                                         Spacer()
                                         if workingFilter.requiredTriggers.contains(trig) {
                                             Image(systemName: "checkmark.circle.fill")
-                                                .foregroundStyle(.red)
+                                                .foregroundStyle(.mygraBlue)
                                         } else {
                                             Image(systemName: "circle")
-                                                .foregroundStyle(.red)
+                                                .foregroundStyle(.mygraBlue)
                                         }
                                     }
                                 }

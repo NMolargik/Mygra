@@ -35,6 +35,7 @@ struct EndMigraineSheet: View {
                         in: startDate...Date().addingTimeInterval(365*24*3600),
                         displayedComponents: [.date, .hourAndMinute]
                     )
+                    .tint(.mygraPurple)
                 } footer: {
                     Text("Choose when this migraine ended. The end time must be after the start time.")
                 }

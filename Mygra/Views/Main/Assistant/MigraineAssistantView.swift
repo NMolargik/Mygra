@@ -18,6 +18,7 @@ struct MigraineAssistantView: View {
     @State private var lastMessageID: AnyHashable? = nil
     @State private var isSending: Bool = false
     @State private var lastConversationCount: Int = 0
+    @State private var animateHeaderGlow = false
     
     private var sendEnabled: Bool {
         !inputText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !insightManager.isGeneratingGuidance
@@ -38,12 +39,51 @@ struct MigraineAssistantView: View {
                             VStack(spacing: 8) {
                                 Text("Migraine Assistant")
                                     .font(.title2).bold()
-                                Text("Powered by Apple Intelligence")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                                    .multilineTextAlignment(.center)
-                                    .padding(.horizontal)
-                                    .padding(.bottom, 8)
+                                HStack(spacing: 6) {
+                                    Image(systemName: "apple.intelligence")
+                                        .symbolEffect(.pulse, isActive: insightManager.isGeneratingGuidance)
+                                        .foregroundStyle(
+                                            AngularGradient(
+                                                colors: [.orange, .red, .purple, .blue, .purple, .red, .orange, .orange],
+                                                center: .center,
+                                                startAngle: .degrees(-90),
+                                                endAngle: .degrees(270)
+                                            )
+                                        )
+                                    Text("Powered by Apple Intelligence")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .overlay {
+                                            LinearGradient(colors: [.clear, .white.opacity(0.7), .clear], startPoint: .leading, endPoint: .trailing)
+                                                .mask(
+                                                    Text("Powered by Apple Intelligence").font(.caption)
+                                                )
+                                                .opacity(animateHeaderGlow ? 1 : 0.2)
+                                                .animation(.easeInOut(duration: 2).repeatForever(autoreverses: true), value: animateHeaderGlow)
+                                        }
+                                    if insightManager.isGeneratingGuidance {
+                                        ProgressView()
+                                            .controlSize(.small)
+                                    }
+                                }
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(
+                                    Capsule()
+                                        .fill(.ultraThinMaterial)
+                                        .overlay(
+                                            Capsule()
+                                                .stroke(
+                                                    AngularGradient(
+                                                        colors: [.orange.opacity(0.9), .pink.opacity(0.8), .purple.opacity(0.9), .blue.opacity(0.9), .purple.opacity(0.9), .pink.opacity(0.8), .orange.opacity(0.9)],
+                                                        center: .center
+                                                    ),
+                                                    lineWidth: 1
+                                                )
+                                                .opacity(0.9)
+                                        )
+                                        .shadow(color: .purple.opacity(0.15), radius: 8, x: 0, y: 2)
+                                )
                             }
                             .id("assistantHeader")
                             
@@ -178,7 +218,7 @@ struct MigraineAssistantView: View {
                     .overlay(Divider(), alignment: .top)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
+                    ToolbarItem(placement: .topBarTrailing) {
                         Button {
                             Haptics.lightImpact()
                             dismiss()

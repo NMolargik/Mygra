@@ -173,6 +173,12 @@ Are you sure you want to proceed?
                     Link("Nick Molargik", destination: URL(string: "https://www.linkedin.com/in/nicholas-molargik/")!)
                         .foregroundStyle(.mygraBlue)
                 }
+                
+                LabeledContent("Graphics") {
+                    Link("Rahul Parmar", destination: URL(string: "https://www.linkedin.com/in/rpn4499/")!)
+                        .foregroundStyle(.mygraBlue)
+                }
+                
                 LabeledContent("Publisher") {
                     Link("Molargik Software LLC", destination: URL(string: "https://www.molargiksoftware.com")!)
                         .foregroundStyle(.mygraBlue)

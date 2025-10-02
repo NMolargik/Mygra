@@ -23,7 +23,7 @@ struct ContentView: View {
 
     var body: some View {
         NavigationStack {
-            Group {
+            ScrollView {
                 if !isPhoneAppInstalled {
                     VStack(spacing: 6) {
                         Text("Open Mygra on your iPhone")
@@ -81,6 +81,9 @@ struct ContentView: View {
                         self.now = date
                     }
                 }
+            }
+            .refreshable {
+                aggressiveRefresh()
             }
             .navigationTitle("Mygra")
             .onAppear {

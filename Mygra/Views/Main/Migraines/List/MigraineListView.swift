@@ -54,8 +54,10 @@ struct MigraineListView: View {
                                     } label: {
                                         Label("Show All", systemImage: "pin.slash")
                                     }
-                                    .buttonStyle(.borderedProminent)
-                                    .tint(.yellow)
+                                    .padding(8)
+                                    .padding(.horizontal, 5)
+                                    .foregroundStyle(.white)
+                                    .adaptiveGlass(tint: .yellow)
                                     .accessibilityIdentifier("emptyShowAllButton")
                                 }
                                 Button {
@@ -64,8 +66,10 @@ struct MigraineListView: View {
                                 } label: {
                                     Label("Clear Filters", systemImage: "xmark.circle")
                                 }
-                                .buttonStyle(.bordered)
-                                .tint(.mygraBlue)
+                                .padding(8)
+                                .padding(.horizontal, 5)
+                                .foregroundStyle(.white)
+                                .adaptiveGlass(tint: .mygraBlue)
                                 .accessibilityIdentifier("emptyClearFiltersButton")
                             }
                             .padding(.top, 4)
@@ -77,6 +81,10 @@ struct MigraineListView: View {
                         } label: {
                             Label("Adjust Filters", systemImage: "slider.horizontal.3")
                         }
+                        .padding(8)
+                        .padding(.horizontal, 5)
+                        .foregroundStyle(.white)
+                        .adaptiveGlass(tint: .green)
                     }
                 } else {
                     ScrollView {
@@ -156,8 +164,10 @@ struct MigraineListView: View {
                                         } label: {
                                             Label("Show All", systemImage: "pin.slash")
                                         }
-                                        .buttonStyle(.bordered)
-                                        .tint(.yellow)
+                                        .padding(8)
+                                        .padding(.horizontal, 5)
+                                        .foregroundStyle(.white)
+                                        .adaptiveGlass(tint: .yellow)
                                         .controlSize(.small)
                                         .accessibilityIdentifier("footerShowAllButton")
                                     }
@@ -173,8 +183,10 @@ struct MigraineListView: View {
                                     } label: {
                                         Label("Clear Filters", systemImage: "xmark.circle")
                                     }
-                                    .buttonStyle(.bordered)
-                                    .tint(.mygraBlue)
+                                    .padding(8)
+                                    .padding(.horizontal, 5)
+                                    .foregroundStyle(.white)
+                                    .adaptiveGlass(tint: .mygraBlue)
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerClearFiltersButton")
                                     
@@ -184,8 +196,10 @@ struct MigraineListView: View {
                                     } label: {
                                         Label("Adjust", systemImage: "slider.horizontal.3")
                                     }
-                                    .buttonStyle(.bordered)
-                                    .tint(.green)
+                                    .padding(8)
+                                    .padding(.horizontal, 5)
+                                    .foregroundStyle(.white)
+                                    .adaptiveGlass(tint: .green)
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerAdjustFiltersButton")
                                 }
