@@ -36,10 +36,10 @@ struct IntelligenceCardView: View {
             
             Button(action: onOpen) {
                 Text("Chat")
-                    .padding(8)
-                    .padding(.horizontal, 5)
-                    .foregroundStyle(.white)
             }
+            .padding(8)
+            .padding(.horizontal, 5)
+            .foregroundStyle(.white)
             .adaptiveGlass(tint: .mygraPurple)
             .accessibilityLabel("Open Migraine Assistant")
         }

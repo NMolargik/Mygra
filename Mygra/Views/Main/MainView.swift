@@ -299,7 +299,8 @@ struct MainView: View {
             }
             .buttonStyle(.plain)
             .onReceive(timer) { tick in
-                self.now = tick
+                let quantized = Date(timeIntervalSince1970: floor(tick.timeIntervalSince1970))
+                self.now = quantized
                 withAnimation(.easeInOut(duration: 0.8)) {
                     self.drawOn.toggle()
                 }
@@ -314,7 +315,7 @@ struct MainView: View {
     }
 
     private var timer: Publishers.Autoconnect<Timer.TimerPublisher> {
-        Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()
+        Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
     }
 
     private func durationString(since start: Date, now: Date) -> String {
@@ -460,3 +461,4 @@ struct MainView: View {
     .environment(previewUserManager)
     .environment(previewMigraineManager)
 }
+

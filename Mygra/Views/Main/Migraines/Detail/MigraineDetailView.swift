@@ -66,20 +66,6 @@ struct MigraineDetailView: View {
                 if let h = migraine.health {
                     HealthDetailView(health: h, useMetricUnits: useMetricUnits)
                 }
-                
-                Spacer(minLength: 12)
-                
-                // Delete button at the very bottom
-                Button(role: .destructive) {
-                    showDeleteConfirm = true
-                } label: {
-                    Label("Delete Migraine", systemImage: "trash")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                }
-                .buttonStyle(.bordered)
-                .tint(.red)
-                .accessibilityIdentifier("deleteMigraineButton")
             }
             .padding()
         }
@@ -113,14 +99,26 @@ struct MigraineDetailView: View {
                 .accessibilityLabel(migraine.pinned ? "Unpin" : "Pin")
             }
             
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingModifySheet = true
-                } label: {
-                    Label("Modify", systemImage: "pencil")
+            if !migraine.isOngoing {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingModifySheet = true
+                    } label: {
+                        Label("Modify", systemImage: "slider.horizontal.3")
+                    }
+                    .tint(.green)
+                    .accessibilityIdentifier("modifyMigraineButton")
                 }
-                .tint(.green)
-                .accessibilityIdentifier("modifyMigraineButton")
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showDeleteConfirm = true
+                    } label: {
+                        Label("Delete Migraine", systemImage: "trash")
+                    }
+                    .tint(.red)
+                    .accessibilityIdentifier("deleteMigraineButton")
+                }
             }
         }
         .sheet(isPresented: $showingEndSheet) {
@@ -140,7 +138,7 @@ struct MigraineDetailView: View {
                 },
                 onCancel: { /* simply closes */ }
             )
-            .presentationDetents([.fraction(0.3)])
+            .presentationDetents([.medium])
         }
         .sheet(isPresented: $showingModifySheet) {
             ModifyMigraineSheetView(

@@ -24,46 +24,8 @@ struct MigraineActivityAttributes: ActivityAttributes {
 struct MygraWidgetsLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: MigraineActivityAttributes.self) { context in
-            // Lock screen / banner UI - Enhanced with severity indicator and subtle gradient
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 12) {
-                    Image(systemName: "brain.head.profile.fill")
-                        .symbolRenderingMode(.multicolor)
-                    LinearGradient(
-                        colors: [Color.mygraPurple, Color.mygraBlue],
-                        startPoint: .topTrailing,
-                        endPoint: .bottomLeading
-                    )
-                        .ignoresSafeArea()
-                        .font(.system(size: 24))
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Ongoing Migraine")
-                            .font(.headline.bold())
-                        // Live timer since start
-                        Text(context.state.startDate, style: .timer)
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                            .font(.subheadline)
-                    }
-                    Spacer()
-                    Text("Severity: \(context.state.severity)/10")
-                        .font(.caption2.bold())
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(severityColor(severity: context.state.severity))
-                        .foregroundStyle(.white)
-                        .clipShape(Capsule())
-                }
-                if let notes = context.state.notes, !notes.isEmpty {
-                    Text(notes)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .truncationMode(.tail)
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+            // Lock screen / banner UI
+            MigraineActivityContentView(context: context)
 
         } dynamicIsland: { context in
             DynamicIsland {
@@ -129,12 +91,11 @@ struct MygraWidgetsLiveActivity: Widget {
             } compactLeading: {
                 // Compact leading - Minimal icon with subtle animation if possible (but static here)
                 Image(systemName: "brain.head.profile.fill")
-                    LinearGradient(
+                    .foregroundStyle(LinearGradient(
                         colors: [Color.mygraPurple, Color.mygraBlue],
                         startPoint: .topTrailing,
                         endPoint: .bottomLeading
-                    )
-                    .font(.caption)
+                    ))
             } compactTrailing: {
                 // Compact trailing - Ultra-compact severity chip to avoid stretching width
                 Text("\(context.state.severity)")
@@ -147,16 +108,121 @@ struct MygraWidgetsLiveActivity: Widget {
             } minimal: {
                 // Minimal - Icon with severity color overlay
                 Image(systemName: "brain.head.profile.fill")
-                    LinearGradient(
+                    .foregroundStyle(LinearGradient(
                         colors: [Color.mygraPurple, Color.mygraBlue],
                         startPoint: .topTrailing,
                         endPoint: .bottomLeading
-                    )
+                    ))
                     .padding()
             }
             .widgetURL(URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)"))
             .keylineTint(.red.opacity(0.5))
         }
+        .supplementalActivityFamilies([.small]) // Enables compact presentation on watchOS Smart Stack
+    }
+}
+
+// MARK: - Cross-platform content view that adapts by ActivityFamily
+private struct MigraineActivityContentView: View {
+    let context: ActivityViewContext<MigraineActivityAttributes>
+    @Environment(\.activityFamily) private var activityFamily
+
+    var body: some View {
+        Group {
+            if activityFamily == .small {
+                // Compact layout tailored for Apple Watch Smart Stack (icon • timer • severity badge)
+                
+                VStack(spacing: 5) {
+                    HStack {
+                        Text("Ongoing Migraine")
+                        
+                        Spacer()
+                    }
+                    .padding(.leading, 8)
+                    HStack(alignment: .center, spacing: 6) {
+                        Image(systemName: "brain.head.profile.fill")
+                            .symbolRenderingMode(.multicolor)
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [Color.mygraPurple, Color.mygraBlue],
+                                    startPoint: .topTrailing,
+                                    endPoint: .bottomLeading
+                                )
+                            )
+                            .font(.system(size: 14, weight: .semibold))
+                            .accessibilityHidden(true)
+                        
+                        // Timer given highest priority to avoid truncation
+                        Text(context.state.startDate, style: .timer)
+                            .monospacedDigit()
+                            .font(.body)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .layoutPriority(1)
+                        
+                        Spacer(minLength: 4)
+                        
+                        // Circular severity badge to save horizontal space
+                        ZStack {
+                            Circle()
+                                .fill(severityColor(severity: context.state.severity))
+                            Text("\(context.state.severity)")
+                                .font(.caption2.bold())
+                                .monospacedDigit()
+                                .foregroundStyle(.black)
+                        }
+                        .frame(width: 22, height: 22)
+                        .accessibilityLabel("Severity \(context.state.severity) out of 10")
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 6)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityLabel("Migraine, timer \(Text(context.state.startDate, style: .timer)), severity \(context.state.severity) out of 10")
+                }
+            } else {
+                // iOS Lock screen / banner (original fuller layout)
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "brain.head.profile.fill")
+                            .symbolRenderingMode(.multicolor)
+                            .foregroundStyle(LinearGradient(
+                                colors: [Color.mygraPurple, Color.mygraBlue],
+                                startPoint: .topTrailing,
+                                endPoint: .bottomLeading
+                            ))
+                            .ignoresSafeArea()
+                            .font(.system(size: 24))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Ongoing Migraine")
+                                .font(.headline.bold())
+                            // Live timer since start
+                            Text(context.state.startDate, style: .timer)
+                                .monospacedDigit()
+                                .foregroundStyle(.secondary)
+                                .font(.subheadline)
+                        }
+                        Spacer()
+                        Text("Severity: \(context.state.severity)/10")
+                            .font(.caption2.bold())
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(severityColor(severity: context.state.severity))
+                            .foregroundStyle(.black)
+                            .clipShape(Capsule())
+                    }
+                    if let notes = context.state.notes, !notes.isEmpty {
+                        Text(notes)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+            }
+        }
+        .containerBackground(for: .widget) { Color.clear }
     }
 }
 
@@ -194,4 +260,12 @@ private func severityColor(severity: Int) -> Color {
 } contentStates: {
     MigraineActivityAttributes.ContentState.sample
 }
+
+#if os(watchOS)
+#Preview("Apple Watch – Smart Stack", as: .content, using: MigraineActivityAttributes()) {
+    MygraWidgetsLiveActivity()
+} contentStates: {
+    MigraineActivityAttributes.ContentState.sample
+}
+#endif
 

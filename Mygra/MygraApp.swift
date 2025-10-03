@@ -49,6 +49,9 @@ struct MygraApp: App {
         weatherManager = WeatherManager()
         healthManager = HealthManager()
         notificationManager = NotificationManager()
+        
+        // watchOS
+        ComplicationSync.shared.activate()
     }
 
     var body: some Scene {

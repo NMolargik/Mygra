@@ -35,7 +35,7 @@ struct UserEditView: View {
                 displayedComponents: .date
             )
             .datePickerStyle(.graphical)
-            .tint(.red)
+            .tint(.mygraPurple)
             .onChange(of: user.birthday) { isFirstNameFocused = false }
         }
 

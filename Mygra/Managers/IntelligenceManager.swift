@@ -144,6 +144,7 @@ final class IntelligenceManager {
         When the user asks whether a pattern appears "in my entries," reference specific rows by date or fields from Entries/EntriesJSON.
         Prefer concrete, data-backed statements over generalities. If the data is insufficient, say what additional fields would help.
         Do NOT provide concrete medical advice, diagnoses, or treatment suggestions, though you can state the obvious.
+        Return all responses in natural language with no special data wrapping. Give detailed responses.
         """
         if !userSummary.isEmpty {
             instructions += "\nUser profile: \(userSummary)"
