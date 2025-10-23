@@ -84,7 +84,7 @@ struct MigraineDetailView: View {
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "chevron.left")
-                            Text("Close")
+                            Text("Back")
                         }
                     }
                 }
