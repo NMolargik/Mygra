@@ -42,28 +42,7 @@ struct MainView: View {
                         MigraineListView(showingEntrySheet: $showingEntrySheet)
                             .navigationTitle("")
                             .toolbar {
-                                if migraineManager.ongoingMigraine == nil {
-                                    ToolbarItem(placement: .topBarTrailing) {
-                                        Button {
-                                            handleAddTapped()
-                                        } label: {
-                                            HStack(spacing: 6) {
-                                                Image(systemName: "plus")
-                                            }
-                                            .foregroundStyle(.mygraBlue)
-                                        }
-                                        .accessibilityIdentifier("addEntryButton")
-                                        .tint(.blue)
-                                    }
-                                }
-                            }
-                    }
-                } detail: {
-                    NavigationStack(path: $listPath) {
-                        InsightsView(showingEntrySheet: $showingEntrySheet)
-                            .navigationTitle(AppTab.insights.rawValue)
-                            .toolbar {
-                                ToolbarItemGroup(placement: .topBarTrailing) {
+                                ToolbarItem(placement: .topBarTrailing) {
                                     Button {
                                         showingSettingsSheet = true
                                     } label: {
@@ -73,6 +52,12 @@ struct MainView: View {
                                     .tint(.orange)
                                 }
                             }
+                    }
+                } detail: {
+                    NavigationStack(path: $listPath) {
+                        InsightsView(showingEntrySheet: $showingEntrySheet)
+                            .navigationTitle(AppTab.insights.rawValue)
+                            .toolbar { regularWidthTopBarToolbar }
                             .navigationDestination(for: UUID.self) { migraineID in
                                 if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
                                                    ?? migraineManager.migraines.first { $0.id == migraineID }) {
@@ -109,7 +94,7 @@ struct MainView: View {
                         }
                     }
                 }
-                .tabViewBottomAccessoryIfAvailable { ongoingAccessory }
+                .tabViewBottomAccessoryIfAvailable { bottomAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(onMigraineSaved: { migraine, reviewScene in
                         createNewMigraine(migraine: migraine, reviewScene: reviewScene)
@@ -129,20 +114,7 @@ struct MainView: View {
                             showingEntrySheet: $showingEntrySheet
                         )
                         .navigationTitle("Mygra")
-                        .toolbar {
-                            if migraineManager.ongoingMigraine == nil {
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button {
-                                        handleAddTapped()
-                                    } label: {
-                                        Text("New Migraine")
-                                            .bold()
-                                        .foregroundStyle(.mygraBlue)
-                                    }
-                                    .accessibilityIdentifier("addEntryButton")
-                                }
-                            }
-                        }
+                        .toolbar { insightsTopBarToolbar }
                     }
                     .tabItem {
                         AppTab.insights.icon()
@@ -167,24 +139,7 @@ struct MainView: View {
                                 )
                             }
                         }
-                        .toolbar {
-                            if migraineManager.ongoingMigraine == nil {
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button {
-                                        handleAddTapped()
-                                    } label: {
-                                        HStack(spacing: 6) {
-                                            Image(systemName: "plus")
-                                            Text("Add")
-                                                .bold()
-
-                                        }
-                                        .foregroundStyle(.mygraBlue)
-                                    }
-                                    .accessibilityIdentifier("addEntryButton")
-                                }
-                            }
-                        }
+                        .toolbar { listTopBarToolbar }
                     }
                     .tabItem {
                         AppTab.list.icon()
@@ -207,7 +162,7 @@ struct MainView: View {
                     .tag(AppTab.settings)
                 }
                 .tint(appTab.color())
-                .tabViewBottomAccessoryIfAvailable { ongoingAccessory }
+                .tabViewBottomAccessoryIfAvailable { bottomAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(
                         onMigraineSaved: { migraine, reviewScene in
@@ -285,12 +240,16 @@ struct MainView: View {
 
                     Text("Ongoing Migraine")
                         .font(.headline)
+                    
                     Text("•")
                         .foregroundStyle(.secondary)
+                    
                     Text(durationString(since: ongoing.startDate, now: now))
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
+                    
                     Spacer(minLength: 0)
+                    
                     Image(systemName: "chevron.right")
                         .foregroundStyle(.secondary)
                 }
@@ -305,6 +264,117 @@ struct MainView: View {
                     self.drawOn.toggle()
                 }
             }
+        }
+    }
+
+    // MARK: - Bottom accessory
+    @ViewBuilder
+    private var bottomAccessory: some View {
+        // If there's an ongoing migraine, show the existing ongoing accessory and nothing else
+        if migraineManager.ongoingMigraine != nil {
+            ongoingAccessory
+        } else if !isRegularWidth {
+            // iPhone only (compact width)
+            HStack(spacing: 12) {
+                // Leading: days since last migraine
+                Text(daysSinceLastMigraineString())
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                Spacer(minLength: 0)
+
+                // Trailing: New Migraine button
+                Button {
+                    handleAddTapped()
+                } label: {
+                    Text("New Migraine")
+                        .bold()
+                        .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButtonBottom")
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 10)
+        }
+    }
+
+    // MARK: - Toolbar helpers
+    @ToolbarContentBuilder
+    private var insightsTopBarToolbar: some ToolbarContent {
+        if #unavailable(iOS 26) {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    Text("New Migraine")
+                        .bold()
+                        .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButton")
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var listTopBarToolbar: some ToolbarContent {
+        if #unavailable(iOS 26) {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                        Text("Add")
+                            .bold()
+                    }
+                    .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButton")
+            }
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var regularWidthTopBarToolbar: some ToolbarContent {
+        if #unavailable(iOS 26) {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                        Text("New Migraine")
+                    }
+                    .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButton")
+                .tint(.blue)
+            }
+        }
+    }
+
+    private func daysSinceLastMigraineString() -> String {
+        // Determine the most recent migraine end date or start date if never ended
+        let lastDate: Date? = {
+            // Consider visibleMigraines first; if empty, fall back to all migraines
+            let all = migraineManager.visibleMigraines.isEmpty ? migraineManager.migraines : migraineManager.visibleMigraines
+            guard !all.isEmpty else { return nil }
+            // Sort by the most relevant date: endDate if present, otherwise startDate
+            return all
+                .compactMap { $0.endDate ?? $0.startDate }
+                .max()
+        }()
+
+        guard let date = lastDate else {
+            return "Streak: 0 days"
+        }
+        let days = max(0, Int(Date().timeIntervalSince(date) / 86_400))
+        if days == 0 {
+            return "Streak: 0 days"
+        } else if days == 1 {
+            return "Streak: 1 day"
+        } else {
+            return "Streak: \(days) days"
         }
     }
 
@@ -461,4 +531,3 @@ struct MainView: View {
     .environment(previewUserManager)
     .environment(previewMigraineManager)
 }
-
