@@ -312,6 +312,17 @@ struct MainView: View {
                 }
                 .accessibilityIdentifier("addEntryButton")
             }
+        } else if isRegularWidth {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    Text("New Migraine")
+                        .bold()
+                        .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButton")
+            }
         }
     }
 
@@ -331,12 +342,40 @@ struct MainView: View {
                 }
                 .accessibilityIdentifier("addEntryButton")
             }
+        } else if isRegularWidth {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                        Text("Add")
+                            .bold()
+                    }
+                    .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButton")
+            }
         }
     }
 
     @ToolbarContentBuilder
     private var regularWidthTopBarToolbar: some ToolbarContent {
         if #unavailable(iOS 26) {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "plus")
+                        Text("New Migraine")
+                    }
+                    .foregroundStyle(.mygraBlue)
+                }
+                .accessibilityIdentifier("addEntryButton")
+                .tint(.blue)
+            }
+        } else if isRegularWidth {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {
                     handleAddTapped()
@@ -531,3 +570,4 @@ struct MainView: View {
     .environment(previewUserManager)
     .environment(previewMigraineManager)
 }
+
