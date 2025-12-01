@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Observation
 
 extension ContentView {
     @Observable
