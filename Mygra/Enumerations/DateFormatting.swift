@@ -68,9 +68,9 @@ enum DateFormatting {
             let day = DateFormatting.date(startDate, useDMY: useDMY, locale: locale)
             return "\(day) \(timeOnly(startDate))–\(timeOnly(endDate))"
         } else {
-            let a = DateFormatting.dateTime(startDate, useDMY: useDMY, locale: locale)
-            let b = DateFormatting.dateTime(endDate, useDMY: useDMY, locale: locale)
-            return "\(a) – \(b)"
+            let startString = DateFormatting.dateTime(startDate, useDMY: useDMY, locale: locale)
+            let endString = DateFormatting.dateTime(endDate, useDMY: useDMY, locale: locale)
+            return "\(startString) – \(endString)"
         }
     }
 }

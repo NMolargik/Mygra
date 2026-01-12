@@ -34,10 +34,6 @@ struct SettingsView: View {
         return "\(version) (Build \(build))"
     }
 
-    private var bundleIdentifier: String {
-        Bundle.main.bundleIdentifier ?? "—"
-    }
-
     var body: some View {
         @Bindable var manager = userManager
 
@@ -70,6 +66,7 @@ struct SettingsView: View {
                 }
             ))
             .tint(.green)
+            .accessibilityHint("Switch between imperial and metric units for measurements")
 
             Toggle("Use Day–Month–Year Dates", isOn: Binding(
                 get: { useDayMonthYearDates },
@@ -172,16 +169,19 @@ Are you sure you want to proceed?
                 LabeledContent("Developer") {
                     Link("Nick Molargik", destination: URL(string: "https://www.linkedin.com/in/nicholas-molargik/")!)
                         .foregroundStyle(.mygraBlue)
+                        .accessibilityLabel("Developer: Nick Molargik, opens LinkedIn profile")
                 }
-                
+
                 LabeledContent("Graphics") {
                     Link("Rahul Parmar", destination: URL(string: "https://www.linkedin.com/in/rpn4499/")!)
                         .foregroundStyle(.mygraBlue)
+                        .accessibilityLabel("Graphics designer: Rahul Parmar, opens LinkedIn profile")
                 }
-                
+
                 LabeledContent("Publisher") {
                     Link("Molargik Software LLC", destination: URL(string: "https://www.molargiksoftware.com")!)
                         .foregroundStyle(.mygraBlue)
+                        .accessibilityLabel("Publisher: Molargik Software LLC, opens website")
                 }
             }
 
@@ -208,11 +208,10 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                 .navigationTitle("Edit User")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
+                        Button("Cancel", role: .cancel) {
                             editingUser = false
                             Haptics.lightImpact()
                         }
-                        .tint(.red)
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         Button("Save") {
@@ -288,10 +287,6 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
     private func presentFarewellFlow() {
         showingFarewell = true
         onDeletionTriggered()
-    }
-
-    private func deletionFlowCompleted() {
-        // TODO: Intentionally left empty; to be implemented later.
     }
 
     // MARK: - Export logic

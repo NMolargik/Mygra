@@ -75,11 +75,11 @@ struct MigraineRowView: View {
                 // Secondary line: triggers as dots + note
                 let triggerCount = migraine.triggers.count + migraine.customTriggers.count
                 let hasNote = (migraine.note?.isEmpty == false)
-                let hasSecondary = migraine.pinned || triggerCount > 0 || hasNote
+                let hasSecondary = migraine.isPinned || triggerCount > 0 || hasNote
 
                 if hasSecondary {
                     HStack(alignment: .center, spacing: 8) {
-                        if migraine.pinned {
+                        if migraine.isPinned {
                             // Localized in Localizable.xcstrings:
                             // "migraine_pinned" = "Pinned";
                             Label {

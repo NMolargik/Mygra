@@ -172,12 +172,11 @@ struct UserEditView: View {
                 HStack {
                     Text(condition)
                     Spacer()
-                    Button(action: {
+                    Button(role: .destructive, action: {
                         user.chronicConditions.removeAll(where: { $0 == condition })
                     }) {
                         Image(systemName: "trash")
                             .font(.title2)
-                            .foregroundColor(.red)
                     }
                     .buttonStyle(.borderless)
                 }
@@ -216,12 +215,11 @@ struct UserEditView: View {
                 HStack {
                     Text(restriction)
                     Spacer()
-                    Button(action: {
+                    Button(role: .destructive, action: {
                         user.dietaryRestrictions.removeAll(where: { $0 == restriction })
                     }) {
                         Image(systemName: "trash")
                             .font(.title2)
-                            .foregroundColor(.red)
                     }
                     .buttonStyle(.borderless)
                 }

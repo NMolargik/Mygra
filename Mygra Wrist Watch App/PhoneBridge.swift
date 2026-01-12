@@ -9,6 +9,11 @@ import Foundation
 import WatchConnectivity
 import WidgetKit
 
+/// Shared App Group identifier for cross-target data sharing
+enum AppGroup {
+    static let id = "group.com.molargiksoftware.Mygra"
+}
+
 final class PhoneBridge: NSObject, WCSessionDelegate {
     static let shared = PhoneBridge()
     private override init() { super.init() }
@@ -20,25 +25,27 @@ final class PhoneBridge: NSObject, WCSessionDelegate {
     }
 
     func session(_ session: WCSession, didReceiveComplicationUserInfo userInfo: [String : Any] = [:]) {
-        let defaults = UserDefaults(suiteName: "group.com.molargiksoftware.Mygra")
+        let defaults = UserDefaults(suiteName: AppGroup.id)
         if let ts = userInfo["lastMigraineStart"] as? TimeInterval {
             defaults?.set(ts, forKey: "lastMigraineStart")
         }
         if let ongoing = userInfo["hasOngoingMigraine"] as? Bool {
             defaults?.set(ongoing, forKey: "hasOngoingMigraine")
         }
+        defaults?.synchronize()
         // Tell the watch complication to refresh
         WidgetCenter.shared.reloadAllTimelines()
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        let defaults = UserDefaults(suiteName: "group.com.molargiksoftware.Mygra")
+        let defaults = UserDefaults(suiteName: AppGroup.id)
         if let ts = applicationContext["lastMigraineStart"] as? TimeInterval {
             defaults?.set(ts, forKey: "lastMigraineStart")
         }
         if let ongoing = applicationContext["hasOngoingMigraine"] as? Bool {
             defaults?.set(ongoing, forKey: "hasOngoingMigraine")
         }
+        defaults?.synchronize()
         WidgetCenter.shared.reloadAllTimelines()
         NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
     }
@@ -80,11 +87,12 @@ final class PhoneBridge: NSObject, WCSessionDelegate {
         // Optionally attempt to pull status if reachable; if not, iPhone should push via application context
         if error == nil {
             requestStatus { hasOngoing, lastStart in
-                let defaults = UserDefaults(suiteName: "group.com.molargiksoftware.Mygra")
+                let defaults = UserDefaults(suiteName: AppGroup.id)
                 if let lastStart {
                     defaults?.set(lastStart.timeIntervalSince1970, forKey: "lastMigraineStart")
                 }
                 defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
+                defaults?.synchronize()
                 WidgetCenter.shared.reloadAllTimelines()
                 NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
             }

@@ -111,8 +111,6 @@ struct InsightsView: View {
                     MigraineAssistantView()
                         .environment(insightManager)
                         .ignoresSafeArea()
-                } else {
-                    // TODO: alert user of need for iOS 26
                 }
             }
             .onChange(of: viewModel.isQuickAddExpanded) { _, _ in

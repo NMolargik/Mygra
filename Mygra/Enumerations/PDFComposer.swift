@@ -54,24 +54,24 @@ enum PDFComposer {
             cursorY += 16
 
             // User section
-            if let u = user {
+            if let currentUser = user {
                 cursorY += drawSectionHeader("User", at: CGPoint(x: leftX, y: cursorY), width: contentWidth)
                 cursorY += 6
-                let heightValue = u.displayHeight(useMetricUnits: useMetricUnits) ?? 0
-                let weightValue = u.displayWeight(useMetricUnits: useMetricUnits) ?? 0
+                let heightValue = currentUser.displayHeight(useMetricUnits: useMetricUnits) ?? 0
+                let weightValue = currentUser.displayWeight(useMetricUnits: useMetricUnits) ?? 0
                 let heightUnit = useMetricUnits ? "cm" : "in"
                 let weightUnit = useMetricUnits ? "kg" : "lb"
 
                 let lines: [String] = [
-                    "Name: \(u.name.isEmpty ? "—" : u.name)",
-                    "Birthday: \(DateFormatting.date(u.birthday, useDMY: useDMY))",
-                    "Biological Sex: \(u.biologicalSex.rawValue.capitalized)",
+                    "Name: \(currentUser.name.isEmpty ? "—" : currentUser.name)",
+                    "Birthday: \(DateFormatting.date(currentUser.birthday, useDMY: useDMY))",
+                    "Biological Sex: \(currentUser.biologicalSex.rawValue.capitalized)",
                     String(format: "Height: %.1f %@", heightValue, heightUnit),
                     String(format: "Weight: %.1f %@", weightValue, weightUnit),
-                    String(format: "Avg Sleep: %.1f h", u.averageSleepHours),
-                    String(format: "Avg Caffeine: %.0f mg", u.averageCaffeineMg),
-                    "Chronic Conditions: \(u.chronicConditions.isEmpty ? "—" : u.chronicConditions.joined(separator: ", "))",
-                    "Dietary Restrictions: \(u.dietaryRestrictions.isEmpty ? "—" : u.dietaryRestrictions.joined(separator: ", "))"
+                    String(format: "Avg Sleep: %.1f h", currentUser.averageSleepHours),
+                    String(format: "Avg Caffeine: %.0f mg", currentUser.averageCaffeineMg),
+                    "Chronic Conditions: \(currentUser.chronicConditions.isEmpty ? "—" : currentUser.chronicConditions.joined(separator: ", "))",
+                    "Dietary Restrictions: \(currentUser.dietaryRestrictions.isEmpty ? "—" : currentUser.dietaryRestrictions.joined(separator: ", "))"
                 ]
                 for line in lines {
                     startPageIfNeeded(extra: 18)
@@ -91,21 +91,21 @@ enum PDFComposer {
                     // Each entry block
                     startPageIfNeeded(extra: 100)
 
-                    let title = "• \(DateFormatting.dateTime(m.startDate, useDMY: useDMY))" + (m.pinned ? "  [Pinned]" : "")
+                    let title = "• \(DateFormatting.dateTime(m.startDate, useDMY: useDMY))" + (m.isPinned ? "  [Pinned]" : "")
                     cursorY += drawSubheadline(title, at: CGPoint(x: leftX, y: cursorY), width: contentWidth)
 
                     var meta: [String] = []
                     if let end = m.endDate {
                         let interval = DateFormatting.dateInterval(from: m.startDate, to: end, useDMY: useDMY)
                         meta.append("Range: \(interval)")
-                        let dur = end.timeIntervalSince(m.startDate)
-                        let h = Int(dur) / 3600
-                        let min = (Int(dur) % 3600) / 60
-                        let s = Int(dur) % 60
-                        if h > 0 {
-                            meta.append(String(format: "Duration: %dh %02dm %02ds", h, min, s))
+                        let duration = end.timeIntervalSince(m.startDate)
+                        let hours = Int(duration) / 3600
+                        let minutes = (Int(duration) % 3600) / 60
+                        let seconds = Int(duration) % 60
+                        if hours > 0 {
+                            meta.append(String(format: "Duration: %dh %02dm %02ds", hours, minutes, seconds))
                         } else {
-                            meta.append(String(format: "Duration: %dm %02ds", min, s))
+                            meta.append(String(format: "Duration: %dm %02ds", minutes, seconds))
                         }
                     } else {
                         meta.append("Ongoing")
@@ -149,7 +149,7 @@ enum PDFComposer {
                             if useMetricUnits {
                                 hparts.append(String(format: "Water: %.1f L", liters))
                             } else {
-                                let flOz = liters * 33.8140227
+                                let flOz = liters * UnitConversion.litersToFluidOunces
                                 hparts.append(String(format: "Water: %.0f fl oz", flOz))
                             }
                         }
@@ -176,7 +176,7 @@ enum PDFComposer {
                         }
                         if let glucose = h.glucoseMgPerdL {
                             if useMetricUnits {
-                                let mmol = glucose / 18.0
+                                let mmol = glucose / UnitConversion.glucoseMgDlToMmolL
                                 hparts.append(String(format: "Glucose: %.1f mmol/L", mmol))
                             } else {
                                 hparts.append(String(format: "Glucose: %.0f mg/dL", glucose.rounded()))

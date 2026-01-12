@@ -9,12 +9,9 @@ import Foundation
 import WidgetKit
 import SwiftUI
 
-private let WidgetAppGroupID = "group.com.molargiksoftware.Mygra"
-
 struct DaysSinceLastMigraineEntry: TimelineEntry {
     let date: Date
     let daysSince: Int
-
 }
 
 private struct DaysSinceLastMigraineProvider: TimelineProvider {
@@ -35,7 +32,7 @@ private struct DaysSinceLastMigraineProvider: TimelineProvider {
     }
 
     private func makeEntry() -> DaysSinceLastMigraineEntry {
-        let defaults = UserDefaults(suiteName: WidgetAppGroupID)
+        let defaults = UserDefaults(suiteName: AppGroup.id)
         let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
         let lastStart = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
         let days = Self.daysSince(lastStart)

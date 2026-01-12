@@ -228,8 +228,8 @@ final class WeatherManager {
     private func reverseGeocodeIfNeeded(for location: CLLocation) async {
         // If we already have a placemark for (roughly) the same spot, skip.
         if let _ = placemark, let last = lastLocation {
-            let d = location.distance(from: last)
-            if d < 100 { return } // within 100m: keep existing placemark
+            let distance = location.distance(from: last)
+            if distance < 100 { return } // within 100m: keep existing placemark
         }
 
         // Cancel any in-flight geocode to avoid piling up
@@ -248,18 +248,18 @@ final class WeatherManager {
     // MARK: - UI conveniences
 
     var temperatureString: String? {
-        guard let t = temperature else { return nil }
-        return Self.tempFormatter.string(from: t)
+        guard let temp = temperature else { return nil }
+        return Self.tempFormatter.string(from: temp)
     }
 
     var pressureString: String? {
-        guard let p = pressure else { return nil }
-        return Self.pressureFormatter.string(from: p)
+        guard let press = pressure else { return nil }
+        return Self.pressureFormatter.string(from: press)
     }
 
     var humidityPercentString: String? {
-        guard let h = humidity else { return nil }
-        return Self.percentFormatter.string(from: NSNumber(value: h))
+        guard let humidityValue = humidity else { return nil }
+        return Self.percentFormatter.string(from: NSNumber(value: humidityValue))
     }
 
     // Human-readable location name (e.g., "Seattle, WA" or "Seattle, USA")

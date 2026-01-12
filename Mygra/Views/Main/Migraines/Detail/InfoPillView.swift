@@ -30,6 +30,8 @@ struct InfoPillView: View {
                 .fill(tint.opacity(0.12))
         )
         .contentShape(Rectangle())
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 }
 

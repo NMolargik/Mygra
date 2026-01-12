@@ -175,11 +175,11 @@ struct ModifyMigraineSheetView: View {
             .navigationTitle("Modify Migraine")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Cancel", role: .cancel) {
                         Haptics.lightImpact()
                         onCancel()
                     }
-                    .tint(.red)
+                    .foregroundStyle(.red)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
@@ -199,11 +199,11 @@ struct ModifyMigraineSheetView: View {
     }
 
     private func waterRange(useMetricUnits: Bool) -> ClosedRange<Double> {
-        useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814)
+        useMetricUnits ? 0...2.5 : 0...2.5
     }
 
     private func waterStep(useMetricUnits: Bool) -> Double {
-        useMetricUnits ? 0.1 : (8.0 / 33.814)
+        useMetricUnits ? 0.1 : (8.0 / UnitConversion.litersToFluidOunces)
     }
 
     private func waterDisplay(_ value: Double, useMetricUnits: Bool) -> String {

@@ -80,20 +80,20 @@ final class HealthData {
     
     /// Water in fluid ounces (derived from liters).
     var waterOunces: Double? {
-        get { waterLiters.map { $0 * 33.814 } }
-        set { waterLiters = newValue.map { $0 / 33.814 }; }
+        get { waterLiters.map { $0 * UnitConversion.litersToFluidOunces } }
+        set { waterLiters = newValue.map { $0 / UnitConversion.litersToFluidOunces } }
     }
-    
+
     /// Energy in kilojoules (derived from kcal).
     var energyKilojoules: Double? {
-        get { energyKilocalories.map { $0 * 4.184 } }
-        set { energyKilocalories = newValue.map { $0 / 4.184 }; }
+        get { energyKilocalories.map { $0 * UnitConversion.kilocaloriesToKilojoules } }
+        set { energyKilocalories = newValue.map { $0 / UnitConversion.kilocaloriesToKilojoules } }
     }
-    
+
     /// Glucose in mmol/L (derived from mg/dL).
     var glucoseMmolPerL: Double? {
-        get { glucoseMgPerdL.map { $0 / 18.0 } }
-        set { glucoseMgPerdL = newValue.map { $0 * 18.0 } }
+        get { glucoseMgPerdL.map { $0 / UnitConversion.glucoseMgDlToMmolL } }
+        set { glucoseMgPerdL = newValue.map { $0 * UnitConversion.glucoseMgDlToMmolL } }
     }
     
     /// Returns water intake to display given unit preference.

@@ -93,10 +93,13 @@ struct MigraineDetailView: View {
                 Button {
                     migraineManager.togglePinned(migraine)
                 } label: {
-                    Image(systemName: migraine.pinned ? "pin.fill" : "pin")
-                        .foregroundStyle(migraine.pinned ? .yellow : .secondary)
+                    Label(migraine.isPinned ? "Unpin" : "Pin",
+                          systemImage: migraine.isPinned ? "pin.fill" : "pin")
+                        .foregroundStyle(migraine.isPinned ? .yellow : .secondary)
                 }
-                .accessibilityLabel(migraine.pinned ? "Unpin" : "Pin")
+                .labelStyle(.iconOnly)
+                .accessibilityLabel(migraine.isPinned ? "Unpin migraine" : "Pin migraine")
+                .accessibilityHint("Pinned migraines appear at the top of the list")
             }
             
             if !migraine.isOngoing {
@@ -106,7 +109,6 @@ struct MigraineDetailView: View {
                     } label: {
                         Label("Modify", systemImage: "slider.horizontal.3")
                     }
-                    .tint(.green)
                     .accessibilityIdentifier("modifyMigraineButton")
                 }
                 

@@ -18,8 +18,9 @@ struct ContentView: View {
     @State private var lastStart: Date? = nil
     @State private var now: Date = Date()
     @State private var didSetup: Bool = false
+    @State private var syncError: String? = nil
 
-    private let appGroupID = "group.com.molargiksoftware.Mygra"
+    private let appGroupID = AppGroup.id
 
     var body: some View {
         NavigationStack {
@@ -81,6 +82,16 @@ struct ContentView: View {
                         self.now = date
                     }
                 }
+
+                // Display sync error if any
+                if let error = syncError {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 8)
+                        .padding(.top, 4)
+                }
             }
             .refreshable {
                 aggressiveRefresh()
@@ -103,6 +114,7 @@ struct ContentView: View {
     // MARK: - Actions
     private func endOngoing() {
         isEnding = true
+        syncError = nil
         PhoneBridge.shared.endOngoingMigraine { success in
             DispatchQueue.main.async {
                 isEnding = false
@@ -111,6 +123,8 @@ struct ContentView: View {
                     self.hasOngoing = false
                     // Reload from defaults in case the phone also updated the last start
                     self.loadFromDefaults()
+                } else {
+                    self.syncError = "Couldn't end migraine. Try again."
                 }
             }
         }
@@ -132,6 +146,8 @@ struct ContentView: View {
     }
     
     private func aggressiveRefresh() {
+        // Clear any previous error on refresh
+        syncError = nil
         // Kick WCSession again and attempt a few retries with backoff
         if WCSession.isSupported() {
             WCSession.default.activate()

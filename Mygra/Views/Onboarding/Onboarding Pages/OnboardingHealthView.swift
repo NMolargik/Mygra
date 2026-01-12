@@ -50,7 +50,9 @@ struct OnboardingHealthView: View {
                 .padding(.vertical, 14)
                 .foregroundStyle(.white)
             }
+            .frame(maxWidth: 400)
             .adaptiveGlass(tint: .mygraPurple)
+            .hoverEffect()
             .shadow(radius: 6, y: 3)
             .padding(.horizontal)
         }

@@ -57,7 +57,13 @@ enum MigraineActivityCenter {
             let toKeep = sorted.first
             let toEnd = sorted.dropFirst()
             for act in toEnd {
-                Task { await act.end(nil, dismissalPolicy: .immediate) }
+                Task {
+                    do {
+                        await act.end(nil, dismissalPolicy: .immediate)
+                    } catch {
+                        print("[MigraineActivityCenter] Failed to end duplicate activity: \(error)")
+                    }
+                }
             }
             // Optionally, we could refresh the kept one with latest content if severity/notes changed.
             if let keep = toKeep {
@@ -69,7 +75,13 @@ enum MigraineActivityCenter {
                 )
                 let staleDate = Date().addingTimeInterval(5 * 60)
                 let content = ActivityContent(state: state, staleDate: staleDate)
-                Task { await keep.update(content) }
+                Task {
+                    do {
+                        await keep.update(content)
+                    } catch {
+                        print("[MigraineActivityCenter] Failed to update activity: \(error)")
+                    }
+                }
             }
         }
     }
@@ -79,7 +91,11 @@ enum MigraineActivityCenter {
         let activities = Activity<MigraineActivityAttributes>.activities
         if let activity = activities.first(where: { $0.content.state.migraineID == migraineID }) {
             Task {
-                await activity.end(nil, dismissalPolicy: .immediate)
+                do {
+                    await activity.end(nil, dismissalPolicy: .immediate)
+                } catch {
+                    print("[MigraineActivityCenter] Failed to end activity: \(error)")
+                }
             }
         }
     }

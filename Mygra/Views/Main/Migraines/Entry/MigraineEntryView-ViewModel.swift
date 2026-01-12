@@ -25,6 +25,10 @@ extension MigraineEntryView {
         var showWeatherBackdateAlert: Bool = false
         var weatherBackdateMessage: String = ""
 
+        // Health data info alert state
+        var showHealthInfoAlert: Bool = false
+        var healthInfoMessage: String = ""
+
         // Entry form state
         var startDate: Date = Date()
         var isOngoing: Bool = true

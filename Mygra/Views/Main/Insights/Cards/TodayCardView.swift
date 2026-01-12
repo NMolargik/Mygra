@@ -13,6 +13,8 @@ struct TodayCardView: View {
     let useMetricUnits: Bool
 
     @Binding var isQuickAddExpanded: Bool
+
+    @State private var showHealthSourceInfo: Bool = false
     @Binding var addWater: Double
     @Binding var addCaffeine: Double
     @Binding var addFood: Double
@@ -42,11 +44,23 @@ struct TodayCardView: View {
                             .buttonStyle(.borderedProminent)
                             .tint(.pink)
                     } else {
-                        Button(action: onRefreshHealth) {
-                            Image(systemName: "arrow.clockwise")
+                        Button {
+                            showHealthSourceInfo = true
+                        } label: {
+                            Label("Health Info", systemImage: "info.circle")
                         }
                         .buttonStyle(.borderless)
+                        .labelStyle(.iconOnly)
+                        .foregroundStyle(.secondary)
+                        .accessibilityLabel("About health data source")
+
+                        Button(action: onRefreshHealth) {
+                            Label("Refresh", systemImage: "arrow.clockwise")
+                        }
+                        .buttonStyle(.borderless)
+                        .labelStyle(.iconOnly)
                         .foregroundStyle(.mygraPurple)
+                        .accessibilityLabel("Refresh health data")
                     }
 
                     if isAuthorized {
@@ -66,7 +80,9 @@ struct TodayCardView: View {
                         .padding(8)
                         .padding(.horizontal, 5)
                         .adaptiveGlass(tint: .mygraPurple)
+                        .hoverEffect()
                         .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
+                        .accessibilityHint("Opens intake editor to log water, caffeine, food, or sleep")
                     }
                 }
 
@@ -77,7 +93,7 @@ struct TodayCardView: View {
                     let foodStr: String = {
                         guard let kcal = data.energyKilocalories else { return "—" }
                         if useMetricUnits {
-                            let kJ = (kcal * 4.184).rounded()
+                            let kJ = (kcal * UnitConversion.kilocaloriesToKilojoules).rounded()
                             return "\(Int(kJ)) kJ"
                         } else {
                             return "\(Int(kcal)) cal"
@@ -157,6 +173,11 @@ struct TodayCardView: View {
             .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             .clipped()
             .accessibilityElement(children: .contain)
+            .alert("About This Data", isPresented: $showHealthSourceInfo) {
+                Button("OK") { }
+            } message: {
+                Text("These values are read from Apple Health. Use the Quick Add button to log intake, or add data directly in the Health app.")
+            }
         } else {
             VStack(alignment: .leading, spacing: 10) {
                 HStack {

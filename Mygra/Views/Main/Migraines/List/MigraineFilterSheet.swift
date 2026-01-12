@@ -167,7 +167,7 @@ struct MigraineFilterSheet: View {
         .navigationTitle("Filter Migraines")
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
-                Button("Cancel") {
+                Button("Cancel", role: .destructive) {
                     Haptics.lightImpact()
                     cancel()
                 }

@@ -43,11 +43,10 @@ struct EndMigraineSheet: View {
             .navigationTitle("End Migraine")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Cancel", role: .cancel) {
                         onCancel()
                         dismiss()
                     }
-                    .tint(.red)
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {

@@ -91,8 +91,8 @@ class UserManager {
     ) {
         do {
             // Delete any existing user
-            if let u = currentUser {
-                context.delete(u)
+            if let existingUser = currentUser {
+                context.delete(existingUser)
             }
             context.insert(newUser)
             try context.save()
@@ -105,11 +105,11 @@ class UserManager {
 
     // MARK: - Update
     func update(_ mutate: (User) -> Void) {
-        guard let u = currentUser else {
+        guard let user = currentUser else {
             handle(UserError.notFound)
             return
         }
-        mutate(u)
+        mutate(user)
         do {
             try context.save()
             Task { await refresh() }

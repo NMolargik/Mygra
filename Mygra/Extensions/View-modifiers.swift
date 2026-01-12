@@ -11,11 +11,28 @@ extension View {
     func shimmer() -> some View {
         self.modifier(ShimmerModifier())
     }
-    
+
     /// Applies a glass effect with the provided tint on iOS 26+,
     /// and falls back to a simple tinted background on earlier iOS versions.
     func adaptiveGlass(tint: Color) -> some View {
         self.modifier(AdaptiveGlassModifier(tint: tint))
+    }
+
+    /// Standard card styling used throughout the app.
+    func cardStyle() -> some View {
+        self.padding(14)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+}
+
+extension LinearGradient {
+    /// The standard Mygra brand gradient (purple to blue, top-trailing to bottom-leading).
+    static var mygra: LinearGradient {
+        LinearGradient(
+            colors: [.mygraPurple, .mygraBlue],
+            startPoint: .topTrailing,
+            endPoint: .bottomLeading
+        )
     }
 }
 
@@ -67,7 +84,6 @@ struct ShimmerModifier: ViewModifier {
  
 struct DrawOnOffEffect: ViewModifier {
     let drawOn: Bool
-    let drawOff: Bool
 
     func body(content: Content) -> some View {
         #if compiler(>=6.0)

@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SparkleText: View {
     var text: String
-    @State private var phase: CGFloat = 0
+
     var body: some View {
         TimelineView(.animation) { timeline in
             let percent = CGFloat((timeline.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 1)) / 1)

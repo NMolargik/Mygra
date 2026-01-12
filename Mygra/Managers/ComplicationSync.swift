@@ -35,7 +35,9 @@ final class ComplicationSync: NSObject, WCSessionDelegate {
         try? WCSession.default.updateApplicationContext(payload)
         // Also send a live message when possible for immediate UI updates
         if WCSession.default.isReachable {
-            WCSession.default.sendMessage(payload, replyHandler: nil, errorHandler: nil)
+            WCSession.default.sendMessage(payload, replyHandler: nil) { error in
+                print("[ComplicationSync] Failed to send live message to watch: \(error.localizedDescription)")
+            }
         }
     }
 
@@ -99,6 +101,7 @@ final class ComplicationSync: NSObject, WCSessionDelegate {
                 }
                 let defaults = UserDefaults(suiteName: AppGroup.id)
                 defaults?.set(false, forKey: "hasOngoingMigraine")
+                defaults?.synchronize()
                 replyHandler?(["success": true])
                 // Push updated state to the watch so UI/complications refresh promptly
                 pushCurrentStateToWatch()

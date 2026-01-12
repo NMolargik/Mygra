@@ -24,11 +24,18 @@ struct MigraineEntryView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Text(viewModel.greeting.isEmpty ? "We’ve got you." : viewModel.greeting)
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 4)
+                Text(viewModel.greeting.isEmpty ? "We've got you." : viewModel.greeting)
+                    .font(.system(.title3, design: .rounded, weight: .medium))
+                    .italic()
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.mygraPurple, .mygraBlue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 8)
                 
                 Section("Duration") {
                     DurationSection(
@@ -43,6 +50,16 @@ struct MigraineEntryView: View {
                 Section("Data Retreival") {
                     // Health capsule
                     HStack(spacing: 10) {
+                        // Determine warning state upfront for reuse
+                        let zeroHealthFlag: Bool = {
+                            guard let h = healthManager.latestData else { return false }
+                            let sleepZero = (h.sleepHours ?? -1) == 0
+                            let caffeineZero = (h.caffeineMg ?? -1) == 0
+                            let waterZero = (h.waterLiters ?? -1) == 0
+                            let caloriesZero = (h.energyKilocalories ?? -1) == 0
+                            return sleepZero || caffeineZero || waterZero || caloriesZero
+                        }()
+
                         if viewModel.isPullingHealth {
                             ProgressView()
                                 .controlSize(.small)
@@ -50,15 +67,6 @@ struct MigraineEntryView: View {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundStyle(.red)
                         } else if viewModel.didPullHealth {
-                            // Determine if we should warn (any of sleep/caffeine/water/calories explicitly 0)
-                            let zeroHealthFlag: Bool = {
-                                guard let h = healthManager.latestData else { return false }
-                                let sleepZero = (h.sleepHours ?? -1) == 0
-                                let caffeineZero = (h.caffeineMg ?? -1) == 0
-                                let waterZero = (h.waterLiters ?? -1) == 0
-                                let caloriesZero = (h.energyKilocalories ?? -1) == 0
-                                return sleepZero || caffeineZero || waterZero || caloriesZero
-                            }()
                             if zeroHealthFlag {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundStyle(.yellow.gradient)
@@ -88,6 +96,31 @@ struct MigraineEntryView: View {
                         .animation(.easeInOut(duration: 0.2), value: viewModel.startDate)
 
                         Spacer(minLength: 0)
+
+                        // Info button when there's a warning or error
+                        if !viewModel.isPullingHealth && (viewModel.healthError != nil || zeroHealthFlag) {
+                            Button {
+                                if viewModel.healthError != nil {
+                                    viewModel.healthInfoMessage = "We couldn't read your health data from Apple Health. This may happen if Mygra doesn't have permission to access Health data, or if there was a problem communicating with HealthKit.\n\nYou can still log this migraine, but health metrics won't be attached."
+                                } else {
+                                    // Build a message about which values are zero
+                                    var zeroItems: [String] = []
+                                    if let h = healthManager.latestData {
+                                        if (h.sleepHours ?? -1) == 0 { zeroItems.append("sleep") }
+                                        if (h.caffeineMg ?? -1) == 0 { zeroItems.append("caffeine") }
+                                        if (h.waterLiters ?? -1) == 0 { zeroItems.append("water") }
+                                        if (h.energyKilocalories ?? -1) == 0 { zeroItems.append("calories") }
+                                    }
+                                    let itemsList = zeroItems.formatted(.list(type: .and))
+                                    viewModel.healthInfoMessage = "Your \(itemsList) intake shows as zero for the selected time period. This could mean the data hasn't been logged in Apple Health yet.\n\nAccurate intake data helps identify migraine patterns. You can add today's consumption using the \"Add Consumption\" button below."
+                                }
+                                viewModel.showHealthInfoAlert = true
+                            } label: {
+                                Image(systemName: "info.circle.fill")
+                                    .foregroundStyle(.yellow.gradient)
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
                     .padding(.horizontal, 14)
                     .padding(.vertical, 10)
@@ -386,7 +419,7 @@ struct MigraineEntryView: View {
             .navigationTitle("New Migraine")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Cancel", role: .cancel) {
                         Haptics.lightImpact()
                         // Clear any staged intake values when abandoning the entry entirely
                         viewModel.addWater = 0
@@ -428,6 +461,11 @@ struct MigraineEntryView: View {
             }
         }, message: {
             Text(viewModel.validationMessage)
+        })
+        .alert("Health Data", isPresented: $viewModel.showHealthInfoAlert, actions: {
+            Button("OK", role: .cancel) { }
+        }, message: {
+            Text(viewModel.healthInfoMessage)
         })
         .presentationDetents([.large])
         // Snap water to new step/range whenever unit preference changes

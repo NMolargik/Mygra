@@ -135,7 +135,7 @@ final class MigraineManager {
     }
 
     func togglePinned(_ migraine: Migraine) {
-        migraine.pinned.toggle()
+        migraine.isPinned.toggle()
         saveAndReload()
     }
 
@@ -231,7 +231,10 @@ final class MigraineManager {
             // Only write the last start if it actually changed
             if changedLastStart {
                 defaults?.set(newValue, forKey: "lastMigraineStart")
+                defaults?.synchronize()
                 WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+            } else {
+                defaults?.synchronize()
             }
 
             // Push to watch if either last start or ongoing status changed
@@ -242,6 +245,7 @@ final class MigraineManager {
             // No migraines: clear last start, persist ongoing flag, reload widget, and push reset to watch
             defaults?.removeObject(forKey: "lastMigraineStart")
             defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
+            defaults?.synchronize()
             WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
             ComplicationSync.shared.pushStatus(lastMigraineStart: 0, hasOngoing: hasOngoing)
         }

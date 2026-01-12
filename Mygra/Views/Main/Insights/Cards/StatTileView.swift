@@ -52,6 +52,8 @@ struct StatTileView: View {
         .onChange(of: valueToken ?? AnyHashable(value)) {
             bounceFlag.toggle()
         }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("\(title): \(value)")
     }
 
 }

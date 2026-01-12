@@ -77,6 +77,7 @@ struct OnboardingCompleteView: View {
                 .animation(.spring(response: 1.2, dampingFraction: 0.85), value: shownRows[3])
                 .symbolEffect(.bounce, value: shownRows[3])
             }
+            .frame(maxWidth: 400)
             .padding(.horizontal)
 
             Spacer(minLength: 12)
@@ -93,7 +94,9 @@ struct OnboardingCompleteView: View {
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
             }
+            .frame(maxWidth: 400)
             .adaptiveGlass(tint: .mygraPurple)
+            .hoverEffect()
             .shadow(radius: 6, y: 3)
             .padding(.horizontal)
             .opacity(showButton ? 1 : 0)

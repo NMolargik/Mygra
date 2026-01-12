@@ -49,7 +49,6 @@ struct MainView: View {
                                         Image(systemName: "gearshape.fill")
                                     }
                                     .accessibilityLabel("Settings")
-                                    .tint(.orange)
                                 }
                             }
                     }
@@ -116,6 +115,7 @@ struct MainView: View {
                         .navigationTitle("Mygra")
                         .toolbar { insightsTopBarToolbar }
                     }
+                    .tint(nil)
                     .tabItem {
                         AppTab.insights.icon()
                         Text(AppTab.insights.rawValue)
@@ -141,6 +141,7 @@ struct MainView: View {
                         }
                         .toolbar { listTopBarToolbar }
                     }
+                    .tint(nil)
                     .tabItem {
                         AppTab.list.icon()
                         Text(AppTab.list.rawValue)
@@ -155,6 +156,7 @@ struct MainView: View {
                         )
                             .navigationTitle(AppTab.settings.rawValue)
                     }
+                    .tint(nil)
                     .tabItem {
                         AppTab.settings.icon()
                         Text(AppTab.settings.rawValue)
@@ -373,7 +375,6 @@ struct MainView: View {
                     .foregroundStyle(.mygraBlue)
                 }
                 .accessibilityIdentifier("addEntryButton")
-                .tint(.blue)
             }
         } else if isRegularWidth {
             ToolbarItem(placement: .topBarTrailing) {
@@ -387,7 +388,6 @@ struct MainView: View {
                     .foregroundStyle(.mygraBlue)
                 }
                 .accessibilityIdentifier("addEntryButton")
-                .tint(.blue)
             }
         }
     }

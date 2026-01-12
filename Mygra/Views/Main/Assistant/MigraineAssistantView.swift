@@ -218,8 +218,8 @@ struct MigraineAssistantView: View {
                     .overlay(Divider(), alignment: .top)
                 }
                 .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button(role: .cancel) {
                             Haptics.lightImpact()
                             dismiss()
                         } label: {

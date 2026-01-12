@@ -12,10 +12,6 @@ import SwiftData
 /// We enforce a single-row invariant in code (no uniqueness constraints in CloudKit-backed stores).
 @Model
 final class User {
-    // MARK: - Singleton enforcement (code-level; no uniqueness constraint)
-    /// A constant key you can use for debugging or code-level checks.
-    var singletonKey: String = "USER_SINGLETON"
-
     // MARK: - Identity
     /// Default birthday used for new users: 18 years ago from today
     static var defaultBirthday: Date {

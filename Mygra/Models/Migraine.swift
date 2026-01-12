@@ -77,13 +77,24 @@ final class Migraine {
         self.health = health
     }
 
+    // MARK: - Computed properties
+
     var isOngoing: Bool { endDate == nil }
+
     var duration: TimeInterval? {
         guard let end = endDate else { return nil }
         return end.timeIntervalSince(startDate)
     }
+
     var severity: Severity {
         Severity.from(painLevel: painLevel)
+    }
+
+    /// Alias for `pinned` following Swift naming conventions for Booleans.
+    /// Use this property in new code; `pinned` is kept for SwiftData compatibility.
+    var isPinned: Bool {
+        get { pinned }
+        set { pinned = newValue }
     }
 }
 

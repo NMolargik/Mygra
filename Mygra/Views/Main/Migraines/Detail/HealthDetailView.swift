@@ -21,7 +21,7 @@ struct HealthDetailView: View {
                                 if useMetricUnits {
                                     Text(String(format: "%.1f L", w))
                                 } else {
-                                    let flOz = w * 33.8140227
+                                    let flOz = w * UnitConversion.litersToFluidOunces
                                     Text(String(format: "%.0f fl oz", flOz))
                                 }
                             }
@@ -138,7 +138,7 @@ struct HealthDetailView: View {
                         HStack(spacing: 8) {
                             Group {
                                 if useMetricUnits {
-                                    let mmol = glucose / 18.0
+                                    let mmol = glucose / UnitConversion.glucoseMgDlToMmolL
                                     Text(String(format: "%.1f mmol/L", mmol))
                                 } else {
                                     Text(String(format: "%.0f mg/dL", glucose.rounded()))

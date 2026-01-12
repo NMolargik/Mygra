@@ -41,6 +41,7 @@ struct IntelligenceCardView: View {
             .padding(.horizontal, 5)
             .foregroundStyle(.white)
             .adaptiveGlass(tint: .mygraPurple)
+            .hoverEffect()
             .accessibilityLabel("Open Migraine Assistant")
         }
         .padding(14)

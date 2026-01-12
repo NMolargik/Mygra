@@ -87,6 +87,7 @@ struct WeatherCardView: View {
                                 .accessibilityHidden(true)
                             Link("Legal", destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
                                 .foregroundStyle(.mygraPurple)
+                                .accessibilityLabel("Apple Weather legal attribution, opens in browser")
                             
                             Spacer()
                         }
@@ -146,12 +147,15 @@ struct WeatherCardView: View {
                         ProgressView()
                             .controlSize(.small)
                             .tint(.mygraPurple)
+                            .accessibilityLabel("Loading weather data")
                     } else {
                         Button(action: onRefresh) {
-                            Image(systemName: "arrow.clockwise")
+                            Label("Refresh", systemImage: "arrow.clockwise")
                         }
                         .buttonStyle(.bordered)
+                        .labelStyle(.iconOnly)
                         .tint(.mygraPurple)
+                        .accessibilityLabel("Refresh weather data")
                     }
                 }
                 .padding(14)

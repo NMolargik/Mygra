@@ -32,7 +32,7 @@ struct IntakeSection: View {
                         let litersTotal = baseWater + addWater
                         let text = useMetricUnits
                             ? String(format: "%.1f L", litersTotal)
-                            : String("\(Int((litersTotal * 33.814).rounded())) fl oz")
+                            : String("\(Int((litersTotal * UnitConversion.litersToFluidOunces).rounded())) fl oz")
                         Label(text, systemImage: "drop.fill")
                             .foregroundStyle((addWater > 0) ? .yellow : .secondary)
                     }
@@ -59,7 +59,7 @@ struct IntakeSection: View {
                         let totalKcal = baseKcal + addFoodKcal
                         let text: String = {
                             if useMetricUnits {
-                                let kJ = (totalKcal * 4.184).rounded()
+                                let kJ = (totalKcal * UnitConversion.kilocaloriesToKilojoules).rounded()
                                 return "\(Int(kJ)) kJ"
                             } else {
                                 return "\(Int(totalKcal.rounded())) kcal"
@@ -99,6 +99,7 @@ struct IntakeSection: View {
                     .padding(.horizontal, 5)
                     .foregroundStyle(.white)
                     .adaptiveGlass(tint: .mygraPurple)
+                    .hoverEffect()
                     Spacer()
                 }
                 .padding([.top, .horizontal])

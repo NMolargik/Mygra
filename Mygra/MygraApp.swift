@@ -113,21 +113,21 @@ struct MygraApp: App {
     // MARK: - One-shot weather check and notify
 
     private func isHighRiskWeather() -> Bool {
-        // Use WeatherManager’s latest readings
+        // Use WeatherManager's latest readings
         let humidityHigh: Bool = {
-            if let h = weatherManager.humidity { return h >= 0.70 }
+            if let humidity = weatherManager.humidity { return humidity >= 0.70 }
             return false
         }()
         let pressureLow: Bool = {
-            if let p = weatherManager.pressure {
-                let hPa = p.converted(to: .hectopascals).value
+            if let pressure = weatherManager.pressure {
+                let hPa = pressure.converted(to: .hectopascals).value
                 return hPa < 1008.0
             }
             return false
         }()
         let storms: Bool = {
-            if let c = weatherManager.condition {
-                return c == .strongStorms
+            if let condition = weatherManager.condition {
+                return condition == .strongStorms
             }
             return false
         }()
@@ -136,15 +136,15 @@ struct MygraApp: App {
 
     private func weatherRiskTitleAndBody() -> (title: String, body: String) {
         var parts: [String] = []
-        if let c = weatherManager.condition {
-            parts.append(c.description.capitalized)
+        if let condition = weatherManager.condition {
+            parts.append(condition.description.capitalized)
         }
-        if let p = weatherManager.pressure {
-            let hPa = p.converted(to: .hectopascals).value
+        if let pressure = weatherManager.pressure {
+            let hPa = pressure.converted(to: .hectopascals).value
             parts.append(String(format: "%.0f hPa", hPa))
         }
-        if let h = weatherManager.humidity {
-            parts.append(String(format: "%.0f%% humidity", h * 100.0))
+        if let humidity = weatherManager.humidity {
+            parts.append(String(format: "%.0f%% humidity", humidity * 100.0))
         }
         let summary = parts.isEmpty ? "Current conditions" : parts.joined(separator: " • ")
         return (

@@ -49,7 +49,7 @@ struct IntakeEditorView: View {
             return String(format: "+%.1f L", liters)
         } else {
             // Convert liters to US fluid ounces
-            let ounces = liters * 33.814
+            let ounces = liters * UnitConversion.litersToFluidOunces
             return "+\(Int(ounces.rounded())) oz"
         }
     }
@@ -67,10 +67,11 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "drop.fill").foregroundStyle(.blue.gradient)
                         .frame(width: 30)
+                        .accessibilityHidden(true)
                     Slider(
-                        value: snappingBinding(for: $addWater, step: useMetricUnits ? 0.1 : (8.0 / 33.814), in: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814)),
-                        in: useMetricUnits ? 0...2.5 : 0...(2.5 * 33.814 / 33.814),
-                        step: useMetricUnits ? 0.1 : (8.0 / 33.814)
+                        value: snappingBinding(for: $addWater, step: useMetricUnits ? 0.1 : (8.0 / UnitConversion.litersToFluidOunces), in: useMetricUnits ? 0...2.5 : 0...(2.5)),
+                        in: useMetricUnits ? 0...2.5 : 0...(2.5),
+                        step: useMetricUnits ? 0.1 : (8.0 / UnitConversion.litersToFluidOunces)
                     )
                         .tint(.blue)
                         .onChange(of: addWater) { _, _ in sliderTick(\.waterHapticGate) }
@@ -84,6 +85,7 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "cup.and.saucer.fill").foregroundStyle(.brown.gradient)
                         .frame(width: 30)
+                        .accessibilityHidden(true)
                     Slider(
                         value: snappingBinding(for: $addCaffeine, step: 10, in: 0...1000),
                         in: 0...1000,
@@ -101,30 +103,31 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "fork.knife").foregroundStyle(.orange.gradient)
                         .frame(width: 30)
+                        .accessibilityHidden(true)
 
                     // When metric units are on, present kilojoules; otherwise present kilocalories.
                     if useMetricUnits {
                         // Present kJ to the user, but keep `addFood` stored as kcal under the hood.
-                        // 1 kcal = 4.184 kJ
+                        // 1 kcal = UnitConversion.kilocaloriesToKilojoules kJ
                         Slider(
                             value: snappingBinding(
                                 for: Binding(
-                                    get: { addFood * 4.184 },
-                                    set: { addFood = $0 / 4.184 }
+                                    get: { addFood * UnitConversion.kilocaloriesToKilojoules },
+                                    set: { addFood = $0 / UnitConversion.kilocaloriesToKilojoules }
                                 ),
-                                step: 50.0 * 4.184,
-                                in: 0...(2500.0 * 4.184)
+                                step: 50.0 * UnitConversion.kilocaloriesToKilojoules,
+                                in: 0...(2500.0 * UnitConversion.kilocaloriesToKilojoules)
                             ),
-                            in: 0...(2500.0 * 4.184),
-                            step: 50.0 * 4.184
+                            in: 0...(2500.0 * UnitConversion.kilocaloriesToKilojoules),
+                            step: 50.0 * UnitConversion.kilocaloriesToKilojoules
                         )
                         .tint(.orange)
                         .onChange(of: addFood) { _, _ in sliderTick(\.caloriesHapticGate) }
 
-                        AmountPill(text: "+\(Int((addFood * 4.184).rounded())) kJ", tint: .orange)
+                        AmountPill(text: "+\(Int((addFood * UnitConversion.kilocaloriesToKilojoules).rounded())) kJ", tint: .orange)
                             .frame(width: 140, alignment: .trailing)
                             .animation(.snappy(duration: 0.2), value: addFood)
-                            .accessibilityLabel("Add \(Int((addFood * 4.184).rounded())) kilojoules of energy")
+                            .accessibilityLabel("Add \(Int((addFood * UnitConversion.kilocaloriesToKilojoules).rounded())) kilojoules of energy")
                     } else {
                         Slider(
                             value: snappingBinding(for: $addFood, step: 50, in: 0...2500),
@@ -145,6 +148,7 @@ struct IntakeEditorView: View {
                 HStack(alignment: .center) {
                     Image(systemName: "bed.double.fill").foregroundStyle(.indigo.gradient)
                         .frame(width: 30)
+                        .accessibilityHidden(true)
                     Slider(
                         value: snappingBinding(for: $addSleepHours, step: 0.5, in: 0...12),
                         in: 0...12,
@@ -172,6 +176,7 @@ struct IntakeEditorView: View {
                 .foregroundStyle(.white)
                 .padding(8)
                 .adaptiveGlass(tint: .gray)
+                .hoverEffect()
                 
                 if !allAddsAreZero {
                     Button(isSaving ? "Adding..." : "Add") {
@@ -186,6 +191,7 @@ struct IntakeEditorView: View {
                     .padding(8)
                     .padding(.horizontal, 10)
                     .adaptiveGlass(tint: .mygraPurple)
+                    .hoverEffect()
                 }
 
                 

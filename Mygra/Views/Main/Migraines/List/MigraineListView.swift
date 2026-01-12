@@ -58,6 +58,7 @@ struct MigraineListView: View {
                                     .padding(.horizontal, 5)
                                     .foregroundStyle(.white)
                                     .adaptiveGlass(tint: .yellow)
+                                    .hoverEffect()
                                     .accessibilityIdentifier("emptyShowAllButton")
                                 }
                                 Button {
@@ -70,6 +71,7 @@ struct MigraineListView: View {
                                 .padding(.horizontal, 5)
                                 .foregroundStyle(.white)
                                 .adaptiveGlass(tint: .mygraBlue)
+                                .hoverEffect()
                                 .accessibilityIdentifier("emptyClearFiltersButton")
                             }
                             .padding(.top, 4)
@@ -85,6 +87,7 @@ struct MigraineListView: View {
                         .padding(.horizontal, 5)
                         .foregroundStyle(.white)
                         .adaptiveGlass(tint: .green)
+                        .hoverEffect()
                     }
                 } else {
                     ScrollView {
@@ -124,8 +127,8 @@ struct MigraineListView: View {
                                 Haptics.lightImpact()
                                 migraineManager.togglePinned(migraine)
                             } label: {
-                                Label(migraine.pinned ? "Unpin" : "Pin",
-                                      systemImage: migraine.pinned ? "pin.slash" : "pin")
+                                Label(migraine.isPinned ? "Unpin" : "Pin",
+                                      systemImage: migraine.isPinned ? "pin.slash" : "pin")
                             }
                             .tint(.yellow)
                         }
@@ -136,7 +139,6 @@ struct MigraineListView: View {
                                 migraineManager.delete(migraine)
                             } label: {
                                 Label("Delete", systemImage: "trash")
-                                    .tint(.red)
                             }
                         }
                     }
@@ -168,6 +170,7 @@ struct MigraineListView: View {
                                         .padding(.horizontal, 5)
                                         .foregroundStyle(.white)
                                         .adaptiveGlass(tint: .yellow)
+                                        .hoverEffect()
                                         .controlSize(.small)
                                         .accessibilityIdentifier("footerShowAllButton")
                                     }
@@ -187,6 +190,7 @@ struct MigraineListView: View {
                                     .padding(.horizontal, 5)
                                     .foregroundStyle(.white)
                                     .adaptiveGlass(tint: .mygraBlue)
+                                    .hoverEffect()
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerClearFiltersButton")
                                     
@@ -200,6 +204,7 @@ struct MigraineListView: View {
                                     .padding(.horizontal, 5)
                                     .foregroundStyle(.white)
                                     .adaptiveGlass(tint: .green)
+                                    .hoverEffect()
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerAdjustFiltersButton")
                                 }
@@ -219,7 +224,6 @@ struct MigraineListView: View {
                     Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
                 }
                 .accessibilityIdentifier("filterButton")
-                .tint(.green)
             }
             ToolbarItem(placement: .topBarLeading) {
                 Button {
@@ -234,7 +238,6 @@ struct MigraineListView: View {
                     )
                 }
                 .accessibilityIdentifier("pinnedOnlyToggle")
-                .tint(.yellow)
             }
         }
         .sheet(isPresented: $viewModel.showingFilterSheet) {
