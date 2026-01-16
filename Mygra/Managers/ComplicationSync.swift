@@ -110,6 +110,42 @@ final class ComplicationSync: NSObject, WCSessionDelegate {
             }
             return
         }
+
+        // Handle start migraine command from watch
+        if let command = message["command"] as? String, command == "startMigraine" {
+            // Check if there's already an ongoing migraine
+            if MigraineManager.shared?.ongoingMigraine != nil {
+                replyHandler?(["success": false, "error": "alreadyOngoing"])
+                return
+            }
+
+            // Create a new migraine with default values
+            let migraine = Migraine(
+                startDate: Date(),
+                endDate: nil,  // Ongoing
+                painLevel: message["painLevel"] as? Int ?? 5,
+                stressLevel: message["stressLevel"] as? Int ?? 5,
+                note: "Started from Apple Watch",
+                triggers: [],
+                customTriggers: [],
+                foodsEaten: []
+            )
+
+            // Insert and save via MigraineManager
+            MigraineManager.shared?.create(migraine: migraine, reviewScene: nil)
+
+            // Update shared state for widgets/complications
+            let defaults = UserDefaults(suiteName: AppGroup.id)
+            defaults?.set(migraine.startDate.timeIntervalSince1970, forKey: "lastMigraineStart")
+            defaults?.set(true, forKey: "hasOngoingMigraine")
+            defaults?.synchronize()
+
+            replyHandler?(["success": true, "migraineID": migraine.id.uuidString])
+
+            // Push updated state to the watch
+            pushCurrentStateToWatch()
+            return
+        }
     }
 }
 

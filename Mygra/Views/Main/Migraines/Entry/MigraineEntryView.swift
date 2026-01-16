@@ -433,7 +433,7 @@ struct MigraineEntryView: View {
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Submit") {
+                    Button(viewModel.isOngoing ? "Start" : "Submit") {
                         Haptics.lightImpact()
                         Task {
                             guard viewModel.validateBeforeSave() else {

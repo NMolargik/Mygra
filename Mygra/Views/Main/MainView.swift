@@ -25,14 +25,14 @@ struct MainView: View {
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(UserManager.self) private var userManager: UserManager
 
-    @State private var appTab: AppTab = .insights
+    @State private var appTab: AppTab = .dashboard
     @State private var showingEntrySheet: Bool = false
     @State private var showingSettingsSheet: Bool = false
     @State private var showingOngoingAlert: Bool = false
     @State private var listPath = NavigationPath()
+    @State private var calendarPath = NavigationPath()
     @State private var lastPushedMigraineID: UUID? = nil
     @State private var now: Date = Date()
-    @State private var drawOn: Bool = false
 
     var body: some View {
         Group {
@@ -54,8 +54,8 @@ struct MainView: View {
                     }
                 } detail: {
                     NavigationStack(path: $listPath) {
-                        InsightsView(showingEntrySheet: $showingEntrySheet)
-                            .navigationTitle(AppTab.insights.rawValue)
+                        DashboardView(showingEntrySheet: $showingEntrySheet)
+                            .navigationTitle("Mygra")
                             .toolbar { regularWidthTopBarToolbar }
                             .navigationDestination(for: UUID.self) { migraineID in
                                 if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
@@ -109,18 +109,40 @@ struct MainView: View {
             } else {
                 TabView(selection: $appTab) {
                     NavigationStack {
-                        InsightsView(
+                        DashboardView(
                             showingEntrySheet: $showingEntrySheet
                         )
                         .navigationTitle("Mygra")
-                        .toolbar { insightsTopBarToolbar }
+                        .toolbar { dashboardTopBarToolbar }
                     }
                     .tint(nil)
                     .tabItem {
-                        AppTab.insights.icon()
-                        Text(AppTab.insights.rawValue)
+                        AppTab.dashboard.icon()
+                        Text(AppTab.dashboard.rawValue)
                     }
-                    .tag(AppTab.insights)
+                    .tag(AppTab.dashboard)
+
+                    NavigationStack(path: $calendarPath) {
+                        MigraineCalendarView()
+                            .navigationDestination(for: UUID.self) { migraineID in
+                                if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
+                                                   ?? migraineManager.migraines.first { $0.id == migraineID }) {
+                                    MigraineDetailView(migraine: migraine)
+                                } else {
+                                    ContentUnavailableView(
+                                        "Migraine Not Found",
+                                        systemImage: "exclamationmark.triangle",
+                                        description: Text("The selected migraine could not be loaded.")
+                                    )
+                                }
+                            }
+                    }
+                    .tint(nil)
+                    .tabItem {
+                        AppTab.calendar.icon()
+                        Text(AppTab.calendar.rawValue)
+                    }
+                    .tag(AppTab.calendar)
 
                     NavigationStack(path: $listPath) {
                         MigraineListView(
@@ -230,8 +252,7 @@ struct MainView: View {
                             Image(systemName: "waveform.path.ecg")
                                 .symbolVariant(.fill)
                                 .foregroundStyle(LinearGradient(colors: [.mygraPurple, .mygraBlue], startPoint: .leading, endPoint: .trailing))
-                                .symbolEffect(.drawOn.wholeSymbol, isActive: drawOn)
-
+                                .symbolEffect(.breathe.pulse.byLayer, isActive: true)
                         } else {
                             Image(systemName: "waveform.path.ecg")
                                 .symbolVariant(.fill)
@@ -262,9 +283,6 @@ struct MainView: View {
             .onReceive(timer) { tick in
                 let quantized = Date(timeIntervalSince1970: floor(tick.timeIntervalSince1970))
                 self.now = quantized
-                withAnimation(.easeInOut(duration: 0.8)) {
-                    self.drawOn.toggle()
-                }
             }
         }
     }
@@ -302,7 +320,7 @@ struct MainView: View {
 
     // MARK: - Toolbar helpers
     @ToolbarContentBuilder
-    private var insightsTopBarToolbar: some ToolbarContent {
+    private var dashboardTopBarToolbar: some ToolbarContent {
         if #unavailable(iOS 26) {
             ToolbarItem(placement: .topBarTrailing) {
                 Button {

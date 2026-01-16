@@ -13,6 +13,7 @@ struct ContentView: View {
     @State private var daysSince: Int = 0
     @State private var hasOngoing: Bool = false
     @State private var isEnding: Bool = false
+    @State private var isStarting: Bool = false
     @State private var isPhoneReachable: Bool = false
     @State private var isPhoneAppInstalled: Bool = false
     @State private var lastStart: Date? = nil
@@ -75,6 +76,19 @@ struct ContentView: View {
                             Text("\(daysSince)")
                                 .font(.system(size: 44, weight: .bold, design: .rounded))
                                 .monospacedDigit()
+
+                            // Start Migraine button
+                            Button {
+                                startMigraine()
+                            } label: {
+                                Label("Start Migraine", systemImage: "bolt.fill")
+                                    .font(.headline)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .tint(.red)
+                            .buttonStyle(.borderedProminent)
+                            .disabled(isStarting || !isPhoneReachable)
+                            .padding(.top, 8)
                         }
                     }
                     .padding(.top, 8)
@@ -112,6 +126,34 @@ struct ContentView: View {
     }
 
     // MARK: - Actions
+    private func startMigraine() {
+        isStarting = true
+        syncError = nil
+        PhoneBridge.shared.startMigraine { success, error in
+            DispatchQueue.main.async {
+                isStarting = false
+                if success {
+                    // The migraine was started, update local state
+                    self.hasOngoing = true
+                    self.lastStart = Date()
+                    self.daysSince = 0
+                    // Save to defaults
+                    let defaults = UserDefaults(suiteName: appGroupID)
+                    defaults?.set(Date().timeIntervalSince1970, forKey: "lastMigraineStart")
+                    defaults?.set(true, forKey: "hasOngoingMigraine")
+                    defaults?.synchronize()
+                } else {
+                    if error == "alreadyOngoing" {
+                        self.syncError = "A migraine is already ongoing."
+                        self.hasOngoing = true
+                    } else {
+                        self.syncError = error ?? "Couldn't start migraine. Try again."
+                    }
+                }
+            }
+        }
+    }
+
     private func endOngoing() {
         isEnding = true
         syncError = nil

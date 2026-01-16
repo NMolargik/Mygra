@@ -44,6 +44,13 @@ final class Migraine {
     @Relationship(inverse: \WeatherData.migraine) var weather: WeatherData?
     @Relationship(inverse: \HealthData.migraine) var health: HealthData?
 
+    // MARK: - User-defined tags
+    @Relationship(inverse: \MigraineTag.migraines) var tags: [MigraineTag]?
+
+    // MARK: - Intensity samples (time-series)
+    @Relationship(deleteRule: .cascade, inverse: \IntensitySample.migraine)
+    var intensitySamples: [IntensitySample]?
+
     // MARK: - Init
     init(
         id: UUID = UUID(),

@@ -101,6 +101,8 @@ final class InsightManager {
         async let sleep = generateSleepInsights()
         async let weather = generateWeatherInsights()
         async let phases = generateMenstrualPhaseInsights()
+        async let intensity = generateIntensityPatternInsights()
+        async let tags = generateTagInsights()
 
         var all: [Insight] = []
         do { all += try await trends } catch { errors.append(.trendsFailed(underlying: error)) }
@@ -110,6 +112,8 @@ final class InsightManager {
         do { all += try await sleep } catch { errors.append(.sleepFailed(underlying: error)) }
         do { all += try await weather } catch { errors.append(.weatherFailed(underlying: error)) }
         do { all += try await phases } catch { errors.append(.phasesFailed(underlying: error)) }
+        do { all += try await intensity } catch { errors.append(.intensityFailed(underlying: error)) }
+        do { all += try await tags } catch { errors.append(.tagsFailed(underlying: error)) }
 
         // De-duplicate
         var seen = Set<DedupeKey>()
@@ -552,6 +556,259 @@ final class InsightManager {
                 ]
             )
         ]
+    }
+
+    // Intensity pattern insights: analyze how pain/stress evolve during migraines
+    private func generateIntensityPatternInsights() async throws -> [Insight] {
+        let items = migraineManager.migraines
+        guard !items.isEmpty else { return [] }
+
+        var results: [Insight] = []
+
+        // Gather all migraines with multiple intensity samples
+        let migrainesWithSamples = items.filter { ($0.intensitySamples ?? []).count >= 2 }
+        guard !migrainesWithSamples.isEmpty else { return [] }
+
+        // Analyze patterns across migraines
+        var increasingCount = 0
+        var decreasingCount = 0
+        var peakInFirstHalfCount = 0
+        var peakInSecondHalfCount = 0
+        var totalAnalyzed = 0
+
+        for migraine in migrainesWithSamples {
+            let samples = (migraine.intensitySamples ?? []).sorted { $0.timestamp < $1.timestamp }
+            guard samples.count >= 2 else { continue }
+
+            totalAnalyzed += 1
+
+            let firstPain = samples.first!.painLevel
+            let lastPain = samples.last!.painLevel
+
+            // Check trend direction
+            if lastPain > firstPain + 1 {
+                increasingCount += 1
+            } else if lastPain < firstPain - 1 {
+                decreasingCount += 1
+            }
+
+            // Find peak timing
+            if let peakIndex = samples.indices.max(by: { samples[$0].painLevel < samples[$1].painLevel }) {
+                let midpoint = samples.count / 2
+                if peakIndex < midpoint {
+                    peakInFirstHalfCount += 1
+                } else {
+                    peakInSecondHalfCount += 1
+                }
+            }
+        }
+
+        // Generate pattern insights if we have enough data
+        guard totalAnalyzed >= 3 else { return results }
+
+        // Pain trend insight
+        let increasingPct = Double(increasingCount) / Double(totalAnalyzed)
+        let decreasingPct = Double(decreasingCount) / Double(totalAnalyzed)
+
+        if increasingPct >= 0.5 {
+            results.append(
+                Insight(
+                    category: .intensityPattern,
+                    title: "Pain tends to build over time",
+                    message: String(format: "%.0f%% of your migraines show increasing pain intensity.", increasingPct * 100),
+                    priority: .medium,
+                    tags: ["increasingPercent": increasingPct, "analyzed": totalAnalyzed]
+                )
+            )
+        } else if decreasingPct >= 0.5 {
+            results.append(
+                Insight(
+                    category: .intensityPattern,
+                    title: "Pain tends to ease over time",
+                    message: String(format: "%.0f%% of your migraines show decreasing pain intensity.", decreasingPct * 100),
+                    priority: .low,
+                    tags: ["decreasingPercent": decreasingPct, "analyzed": totalAnalyzed]
+                )
+            )
+        }
+
+        // Peak timing insight
+        let earlyPeakPct = Double(peakInFirstHalfCount) / Double(totalAnalyzed)
+        let latePeakPct = Double(peakInSecondHalfCount) / Double(totalAnalyzed)
+
+        if earlyPeakPct >= 0.6 {
+            results.append(
+                Insight(
+                    category: .intensityPeakTiming,
+                    title: "Peak pain occurs early",
+                    message: String(format: "%.0f%% of migraines reach peak intensity in the first half.", earlyPeakPct * 100),
+                    priority: .medium,
+                    tags: ["earlyPeakPercent": earlyPeakPct, "analyzed": totalAnalyzed]
+                )
+            )
+        } else if latePeakPct >= 0.6 {
+            results.append(
+                Insight(
+                    category: .intensityPeakTiming,
+                    title: "Peak pain occurs later",
+                    message: String(format: "%.0f%% of migraines reach peak intensity in the second half.", latePeakPct * 100),
+                    priority: .medium,
+                    tags: ["latePeakPercent": latePeakPct, "analyzed": totalAnalyzed]
+                )
+            )
+        }
+
+        // Average intensity change insight
+        var totalPainChange: [Int] = []
+        var totalStressChange: [Int] = []
+
+        for migraine in migrainesWithSamples {
+            let samples = (migraine.intensitySamples ?? []).sorted { $0.timestamp < $1.timestamp }
+            guard samples.count >= 2 else { continue }
+
+            let painChange = samples.last!.painLevel - samples.first!.painLevel
+            let stressChange = samples.last!.stressLevel - samples.first!.stressLevel
+            totalPainChange.append(painChange)
+            totalStressChange.append(stressChange)
+        }
+
+        if !totalStressChange.isEmpty {
+            let avgStressChange = Double(totalStressChange.reduce(0, +)) / Double(totalStressChange.count)
+            if avgStressChange >= 2.0 {
+                results.append(
+                    Insight(
+                        category: .intensityPattern,
+                        title: "Stress increases during migraines",
+                        message: String(format: "On average, stress increases by %.1f points during your migraines.", avgStressChange),
+                        priority: .medium,
+                        tags: ["avgStressChange": avgStressChange]
+                    )
+                )
+            } else if avgStressChange <= -2.0 {
+                results.append(
+                    Insight(
+                        category: .intensityPattern,
+                        title: "Stress decreases during migraines",
+                        message: String(format: "On average, stress decreases by %.1f points during your migraines.", abs(avgStressChange)),
+                        priority: .low,
+                        tags: ["avgStressChange": avgStressChange]
+                    )
+                )
+            }
+        }
+
+        return results
+    }
+
+    // Tag insights: frequency and severity correlations
+    private func generateTagInsights() async throws -> [Insight] {
+        let items = migraineManager.migraines
+        guard !items.isEmpty else { return [] }
+
+        // Gather all migraines with tags
+        let migrainesWithTags = items.filter { !($0.tags ?? []).isEmpty }
+        guard !migrainesWithTags.isEmpty else { return [] }
+
+        var results: [Insight] = []
+
+        // Count tag frequency across all migraines
+        var tagCounts: [String: Int] = [:]
+        var tagSeveritySum: [String: Int] = [:]
+        var tagSeverityCount: [String: Int] = [:]
+
+        for migraine in items {
+            for tag in (migraine.tags ?? []) {
+                tagCounts[tag.name, default: 0] += 1
+                tagSeveritySum[tag.name, default: 0] += migraine.painLevel
+                tagSeverityCount[tag.name, default: 0] += 1
+            }
+        }
+
+        guard !tagCounts.isEmpty else { return [] }
+
+        // Most common tags (frequency insights)
+        let total = items.count
+        let sortedByFrequency = tagCounts.sorted { $0.value > $1.value }
+
+        if let topTag = sortedByFrequency.first, topTag.value >= 3 {
+            let pct = Double(topTag.value) / Double(total) * 100
+            results.append(
+                Insight(
+                    category: .tagFrequency,
+                    title: "Most common tag: \(topTag.key)",
+                    message: String(format: "\"%@\" appears in %.0f%% of your migraines (%d total).", topTag.key, pct, topTag.value),
+                    priority: pct >= 40 ? .medium : .low,
+                    tags: ["tag": topTag.key, "count": topTag.value, "percent": pct]
+                )
+            )
+        }
+
+        // Severity correlation insights
+        var tagAvgSeverity: [(name: String, avg: Double, count: Int)] = []
+        for (name, sum) in tagSeveritySum {
+            guard let count = tagSeverityCount[name], count >= 2 else { continue }
+            let avg = Double(sum) / Double(count)
+            tagAvgSeverity.append((name: name, avg: avg, count: count))
+        }
+
+        // Find tags with notably high severity
+        let overallAvgSeverity = averageSeverity(items) ?? 5.0
+        let highSeverityTags = tagAvgSeverity.filter { $0.avg >= overallAvgSeverity + 1.5 }.sorted { $0.avg > $1.avg }
+
+        if let highest = highSeverityTags.first {
+            results.append(
+                Insight(
+                    category: .tagSeverityCorrelation,
+                    title: "\"\(highest.name)\" linked to higher pain",
+                    message: String(format: "Migraines tagged \"%@\" average %.1f pain vs %.1f overall.", highest.name, highest.avg, overallAvgSeverity),
+                    priority: .high,
+                    tags: ["tag": highest.name, "tagAvg": highest.avg, "overallAvg": overallAvgSeverity]
+                )
+            )
+        }
+
+        // Find tags with notably low severity
+        let lowSeverityTags = tagAvgSeverity.filter { $0.avg <= overallAvgSeverity - 1.5 }.sorted { $0.avg < $1.avg }
+
+        if let lowest = lowSeverityTags.first {
+            results.append(
+                Insight(
+                    category: .tagSeverityCorrelation,
+                    title: "\"\(lowest.name)\" linked to lower pain",
+                    message: String(format: "Migraines tagged \"%@\" average %.1f pain vs %.1f overall.", lowest.name, lowest.avg, overallAvgSeverity),
+                    priority: .low,
+                    tags: ["tag": lowest.name, "tagAvg": lowest.avg, "overallAvg": overallAvgSeverity]
+                )
+            )
+        }
+
+        // Tag co-occurrence insight (which tags appear together)
+        var coOccurrences: [String: Int] = [:]
+        for migraine in migrainesWithTags {
+            let tags = (migraine.tags ?? []).map { $0.name }.sorted()
+            guard tags.count >= 2 else { continue }
+            // Count pairs
+            for i in 0..<tags.count {
+                for j in (i + 1)..<tags.count {
+                    let pair = "\(tags[i]) + \(tags[j])"
+                    coOccurrences[pair, default: 0] += 1
+                }
+            }
+        }
+
+        if let topPair = coOccurrences.max(by: { $0.value < $1.value }), topPair.value >= 3 {
+            results.append(
+                Insight(
+                    category: .tagFrequency,
+                    title: "Tags often appear together",
+                    message: "\"\(topPair.key)\" occur together in \(topPair.value) migraines.",
+                    priority: .low,
+                    tags: ["pair": topPair.key, "count": topPair.value]
+                )
+            )
+        }
+
+        return results
     }
 
     // MARK: - Intelligence

@@ -24,6 +24,7 @@ struct MygraApp: App {
     private let weatherManager: WeatherManager
     private let healthManager: HealthManager
     private let notificationManager: NotificationManager
+    private let tagManager: TagManager
     private let weatherTaskIdentifier = "com.molargiksoftware.Mygra.weatherRefresh"
 
     @State private var lastWeatherHighRisk: Bool = false
@@ -37,7 +38,7 @@ struct MygraApp: App {
             )
 
             sharedModelContainer = try ModelContainer(
-                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+                for: User.self, Migraine.self, WeatherData.self, HealthData.self, MigraineTag.self, IntensitySample.self,
                 configurations: config
             )
         } catch {
@@ -49,6 +50,7 @@ struct MygraApp: App {
         weatherManager = WeatherManager()
         healthManager = HealthManager()
         notificationManager = NotificationManager()
+        tagManager = TagManager(context: sharedModelContainer.mainContext)
         
         // watchOS
         ComplicationSync.shared.activate()
@@ -64,6 +66,7 @@ struct MygraApp: App {
                 .environment(weatherManager)
                 .environment(healthManager)
                 .environment(notificationManager)
+                .environment(tagManager)
                 .onAppear { registerBackgroundTaskHandler() }
                 .task {
                     await startPeriodicWeatherChecksInForeground()

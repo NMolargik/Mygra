@@ -20,4 +20,10 @@ enum InsightCategory: String, Hashable {
     case weatherAssociation
     case generative
     case biometrics
+    // Intensity tracking insights
+    case intensityPattern
+    case intensityPeakTiming
+    // Tag insights
+    case tagFrequency
+    case tagSeverityCorrelation
 }

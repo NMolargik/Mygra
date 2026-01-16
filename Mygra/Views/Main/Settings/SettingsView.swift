@@ -12,10 +12,11 @@ import Network
 struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(UserManager.self) private var userManager: UserManager
+    @Environment(TagManager.self) private var tagManager: TagManager
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
-    
+
     var onDeletionTriggered: () -> Void
 
     @State private var editingUser: Bool = false
@@ -27,6 +28,10 @@ struct SettingsView: View {
     @State private var showingFarewell: Bool = false
     @State private var isOnline: Bool = true
     @State private var networkMonitor: NWPathMonitor?
+    #if DEBUG
+    @State private var isGeneratingTestData: Bool = false
+    @State private var showTestDataConfirmation: Bool = false
+    #endif
 
     private var appVersion: String {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "—"
@@ -77,6 +82,30 @@ struct SettingsView: View {
             ))
             .tint(.green)
             .accessibilityHint("Switch between Month–Day–Year and Day–Month–Year formats for dates.")
+
+            Section("Dashboard Stats") {
+                Text("Choose which health stats to display on the Today card.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+
+                DashboardStatToggle(stat: .water)
+                DashboardStatToggle(stat: .sleep)
+                DashboardStatToggle(stat: .food)
+                DashboardStatToggle(stat: .caffeine)
+                DashboardStatToggle(stat: .steps)
+                DashboardStatToggle(stat: .restingHeartRate)
+                DashboardStatToggle(stat: .bloodOxygen)
+                DashboardStatToggle(stat: .bloodGlucose)
+            }
+
+            Section("Tags") {
+                NavigationLink {
+                    TagManagementView()
+                } label: {
+                    Label("Manage Tags", systemImage: "tag.fill")
+                        .foregroundStyle(.mygraPurple)
+                }
+            }
 
             Button {
                 editingUser = true
@@ -193,6 +222,44 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
             }
+
+            #if DEBUG
+            Section {
+                Button {
+                    showTestDataConfirmation = true
+                    Haptics.lightImpact()
+                } label: {
+                    if isGeneratingTestData {
+                        HStack {
+                            ProgressView()
+                            Text("Generating…")
+                                .bold()
+                                .foregroundStyle(.purple)
+                        }
+                    } else {
+                        Label("Generate Test Data", systemImage: "flask.fill")
+                            .bold()
+                            .foregroundStyle(.purple)
+                    }
+                }
+                .buttonStyle(.plain)
+                .disabled(isGeneratingTestData)
+                .alert("Generate Test Data?", isPresented: $showTestDataConfirmation) {
+                    Button("Cancel", role: .cancel) { }
+                    Button("Generate") {
+                        generateTestData()
+                    }
+                } message: {
+                    Text("This will create 12-15 sample migraines with tags, intensity samples, health data, and weather data spread over the last 4 weeks. This is useful for testing features like the calendar, intensity charts, and insights.")
+                }
+
+                Text("Debug build only. Creates sample data to test calendar, intensity tracking, tags, and insights features.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            } header: {
+                Label("Developer Tools", systemImage: "hammer.fill")
+            }
+            #endif
         }
         .sheet(isPresented: $editingUser) {
             NavigationStack {
@@ -245,7 +312,7 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                 )
                 
                 VStack(spacing: 16) {
-                    Text("Thank you for using Mygra. We hoped we helped, even a little.")
+                    Text("Thank you for using Mygra. We hope we helped, even a little.")
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                     Text("We're deleting your data from iCloud now. This may take a moment.")
@@ -339,6 +406,46 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
         }
         exportTempURL = nil
     }
+
+    #if DEBUG
+    // MARK: - Test Data Generation
+
+    private func generateTestData() {
+        isGeneratingTestData = true
+        TestDataGenerator.generateTestData(context: modelContext, tagManager: tagManager)
+        isGeneratingTestData = false
+        Haptics.success()
+    }
+    #endif
+}
+
+// MARK: - Dashboard Stat Toggle
+
+/// A toggle view for controlling visibility of a dashboard stat.
+private struct DashboardStatToggle: View {
+    let stat: DashboardStat
+
+    @AppStorage private var isVisible: Bool
+
+    init(stat: DashboardStat) {
+        self.stat = stat
+        // Initialize AppStorage with the stat's storage key and default value
+        _isVisible = AppStorage(wrappedValue: stat.defaultVisibility, stat.storageKey)
+    }
+
+    var body: some View {
+        Toggle(isOn: Binding(
+            get: { isVisible },
+            set: { newValue in
+                isVisible = newValue
+                Haptics.lightImpact()
+            }
+        )) {
+            Label(stat.displayName, systemImage: stat.systemImage)
+                .foregroundStyle(stat.color)
+        }
+        .tint(stat.color)
+    }
 }
 
 #Preview {
@@ -347,6 +454,7 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
         // Mirror the app schema but use an in-memory store for previews
         container = try ModelContainer(
             for: User.self, Migraine.self, WeatherData.self, HealthData.self,
+            MigraineTag.self, IntensitySample.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: true)
         )
     } catch {
@@ -354,10 +462,12 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
     }
 
     let previewUserManager = UserManager(context: container.mainContext)
+    let previewTagManager = TagManager(context: container.mainContext)
 
     return SettingsView(
             onDeletionTriggered: {}
         )
         .modelContainer(container)
         .environment(previewUserManager)
+        .environment(previewTagManager)
 }

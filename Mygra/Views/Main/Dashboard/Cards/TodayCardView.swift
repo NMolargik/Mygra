@@ -19,7 +19,7 @@ struct TodayCardView: View {
     @Binding var addCaffeine: Double
     @Binding var addFood: Double
     @Binding var addSleepHours: Double
-    
+
     let isSavingIntake: Bool
     let intakeError: String?
     let allIntakeAddsAreZero: Bool
@@ -29,6 +29,16 @@ struct TodayCardView: View {
     let onRefreshHealth: () -> Void
     let onSaveIntake: () -> Void
     let onCancelIntake: () -> Void
+
+    // MARK: - Dashboard Stat Visibility
+    @AppStorage(AppStorageKeys.showWaterStat) private var showWater = true
+    @AppStorage(AppStorageKeys.showSleepStat) private var showSleep = true
+    @AppStorage(AppStorageKeys.showFoodStat) private var showFood = true
+    @AppStorage(AppStorageKeys.showCaffeineStat) private var showCaffeine = true
+    @AppStorage(AppStorageKeys.showStepsStat) private var showSteps = false
+    @AppStorage(AppStorageKeys.showHeartRateStat) private var showHeartRate = false
+    @AppStorage(AppStorageKeys.showOxygenStat) private var showOxygen = false
+    @AppStorage(AppStorageKeys.showGlucoseStat) private var showGlucose = false
 
     var body: some View {
         if isAuthorized {
@@ -87,51 +97,26 @@ struct TodayCardView: View {
                 }
 
                 if let data = latestData {
-                    // Precompute display strings so we can use them both for value and as stable tokens
-                    let waterStr = waterDisplay(from: data)
-                    let sleepStr = data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—"
-                    let foodStr: String = {
-                        guard let kcal = data.energyKilocalories else { return "—" }
-                        if useMetricUnits {
-                            let kJ = (kcal * UnitConversion.kilocaloriesToKilojoules).rounded()
-                            return "\(Int(kJ)) kJ"
-                        } else {
-                            return "\(Int(kcal)) cal"
-                        }
-                    }()
-                    let caffeineStr = data.caffeineMg.map { "\(Int($0)) mg" } ?? "—"
+                    let visibleStats = buildVisibleStats()
 
-                    HStack(spacing: 12) {
-                        StatTileView(
-                            title: "Water",
-                            value: waterStr,
-                            systemImage: "drop.fill",
-                            color: .blue,
-                            valueToken: AnyHashable(waterStr)
-                        )
-                        StatTileView(
-                            title: "Sleep",
-                            value: sleepStr,
-                            systemImage: "bed.double.fill",
-                            color: .indigo,
-                            valueToken: AnyHashable(sleepStr)
-                        )
-                    }
-                    HStack(spacing: 12) {
-                        StatTileView(
-                            title: "Food",
-                            value: foodStr,
-                            systemImage: "fork.knife",
-                            color: .orange,
-                            valueToken: AnyHashable(foodStr)
-                        )
-                        StatTileView(
-                            title: "Caffeine",
-                            value: caffeineStr,
-                            systemImage: "cup.and.saucer.fill",
-                            color: .brown,
-                            valueToken: AnyHashable(caffeineStr)
-                        )
+                    if visibleStats.isEmpty {
+                        Text("No stats selected. Go to Settings to select dashboard stats.")
+                            .foregroundStyle(.secondary)
+                            .font(.footnote)
+                            .padding(.top, 4)
+                    } else {
+                        // Dynamic grid that adapts to the number of visible stats
+                        LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                            ForEach(visibleStats, id: \.self) { stat in
+                                StatTileView(
+                                    title: stat.displayName,
+                                    value: displayValue(for: stat, data: data),
+                                    systemImage: stat.systemImage,
+                                    color: stat.color,
+                                    valueToken: AnyHashable(displayValue(for: stat, data: data))
+                                )
+                            }
+                        }
                     }
                 } else {
                     HStack {
@@ -205,6 +190,68 @@ struct TodayCardView: View {
             if let oz = data.waterOunces {
                 return String(format: "%.0f oz", oz)
             } else { return "—" }
+        }
+    }
+
+    // MARK: - Dynamic Stat Helpers
+
+    /// Returns an array of DashboardStat cases that should be visible based on user preferences.
+    private func buildVisibleStats() -> [DashboardStat] {
+        var stats: [DashboardStat] = []
+        if showWater { stats.append(.water) }
+        if showSleep { stats.append(.sleep) }
+        if showFood { stats.append(.food) }
+        if showCaffeine { stats.append(.caffeine) }
+        if showSteps { stats.append(.steps) }
+        if showHeartRate { stats.append(.restingHeartRate) }
+        if showOxygen { stats.append(.bloodOxygen) }
+        if showGlucose { stats.append(.bloodGlucose) }
+        return stats
+    }
+
+    /// Returns the display string for a given stat from the HealthData.
+    private func displayValue(for stat: DashboardStat, data: HealthData) -> String {
+        switch stat {
+        case .water:
+            return waterDisplay(from: data)
+
+        case .sleep:
+            return data.sleepHours.map { String(format: "%.1f h", $0) } ?? "—"
+
+        case .food:
+            guard let kcal = data.energyKilocalories else { return "—" }
+            if useMetricUnits {
+                let kJ = (kcal * UnitConversion.kilocaloriesToKilojoules).rounded()
+                return "\(Int(kJ)) kJ"
+            } else {
+                return "\(Int(kcal)) cal"
+            }
+
+        case .caffeine:
+            return data.caffeineMg.map { "\(Int($0)) mg" } ?? "—"
+
+        case .steps:
+            return data.stepCount.map { "\($0.formatted())" } ?? "—"
+
+        case .restingHeartRate:
+            return data.restingHeartRate.map { "\($0) bpm" } ?? "—"
+
+        case .bloodOxygen:
+            guard let spo2 = data.bloodOxygenPercent else { return "—" }
+            return String(format: "%.0f%%", spo2)
+
+        case .bloodGlucose:
+            guard let glucose = data.glucoseMgPerdL else { return "—" }
+            if useMetricUnits {
+                let mmol = glucose / UnitConversion.glucoseMgDlToMmolL
+                return String(format: "%.1f mmol/L", mmol)
+            } else {
+                return String(format: "%.0f mg/dL", glucose)
+            }
+
+        case .topTriggers:
+            // Triggers are handled separately at DashboardView level
+            return "—"
         }
     }
 }

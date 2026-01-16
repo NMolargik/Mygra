@@ -131,6 +131,40 @@ extension PhoneBridge {
             completion(false)
         }
     }
+
+    /// Starts a new migraine on the iPhone with default values.
+    /// - Parameters:
+    ///   - painLevel: Initial pain level (0-10), defaults to 5
+    ///   - stressLevel: Initial stress level (0-10), defaults to 5
+    ///   - completion: Called with success status and optional error message
+    func startMigraine(
+        painLevel: Int = 5,
+        stressLevel: Int = 5,
+        completion: @escaping (_ success: Bool, _ error: String?) -> Void
+    ) {
+        guard WCSession.isSupported() else {
+            completion(false, "Watch connectivity not supported")
+            return
+        }
+
+        let message: [String: Any] = [
+            "command": "startMigraine",
+            "painLevel": painLevel,
+            "stressLevel": stressLevel
+        ]
+
+        if WCSession.default.isReachable {
+            WCSession.default.sendMessage(message) { reply in
+                let success = reply["success"] as? Bool ?? false
+                let error = reply["error"] as? String
+                completion(success, error)
+            } errorHandler: { error in
+                completion(false, error.localizedDescription)
+            }
+        } else {
+            completion(false, "iPhone not reachable")
+        }
+    }
 }
 
 extension Notification.Name {

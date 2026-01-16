@@ -79,7 +79,7 @@ final class MigraineManager {
                     MigraineActivityCenter.end(for: prev)
                 }
                 if let og = newOngoing {
-                    MigraineActivityCenter.ensureStarted(for: og.id, startDate: og.startDate, severity: og.painLevel, notes: og.note ?? "")
+                    MigraineActivityCenter.ensureStarted(for: og.id, startDate: og.startDate, severity: og.painLevel, stressLevel: og.stressLevel, notes: og.note ?? "")
                 }
             }
 
@@ -98,6 +98,20 @@ final class MigraineManager {
         reviewScene: UIWindowScene? = nil
     ) {
         context.insert(migraine)
+
+        // Create the initial intensity sample from the migraine's starting pain/stress levels
+        let initialSample = IntensitySample(
+            timestamp: migraine.startDate,
+            painLevel: migraine.painLevel,
+            stressLevel: migraine.stressLevel,
+            note: nil,
+            migraine: migraine
+        )
+        context.insert(initialSample)
+        if migraine.intensitySamples == nil {
+            migraine.intensitySamples = []
+        }
+        migraine.intensitySamples?.append(initialSample)
 
         // Post creation notification for observers (e.g., InsightManager)
         NotificationCenter.default.post(
@@ -176,6 +190,70 @@ final class MigraineManager {
         // Clear ongoing reference since none will remain
         ongoingMigraine = nil
         // Persist and refresh state
+        saveAndReload()
+    }
+
+    // MARK: - Intensity Samples
+
+    /// Adds an intensity sample to a migraine and updates the Live Activity.
+    func addIntensitySample(
+        to migraine: Migraine,
+        pain: Int,
+        stress: Int,
+        note: String? = nil
+    ) {
+        let sample = IntensitySample(
+            timestamp: Date(),
+            painLevel: pain,
+            stressLevel: stress,
+            note: note,
+            migraine: migraine
+        )
+        context.insert(sample)
+        if migraine.intensitySamples == nil {
+            migraine.intensitySamples = []
+        }
+        migraine.intensitySamples?.append(sample)
+
+        // Update the migraine's current pain/stress levels to the latest
+        migraine.painLevel = pain
+        migraine.stressLevel = stress
+
+        // Update Live Activity if ongoing
+        if migraine.isOngoing {
+            MigraineActivityCenter.update(
+                for: migraine.id,
+                severity: pain,
+                stressLevel: stress,
+                notes: migraine.note ?? ""
+            )
+        }
+
+        saveAndReload()
+    }
+
+    /// Removes an intensity sample from a migraine.
+    func removeIntensitySample(_ sample: IntensitySample, from migraine: Migraine) {
+        migraine.intensitySamples?.removeAll { $0.id == sample.id }
+        context.delete(sample)
+        saveAndReload()
+    }
+
+    /// Creates the initial intensity sample when a migraine is created.
+    /// Call this after creating the migraine to auto-populate the first sample.
+    func createInitialIntensitySample(for migraine: Migraine) {
+        let sample = IntensitySample(
+            timestamp: migraine.startDate,
+            painLevel: migraine.painLevel,
+            stressLevel: migraine.stressLevel,
+            note: nil,
+            migraine: migraine
+        )
+        context.insert(sample)
+        if migraine.intensitySamples == nil {
+            migraine.intensitySamples = []
+        }
+        migraine.intensitySamples?.append(sample)
         saveAndReload()
     }
 

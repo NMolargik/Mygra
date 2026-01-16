@@ -116,8 +116,10 @@
 				Models/DedupeKey.swift,
 				Models/HealthData.swift,
 				Models/Insight.swift,
+				Models/IntensitySample.swift,
 				Models/Migraine.swift,
 				Models/MigraineFilter.swift,
+				Models/MigraineTag.swift,
 				Models/WeatherData.swift,
 				MygraIcon.icon,
 			);
@@ -149,6 +151,15 @@
 		EBD022CF2E8D9F85007DDFC3 /* Exceptions for "Mygra" folder in "Mygra Wrist Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Enumerations/MenstrualPhase.swift,
+				Enumerations/MigraineTrigger.swift,
+				Enumerations/Severity.swift,
+				Enumerations/UnitConversion.swift,
+				Models/HealthData.swift,
+				Models/IntensitySample.swift,
+				Models/Migraine.swift,
+				Models/MigraineTag.swift,
+				Models/WeatherData.swift,
 				MygraIcon.icon,
 			);
 			target = EB5E66262E8D61FC009872C2 /* Mygra Wrist Watch App */;
@@ -156,6 +167,15 @@
 		EBD022D02E8D9F85007DDFC3 /* Exceptions for "Mygra" folder in "Mygra Wrist WidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				Enumerations/MenstrualPhase.swift,
+				Enumerations/MigraineTrigger.swift,
+				Enumerations/Severity.swift,
+				Enumerations/UnitConversion.swift,
+				Models/HealthData.swift,
+				Models/IntensitySample.swift,
+				Models/Migraine.swift,
+				Models/MigraineTag.swift,
+				Models/WeatherData.swift,
 				MygraIcon.icon,
 			);
 			target = EBD0218A2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension */;
@@ -501,7 +521,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = MygraWidgetsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MygraWidgets/Info.plist;
@@ -514,7 +534,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -535,7 +555,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = MygraWidgetsExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = MygraWidgets/Info.plist;
@@ -548,7 +568,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.MygraWidgets;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -571,7 +591,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mygra/Mygra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_APP_SANDBOX = YES;
@@ -613,7 +633,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -641,7 +661,7 @@
 				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = Mygra/Mygra.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_APP_SANDBOX = YES;
@@ -683,7 +703,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
@@ -832,7 +852,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist Watch App/Mygra Wrist Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -844,7 +864,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -867,7 +887,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist Watch App/Mygra Wrist Watch App.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -879,7 +899,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.molargiksoftware.Mygra.watchkitapp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -903,7 +923,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist WidgetsExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Mygra Wrist Widgets/Info.plist";
@@ -915,7 +935,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.molargiksoftware.Mygra.watchkitapp.Mygra-Wrist-Widgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
@@ -937,7 +957,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = "Mygra Wrist WidgetsExtension.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 48;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = R8Q8DM58C6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Mygra Wrist Widgets/Info.plist";
@@ -949,7 +969,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.molargiksoftware.Mygra.watchkitapp.Mygra-Wrist-Widgets";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;

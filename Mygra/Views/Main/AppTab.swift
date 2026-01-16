@@ -8,27 +8,32 @@
 import SwiftUI
 
 enum AppTab: String, CaseIterable, Identifiable {
-    case insights = "Insights"
+    case dashboard = "Dashboard"
+    case calendar = "Calendar"
     case list = "Migraines"
     case settings = "Settings"
-    
+
     var id: String { self.rawValue }
 
     func icon() -> Image {
         switch self {
-        case .insights:
-            return Image(systemName: "lightbulb.max.fill")
+        case .dashboard:
+            return Image(systemName: "square.grid.2x2.fill")
+        case .calendar:
+            return Image(systemName: "calendar")
         case .list:
             return Image(systemName: "list.bullet")
         case .settings:
             return Image(systemName: "gearshape.2")
         }
     }
-    
+
     func color() -> Color {
         switch self {
-        case .insights:
-            return Color.yellow
+        case .dashboard:
+            return Color.pink
+        case .calendar:
+            return Color.mygraPurple
         case .list:
             return Color.mygraBlue
         case .settings:

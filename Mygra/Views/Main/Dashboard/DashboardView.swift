@@ -1,5 +1,5 @@
 //
-//  InsightsView.swift
+//  DashboardView.swift
 //  Mygra
 //
 //  Created by Nick Molargik on 8/28/25.
@@ -9,7 +9,7 @@ import SwiftUI
 import WeatherKit
 import SwiftData
 
-struct InsightsView: View {
+struct DashboardView: View {
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(HealthManager.self) private var healthManager: HealthManager
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
@@ -17,7 +17,7 @@ struct InsightsView: View {
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     
     @Binding var showingEntrySheet: Bool
-    @State private var viewModel: InsightsView.ViewModel = InsightsView.ViewModel()
+    @State private var viewModel: DashboardView.ViewModel = DashboardView.ViewModel()
 
     var body: some View {
         NavigationStack {
@@ -168,7 +168,7 @@ struct InsightsView: View {
     }
 }
 
-#Preview("Insights – Basic") {
+#Preview("Dashboard – Basic") {
     // Register AppStorage defaults for preview
     UserDefaults.standard.register(defaults: [
         AppStorageKeys.useMetricUnits: false
@@ -200,7 +200,7 @@ struct InsightsView: View {
 
     // Note: InsightManager.insights has a restricted setter; leaving insights empty for preview.
 
-    return InsightsView(showingEntrySheet: .constant(false))
+    return DashboardView(showingEntrySheet: .constant(false))
         .modelContainer(container)
         .environment(previewInsightManager)
         .environment(previewHealthManager)

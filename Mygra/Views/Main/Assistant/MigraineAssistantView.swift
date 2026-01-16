@@ -215,7 +215,6 @@ struct MigraineAssistantView: View {
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .overlay(Divider(), alignment: .top)
                 }
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {

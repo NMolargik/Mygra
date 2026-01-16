@@ -29,7 +29,8 @@ struct MigraineDetailView: View {
     @State private var endError: String?
     @State private var showDeleteConfirm = false
     @State private var showingModifySheet = false
-    
+    @State private var showingIntensitySheet = false
+
     @State private var showPendingWeatherAlert: Bool = false
     @State private var pendingWeatherAlertMessage: String = ""
     
@@ -48,7 +49,30 @@ struct MigraineDetailView: View {
                         showingEndSheet = true
                     }
                 )
-                
+
+                // Intensity chart and update button
+                VStack(spacing: 12) {
+                    IntensityChartView(
+                        samples: migraine.intensitySamples ?? [],
+                        startDate: migraine.startDate,
+                        endDate: migraine.endDate
+                    )
+
+                    // Update intensity button for ongoing migraines
+                    if migraine.isOngoing {
+                        Button {
+                            showingIntensitySheet = true
+                        } label: {
+                            Label("Update Intensity", systemImage: "waveform.path.ecg")
+                                .font(.headline)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.mygraPurple)
+                    }
+                }
+
                 InsightSectionView(migraine: migraine)
                 
                 if let note = migraine.note, !note.isEmpty {
@@ -122,6 +146,20 @@ struct MigraineDetailView: View {
                     .accessibilityIdentifier("deleteMigraineButton")
                 }
             }
+        }
+        .sheet(isPresented: $showingIntensitySheet) {
+            IntensityUpdateSheet(
+                migraine: migraine,
+                onSave: { pain, stress, note in
+                    migraineManager.addIntensitySample(
+                        to: migraine,
+                        pain: pain,
+                        stress: stress,
+                        note: note
+                    )
+                }
+            )
+            .presentationDetents([.medium, .large])
         }
         .sheet(isPresented: $showingEndSheet) {
             EndMigraineSheet(

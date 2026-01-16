@@ -1,5 +1,5 @@
 //
-//  InsightsView-ViewModel.swift
+//  DashboardView-ViewModel.swift
 //  Mygra
 //
 //  Created by Nick Molargik on 8/30/25.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension InsightsView {
+extension DashboardView {
     @Observable
     class ViewModel {
         var addWater: Double = 0        // liters

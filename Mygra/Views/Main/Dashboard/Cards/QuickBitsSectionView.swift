@@ -171,6 +171,10 @@ private extension QuickBitsSectionView {
         case .weatherAssociation: return "cloud.sun"
         case .generative: return "sparkles"
         case .biometrics: return "waveform.path.ecg.text.clipboard"
+        case .intensityPattern: return "chart.xyaxis.line"
+        case .intensityPeakTiming: return "timer"
+        case .tagFrequency: return "tag.fill"
+        case .tagSeverityCorrelation: return "tag.circle.fill"
         }
     }
 

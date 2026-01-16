@@ -17,6 +17,8 @@ enum InsightError: LocalizedError {
     case sleepFailed(underlying: Error)
     case weatherFailed(underlying: Error)
     case phasesFailed(underlying: Error)
+    case intensityFailed(underlying: Error)
+    case tagsFailed(underlying: Error)
     case intelligenceUnavailable
     case intelligenceAnalysisFailed(underlying: Error)
     case chatStartFailed(underlying: Error)
@@ -42,6 +44,10 @@ enum InsightError: LocalizedError {
             return "Failed to generate weather insights."
         case .phasesFailed:
             return "Failed to generate menstrual phase insights."
+        case .intensityFailed:
+            return "Failed to generate intensity pattern insights."
+        case .tagsFailed:
+            return "Failed to generate tag insights."
         case .intelligenceUnavailable:
             return "Apple Intelligence is not available on this device."
         case .intelligenceAnalysisFailed:

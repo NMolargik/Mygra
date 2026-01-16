@@ -15,8 +15,9 @@ struct MigraineActivityAttributes: ActivityAttributes {
         // Dynamic state for the activity
         let migraineID: UUID
         let startDate: Date
-        let severity: Int // New: Add severity level (1-10) for more informative display
-        let notes: String? // New: Optional short notes or triggers for context
+        let severity: Int // Pain level (0-10)
+        let stressLevel: Int // Stress level (0-10)
+        let notes: String? // Optional short notes or triggers for context
     }
 }
 
@@ -43,12 +44,14 @@ struct MygraWidgetsLiveActivity: Widget {
                             .font(.title3)
                             .accessibilityLabel("Migraine Indicator")
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("Mygra")
-                                .font(.subheadline.bold())
-                                .foregroundStyle(.primary)
-                            Text("Pain: \(context.state.severity)")
-                                .font(.caption.bold())
-                                .foregroundStyle(severityColor(severity: context.state.severity))
+                            HStack(spacing: 6) {
+                                Text("Pain: \(context.state.severity)")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(severityColor(severity: context.state.severity))
+                                Text("Stress: \(context.state.stressLevel)")
+                                    .font(.caption.bold())
+                                    .foregroundStyle(stressColor(level: context.state.stressLevel))
+                            }
                         }
                     }
                 }
@@ -97,14 +100,23 @@ struct MygraWidgetsLiveActivity: Widget {
                         endPoint: .bottomLeading
                     ))
             } compactTrailing: {
-                // Compact trailing - Ultra-compact severity chip to avoid stretching width
-                Text("\(context.state.severity)")
-                    .font(.caption2.bold())
-                    .foregroundStyle(.black)
-                    .padding(.horizontal, 5)
-                    .padding(.vertical, 2)
-                    .background(severityColor(severity: context.state.severity))
-                    .clipShape(Capsule())
+                // Compact trailing - Ultra-compact severity chips for pain/stress
+                HStack(spacing: 2) {
+                    Text("\(context.state.severity)")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(severityColor(severity: context.state.severity))
+                        .clipShape(Capsule())
+                    Text("\(context.state.stressLevel)")
+                        .font(.caption2.bold())
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 2)
+                        .background(stressColor(level: context.state.stressLevel))
+                        .clipShape(Capsule())
+                }
             } minimal: {
                 // Minimal - Icon with severity color overlay
                 Image(systemName: "brain.head.profile.fill")
@@ -161,23 +173,36 @@ private struct MigraineActivityContentView: View {
                             .layoutPriority(1)
                         
                         Spacer(minLength: 4)
-                        
-                        // Circular severity badge to save horizontal space
-                        ZStack {
-                            Circle()
-                                .fill(severityColor(severity: context.state.severity))
-                            Text("\(context.state.severity)")
-                                .font(.caption2.bold())
-                                .monospacedDigit()
-                                .foregroundStyle(.black)
+
+                        // Circular badges for pain and stress
+                        HStack(spacing: 4) {
+                            ZStack {
+                                Circle()
+                                    .fill(severityColor(severity: context.state.severity))
+                                Text("\(context.state.severity)")
+                                    .font(.caption2.bold())
+                                    .monospacedDigit()
+                                    .foregroundStyle(.black)
+                            }
+                            .frame(width: 22, height: 22)
+                            .accessibilityLabel("Pain \(context.state.severity) out of 10")
+
+                            ZStack {
+                                Circle()
+                                    .fill(stressColor(level: context.state.stressLevel))
+                                Text("\(context.state.stressLevel)")
+                                    .font(.caption2.bold())
+                                    .monospacedDigit()
+                                    .foregroundStyle(.black)
+                            }
+                            .frame(width: 22, height: 22)
+                            .accessibilityLabel("Stress \(context.state.stressLevel) out of 10")
                         }
-                        .frame(width: 22, height: 22)
-                        .accessibilityLabel("Severity \(context.state.severity) out of 10")
                     }
                     .padding(.horizontal, 8)
                     .padding(.vertical, 6)
                     .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Migraine, timer \(Text(context.state.startDate, style: .timer)), severity \(context.state.severity) out of 10")
+                    .accessibilityLabel("Migraine, timer \(Text(context.state.startDate, style: .timer)), pain \(context.state.severity), stress \(context.state.stressLevel)")
                 }
             } else {
                 // iOS Lock screen / banner (original fuller layout)
@@ -202,13 +227,22 @@ private struct MigraineActivityContentView: View {
                                 .font(.subheadline)
                         }
                         Spacer()
-                        Text("Severity: \(context.state.severity)/10")
-                            .font(.caption2.bold())
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(severityColor(severity: context.state.severity))
-                            .foregroundStyle(.black)
-                            .clipShape(Capsule())
+                        HStack(spacing: 6) {
+                            Text("Pain: \(context.state.severity)")
+                                .font(.caption2.bold())
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 4)
+                                .background(severityColor(severity: context.state.severity))
+                                .foregroundStyle(.black)
+                                .clipShape(Capsule())
+                            Text("Stress: \(context.state.stressLevel)")
+                                .font(.caption2.bold())
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 4)
+                                .background(stressColor(level: context.state.stressLevel))
+                                .foregroundStyle(.black)
+                                .clipShape(Capsule())
+                        }
                     }
                     if let notes = context.state.notes, !notes.isEmpty {
                         Text(notes)
@@ -235,6 +269,10 @@ private func severityColor(severity: Int) -> Color {
     case 9...10: return .red
     default: return .red
     }
+}
+
+private func stressColor(level: Int) -> Color {
+    return .indigo
 }
 
 #Preview("Lock Screen", as: .content, using: MigraineActivityAttributes()) {
