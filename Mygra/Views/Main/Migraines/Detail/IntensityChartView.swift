@@ -13,6 +13,8 @@ struct IntensityChartView: View {
     let samples: [IntensitySample]
     let startDate: Date
     let endDate: Date?
+    /// Optional callback for updating intensity. When provided, shows an "Update" button in the header.
+    var onUpdateIntensity: (() -> Void)? = nil
 
     private var sortedSamples: [IntensitySample] {
         samples.sorted { $0.timestamp < $1.timestamp }
@@ -25,6 +27,17 @@ struct IntensityChartView: View {
                 Label("Intensity Over Time", systemImage: "chart.xyaxis.line")
                     .font(.headline)
                 Spacer()
+                if let onUpdateIntensity {
+                    Button {
+                        onUpdateIntensity()
+                    } label: {
+                        Label("Update", systemImage: "waveform.path.ecg")
+                            .font(.subheadline)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+                    .tint(.mygraPurple)
+                }
             }
 
             if sortedSamples.isEmpty {

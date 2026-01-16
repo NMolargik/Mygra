@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftUI
-
+import UIKit
 import WeatherKit
 import CoreLocation
 
@@ -149,13 +149,29 @@ struct WeatherCardView: View {
                             .tint(.mygraPurple)
                             .accessibilityLabel("Loading weather data")
                     } else {
-                        Button(action: onRefresh) {
-                            Label("Refresh", systemImage: "arrow.clockwise")
+                        HStack(spacing: 8) {
+                            if isLocationPermissionError {
+                                Button(action: openAppSettings) {
+                                    Label("Settings", systemImage: "gearshape")
+                                }
+                                .padding(8)
+                                .padding(.horizontal, 4)
+                                .foregroundStyle(.white)
+                                .adaptiveGlass(tint: .mygraPurple)
+                                .hoverEffect()
+                                .accessibilityLabel("Open location settings")
+                            }
+
+                            Button(action: onRefresh) {
+                                Label("Refresh", systemImage: "arrow.clockwise")
+                                    .labelStyle(.iconOnly)
+                            }
+                            .padding(8)
+                            .foregroundStyle(.white)
+                            .adaptiveGlass(tint: .mygraPurple)
+                            .hoverEffect()
+                            .accessibilityLabel("Refresh weather data")
                         }
-                        .buttonStyle(.bordered)
-                        .labelStyle(.iconOnly)
-                        .tint(.mygraPurple)
-                        .accessibilityLabel("Refresh weather data")
                     }
                 }
                 .padding(14)
@@ -213,13 +229,29 @@ struct WeatherCardView: View {
             case .some(.network):
                 return "Network issue. Check your connection and try again."
             default:
-                return "Weather data isn’t available yet. Try refreshing."
+                return "Weather data isn't available yet. Try refreshing."
             }
         }
         if error.domain == NSURLErrorDomain {
             return "Network issue. Check your connection and try again."
         }
-        return "Weather data isn’t available yet. Try refreshing."
+        return "Weather data isn't available yet. Try refreshing."
+    }
+
+    private var isLocationPermissionError: Bool {
+        guard let error = error as NSError? else { return false }
+        guard error.domain == kCLErrorDomain as String else { return false }
+        switch CLError.Code(rawValue: error.code) {
+        case .some(.denied), .some(.promptDeclined):
+            return true
+        default:
+            return false
+        }
+    }
+
+    private func openAppSettings() {
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
 

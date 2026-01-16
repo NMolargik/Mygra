@@ -19,6 +19,9 @@ extension DashboardView {
 
         var isQuickAddExpanded: Bool = false
         var isShowingMigraineAssistant: Bool = false
+        var isShowingCalendar: Bool = false
+        var isShowingSettingSheet = false
+
         
         var allIntakeAddsAreZero: Bool {
             addWater == 0 && addCaffeine == 0 && addFood == 0 && addSleepHours == 0

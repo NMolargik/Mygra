@@ -46,8 +46,6 @@ struct MigraineRowView: View {
                         .font(.subheadline)
                         .monospacedDigit()
                         .fontWeight(.bold)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
                     
                     Spacer()
 
@@ -122,7 +120,7 @@ struct MigraineRowView: View {
         if migraine.isOngoing {
             return "Ongoing"
         } else {
-            return DateFormatting.dateTime(migraine.startDate, useDMY: useDayMonthYearDates)
+            return DateFormatting.compactDateTime(migraine.startDate, useDMY: useDayMonthYearDates)
         }
     }
 
@@ -152,44 +150,13 @@ struct MigraineRowView: View {
         }
     }
     
-    // MARK: - Ongoing color cycling helpers
-    /// Colors to cycle through when a migraine is ongoing (ordered by rising severity)
-    private let severityCycle: [Color] = [
-        .green, .yellow, .orange, .red, .pink
-    ]
-
-    /// Returns a smoothly animated color that cycles through `severityCycle`.
-    private func animatedSeverityColor(at time: Date, secondsPerStep: Double = 1.5) -> Color {
-        guard severityCycle.count >= 2 else { return migraine.severity.color }
-        let t = time.timeIntervalSinceReferenceDate / secondsPerStep
-        let phase = t - floor(t) // 0...1 within current step
-        let idx = Int(floor(t)) % severityCycle.count
-        let nextIdx = (idx + 1) % severityCycle.count
-        return interpolate(severityCycle[idx], severityCycle[nextIdx], phase: phase)
-    }
-
-    /// Linearly interpolate between two `Color`s using sRGB components.
-    private func interpolate(_ a: Color, _ b: Color, phase: Double) -> Color {
-        // Extract RGBA components from Color via UIColor
-        let (ar, ag, ab, aa) = rgbaComponents(from: a)
-        let (br, bg, bb, ba) = rgbaComponents(from: b)
-        let p = max(0, min(1, phase))
-        let r = ar + (br - ar) * p
-        let g = ag + (bg - ag) * p
-        let bl = ab + (bb - ab) * p
-        let al = aa + (ba - aa) * p
-        return Color(red: Double(r), green: Double(g), blue: Double(bl), opacity: Double(al))
-    }
-
-    /// Safely get sRGB RGBA components for a SwiftUI Color.
-    private func rgbaComponents(from color: Color) -> (CGFloat, CGFloat, CGFloat, CGFloat) {
-        #if canImport(UIKit)
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        UIColor(color).getRed(&r, green: &g, blue: &b, alpha: &a)
-        return (r, g, b, a)
-        #else
-        return (0, 0, 0, 1)
-        #endif
+    // MARK: - Ongoing color pulse helper
+    /// Returns a color that pulses between clear and indigo using a sine wave.
+    private func animatedSeverityColor(at time: Date, pulseDuration: Double = 1.5) -> Color {
+        let t = time.timeIntervalSinceReferenceDate / pulseDuration
+        // Use sine wave for smooth pulse (0 to 1 to 0)
+        let phase = (sin(t * .pi * 2) + 1) / 2 // Normalized 0...1
+        return Color.mygraPurple.opacity(phase)
     }
 
 
@@ -256,7 +223,7 @@ struct MigraineRowView: View {
     private func durationPill() -> some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
             let now = context.date
-            HStack(spacing: 6) {
+            VStack(spacing: 2) {
                 Image(systemName: "clock.fill")
                     .imageScale(.small)
                 Text(liveDurationString(now: now))
@@ -267,7 +234,7 @@ struct MigraineRowView: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(
-                Capsule(style: .continuous).fill(Color.mygraBlue)
+                RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.mygraBlue)
             )
             .accessibilityLabel("Ongoing duration \(liveDurationString(now: now))")
         }

@@ -13,10 +13,17 @@ struct DashboardView: View {
     @Environment(InsightManager.self) private var insightManager: InsightManager
     @Environment(HealthManager.self) private var healthManager: HealthManager
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
+    @Environment(MigraineManager.self) private var migraineManager: MigraineManager
+    @Environment(TagManager.self) private var tagManager: TagManager
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
-    
+
     @Binding var showingEntrySheet: Bool
+    /// Callback to navigate to a migraine in the main navigation stack (used when calendar is in sheet)
+    var onNavigateToMigraine: ((UUID) -> Void)? = nil
+    var deleteAllData: () -> Void
+    
     @State private var viewModel: DashboardView.ViewModel = DashboardView.ViewModel()
 
     var body: some View {
@@ -116,6 +123,59 @@ struct DashboardView: View {
             .onChange(of: viewModel.isQuickAddExpanded) { _, _ in
                 Haptics.lightImpact()
             }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        Haptics.mediumImpact()
+                        viewModel.isShowingCalendar.toggle()
+                    } label: {
+                        Label("Calendar", systemImage: "calendar")
+                    }
+                }
+                
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        viewModel.isShowingSettingSheet.toggle()
+                    } label: {
+                        Label("Settings", systemImage: "gearshape.fill")
+                    }
+                }
+            }
+            .sheet(isPresented: $viewModel.isShowingSettingSheet) {
+                NavigationStack {
+                    SettingsView(
+                        onDeletionTriggered: {
+                            self.deleteAllData()
+                        }
+                    )
+                    .presentationDetents([.large])
+                    .navigationTitle("Settings")
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("Close") {
+                                viewModel.isShowingSettingSheet = false
+                            }
+                        }
+                    }
+                }
+            }
+            .sheet(isPresented: $viewModel.isShowingCalendar) {
+                NavigationStack {
+                    MigraineCalendarView(onSelectMigraine: { migraineID in
+                        viewModel.isShowingCalendar = false
+                        onNavigateToMigraine?(migraineID)
+                    })
+                    .environment(migraineManager)
+                    .environment(tagManager)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) {
+                            Button("Done") {
+                                viewModel.isShowingCalendar = false
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -198,11 +258,15 @@ struct DashboardView: View {
         healthManager: previewHealthManager
     )
 
+    let previewTagManager = TagManager(context: container.mainContext)
+
     // Note: InsightManager.insights has a restricted setter; leaving insights empty for preview.
 
-    return DashboardView(showingEntrySheet: .constant(false))
+    return DashboardView(showingEntrySheet: .constant(false), deleteAllData: {})
         .modelContainer(container)
         .environment(previewInsightManager)
         .environment(previewHealthManager)
         .environment(previewWeatherManager)
+        .environment(previewMigraineManager)
+        .environment(previewTagManager)
 }

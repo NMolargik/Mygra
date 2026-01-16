@@ -49,7 +49,7 @@ struct EndMigraineSheet: View {
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("End") {
                         onConfirm(endDate)
                     }
                     .bold()

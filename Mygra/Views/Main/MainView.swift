@@ -27,7 +27,6 @@ struct MainView: View {
 
     @State private var appTab: AppTab = .dashboard
     @State private var showingEntrySheet: Bool = false
-    @State private var showingSettingsSheet: Bool = false
     @State private var showingOngoingAlert: Bool = false
     @State private var listPath = NavigationPath()
     @State private var calendarPath = NavigationPath()
@@ -41,22 +40,23 @@ struct MainView: View {
                     NavigationStack {
                         MigraineListView(showingEntrySheet: $showingEntrySheet)
                             .navigationTitle("")
-                            .toolbar {
-                                ToolbarItem(placement: .topBarTrailing) {
-                                    Button {
-                                        showingSettingsSheet = true
-                                    } label: {
-                                        Image(systemName: "gearshape.fill")
-                                    }
-                                    .accessibilityLabel("Settings")
-                                }
-                            }
                     }
                 } detail: {
                     NavigationStack(path: $listPath) {
-                        DashboardView(showingEntrySheet: $showingEntrySheet)
-                            .navigationTitle("Mygra")
-                            .toolbar { regularWidthTopBarToolbar }
+                        DashboardView(
+                            showingEntrySheet: $showingEntrySheet,
+                            onNavigateToMigraine: { migraineID in
+                                if lastPushedMigraineID != migraineID {
+                                    listPath.append(migraineID)
+                                    lastPushedMigraineID = migraineID
+                                }
+                            },
+                            deleteAllData: {
+                                deleteAllData()
+                            }
+                        )
+                        .navigationTitle("Mygra")
+                        .toolbar { regularWidthTopBarToolbar }
                             .navigationDestination(for: UUID.self) { migraineID in
                                 if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
                                                    ?? migraineManager.migraines.first { $0.id == migraineID }) {
@@ -73,24 +73,6 @@ struct MainView: View {
                                     )
                                 }
                             }
-                    }
-                }
-                .sheet(isPresented: $showingSettingsSheet) {
-                    NavigationStack {
-                        SettingsView(
-                            onDeletionTriggered: {
-                                self.deleteAllData()
-                            }
-                        )
-                        .presentationDetents([.large])
-                        .navigationTitle("Settings")
-                        .toolbar {
-                            ToolbarItem(placement: .topBarTrailing) {
-                                Button("Close") {
-                                    showingSettingsSheet = false
-                                }
-                            }
-                        }
                     }
                 }
                 .tabViewBottomAccessoryIfAvailable { bottomAccessory }
@@ -110,7 +92,10 @@ struct MainView: View {
                 TabView(selection: $appTab) {
                     NavigationStack {
                         DashboardView(
-                            showingEntrySheet: $showingEntrySheet
+                            showingEntrySheet: $showingEntrySheet,
+                            deleteAllData: {
+                                deleteAllData()
+                            }
                         )
                         .navigationTitle("Mygra")
                         .toolbar { dashboardTopBarToolbar }
@@ -353,12 +338,9 @@ struct MainView: View {
                 Button {
                     handleAddTapped()
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus")
-                        Text("Add")
-                            .bold()
-                    }
-                    .foregroundStyle(.mygraBlue)
+                    Label("Add", systemImage: "plus")
+                        .bold()
+                        .foregroundStyle(.mygraBlue)
                 }
                 .accessibilityIdentifier("addEntryButton")
             }
@@ -367,12 +349,9 @@ struct MainView: View {
                 Button {
                     handleAddTapped()
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus")
-                        Text("Add")
-                            .bold()
-                    }
-                    .foregroundStyle(.mygraBlue)
+                    Label("Add", systemImage: "plus")
+                        .bold()
+                        .foregroundStyle(.mygraBlue)
                 }
                 .accessibilityIdentifier("addEntryButton")
             }
@@ -386,11 +365,8 @@ struct MainView: View {
                 Button {
                     handleAddTapped()
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus")
-                        Text("New Migraine")
-                    }
-                    .foregroundStyle(.mygraBlue)
+                    Text("New Migraine")
+                        .foregroundStyle(.mygraBlue)
                 }
                 .accessibilityIdentifier("addEntryButton")
             }
@@ -399,11 +375,8 @@ struct MainView: View {
                 Button {
                     handleAddTapped()
                 } label: {
-                    HStack(spacing: 6) {
-                        Image(systemName: "plus")
-                        Text("New Migraine")
-                    }
-                    .foregroundStyle(.mygraBlue)
+                    Text("New Migraine")
+                        .foregroundStyle(.mygraBlue)
                 }
                 .accessibilityIdentifier("addEntryButton")
             }

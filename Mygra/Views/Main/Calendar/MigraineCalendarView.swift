@@ -13,6 +13,9 @@ struct MigraineCalendarView: View {
     @Environment(MigraineManager.self) private var migraineManager
     @Environment(TagManager.self) private var tagManager
 
+    /// Optional callback for migraine selection. When provided, uses Button instead of NavigationLink.
+    var onSelectMigraine: ((UUID) -> Void)? = nil
+
     @State private var selectedDate: Date = Date()
     @State private var displayedMonth: Date = Date()
     @State private var selectedTag: MigraineTag? = nil
@@ -81,8 +84,17 @@ struct MigraineCalendarView: View {
                 List {
                     Section {
                         ForEach(migrainesForSelectedDate) { migraine in
-                            NavigationLink(value: migraine.id) {
-                                MigraineCalendarRowView(migraine: migraine)
+                            if let onSelectMigraine {
+                                Button {
+                                    onSelectMigraine(migraine.id)
+                                } label: {
+                                    MigraineCalendarRowView(migraine: migraine)
+                                }
+                                .tint(.primary)
+                            } else {
+                                NavigationLink(value: migraine.id) {
+                                    MigraineCalendarRowView(migraine: migraine)
+                                }
                             }
                         }
                     } header: {

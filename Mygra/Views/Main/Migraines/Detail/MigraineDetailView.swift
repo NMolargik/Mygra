@@ -50,28 +50,15 @@ struct MigraineDetailView: View {
                     }
                 )
 
-                // Intensity chart and update button
-                VStack(spacing: 12) {
-                    IntensityChartView(
-                        samples: migraine.intensitySamples ?? [],
-                        startDate: migraine.startDate,
-                        endDate: migraine.endDate
-                    )
-
-                    // Update intensity button for ongoing migraines
-                    if migraine.isOngoing {
-                        Button {
-                            showingIntensitySheet = true
-                        } label: {
-                            Label("Update Intensity", systemImage: "waveform.path.ecg")
-                                .font(.headline)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                        }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.mygraPurple)
-                    }
-                }
+                // Intensity chart (with inline update button for ongoing migraines)
+                IntensityChartView(
+                    samples: migraine.intensitySamples ?? [],
+                    startDate: migraine.startDate,
+                    endDate: migraine.endDate,
+                    onUpdateIntensity: migraine.isOngoing ? {
+                        showingIntensitySheet = true
+                    } : nil
+                )
 
                 InsightSectionView(migraine: migraine)
                 
@@ -95,6 +82,7 @@ struct MigraineDetailView: View {
         }
         .navigationTitle("Migraine")
         .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(hSizeClass == .regular)
         // iPad-only Close button in the leading position, pin in trailing
         .toolbar {
             if hSizeClass == .regular {
@@ -106,10 +94,7 @@ struct MigraineDetailView: View {
                             dismiss()
                         }
                     } label: {
-                        HStack(spacing: 4) {
-                            Image(systemName: "chevron.left")
-                            Text("Back")
-                        }
+                        Label("Back", systemImage: "chevron.left")
                     }
                 }
             }
@@ -159,7 +144,7 @@ struct MigraineDetailView: View {
                     )
                 }
             )
-            .presentationDetents([.medium, .large])
+            .presentationDetents([.large])
         }
         .sheet(isPresented: $showingEndSheet) {
             EndMigraineSheet(

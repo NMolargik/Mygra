@@ -44,6 +44,21 @@ enum DateFormatting {
         return "\(datePart), \(timePart)"
     }
 
+    /// Formats a date with time in a compact format.
+    /// Example:
+    /// - DMY: 1/1/26, 1:23 PM
+    /// - MDY: 1/1/26, 1:23 PM
+    static func compactDateTime(_ value: Date, useDMY: Bool, locale: Locale = .current) -> String {
+        let df = DateFormatter()
+        df.locale = locale
+        if useDMY {
+            df.dateFormat = "d/M/yy, h:mm a"
+        } else {
+            df.dateFormat = "M/d/yy, h:mm a"
+        }
+        return df.string(from: value)
+    }
+
     /// Formats a date interval with the provided preference.
     /// If both dates are the same calendar day, show: "<date> <startTime>–<endTime>"
     /// Else: "<startDate, time> – <endDate, time>"
