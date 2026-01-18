@@ -124,20 +124,22 @@ struct DashboardView: View {
                 Haptics.lightImpact()
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        Haptics.mediumImpact()
-                        viewModel.isShowingCalendar.toggle()
-                    } label: {
-                        Label("Calendar", systemImage: "calendar")
+                if horizontalSizeClass == .regular {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            Haptics.mediumImpact()
+                            viewModel.isShowingCalendar.toggle()
+                        } label: {
+                            Label("Calendar", systemImage: "calendar")
+                        }
                     }
-                }
-                
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        viewModel.isShowingSettingSheet.toggle()
-                    } label: {
-                        Label("Settings", systemImage: "gearshape.fill")
+
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            viewModel.isShowingSettingSheet.toggle()
+                        } label: {
+                            Label("Settings", systemImage: "gearshape.fill")
+                        }
                     }
                 }
             }
@@ -270,3 +272,4 @@ struct DashboardView: View {
         .environment(previewMigraineManager)
         .environment(previewTagManager)
 }
+
