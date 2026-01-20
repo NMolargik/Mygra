@@ -33,7 +33,7 @@ final class IntensitySample {
 
     // MARK: - Relationship
     /// The migraine this sample belongs to.
-    var migraine: Migraine?
+    var parentMigraine: Migraine?
 
     // MARK: - Init
     init(
@@ -43,7 +43,7 @@ final class IntensitySample {
         painLevel: Int = 0,
         stressLevel: Int = 0,
         note: String? = nil,
-        migraine: Migraine? = nil
+        parentMigraine: Migraine? = nil
     ) {
         self.id = id
         self.createdAt = createdAt
@@ -51,7 +51,7 @@ final class IntensitySample {
         self.painLevel = painLevel
         self.stressLevel = stressLevel
         self.note = note
-        self.migraine = migraine
+        self.parentMigraine = parentMigraine
     }
 
     // MARK: - Computed Properties
@@ -63,7 +63,7 @@ final class IntensitySample {
 
     /// Time since the migraine started (for chart X-axis).
     var timeSinceStart: TimeInterval? {
-        guard let migraine = migraine else { return nil }
+        guard let migraine = parentMigraine else { return nil }
         return timestamp.timeIntervalSince(migraine.startDate)
     }
 

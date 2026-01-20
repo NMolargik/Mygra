@@ -402,7 +402,7 @@ struct TestDataGenerator {
                 painLevel: pain,
                 stressLevel: stress,
                 note: sampleNote(for: i, total: sampleCount, pattern: pattern),
-                migraine: migraine
+                parentMigraine: migraine
             )
 
             context.insert(sample)
@@ -421,7 +421,7 @@ struct TestDataGenerator {
             painLevel: max(1, migraine.painLevel - 2),
             stressLevel: max(1, migraine.stressLevel - 1),
             note: "Just started",
-            migraine: migraine
+            parentMigraine: migraine
         )
         context.insert(sample1)
         samples.append(sample1)
@@ -432,7 +432,7 @@ struct TestDataGenerator {
             painLevel: migraine.painLevel - 1,
             stressLevel: migraine.stressLevel,
             note: nil,
-            migraine: migraine
+            parentMigraine: migraine
         )
         context.insert(sample2)
         samples.append(sample2)
@@ -443,7 +443,7 @@ struct TestDataGenerator {
             painLevel: migraine.painLevel,
             stressLevel: migraine.stressLevel,
             note: "Still ongoing",
-            migraine: migraine
+            parentMigraine: migraine
         )
         context.insert(sample3)
         samples.append(sample3)

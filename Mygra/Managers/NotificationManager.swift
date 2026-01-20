@@ -12,11 +12,26 @@ enum LocalNotificationCategory: String {
 final class NotificationManager {
     static let shared = NotificationManager()
     private let center = UNUserNotificationCenter.current()
-    
+
+    /// Current authorization status (synchronous, observable)
+    private(set) var authorizationStatus: UNAuthorizationStatus = .notDetermined
+
+    init() {
+        Task { await refreshAuthorizationStatus() }
+    }
+
+    /// Refresh the authorization status from the notification center
+    @MainActor
+    func refreshAuthorizationStatus() async {
+        let settings = await center.notificationSettings()
+        authorizationStatus = settings.authorizationStatus
+    }
+
     /// Requests authorization for local notifications.
     func requestAuthorization() async throws {
         do {
             let granted = try await center.requestAuthorization(options: [.alert, .sound, .badge])
+            await refreshAuthorizationStatus()
             if !granted {
                 throw NotificationError.authorizationDenied
             }

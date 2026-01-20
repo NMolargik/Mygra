@@ -22,7 +22,7 @@ struct DashboardView: View {
     @Binding var showingEntrySheet: Bool
     /// Callback to navigate to a migraine in the main navigation stack (used when calendar is in sheet)
     var onNavigateToMigraine: ((UUID) -> Void)? = nil
-    var deleteAllData: () -> Void
+    var deleteAllMigraines: () -> Void
     
     @State private var viewModel: DashboardView.ViewModel = DashboardView.ViewModel()
 
@@ -146,8 +146,8 @@ struct DashboardView: View {
             .sheet(isPresented: $viewModel.isShowingSettingSheet) {
                 NavigationStack {
                     SettingsView(
-                        onDeletionTriggered: {
-                            self.deleteAllData()
+                        onMigrainesDeletionTriggered: {
+                            self.deleteAllMigraines()
                         }
                     )
                     .presentationDetents([.large])
@@ -264,7 +264,7 @@ struct DashboardView: View {
 
     // Note: InsightManager.insights has a restricted setter; leaving insights empty for preview.
 
-    return DashboardView(showingEntrySheet: .constant(false), deleteAllData: {})
+    return DashboardView(showingEntrySheet: .constant(false), deleteAllMigraines: {})
         .modelContainer(container)
         .environment(previewInsightManager)
         .environment(previewHealthManager)

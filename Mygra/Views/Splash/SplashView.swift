@@ -6,156 +6,83 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct SplashView: View {
-    @Environment(UserManager.self) private var userManager: UserManager
+    var onContinue: () -> Void
 
-    var proceedForward: () -> Void
-    var refreshUser: () async -> Void
-    var viewModel = SplashView.ViewModel()
-
-    @State private var showReturningUserModal: Bool = false
-    @State private var isSyncingFromCloud: Bool = false
-    @State private var lastSyncError: String? = nil
+    @State private var viewModel = SplashView.ViewModel()
+    @Environment(\.horizontalSizeClass) private var hSizeClass
 
     var body: some View {
-        ZStack {
-            LinearGradient(
-                colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
-                startPoint: .topTrailing,
-                endPoint: .bottomLeading
-            )
-            .ignoresSafeArea()
-            
-            VStack() {
-                Text("Mygra")
-                    .font(.system(size: 60))
-                    .foregroundStyle(.white)
-                    .bold()
-                    .shadow(radius: 5, x: 1, y: -1)
-                    .opacity(viewModel.titleVisible ? 1 : 0)
-                    .scaleEffect(viewModel.titleVisible ? 1 : 0.7)
-                    .animation(.easeOut(duration: 0.6), value: viewModel.titleVisible)
-                    .padding(.bottom, 5)
-                
-                Text("Your Intelligent Migraine Journal")
-                    .font(.title3)
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.secondary)
-                    .opacity(viewModel.subtitleVisible ? 1 : 0)
-                    .offset(y: viewModel.subtitleVisible ? 0 : 20)
-                    .animation(.easeOut(duration: 0.6).delay(0.8), value: viewModel.subtitleVisible)
-                
-                Spacer()
-                
-                Image("mygra_head")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(maxWidth: 350)
-                    .shadow(radius: 5)
-                    .opacity(viewModel.subtitleVisible ? 1 : 0)
-                    .animation(.easeOut(duration: 0.6).delay(1.1), value: viewModel.subtitleVisible)
-                
-                Spacer()
-                
-                Text("Oh! You're new here.")
-                    .font(.headline)
-                    .foregroundStyle(.secondary)
-                    .opacity(viewModel.subtitleVisible ? 1 : 0)
-                    .offset(y: viewModel.subtitleVisible ? 0 : 30)
-                    .transition(.move(edge: .top).combined(with: .opacity))
-                    .animation(.spring(response: 0.5, dampingFraction: 0.8).delay(1.1), value: viewModel.subtitleVisible)
-                
-                Button("Get Started") {
-                    Haptics.lightImpact()
-                    Haptics.success()
-                    proceedForward()
-                }
-                .foregroundStyle(.white)
-                .font(.title)
+        VStack {
+            Spacer()
+
+            // Title
+            Text("Mygra")
+                .font(.system(size: hSizeClass == .regular ? 90 : 60))
                 .bold()
+                .opacity(viewModel.titleVisible ? 1 : 0)
+                .scaleEffect(viewModel.titleVisible ? 1 : 0.7)
+                .animation(.easeOut(duration: 0.6), value: viewModel.titleVisible)
+                .padding(.bottom, 5)
+                .accessibilityAddTraits(.isHeader)
+
+            // Subtitle
+            Text("Your Intelligent Migraine Journal")
+                .font(hSizeClass == .regular ? .title : .title3)
+                .fontWeight(.semibold)
+                .foregroundStyle(.secondary)
+                .opacity(viewModel.subtitleVisible ? 1 : 0)
+                .offset(y: viewModel.subtitleVisible ? 0 : 20)
+                .animation(.easeOut(duration: 0.6).delay(0.8), value: viewModel.subtitleVisible)
+
+            // App icon
+            Image("mygra_head")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(maxWidth: hSizeClass == .regular ? 200 : 220)
+                .opacity(viewModel.subtitleVisible ? 1 : 0)
+                .scaleEffect(viewModel.subtitleVisible ? 1 : 0)
+                .animation(.bouncy(duration: 0.6).delay(0.8), value: viewModel.subtitleVisible)
                 .padding()
-                .adaptiveGlass(tint: .mygraPurple)
-                .hoverEffect()
-                .shadow(radius: 8, y: 3)
-                .opacity(viewModel.buttonVisible ? 1 : 0)
-                .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
-                .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
-                
-                Button("No, I'm not new!") {
-                    Haptics.lightImpact()
-                    lastSyncError = nil
-                    showReturningUserModal = true
-                    Task { await attemptCloudRefresh() }
+                .accessibilityLabel("Mygra app logo")
+
+            Spacer()
+
+            // Get Started Button
+            Button {
+                Haptics.lightImpact()
+                onContinue()
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "arrow.right.circle.fill")
+                    Text("Get Started")
+                        .bold()
                 }
+                .padding()
+                .frame(maxWidth: 250)
+                .background(Color.mygraPurple)
                 .foregroundStyle(.white)
-                .padding(8)
-                .bold()
-                .adaptiveGlass(tint: .gray)
-                .hoverEffect()
-                .opacity(viewModel.buttonVisible ? 1 : 0)
-                .scaleEffect(viewModel.buttonVisible ? 1 : 0.8)
-                .animation(.spring(response: 0.5, dampingFraction: 0.7).delay(1.9), value: viewModel.buttonVisible)
+                .clipShape(RoundedRectangle(cornerRadius: 14))
             }
-            .padding(.top, 80)
+            .buttonStyle(.plain)
+            .opacity(viewModel.buttonVisible ? 1 : 0)
+            .scaleEffect(viewModel.buttonVisible ? 1 : 0.98)
+            .animation(.easeOut(duration: 0.5).delay(1.2), value: viewModel.buttonVisible)
+            .accessibilityLabel("Get Started")
+            .accessibilityHint("Tap to begin using Mygra")
+
+            Spacer()
         }
         .onAppear {
             viewModel.activateAnimation()
         }
-        .sheet(isPresented: $showReturningUserModal) {
-            ReturningUserView(
-                isSyncing: $isSyncingFromCloud,
-                errorMessage: $lastSyncError,
-                onRetry: {
-                    Haptics.lightImpact()
-                    Task { await attemptCloudRefresh() }
-                },
-                onClose: {
-                    Haptics.lightImpact()
-                    showReturningUserModal = false
-                }
-            )
-            .presentationDetents([.medium])
-        }
-    }
-
-    @MainActor
-    private func attemptCloudRefresh() async {
-        isSyncingFromCloud = true
-        lastSyncError = nil
-        defer { isSyncingFromCloud = false }
-        
-        // Re-fetch local state first
-        await userManager.refresh()
-        // Try another iCloud restore attempt (slightly longer timeout to improve chances)
-        await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
-        
-        if userManager.currentUser != nil {
-            Haptics.success()
-            // Let outer flow proceed (mirrors ContentView.refreshUser behavior)
-            await refreshUser()
-        } else {
-            // Keep the modal open; provide a soft message to encourage retry later
-            lastSyncError = "No user found yet. iCloud may take a bit longer to deliver your data."
-        }
+        .padding(.top, hSizeClass == .regular ? 40 : 80)
+        .frame(maxWidth: hSizeClass == .regular ? 520 : .infinity)
+        .padding(.horizontal, 24)
     }
 }
 
 #Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(
-            for: User.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-
-    let previewUserManager = UserManager(context: container.mainContext)
-
-    return SplashView(proceedForward: {}, refreshUser: {})
-        .modelContainer(container)
-        .environment(previewUserManager)
+    SplashView(onContinue: {})
 }

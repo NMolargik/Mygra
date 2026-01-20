@@ -12,6 +12,7 @@ struct AppStorageKeys {
     static let useMetricUnits = "useMetricUnits"
     static let useDayMonthYearDates = "useDayMonthYearDates"
     static let bgWeatherTaskScheduled = "bgWeatherTaskScheduled"
+    static let isOnboardingComplete = "isOnboardingComplete"
 
     // MARK: - Dashboard Stat Visibility
     static let showWaterStat = "showWaterStat"

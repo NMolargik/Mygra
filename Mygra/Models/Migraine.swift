@@ -48,7 +48,7 @@ final class Migraine {
     @Relationship(inverse: \MigraineTag.migraines) var tags: [MigraineTag]?
 
     // MARK: - Intensity samples (time-series)
-    @Relationship(deleteRule: .cascade, inverse: \IntensitySample.migraine)
+    @Relationship(deleteRule: .cascade, inverse: \IntensitySample.parentMigraine)
     var intensitySamples: [IntensitySample]?
 
     // MARK: - Init

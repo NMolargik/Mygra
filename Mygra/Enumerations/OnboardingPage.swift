@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum OnboardingPage {
+enum OnboardingPage: CaseIterable {
     case health
     case location
     case notifications

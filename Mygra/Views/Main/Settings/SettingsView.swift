@@ -17,7 +17,7 @@ struct SettingsView: View {
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
 
-    var onDeletionTriggered: () -> Void
+    var onMigrainesDeletionTriggered: () -> Void
 
     @State private var editingUser: Bool = false
     @State private var exportTempURL: URL?
@@ -157,7 +157,7 @@ struct SettingsView: View {
                 showDeleteConfirmation = true
                 Haptics.lightImpact()
             } label: {
-                Text("Delete All Data")
+                Text("Delete All Migraines")
                     .bold()
                     .foregroundStyle(.red)
             }
@@ -166,16 +166,15 @@ struct SettingsView: View {
             .accessibilityHint("Requires an internet connection to delete your iCloud data.")
             .alert("Are you sure?", isPresented: $showDeleteConfirmation) {
                 Button("Cancel", role: .cancel) { }
-                
-                Button("Proceed", role: .destructive) {
-                    presentFarewellFlow()
+
+                Button("Delete All", role: .destructive) {
+                    presentDeletionFlow()
                 }
             } message: {
                 Text("""
 All migraines will be deleted from all of your iCloud-enabled devices. Some entries may linger on devices until they are refreshed.
-Your user information will also be deleted from iCloud. Any future attempt to use Mygra will require a new registration.
 
-Data contributed to Apple Health will remain in Apple Health. Even deletion of the application from your device will not remove that data. Apple Health data must be removed manually from within the Apple Health application.
+Data contributed to Apple Health will remain in Apple Health. Apple Health data must be removed manually from within the Apple Health application.
 
 Are you sure you want to proceed?
 """)
@@ -184,7 +183,7 @@ Are you sure you want to proceed?
                 HStack(alignment: .top, spacing: 8) {
                     Image(systemName: "wifi.slash")
                         .foregroundStyle(.secondary)
-                    Text("Deleting your data requires an internet connection because it’s stored in iCloud. Connect to the internet to proceed.")
+                    Text("Deleting migraines requires an internet connection because they are stored in iCloud. Connect to the internet to proceed.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -310,12 +309,12 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
                     startPoint: .topTrailing,
                     endPoint: .bottomLeading
                 )
-                
+
                 VStack(spacing: 16) {
-                    Text("Thank you for using Mygra. We hope we helped, even a little.")
+                    Text("Deleting your migraines from iCloud now.")
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                    Text("We're deleting your data from iCloud now. This may take a moment.")
+                    Text("This may take a moment.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
@@ -351,9 +350,9 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
 
     // MARK: - Delete flow
 
-    private func presentFarewellFlow() {
+    private func presentDeletionFlow() {
         showingFarewell = true
-        onDeletionTriggered()
+        onMigrainesDeletionTriggered()
     }
 
     // MARK: - Export logic
@@ -465,7 +464,7 @@ private struct DashboardStatToggle: View {
     let previewTagManager = TagManager(context: container.mainContext)
 
     return SettingsView(
-            onDeletionTriggered: {}
+            onMigrainesDeletionTriggered: {}
         )
         .modelContainer(container)
         .environment(previewUserManager)

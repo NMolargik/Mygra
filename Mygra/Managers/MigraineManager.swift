@@ -105,7 +105,7 @@ final class MigraineManager {
             painLevel: migraine.painLevel,
             stressLevel: migraine.stressLevel,
             note: nil,
-            migraine: migraine
+            parentMigraine: migraine
         )
         context.insert(initialSample)
         if migraine.intensitySamples == nil {
@@ -207,7 +207,7 @@ final class MigraineManager {
             painLevel: pain,
             stressLevel: stress,
             note: note,
-            migraine: migraine
+            parentMigraine: migraine
         )
         context.insert(sample)
         if migraine.intensitySamples == nil {
@@ -247,7 +247,7 @@ final class MigraineManager {
             painLevel: migraine.painLevel,
             stressLevel: migraine.stressLevel,
             note: nil,
-            migraine: migraine
+            parentMigraine: migraine
         )
         context.insert(sample)
         if migraine.intensitySamples == nil {

@@ -62,16 +62,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - One-shot location
 
     func currentLocation() async throws -> CLLocation {
-        // If the manager already has a cached location and we’re authorized, use it.
+        // If the manager already has a cached location and we're authorized, use it.
         if isAuthorized, let loc = manager.location {
             lastLocation = loc
             return loc
         }
 
-        // Ensure we’ve requested authorization
-        requestAuthorization()
-
-        // If not authorized, throw a standard error
+        // If not authorized, throw without prompting - authorization should be requested
+        // explicitly via requestAuthorization() (e.g., from OnboardingLocationPage)
         guard isAuthorized else {
             throw LocationError.notAuthorized
         }
@@ -95,7 +93,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - Continuous updates
 
     func locationUpdates() -> AsyncStream<CLLocation> {
-        requestAuthorization()
+        // Only start updates if authorized - authorization should be requested
+        // explicitly via requestAuthorization() (e.g., from OnboardingLocationPage)
+        guard isAuthorized else {
+            return AsyncStream { $0.finish() }
+        }
 
         // Start updates immediately; will be stopped when stream terminates
         manager.startUpdatingLocation()

@@ -53,7 +53,7 @@ struct EndMigraineSheet: View {
                         onConfirm(endDate)
                     }
                     .bold()
-                    .tint(.mygraBlue)
+                    .tint(.red)
                 }
             }
         }

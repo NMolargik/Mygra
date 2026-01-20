@@ -14,20 +14,12 @@ import CoreLocation
 @main
 struct MygraApp: App {
     @Environment(\.scenePhase) private var scenePhase
-    
     @AppStorage(AppStorageKeys.bgWeatherTaskScheduled) private var bgWeatherTaskScheduled: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
+    @AppStorage(AppStorageKeys.isOnboardingComplete) private var isOnboardingComplete: Bool = false
     
     private let sharedModelContainer: ModelContainer
-    private let userManager: UserManager
-    private let weatherManager: WeatherManager
-    private let healthManager: HealthManager
-    private let notificationManager: NotificationManager
-    private let tagManager: TagManager
-    private let weatherTaskIdentifier = "com.molargiksoftware.Mygra.weatherRefresh"
-
-    @State private var lastWeatherHighRisk: Bool = false
 
     init() {
         let cloudKitContainerID = "iCloud.com.molargiksoftware.Mygra"
@@ -44,40 +36,62 @@ struct MygraApp: App {
         } catch {
             fatalError("[Mygra] Failed to initialize ModelContainer: \(error)")
         }
-
-        // Initialize managers with the shared ModelContext
-        userManager = UserManager(context: sharedModelContainer.mainContext)
+        
+        // Configure TipKit
+        // try? Tips.configure([
+        //      .displayFrequency(.immediate)
+        // ])
+        
         weatherManager = WeatherManager()
-        healthManager = HealthManager()
         notificationManager = NotificationManager()
-        tagManager = TagManager(context: sharedModelContainer.mainContext)
+
+        // Must register handler BEFORE scheduling any tasks
+        registerBackgroundTaskHandler()
+
+        if !bgWeatherTaskScheduled {
+            scheduleWeatherRefreshTask(earliestInMinutes: 90)
+        }
+        ensureLocationProviderIfMissing()
+        print(weatherManager.locationManager == nil ? "No location manager" : "Has location manager")
         
         // watchOS
         ComplicationSync.shared.activate()
     }
+    
+    @State private var pendingDeepLink: DeepLink?
+    @State private var lastWeatherHighRisk: Bool = false
+    @State private var notificationManager: NotificationManager
+    @State private var weatherManager: WeatherManager
+    private let weatherTaskIdentifier = "com.molargiksoftware.Mygra.weatherRefresh"
 
     var body: some Scene {
         WindowGroup {
-            ContentView(
-                resetApplication: self.resetApplication
-            )
+            ContentView(pendingDeepLink: $pendingDeepLink)
                 .modelContainer(sharedModelContainer)
-                .environment(userManager)
-                .environment(weatherManager)
-                .environment(healthManager)
-                .environment(notificationManager)
-                .environment(tagManager)
-                .onAppear { registerBackgroundTaskHandler() }
-                .task {
-                    await startPeriodicWeatherChecksInForeground()
-
-                    if !bgWeatherTaskScheduled {
-                        scheduleWeatherRefreshTask(earliestInMinutes: 90)
-                    }
+                .onOpenURL { url in
+                    handleDeepLink(url)
                 }
+                .environment(weatherManager)
+                .environment(notificationManager)
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .background { scheduleWeatherRefreshTask(earliestInMinutes: 90) }
                 }
+                .task {
+                    await startPeriodicWeatherChecksInForeground()
+                }
+        }
+    }
+    
+    private func handleDeepLink(_ url: URL) {
+        guard url.scheme == "mygra" else { return }
+
+        switch url.host {
+        case "new-migraine":
+            pendingDeepLink = .newMigraine
+        case "home":
+            pendingDeepLink = .home
+        default:
+            break
         }
     }
 
@@ -202,13 +216,5 @@ struct MygraApp: App {
             if Task.isCancelled { return }
             do { try await Task.sleep(nanoseconds: 90 * 60 * 1_000_000_000) } catch { return }
         }
-    }
-    
-    // MARK: - Reset the application following data deletion
-    
-    private func resetApplication() {
-        bgWeatherTaskScheduled = false
-        useMetricUnits = false
-        useDayMonthYearDates = false
     }
 }

@@ -10,40 +10,60 @@ import SwiftUI
 extension OnboardingView {
     @Observable
     class ViewModel {
-        var currentPage: OnboardingPage = .health
+        var currentStep: OnboardingStep = .privacy
         var newUser: User = User()
         var userFormComplete: Bool = false
-        var notificationsAuthorized = false
-        var isMovingForward: Bool = true
         
-        func criteriaMet(healthManager: HealthManager, weatherManager: WeatherManager) -> Bool {
-            switch(self.currentPage) {
-            case .health:
-                return healthManager.isAuthorized
-            case .location:
-                return true
-            case .notifications:
+        var canContinue: Bool {
+            switch currentStep {
+            case .privacy, .location, .health, .notification, .complete:
                 return true
             case .user:
                 return userFormComplete
-            case .complete:
+            }
+        }
+
+        var showsSkip: Bool {
+            switch currentStep {
+            case .location, .notification, .privacy:
                 return true
+            case .complete, .health, .user:
+                return false
             }
         }
         
-        var forwardTransition: AnyTransition {
-            .asymmetric(
-                insertion: .move(edge: .trailing).combined(with: .opacity),
-                removal: .move(edge: .leading).combined(with: .opacity)
-            )
+        func handleContinueTapped() {
+            switch currentStep {
+            case .privacy:
+                currentStep = .health
+            case .health:
+                currentStep = .location
+            case .location:
+                currentStep = .notification
+            case .notification:
+                currentStep = .user
+            case .user:
+                currentStep = .complete
+            case .complete:
+                break
+            }
         }
         
-        var backwardTransition: AnyTransition {
-            .asymmetric(
-                insertion: .move(edge: .leading).combined(with: .opacity),
-                // when going back: outgoing page exits toward trailing
-                removal: .move(edge: .trailing).combined(with: .opacity)
-            )
+        func handleSkipTapped() {
+            switch currentStep {
+            case .privacy:
+                currentStep = .health
+            case .health:
+                break
+            case .location:
+                currentStep = .notification
+            case .notification:
+                currentStep = .user
+            case .user:
+                break
+            case .complete:
+                break
+            }
         }
     }
 }

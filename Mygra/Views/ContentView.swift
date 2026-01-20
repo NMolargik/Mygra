@@ -9,205 +9,136 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(UserManager.self) private var userManager: UserManager
-    @Environment(HealthManager.self) private var healthManager: HealthManager
+    @Environment(\.modelContext) private var modelContext
     @Environment(WeatherManager.self) private var weatherManager: WeatherManager
-    
-    var resetApplication: () -> Void
-    
+    @Environment(NotificationManager.self) private var notificationManager: NotificationManager
+    @AppStorage(AppStorageKeys.isOnboardingComplete) private var isOnboardingComplete: Bool = false
+
+    @Binding var pendingDeepLink: DeepLink?
+
     @State private var viewModel: ContentView.ViewModel = ViewModel()
     @State private var migraineManager: MigraineManager?
     @State private var insightManager: InsightManager?
-    
-    private struct ConditionalEnvironmentMainView<Content: View>: View {
-        let base: Content
-        let migraineManager: MigraineManager?
-        let insightManager: InsightManager?
-        
-        init(base: Content, migraineManager: MigraineManager?, insightManager: InsightManager?) {
-            self.base = base
-            self.migraineManager = migraineManager
-            self.insightManager = insightManager
-        }
-        
-        var body: some View {
-            var view: AnyView = AnyView(base)
-            if let migraineManager {
-                view = AnyView(view.environment(migraineManager))
-            }
-            if let insightManager {
-                view = AnyView(view.environment(insightManager))
-            }
-            return view
-        }
-    }
-    
+    @State private var healthManager: HealthManager = HealthManager()
+    @State private var userManager: UserManager?
+    @State private var tagManager: TagManager?
+    @State private var cloudSyncManager = CloudSyncManager()
+
     var body: some View {
         ZStack {
-            switch (viewModel.appStage) {
-            case .start:
-                ProgressView()
-                    .id("start")
-                    .zIndex(0)
-                    .task {
-                        await prepareApp()
-                    }
+            switch viewModel.appStage {
             case .splash:
-                SplashView(proceedForward: {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.appStage = .onboarding
+                SplashView(
+                    onContinue: {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.appStage = .onboarding
+                        }
                     }
-                }, refreshUser: {
-                    await refreshUser()
-                })
+                )
                 .id("splash")
                 .transition(viewModel.leadingTransition)
                 .zIndex(1)
+                
             case .onboarding:
-                OnboardingView(proceedForward: {
-                    if self.migraineManager == nil {
-                        self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
-                    }
-                    
-                    if self.insightManager == nil {
-                        self.insightManager = InsightManager(
-                            userManager: userManager,
-                            migraineManager: migraineManager!,
-                            weatherManager: weatherManager,
-                            healthManager: healthManager
-                        )
-                    }
+                OnboardingView(onFinished: {
+                    isOnboardingComplete = true
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.appStage = .main
+                        viewModel.appStage = .syncing
                     }
                 })
                 .id("onboarding")
+                .environment(healthManager)
+                .environment(weatherManager)
+                .environment(userManager)
                 .transition(viewModel.leadingTransition)
                 .zIndex(1)
-            case .main:
-                ConditionalEnvironmentMainView(
-                    base: MainView(
-                        resetApplication: {
-                            withAnimation(.easeInOut(duration: 0.3)) {
-                                self.resetApplicationStage()
-                            }
-                        },
-                        pendingDeepLinkID: $viewModel.pendingDeepLinkID,
-                        pendingDeepLinkAction: $viewModel.pendingDeepLinkAction
-                    ),
-                    migraineManager: migraineManager,
-                    insightManager: insightManager
+                
+            case .syncing:
+                SyncingView(
+                    onSyncComplete: { foundData in
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            viewModel.appStage = .main
+                        }
+                    }
                 )
+                .environment(userManager)
+                .environment(migraineManager)
+                .id("syncing")
+                .transition(viewModel.leadingTransition)
+                .zIndex(1)
+                
+            case .main:
+                MainView(
+                    pendingDeepLink: $pendingDeepLink
+                )
+                .environment(healthManager)
+                .environment(userManager)
+                .environment(migraineManager)
+                .environment(insightManager)
+                .environment(tagManager)
+                .environment(cloudSyncManager)
                 .id("main")
                 .transition(viewModel.leadingTransition)
                 .zIndex(0)
             }
         }
-        .onOpenURL { url in
-            let shouldGoToMain = viewModel.handleOpenURL(url)
-            if shouldGoToMain {
-                Task { @MainActor in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.appStage = .main
-                    }
-                }
-            }
-        }
-        .onChange(of: userManager.currentUser != nil) { oldValue, newValue in
-            guard newValue else { return }
-            // Avoid auto-transitioning to Main while still in onboarding
-            guard viewModel.appStage != .onboarding else { return }
-            Task {
-                await enterMainEnsuringManagers()
-            }
-        }
-    }
-    
-    private func prepareApp() async {
-        // Initial local fetch
-        await userManager.refresh()
-        
-        // If no user yet, attempt a restore window from iCloud before deciding onboarding
-        if userManager.currentUser == nil {
-            await userManager.restoreFromCloud(timeout: 1, pollInterval: 1.0)
-        }
-        
-        if userManager.currentUser != nil {
-            await enterMainEnsuringManagers()
-        } else {
+        .task {
+            // Ensure managers exist in the View
             await MainActor.run {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    viewModel.appStage = .splash
+                // Ensure weatherManager has a location provider
+                if weatherManager.locationManager == nil {
+                    weatherManager.setLocationProvider(LocationManager())
                 }
-            }
-        }
-    }
-    
-    // Attempt another iCloud restore when the user requests a refresh on the splash screen.
-    private func refreshUser() async {
-        // Re-fetch local state first
-        await userManager.refresh()
-        // Try another iCloud restore attempt (slightly longer timeout to improve chances)
-        await userManager.restoreFromCloud(timeout: 2, pollInterval: 1.0)
-        
-        guard userManager.currentUser != nil else {
-            // Stay on splash if we still don't have a user
-            return
-        }
-        
-        await enterMainEnsuringManagers()
-    }
-    
-    private func enterMainEnsuringManagers() async {
-        // Perform any data refreshes before transitioning
-        await healthManager.refreshLatestForToday()
-        
-        await MainActor.run {
-            if self.migraineManager == nil {
-                self.migraineManager = MigraineManager(context: userManager.context, healthManager: healthManager)
-            }
-            if self.weatherManager.locationManager == nil {
-                self.weatherManager.setLocationProvider(LocationManager())
-            }
-            if self.insightManager == nil, let migraineManager = self.migraineManager {
-                self.insightManager = InsightManager(
-                    userManager: userManager,
-                    migraineManager: migraineManager,
-                    weatherManager: weatherManager,
-                    healthManager: healthManager
-                )
-            }
-            if viewModel.appStage != .main {
-                withAnimation(.easeInOut(duration: 0.3)) {
-                    viewModel.appStage = .main
+
+                if self.migraineManager == nil {
+                    self.migraineManager = MigraineManager(context: modelContext)
                 }
+
+                if self.userManager == nil {
+                    self.userManager = UserManager(context: modelContext)
+                }
+                
+                if self.tagManager == nil {
+                    self.tagManager = TagManager(context: modelContext)
+                }
+
+                if self.insightManager == nil {
+                    guard let userManager, let migraineManager else {
+                        // Defer InsightManager initialization until dependencies are ready
+                        return
+                    }
+                    self.insightManager = InsightManager(
+                        userManager: userManager,
+                        migraineManager: migraineManager,
+                        weatherManager: weatherManager,
+                        healthManager: healthManager
+                    )
+                }
+
+                // Configure cloud sync manager with model context
+                self.cloudSyncManager.configure(with: modelContext)
             }
+            await viewModel.prepareApp(isOnboardingComplete: isOnboardingComplete)
         }
-    }
-    
-    private func resetApplicationStage() {
-        viewModel.appStage = .splash
-        self.resetApplication()
+        .onAppear {
+            viewModel.configure(cloudSyncManager: cloudSyncManager)
+        }
     }
 }
 
 #Preview {
     let container: ModelContainer
     do {
-        container = try ModelContainer(for: User.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
+        container = try ModelContainer(for: User.self, Migraine.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
     } catch {
         fatalError("Preview ModelContainer setup failed: \(error)")
     }
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewHealthManager = HealthManager()
     let previewWeatherManager = WeatherManager()
     let previewNotificationManager = NotificationManager()
-    return ContentView(
-        resetApplication: {}
-    )
+
+    return ContentView(pendingDeepLink: .constant(nil))
         .modelContainer(container)
-        .environment(previewUserManager)
-        .environment(previewHealthManager)
         .environment(previewWeatherManager)
         .environment(previewNotificationManager)
 }
+

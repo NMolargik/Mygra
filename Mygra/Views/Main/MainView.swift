@@ -11,12 +11,6 @@ import WeatherKit
 import Combine
 
 struct MainView: View {
-    var resetApplication: () -> Void
-
-    // Deep link inputs provided by ContentView so we can act once mounted
-    @Binding var pendingDeepLinkID: UUID?
-    @Binding var pendingDeepLinkAction: String?
-
     @Environment(\.modelContext) private var modelContext
     @Environment(\.horizontalSizeClass) private var hSizeClass
     @Environment(\.verticalSizeClass) private var vSizeClass
@@ -24,6 +18,8 @@ struct MainView: View {
     
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
     @Environment(UserManager.self) private var userManager: UserManager
+    
+    @Binding var pendingDeepLink: DeepLink?
 
     @State private var appTab: AppTab = .dashboard
     @State private var showingEntrySheet: Bool = false
@@ -51,8 +47,8 @@ struct MainView: View {
                                     lastPushedMigraineID = migraineID
                                 }
                             },
-                            deleteAllData: {
-                                deleteAllData()
+                            deleteAllMigraines: {
+                                deleteAllMigraines()
                             }
                         )
                         .navigationTitle("Mygra")
@@ -93,8 +89,8 @@ struct MainView: View {
                     NavigationStack {
                         DashboardView(
                             showingEntrySheet: $showingEntrySheet,
-                            deleteAllData: {
-                                deleteAllData()
+                            deleteAllMigraines: {
+                                deleteAllMigraines()
                             }
                         )
                         .navigationTitle("Mygra")
@@ -157,11 +153,11 @@ struct MainView: View {
 
                     NavigationStack {
                         SettingsView(
-                            onDeletionTriggered: {
-                                self.deleteAllData()
+                            onMigrainesDeletionTriggered: {
+                                self.deleteAllMigraines()
                             }
                         )
-                            .navigationTitle(AppTab.settings.rawValue)
+                        .navigationTitle(AppTab.settings.rawValue)
                     }
                     .tint(nil)
                     .tabItem {
@@ -204,16 +200,32 @@ struct MainView: View {
         } message: {
             Text("You already have an ongoing migraine. End it before starting a new one.")
         }
-        // Process any pending deep link once mounted and whenever inputs change
-        .task { await processPendingDeepLinkIfNeeded() }
-        .onChange(of: pendingDeepLinkID) { _, _ in
-            Task { await processPendingDeepLinkIfNeeded() }
+        .onChange(of: pendingDeepLink) { _, newLink in
+            handleDeepLink(newLink)
         }
-        .onChange(of: pendingDeepLinkAction) { _, _ in
-            Task { await processPendingDeepLinkIfNeeded() }
+        .onAppear {
+            // Handle any pending deep link on appear
+            if pendingDeepLink != nil {
+                handleDeepLink(pendingDeepLink)
+            }
         }
-        .onChange(of: hSizeClass) { _, _ in
-            Task { await processPendingDeepLinkIfNeeded() }
+    }
+    
+    private func handleDeepLink(_ link: DeepLink?) {
+        guard let link = link else { return }
+
+        // Reset the deep link after handling
+        defer { pendingDeepLink = nil }
+
+        switch link {
+        case .newMigraine:
+            showingEntrySheet = true
+        case .home:
+            appTab = .dashboard
+        case .list:
+            appTab = .list
+        case .settings:
+            appTab = .settings
         }
     }
 
@@ -473,47 +485,26 @@ struct MainView: View {
         listPath.append(id)
         lastPushedMigraineID = id
     }
-
-    @MainActor
-    private func processPendingDeepLinkIfNeeded() async {
-        guard let id = pendingDeepLinkID else { return }
-
-        // Ensure the stacks are mounted before navigating
-        // A short hop to the next runloop helps after size-class changes or first mount.
-        await Task.yield()
-
-        navigateToMigraine(id: id)
-        endMigraineIfRequested(for: id, action: pendingDeepLinkAction)
-
-        // Clear pending so it won’t repeat
-        pendingDeepLinkID = nil
-        pendingDeepLinkAction = nil
-    }
     
-    private func deleteAllData() {
+    private func deleteAllMigraines() {
         let start = Date()
-        
+
         Task {
             // Delete all migraines via manager
             await MainActor.run {
                 migraineManager.deleteAllMigraines()
             }
-            
-            // Delete the user
-            await MainActor.run {
-                userManager.deleteUser()
-            }
-            
-            // Ensure at least 4 seconds elapsed
+
+            // Ensure at least 2 seconds elapsed to show the deletion UI
             let elapsed = Date().timeIntervalSince(start)
-            if elapsed < 4.0 {
-                let remaining = UInt64((4.0 - elapsed) * 1_000_000_000)
+            if elapsed < 2.0 {
+                let remaining = UInt64((2.0 - elapsed) * 1_000_000_000)
                 try? await Task.sleep(nanoseconds: remaining)
             }
-            
-            // Reset app state
+
+            // Haptic feedback for completion
             await MainActor.run {
-                resetApplication()
+                Haptics.success()
             }
         }
     }
@@ -550,9 +541,7 @@ struct MainView: View {
     )
 
     return MainView(
-        resetApplication: {},
-        pendingDeepLinkID: .constant(nil),
-        pendingDeepLinkAction: .constant(nil)
+        pendingDeepLink: .constant(nil)
     )
     .modelContainer(container)
     .environment(previewInsightManager)

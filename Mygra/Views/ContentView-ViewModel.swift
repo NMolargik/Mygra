@@ -10,11 +10,18 @@ import SwiftUI
 extension ContentView {
     @Observable
     class ViewModel {
-        var appStage: AppStage = .start
-
-        var pendingDeepLinkID: UUID? = nil
-        var pendingDeepLinkAction: String? = nil
+        // MARK: - App State
+        var appStage: AppStage = .splash
         
+        // MARK: - Dependencies
+        var cloudSyncManager: CloudSyncManager?
+        
+        // MARK: - Configuration
+        func configure(cloudSyncManager: CloudSyncManager) {
+            self.cloudSyncManager = cloudSyncManager
+        }
+
+        // MARK: - Transitions
         var leadingTransition: AnyTransition {
             .asymmetric(
                 insertion: .move(edge: .trailing).combined(with: .opacity),
@@ -22,20 +29,10 @@ extension ContentView {
             )
         }
 
-        func handleOpenURL(_ url: URL) -> Bool {
-            guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return false }
-            guard components.host?.lowercased() == "migraine" else { return false }
-            
-            let path = url.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-            guard let id = UUID(uuidString: path) else { return false }
-            let action = components.queryItems?.first(where: { $0.name.lowercased() == "action" })?.value
-            
-            // Set pending states so MainView can process them after transition/mount.
-            self.pendingDeepLinkID = id
-            self.pendingDeepLinkAction = action
-            
-            // If we’re not in main, signal the caller to navigate there.
-            return self.appStage != .main
+        func prepareApp(isOnboardingComplete: Bool) async {
+            await MainActor.run {
+                appStage = isOnboardingComplete ? .syncing : .splash
+            }
         }
     }
 }
