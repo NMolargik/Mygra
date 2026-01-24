@@ -1,3 +1,5 @@
+<img src="Icons/MygraIcon-iOS-Default-1024x1024@1x.png" alt="Mygra" width="128" height="128">
+
 # Mygra
 
 A personal iOS app for tracking migraines and surfacing actionable insights through pattern analysis.
