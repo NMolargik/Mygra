@@ -1,60 +1,139 @@
 # Mygra
 
-A SwiftUI app that helps people track migraines and related factors, then surfaces actionable insights. Mygra combines HealthKit data (sleep, hydration, caffeine, energy intake), local weather conditions via WeatherKit, and on-device intelligence to provide guidance through a dedicated Migraine Assistant.
+A personal iOS app for tracking migraines and surfacing actionable insights through pattern analysis.
+
+## Overview
+
+Mygra helps migraine sufferers understand their triggers by combining HealthKit data (sleep, hydration, caffeine, energy), local weather conditions via WeatherKit, and on-device Apple Intelligence to provide personalized guidance. Built with SwiftUI and SwiftData, it features seamless iCloud sync, Live Activities, and cross-device support with Apple Watch.
 
 ## Features
 
-- **Insights Dashboard**
-  - Weather card powered by WeatherKit (temperature, pressure, humidity, conditions, location, last updated, pull-to-refresh)
-  - "Quick Bits" insight feed highlighting notable patterns (e.g., hydration on migraine days, sleep trends)
-  - Adaptive layout that places cards side-by-side on larger screens (iPad, landscape) and stacks on smaller screens
+### Migraine Tracking
+- Record migraines with severity levels and detailed notes
+- Automatic capture of weather conditions at migraine onset
+- Automatic capture of health data snapshot (sleep, hydration, caffeine, energy)
+- Live Activities showing ongoing migraine duration on lock screen
 
-- **Today Card + Quick Add**
-  - Connect to HealthKit and view the latest data for today
-  - Quickly add: water (L/fl oz), caffeine (mg), food/energy (kcal), and sleep (h)
-  - Writes entries to HealthKit and refreshes the dashboard
+### Insights Dashboard
+- **Weather Card**: Real-time conditions with pressure, humidity, and storm detection
+- **Today Card**: Current health metrics with quick-add for water, caffeine, food, and sleep
+- **Quick Bits**: Pattern highlights (e.g., hydration trends, sleep correlations)
+- Adaptive layout: side-by-side on iPad/landscape, stacked on phones
 
-- **Migraine Assistant (Apple Intelligence)**
-  - Opens a full-screen counselor-style chat to guide users with personalized advice
-  - Launches only on devices that support Apple Intelligence capabilities
+### Migraine Assistant (Apple Intelligence)
+- Full-screen counselor-style chat with personalized advice
+- Context-aware guidance based on your migraine history and patterns
+- Requires compatible device with Apple Intelligence (iOS 26+)
 
-- **Haptics & Polished UX**
-  - Light impacts for interactions, success/error feedback
-  - Pull-to-refresh across insights, weather, and health data
+### Health Integration
+- Read sleep, hydration, caffeine, and energy data from HealthKit
+- Quick-add entries that write directly to HealthKit
+- Unit conversion support (metric/imperial)
 
-## Tech Stack
-
-- **SwiftUI** for the UI
-- **Swift Concurrency** (async/await, Task groups) for async workflows
-- **HealthKit** for reading/writing health data (water, caffeine, energy/food, sleep)
-- **WeatherKit** for local conditions and metadata
-- **App Storage** for unit preferences (metric/imperial)
-
-## Architecture Overview
-
-Mygra uses a lightweight, testable state management approach based on environment-provided managers and a local view model for transient UI state:
-
-- `InsightManager` — Fetches and aggregates insights; coordinates the counselor chat; exposes `insights`, `errors`, and refresh state.
-- `HealthManager` — Handles HealthKit authorization and CRUD; exposes `isAuthorized` and `latestData`; provides saving helpers (water, caffeine, energy, sleep).
-- `WeatherManager` — Fetches and formats weather data; exposes strings for display, conditions, last updated, and refresh state.
-- `InsightsView.ViewModel` — UI state for the Insights screen (quick add panel, input values, saving state, sheet/full-screen toggles).
-
-The `InsightsView` composes:
-- Weather card
-- Intelligence card (conditionally shown)
-- Today card with quick add
-- Quick Bits insights list
-
-Concurrency patterns include `async let` for initial loads and `TaskGroup` for parallel refreshes.
+### Platform Integration
+- **iCloud Sync**: Seamless multi-device synchronization via CloudKit
+- **HealthKit**: Comprehensive health data read/write
+- **WeatherKit**: Weather conditions with high-risk alerts
+- **Widgets**: Home screen widget showing days since last migraine
+- **Apple Watch**: Companion app with real-time phone sync
 
 ## Requirements
 
-- Xcode 15 or later (recommended: Xcode 16/26 toolchain as applicable)
-- iOS 17+ (project may target newer SDKs; adjust as needed)
-- A device or simulator with HealthKit capability (note: HealthKit writes require a real device)
-- WeatherKit entitlement and configuration (see below)
-- Apple Intelligence features require compatible devices and OS versions
+- iOS 17.0+
+- Xcode 16.0+
+- Apple Developer account (for CloudKit, HealthKit, and WeatherKit capabilities)
 
 ## Setup
 
-1. **Clone the repository**
+1. Clone the repository
+2. Open `Mygra.xcodeproj` in Xcode
+3. Configure signing with your Apple Developer account
+4. Update bundle identifiers and App Group/iCloud container identifiers
+5. Build and run
+
+### Required Capabilities
+
+Enable these in your Xcode project:
+- iCloud (CloudKit with private database)
+- HealthKit
+- App Groups (`group.com.molargiksoftware.Mygra`)
+- WeatherKit
+- Background Modes (location, remote notifications, fetch)
+
+## Architecture
+
+### App Lifecycle
+
+The app progresses through stages managed by `ContentView`:
+
+```
+.splash → .onboarding → .main
+```
+
+### Manager Pattern
+
+Business logic lives in `@Observable` manager classes:
+
+| Manager | Responsibility |
+|---------|---------------|
+| `MigraineManager` | CRUD operations, Live Activities, widget updates |
+| `HealthManager` | HealthKit authorization and data streaming |
+| `WeatherManager` | WeatherKit with throttled updates (10-min interval) |
+| `InsightManager` | Pattern aggregation and correlation analysis |
+| `IntelligenceManager` | Apple Intelligence chat (iOS 26+) |
+| `LocationManager` | CoreLocation wrapper for weather positioning |
+| `NotificationManager` | High-risk weather alerts |
+| `ComplicationSync` | WatchConnectivity for real-time watch updates |
+
+### Data Layer
+
+- **SwiftData** with iCloud CloudKit sync
+- **App Groups** for widget and watch data sharing
+- **AppStorage** for user preferences
+
+### Key Patterns
+
+- **Dependency Injection**: Managers injected via SwiftUI `@Environment`
+- **Async/Await**: Modern Swift concurrency throughout
+- **AsyncStream**: Continuous updates for health and location data
+
+## Project Structure
+
+```
+Mygra/
+├── MygraApp.swift              # App entry point
+├── ContentView.swift           # App stage state machine
+├── Managers/                   # Business logic
+├── Models/                     # SwiftData models
+├── Views/
+│   ├── Splash/                 # Launch screen
+│   ├── Onboarding/             # Permission flow
+│   ├── Main/
+│   │   ├── Insights/           # Dashboard with cards
+│   │   ├── Migraines/          # List, entry, detail views
+│   │   ├── Assistant/          # Apple Intelligence chat
+│   │   └── Settings/           # Preferences, PDF export
+├── Enumerations/               # Shared enums
+├── Errors/                     # LocalizedError types
+└── Extensions/                 # Swift extensions
+
+MygraWidgets/                   # Home screen widgets
+Mygra Wrist Watch App/          # watchOS companion
+```
+
+## Privacy
+
+Mygra is designed with privacy in mind:
+- All data stored in your private iCloud container
+- On-device Apple Intelligence processing
+- Location used only for weather context
+- No analytics or tracking
+- No health data leaves your devices
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Author
+
+Molargik Software LLC
