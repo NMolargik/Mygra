@@ -138,10 +138,8 @@ struct ContentView: View {
                     self.lastStart = Date()
                     self.daysSince = 0
                     // Save to defaults
-                    let defaults = UserDefaults(suiteName: appGroupID)
-                    defaults?.set(Date().timeIntervalSince1970, forKey: "lastMigraineStart")
-                    defaults?.set(true, forKey: "hasOngoingMigraine")
-                    defaults?.synchronize()
+                    SharedMigraineStatus(lastMigraineStart: Date(), hasOngoingMigraine: true)
+                        .write(to: UserDefaults(suiteName: appGroupID))
                 } else {
                     if error == "alreadyOngoing" {
                         self.syncError = "A migraine is already ongoing."
@@ -178,7 +176,7 @@ struct ContentView: View {
                 self.hasOngoing = hasOngoing
                 if let lastStart {
                     self.lastStart = lastStart
-                    self.daysSince = computeDaysSince(from: lastStart)
+                    self.daysSince = MigraineDates.daysSince(lastStart)
                 } else {
                     // If we couldn't get a start date from phone, fall back to defaults
                     self.loadFromDefaults()
@@ -227,35 +225,24 @@ struct ContentView: View {
     private func applyApplicationContextIfAvailable() {
         guard WCSession.isSupported() else { return }
         let ctx = WCSession.default.receivedApplicationContext
-        if let ts = ctx["lastMigraineStart"] as? TimeInterval {
-            let defaults = UserDefaults(suiteName: appGroupID)
-            defaults?.set(ts, forKey: "lastMigraineStart")
+        let defaults = UserDefaults(suiteName: appGroupID)
+        if let ts = ctx[SharedMigraineStatus.Keys.lastMigraineStart] as? TimeInterval {
+            defaults?.set(ts, forKey: SharedMigraineStatus.Keys.lastMigraineStart)
             let last = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
             self.lastStart = last
-            self.daysSince = computeDaysSince(from: last)
+            self.daysSince = MigraineDates.daysSince(last)
         }
-        if let ongoing = ctx["hasOngoingMigraine"] as? Bool {
-            let defaults = UserDefaults(suiteName: appGroupID)
-            defaults?.set(ongoing, forKey: "hasOngoingMigraine")
+        if let ongoing = ctx[SharedMigraineStatus.Keys.hasOngoingMigraine] as? Bool {
+            defaults?.set(ongoing, forKey: SharedMigraineStatus.Keys.hasOngoingMigraine)
             self.hasOngoing = ongoing
         }
     }
 
     private func loadFromDefaults() {
-        let defaults = UserDefaults(suiteName: appGroupID)
-        let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
-        let lastStart = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
-        self.lastStart = lastStart
-        self.daysSince = computeDaysSince(from: lastStart)
-        self.hasOngoing = defaults?.bool(forKey: "hasOngoingMigraine") ?? false
-    }
-
-    private func computeDaysSince(from date: Date?) -> Int {
-        guard let d = date else { return 0 }
-        let cal = Calendar.current
-        let start = cal.startOfDay(for: d)
-        let now = cal.startOfDay(for: Date())
-        return max(0, cal.dateComponents([.day], from: start, to: now).day ?? 0)
+        let status = SharedMigraineStatus(defaults: UserDefaults(suiteName: appGroupID))
+        self.lastStart = status.lastMigraineStart
+        self.daysSince = MigraineDates.daysSince(status.lastMigraineStart)
+        self.hasOngoing = status.hasOngoingMigraine
     }
     
     private func ongoingDurationString() -> String {
@@ -277,24 +264,27 @@ struct ContentView: View {
 
         // Observe combined connectivity changes (installed + reachable)
         NotificationCenter.default.addObserver(forName: .phoneConnectivityStatusChanged, object: nil, queue: .main) { note in
-            if let reachable = note.userInfo?["reachable"] as? Bool {
-                self.isPhoneReachable = reachable
-            }
-            if let installed = note.userInfo?["installed"] as? Bool {
-                self.isPhoneAppInstalled = installed
+            let reachable = note.userInfo?["reachable"] as? Bool
+            let installed = note.userInfo?["installed"] as? Bool
+            Task { @MainActor in
+                if let reachable { self.isPhoneReachable = reachable }
+                if let installed { self.isPhoneAppInstalled = installed }
             }
         }
 
         // Backward compatibility: observe legacy reachability-only notification
         NotificationCenter.default.addObserver(forName: .phoneReachabilityChanged, object: nil, queue: .main) { note in
-            if let reachable = note.userInfo?["reachable"] as? Bool {
-                self.isPhoneReachable = reachable
+            let reachable = note.userInfo?["reachable"] as? Bool
+            Task { @MainActor in
+                if let reachable { self.isPhoneReachable = reachable }
             }
         }
 
         // Observe data updates pushed from the phone (application context or complication info)
         NotificationCenter.default.addObserver(forName: .phoneDataUpdated, object: nil, queue: .main) { _ in
-            self.loadFromDefaults()
+            Task { @MainActor in
+                self.loadFromDefaults()
+            }
         }
     }
 }

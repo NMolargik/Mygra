@@ -114,10 +114,7 @@ struct MigraineFilterSheet: View {
                         } label: {
                             Label("Clear", systemImage: "circle.slash")
                         }
-                        .padding(8)
-                        .padding(.horizontal, 5)
-                        .foregroundStyle(.white)
-                        .adaptiveGlass(tint: .mygraPurple)
+                        .glassActionButton(prominent: false)
                         .controlSize(.small)
                     }
                 }

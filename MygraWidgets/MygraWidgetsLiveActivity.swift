@@ -10,7 +10,8 @@ import WidgetKit
 import SwiftUI
 
 // MARK: - Attributes for Migraine Live Activity
-struct MigraineActivityAttributes: ActivityAttributes {
+// nonisolated: ActivityKit encodes and observes these off the main actor.
+nonisolated struct MigraineActivityAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
         // Dynamic state for the activity
         let migraineID: UUID

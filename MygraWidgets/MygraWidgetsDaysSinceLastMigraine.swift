@@ -26,26 +26,12 @@ private struct DaysSinceLastMigraineProvider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<DaysSinceLastMigraineEntry>) -> Void) {
         let entry = makeEntry()
         // Update again at the next local midnight to bump the count naturally.
-        let calendar = Calendar.current
-        let nextMidnight = calendar.nextDate(after: Date(), matching: DateComponents(hour: 0, minute: 0, second: 5), matchingPolicy: .nextTimePreservingSmallerComponents) ?? Date().addingTimeInterval(3600)
-        completion(Timeline(entries: [entry], policy: .after(nextMidnight)))
+        completion(Timeline(entries: [entry], policy: .after(MigraineDates.nextMidnight())))
     }
 
     private func makeEntry() -> DaysSinceLastMigraineEntry {
-        let defaults = UserDefaults(suiteName: AppGroup.id)
-        let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
-        let lastStart = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
-        let days = Self.daysSince(lastStart)
-        return DaysSinceLastMigraineEntry(date: Date(), daysSince: days)
-    }
-
-    private static func daysSince(_ date: Date?) -> Int {
-        guard let date else { return 0 }
-        let cal = Calendar.current
-        let startOfDayDate = cal.startOfDay(for: date)
-        let startOfDayNow = cal.startOfDay(for: Date())
-        let comps = cal.dateComponents([.day], from: startOfDayDate, to: startOfDayNow)
-        return max(0, comps.day ?? 0)
+        let status = SharedMigraineStatus(defaults: UserDefaults(suiteName: AppGroup.id))
+        return DaysSinceLastMigraineEntry(date: Date(), daysSince: MigraineDates.daysSince(status.lastMigraineStart))
     }
 }
 

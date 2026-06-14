@@ -4,94 +4,146 @@
 //
 //  Created by Nick Molargik on 7/13/25.
 //
+//  Composition root: the model container and every manager are built here,
+//  once, and injected into the view tree via .environment().
+//
 
 import SwiftUI
 import SwiftData
 import WeatherKit
 import BackgroundTasks
 import CoreLocation
+import os
 
 @main
 struct MygraApp: App {
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(AppStorageKeys.bgWeatherTaskScheduled) private var bgWeatherTaskScheduled: Bool = false
-    @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
-    @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
-    @AppStorage(AppStorageKeys.isOnboardingComplete) private var isOnboardingComplete: Bool = false
-    
+
     private let sharedModelContainer: ModelContainer
 
-    init() {
-        let cloudKitContainerID = "iCloud.com.molargiksoftware.Mygra"
+    // MARK: - Managers (composition root)
+    @State private var weatherManager: WeatherManager
+    @State private var notificationManager: NotificationManager
+    @State private var healthManager: HealthManager
+    @State private var migraineManager: MigraineManager
+    @State private var userManager: UserManager
+    @State private var tagManager: TagManager
+    @State private var insightManager: InsightManager
+    @State private var cloudSyncManager: CloudSyncManager
+    @State private var toastManager: ToastManager
+    private let complicationSync: ComplicationSync
 
-        do {
-            let config = ModelConfiguration(
-                cloudKitDatabase: .private(cloudKitContainerID)
-            )
-
-            sharedModelContainer = try ModelContainer(
-                for: User.self, Migraine.self, WeatherData.self, HealthData.self, MigraineTag.self, IntensitySample.self,
-                configurations: config
-            )
-        } catch {
-            fatalError("[Mygra] Failed to initialize ModelContainer: \(error)")
-        }
-        
-        // Configure TipKit
-        // try? Tips.configure([
-        //      .displayFrequency(.immediate)
-        // ])
-        
-        weatherManager = WeatherManager()
-        notificationManager = NotificationManager()
-
-        // Must register handler BEFORE scheduling any tasks
-        registerBackgroundTaskHandler()
-
-        if !bgWeatherTaskScheduled {
-            scheduleWeatherRefreshTask(earliestInMinutes: 90)
-        }
-        ensureLocationProviderIfMissing()
-        print(weatherManager.locationManager == nil ? "No location manager" : "Has location manager")
-        
-        // watchOS
-        ComplicationSync.shared.activate()
-    }
-    
     @State private var pendingDeepLink: DeepLink?
     @State private var lastWeatherHighRisk: Bool = false
-    @State private var notificationManager: NotificationManager
-    @State private var weatherManager: WeatherManager
     private let weatherTaskIdentifier = "com.molargiksoftware.Mygra.weatherRefresh"
+
+    /// True when the process is hosting a unit-test bundle. Under the test
+    /// host the app must avoid CloudKit (which traps on a simulator with no
+    /// signed-in iCloud account) and background-task scheduling.
+    static var isRunningTests: Bool {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil
+            || ProcessInfo.processInfo.environment["XCTestBundlePath"] != nil
+            || NSClassFromString("XCTestCase") != nil
+    }
+
+    init() {
+        // Single shared container, also used by App Intents (see MygraModelContainer).
+        sharedModelContainer = MygraModelContainer.shared
+
+        // Build the object graph. The App protocol is @MainActor, so
+        // mainContext is reachable here.
+        let weather = WeatherManager(locationManager: LocationManager())
+        let health = HealthManager()
+        let complications = ComplicationSync()
+        let migraines = MigraineManager(
+            container: sharedModelContainer,
+            healthManager: health,
+            watchPusher: complications
+        )
+        complications.commandHandler = migraines
+        complications.activate()
+
+        let users = UserManager(container: sharedModelContainer)
+        let tags = TagManager(container: sharedModelContainer)
+        let insights = InsightManager(
+            userManager: users,
+            migraineManager: migraines,
+            weatherManager: weather,
+            healthManager: health
+        )
+
+        _weatherManager = State(initialValue: weather)
+        _notificationManager = State(initialValue: NotificationManager())
+        _healthManager = State(initialValue: health)
+        _migraineManager = State(initialValue: migraines)
+        _userManager = State(initialValue: users)
+        _tagManager = State(initialValue: tags)
+        _insightManager = State(initialValue: insights)
+
+        // iCloud sync runs in the background: refresh the in-memory cache
+        // whenever CloudKit delivers remote changes (no blocking sync screen).
+        let cloudSync = CloudSyncManager()
+        cloudSync.onRemoteChange = {
+            Task { await migraines.refresh() }
+        }
+        _cloudSyncManager = State(initialValue: cloudSync)
+        _toastManager = State(initialValue: ToastManager())
+        complicationSync = complications
+
+        // Skip background-task wiring under the test host: BGTaskScheduler
+        // registration/submission is unavailable there and only adds noise.
+        if !MygraApp.isRunningTests {
+            // Must register handler BEFORE scheduling any tasks
+            registerBackgroundTaskHandler()
+
+            if !bgWeatherTaskScheduled {
+                scheduleWeatherRefreshTask(earliestInMinutes: 90)
+            }
+        }
+    }
 
     var body: some Scene {
         WindowGroup {
             ContentView(pendingDeepLink: $pendingDeepLink)
+                .toastContainer()
                 .modelContainer(sharedModelContainer)
                 .onOpenURL { url in
-                    handleDeepLink(url)
+                    if let link = DeepLink(url: url) {
+                        pendingDeepLink = link
+                    }
                 }
                 .environment(weatherManager)
                 .environment(notificationManager)
+                .environment(healthManager)
+                .environment(migraineManager)
+                .environment(userManager)
+                .environment(tagManager)
+                .environment(insightManager)
+                .environment(cloudSyncManager)
+                .environment(toastManager)
                 .onChange(of: scenePhase) { _, newPhase in
                     if newPhase == .background { scheduleWeatherRefreshTask(earliestInMinutes: 90) }
+                    if newPhase == .active { consumePendingDeepLinkFromIntents() }
                 }
                 .task {
+                    consumePendingDeepLinkFromIntents()
+                    cloudSyncManager.configure(with: sharedModelContainer.mainContext)
                     await startPeriodicWeatherChecksInForeground()
                 }
         }
+        .commands {
+            MygraCommands(pendingDeepLink: $pendingDeepLink)
+        }
     }
-    
-    private func handleDeepLink(_ url: URL) {
-        guard url.scheme == "mygra" else { return }
 
-        switch url.host {
-        case "new-migraine":
-            pendingDeepLink = .newMigraine
-        case "home":
-            pendingDeepLink = .home
-        default:
-            break
+    // MARK: - App Intent deep-link hand-off
+
+    /// Picks up a deep link stashed by an `openAppWhenRun` App Intent and
+    /// routes it through the normal deep-link path.
+    private func consumePendingDeepLinkFromIntents() {
+        if let link = DeepLink.takePending(from: UserDefaults(suiteName: AppGroup.id)) {
+            pendingDeepLink = link
         }
     }
 
@@ -99,7 +151,11 @@ struct MygraApp: App {
 
     private func registerBackgroundTaskHandler() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: weatherTaskIdentifier, using: nil) { task in
-            self.handleWeatherRefreshTask(task: task as! BGAppRefreshTask)
+            guard let refreshTask = task as? BGAppRefreshTask else {
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleWeatherRefreshTask(task: refreshTask)
         }
     }
 
@@ -111,9 +167,9 @@ struct MygraApp: App {
         do {
             try BGTaskScheduler.shared.submit(request)
             bgWeatherTaskScheduled = true
-            print("[Mygra] Scheduled weather refresh task in ~\(minutes) minutes.")
+            Log.weather.info("Scheduled weather refresh task in ~\(minutes) minutes.")
         } catch {
-            print("[Mygra] Failed to schedule weather refresh task: \(error)")
+            Log.weather.error("Failed to schedule weather refresh task: \(error)")
         }
     }
 
@@ -129,92 +185,45 @@ struct MygraApp: App {
 
     // MARK: - One-shot weather check and notify
 
-    private func isHighRiskWeather() -> Bool {
-        // Use WeatherManager's latest readings
-        let humidityHigh: Bool = {
-            if let humidity = weatherManager.humidity { return humidity >= 0.70 }
-            return false
-        }()
-        let pressureLow: Bool = {
-            if let pressure = weatherManager.pressure {
-                let hPa = pressure.converted(to: .hectopascals).value
-                return hPa < 1008.0
-            }
-            return false
-        }()
-        let storms: Bool = {
-            if let condition = weatherManager.condition {
-                return condition == .strongStorms
-            }
-            return false
-        }()
-        return humidityHigh || pressureLow || storms
-    }
-
-    private func weatherRiskTitleAndBody() -> (title: String, body: String) {
-        var parts: [String] = []
-        if let condition = weatherManager.condition {
-            parts.append(condition.description.capitalized)
-        }
-        if let pressure = weatherManager.pressure {
-            let hPa = pressure.converted(to: .hectopascals).value
-            parts.append(String(format: "%.0f hPa", hPa))
-        }
-        if let humidity = weatherManager.humidity {
-            parts.append(String(format: "%.0f%% humidity", humidity * 100.0))
-        }
-        let summary = parts.isEmpty ? "Current conditions" : parts.joined(separator: " • ")
-        return (
-            title: "Weather may trigger a migraine",
-            body: "\(summary). Consider hydration, rest, and minimizing triggers."
+    private var currentRiskInput: WeatherRiskInput {
+        WeatherRiskInput(
+            humidity: weatherManager.humidity,
+            pressureHpa: weatherManager.pressure?.converted(to: .hectopascals).value,
+            condition: weatherManager.condition
         )
     }
 
-    private func ensureLocationProviderIfMissing() {
-        if weatherManager.locationManager == nil {
-            weatherManager.setLocationProvider(LocationManager())
-        }
-    }
-
     private func runOneWeatherCheckAndNotifyIfHighRisk() async {
-        ensureLocationProviderIfMissing()
         // Do not request notification permission here; it must be granted beforehand.
         await weatherManager.refresh()
 
-        let high = isHighRiskWeather()
+        let input = currentRiskInput
+        let high = WeatherRisk.isHighRisk(input)
         if high && !lastWeatherHighRisk {
             let authorized = await notificationManager.isAuthorized
             if authorized {
+                let content = WeatherRisk.notificationContent(input)
                 do {
                     try await notificationManager.send(
-                        title: weatherRiskTitleAndBody().title,
-                        body: weatherRiskTitleAndBody().body,
+                        title: content.title,
+                        body: content.body,
                         category: .alert,
                         identifier: "weather-risk-\(Int(Date().timeIntervalSince1970))"
                     )
-                } catch let error as NotificationError {
-                    print("[Mygra] Notification error: \(error.localizedDescription)")
                 } catch {
-                    print("[Mygra] Unexpected error sending notification: \(error)")
+                    Log.weather.error("Failed to send weather-risk notification: \(error)")
                 }
             }
         }
         lastWeatherHighRisk = high
     }
 
-    // MARK: - Foreground periodic checks (optional)
+    // MARK: - Foreground periodic checks
 
     private func startPeriodicWeatherChecksInForeground() async {
-        while weatherManager.locationManager == nil {
-            if Task.isCancelled { return }
-            do { try await Task.sleep(nanoseconds: 1_000_000_000) } catch { return }
-        }
-
-        while true {
-            if Task.isCancelled { return }
+        while !Task.isCancelled {
             await runOneWeatherCheckAndNotifyIfHighRisk()
-            if Task.isCancelled { return }
-            do { try await Task.sleep(nanoseconds: 90 * 60 * 1_000_000_000) } catch { return }
+            do { try await Task.sleep(for: .seconds(90 * 60)) } catch { return }
         }
     }
 }

@@ -7,11 +7,30 @@
 
 import Foundation
 import WatchConnectivity
+import os
 
-@MainActor 
-final class ComplicationSync: NSObject, WCSessionDelegate {
-    static let shared = ComplicationSync()
-    private override init() { super.init() }
+/// Commands the watch can send to the phone. Implemented by MigraineManager
+/// and wired up at the composition root.
+@MainActor
+protocol WatchCommandHandling: AnyObject {
+    var ongoingMigraine: Migraine? { get }
+    @discardableResult func endOngoingMigraine() -> Bool
+    func startMigraineFromWatch(painLevel: Int, stressLevel: Int) -> UUID?
+}
+
+@MainActor
+final class ComplicationSync: NSObject, WCSessionDelegate, WatchStatusPushing {
+
+    /// Handles watch-originated commands. Set by the composition root after
+    /// the MigraineManager exists; weak to avoid a retain cycle.
+    weak var commandHandler: WatchCommandHandling?
+
+    private let sharedDefaults: KeyValueStoring?
+
+    init(sharedDefaults: KeyValueStoring? = UserDefaults(suiteName: AppGroup.id)) {
+        self.sharedDefaults = sharedDefaults
+        super.init()
+    }
 
     func activate() {
         guard WCSession.isSupported() else { return }
@@ -20,132 +39,135 @@ final class ComplicationSync: NSObject, WCSessionDelegate {
     }
 
     // MARK: - Push updates for widgets/complications
-    func pushLastMigraineStart(_ timeInterval: TimeInterval) {
-        // Backwards compatibility: still send the old payload
-        pushStatus(lastMigraineStart: timeInterval, hasOngoing: MigraineManager.shared?.ongoingMigraine != nil)
-    }
 
-    func pushStatus(lastMigraineStart: TimeInterval, hasOngoing: Bool) {
+    func pushStatus(_ status: SharedMigraineStatus) {
         guard WCSession.default.isPaired, WCSession.default.isWatchAppInstalled else { return }
         let payload: [String: Any] = [
-            "lastMigraineStart": lastMigraineStart,
-            "hasOngoingMigraine": hasOngoing
+            SharedMigraineStatus.Keys.lastMigraineStart: status.lastMigraineStart?.timeIntervalSince1970 ?? 0,
+            SharedMigraineStatus.Keys.hasOngoingMigraine: status.hasOngoingMigraine
         ]
         WCSession.default.transferCurrentComplicationUserInfo(payload)
         try? WCSession.default.updateApplicationContext(payload)
         // Also send a live message when possible for immediate UI updates
         if WCSession.default.isReachable {
             WCSession.default.sendMessage(payload, replyHandler: nil) { error in
-                print("[ComplicationSync] Failed to send live message to watch: \(error.localizedDescription)")
+                Log.watch.error("Failed to send live message to watch: \(error.localizedDescription)")
             }
         }
     }
 
+    private func currentStatus() -> SharedMigraineStatus {
+        var status = sharedDefaults?.readSharedStatus()
+            ?? SharedMigraineStatus(lastMigraineStart: nil, hasOngoingMigraine: false)
+        if commandHandler?.ongoingMigraine != nil {
+            status.hasOngoingMigraine = true
+        }
+        return status
+    }
+
     private func pushCurrentStateToWatch() {
-        let defaults = UserDefaults(suiteName: AppGroup.id)
-        let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
-        let ongoingFromManager = MigraineManager.shared?.ongoingMigraine != nil
-        let ongoingFromDefaults = defaults?.bool(forKey: "hasOngoingMigraine") ?? false
-        let hasOngoing = ongoingFromManager || ongoingFromDefaults
-        pushStatus(lastMigraineStart: ts, hasOngoing: hasOngoing)
+        pushStatus(currentStatus())
     }
 
     // MARK: - WCSessionDelegate
-    func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith state: WCSessionActivationState, error: Error?) {
         guard error == nil else { return }
         // After activation, push the current known state to the watch so it can update immediately
-        pushCurrentStateToWatch()
+        Task { @MainActor in
+            self.pushCurrentStateToWatch()
+        }
     }
 
-    func sessionReachabilityDidChange(_ session: WCSession) {
+    nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         // If the watch becomes reachable, push the latest state for immediate updates
-        if session.isReachable {
-            pushCurrentStateToWatch()
+        let reachable = session.isReachable
+        Task { @MainActor in
+            if reachable {
+                self.pushCurrentStateToWatch()
+            }
         }
     }
 
     #if os(iOS)
-    func sessionDidBecomeInactive(_ session: WCSession) {}
+    nonisolated func sessionDidBecomeInactive(_ session: WCSession) {}
 
-    func sessionDidDeactivate(_ session: WCSession) {
+    nonisolated func sessionDidDeactivate(_ session: WCSession) {
         // After deactivation (e.g., switching watches), re-activate the session
         WCSession.default.activate()
     }
     #endif
 
-    // Respond to watch status requests and end commands
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any]) {
-        handle(message: message, replyHandler: nil)
+    // Respond to watch status requests and start/end commands
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        let payload = WatchMessage(message)
+        Task { @MainActor in
+            self.handle(payload, replyHandler: nil)
+        }
     }
 
-    func session(_ session: WCSession, didReceiveMessage message: [String : Any], replyHandler: @escaping ([String : Any]) -> Void) {
-        handle(message: message, replyHandler: replyHandler)
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any], replyHandler: @escaping ([String: Any]) -> Void) {
+        let payload = WatchMessage(message)
+        // WatchConnectivity reply handlers are safe to invoke from any thread.
+        nonisolated(unsafe) let reply = replyHandler
+        Task { @MainActor in
+            self.handle(payload, replyHandler: reply)
+        }
     }
 
-    private func handle(message: [String: Any], replyHandler: (([String: Any]) -> Void)?) {
-        if let request = message["request"] as? String, request == "status" {
-            let defaults = UserDefaults(suiteName: AppGroup.id)
-            let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
-            let ongoing = MigraineManager.shared?.ongoingMigraine != nil
-            let response: [String: Any] = [
-                "hasOngoingMigraine": ongoing,
-                "lastMigraineStart": ts
-            ]
-            replyHandler?(response)
+    /// A Sendable snapshot of the fields we read from a watch message.
+    private nonisolated struct WatchMessage: Sendable {
+        var request: String?
+        var command: String?
+        var painLevel: Int?
+        var stressLevel: Int?
+
+        init(_ message: [String: Any]) {
+            request = message["request"] as? String
+            command = message["command"] as? String
+            painLevel = message["painLevel"] as? Int
+            stressLevel = message["stressLevel"] as? Int
+        }
+    }
+
+    private func handle(_ message: WatchMessage, replyHandler: (([String: Any]) -> Void)?) {
+        if message.request == "status" {
+            let status = currentStatus()
+            replyHandler?([
+                SharedMigraineStatus.Keys.hasOngoingMigraine: status.hasOngoingMigraine,
+                SharedMigraineStatus.Keys.lastMigraineStart: status.lastMigraineStart?.timeIntervalSince1970 ?? 0
+            ])
             return
         }
-        if let command = message["command"] as? String, command == "endMigraine" {
-            if let migraine = MigraineManager.shared?.ongoingMigraine {
-                MigraineManager.shared?.update(migraine) { m in
-                    m.endDate = Date()
-                }
-                let defaults = UserDefaults(suiteName: AppGroup.id)
-                defaults?.set(false, forKey: "hasOngoingMigraine")
-                defaults?.synchronize()
-                replyHandler?(["success": true])
-                // Push updated state to the watch so UI/complications refresh promptly
+
+        switch message.command {
+        case "endMigraine":
+            let ended = commandHandler?.endOngoingMigraine() ?? false
+            replyHandler?(["success": ended])
+            if ended {
+                // MigraineManager.refresh() updates the shared defaults; push promptly.
                 pushCurrentStateToWatch()
-            } else {
-                replyHandler?(["success": false])
             }
-            return
-        }
 
-        // Handle start migraine command from watch
-        if let command = message["command"] as? String, command == "startMigraine" {
-            // Check if there's already an ongoing migraine
-            if MigraineManager.shared?.ongoingMigraine != nil {
-                replyHandler?(["success": false, "error": "alreadyOngoing"])
+        case "startMigraine":
+            guard let handler = commandHandler else {
+                replyHandler?(["success": false])
                 return
             }
+            if let id = handler.startMigraineFromWatch(
+                painLevel: message.painLevel ?? 5,
+                stressLevel: message.stressLevel ?? 5
+            ) {
+                replyHandler?(["success": true, "migraineID": id.uuidString])
+                pushCurrentStateToWatch()
+            } else {
+                replyHandler?(["success": false, "error": "alreadyOngoing"])
+            }
 
-            // Create a new migraine with default values
-            let migraine = Migraine(
-                startDate: Date(),
-                endDate: nil,  // Ongoing
-                painLevel: message["painLevel"] as? Int ?? 5,
-                stressLevel: message["stressLevel"] as? Int ?? 5,
-                note: "Started from Apple Watch",
-                triggers: [],
-                customTriggers: [],
-                foodsEaten: []
-            )
-
-            // Insert and save via MigraineManager
-            MigraineManager.shared?.create(migraine: migraine, reviewScene: nil)
-
-            // Update shared state for widgets/complications
-            let defaults = UserDefaults(suiteName: AppGroup.id)
-            defaults?.set(migraine.startDate.timeIntervalSince1970, forKey: "lastMigraineStart")
-            defaults?.set(true, forKey: "hasOngoingMigraine")
-            defaults?.synchronize()
-
-            replyHandler?(["success": true, "migraineID": migraine.id.uuidString])
-
-            // Push updated state to the watch
-            pushCurrentStateToWatch()
-            return
+        default:
+            break
         }
     }
 }
 
+// MigraineManager satisfies the watch-command surface directly.
+extension MigraineManager: WatchCommandHandling {}

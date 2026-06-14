@@ -8,27 +8,35 @@
 import Foundation
 import SwiftData
 import Observation
-import StoreKit
 import UIKit
-import WidgetKit
-
-enum AppGroup {
-    static let id = "group.com.molargiksoftware.Mygra"
-}
+import AppIntents
+import CoreSpotlight
+import os
 
 @MainActor
 @Observable
 final class MigraineManager {
-    static var shared: MigraineManager? = nil
 
     // MARK: - Notifications
     nonisolated static let migraineCreatedNotification = Notification.Name("MigraineManager.migraineCreated")
 
     // MARK: - Dependencies
+    // The container is retained alongside the context: a ModelContext does
+    // not retain its container, and a deallocated container traps on fetch.
+    @ObservationIgnored
+    private let container: ModelContainer
     @ObservationIgnored
     private let context: ModelContext
     @ObservationIgnored
     private let healthManager: HealthManager?
+    @ObservationIgnored
+    private let sharedDefaults: KeyValueStoring?
+    @ObservationIgnored
+    private let widgetReloader: WidgetTimelineReloading
+    @ObservationIgnored
+    private let reviewRequester: ReviewRequesting
+    @ObservationIgnored
+    private weak var watchPusher: WatchStatusPushing?
 
     // MARK: - Source of truth
     private(set) var migraines: [Migraine] = []
@@ -39,18 +47,28 @@ final class MigraineManager {
     var filter: MigraineFilter = MigraineFilter() {
         didSet { Task { await refresh() } }
     }
- 
+
     // Derived, filter-applied list for the UI
     var visibleMigraines: [Migraine] {
-        applyFilter(to: migraines)
+        migraines.filter { filter.matches($0) }
     }
 
     // MARK: - Init
-    init(context: ModelContext, healthManager: HealthManager? = nil) {
-        self.context = context
+    init(
+        container: ModelContainer,
+        healthManager: HealthManager? = nil,
+        sharedDefaults: KeyValueStoring? = UserDefaults(suiteName: AppGroup.id),
+        widgetReloader: WidgetTimelineReloading = WidgetCenterReloader(),
+        reviewRequester: ReviewRequesting = AppStoreReviewRequester(),
+        watchPusher: WatchStatusPushing? = nil
+    ) {
+        self.container = container
+        self.context = container.mainContext
         self.healthManager = healthManager
-        MigraineManager.shared = self
-        ComplicationSync.shared.activate()
+        self.sharedDefaults = sharedDefaults
+        self.widgetReloader = widgetReloader
+        self.reviewRequester = reviewRequester
+        self.watchPusher = watchPusher
         Task { await refresh() }
     }
 
@@ -85,8 +103,11 @@ final class MigraineManager {
 
             // Keep the widget up to date with the newest migraine start
             self.updateWidgetSharedState()
+
+            // Refresh Spotlight's semantic index of migraines.
+            self.indexForSpotlight()
         } catch {
-            print(MigraineError.fetchFailed(underlying: error).localizedDescription)
+            Log.migraine.error("Fetch failed: \(error)")
             self.migraines = []
             self.ongoingMigraine = nil
         }
@@ -126,6 +147,11 @@ final class MigraineManager {
         }
 
         saveAndReload()
+
+        // Donate to Siri so it can predict this action (ongoing migraines only).
+        if migraine.isOngoing {
+            donateIntent(StartMigraineIntent())
+        }
 
         // Review prompt on the 5th-ever migraine
         Task { await maybeRequestReviewIfFifthEver(in: reviewScene) }
@@ -182,14 +208,11 @@ final class MigraineManager {
     /// clears the ongoing reference, and saves.
     /// Intended for use by full data-deletion flows.
     func deleteAllMigraines() {
-        // End any Live Activities and delete each migraine
         for m in migraines {
             MigraineActivityCenter.end(for: m.id)
             context.delete(m)
         }
-        // Clear ongoing reference since none will remain
         ongoingMigraine = nil
-        // Persist and refresh state
         saveAndReload()
     }
 
@@ -239,93 +262,98 @@ final class MigraineManager {
         saveAndReload()
     }
 
-    /// Creates the initial intensity sample when a migraine is created.
-    /// Call this after creating the migraine to auto-populate the first sample.
-    func createInitialIntensitySample(for migraine: Migraine) {
-        let sample = IntensitySample(
-            timestamp: migraine.startDate,
-            painLevel: migraine.painLevel,
-            stressLevel: migraine.stressLevel,
-            note: nil,
-            parentMigraine: migraine
+    /// Every migraine in the store, newest first, ignoring the active filter.
+    /// Used by export and other whole-dataset flows.
+    func allMigraines() throws -> [Migraine] {
+        try context.fetch(
+            FetchDescriptor<Migraine>(sortBy: [SortDescriptor(\.startDate, order: .reverse)])
         )
-        context.insert(sample)
-        if migraine.intensitySamples == nil {
-            migraine.intensitySamples = []
-        }
-        migraine.intensitySamples?.append(sample)
-        saveAndReload()
     }
 
-    // MARK: - Filtering helpers
-    private func applyFilter(to items: [Migraine]) -> [Migraine] {
-        items.filter { m in
-            if let r = filter.dateRange {
-                guard r.contains(m.startDate) else { return false }
-            }
-            if let minPain = filter.minPainLevel {
-                guard m.painLevel >= minPain else { return false }
-            }
-            if !filter.requiredTriggers.isEmpty {
-                let set = Set(m.triggers)
-                guard !filter.requiredTriggers.subtracting(set).isEmpty == false else { return false }
-            }
-            if !filter.searchText.isEmpty {
-                let t = filter.searchText.lowercased()
-                let noteHit = m.note?.lowercased().contains(t) == true
-                let insightHit = m.insight?.lowercased().contains(t) == true
-                // Also search custom triggers text
-                let customHit = m.customTriggers.contains { $0.lowercased().contains(t) }
-                guard noteHit || insightHit || customHit else { return false }
-            }
-            return true
-        }
+    // MARK: - Watch commands
+
+    /// Ends the ongoing migraine (e.g., from the watch). Returns whether one was ended.
+    @discardableResult
+    func endOngoingMigraine() -> Bool {
+        guard let migraine = ongoingMigraine else { return false }
+        update(migraine) { $0.endDate = Date() }
+        donateIntent(EndMigraineIntent())
+        return true
+    }
+
+    /// Starts a migraine programmatically (watch, Siri, Shortcuts, automations).
+    /// Returns the new ID, or nil when one is already ongoing.
+    @discardableResult
+    func startMigraine(painLevel: Int, stressLevel: Int, note: String? = nil) -> UUID? {
+        guard ongoingMigraine == nil else { return nil }
+        let migraine = Migraine(
+            startDate: Date(),
+            endDate: nil,
+            painLevel: painLevel,
+            stressLevel: stressLevel,
+            note: note,
+            triggers: [],
+            customTriggers: [],
+            foodsEaten: []
+        )
+        create(migraine: migraine, reviewScene: nil)
+        return migraine.id
+    }
+
+    /// Starts a migraine from a watch command, tagged with its source.
+    func startMigraineFromWatch(painLevel: Int, stressLevel: Int) -> UUID? {
+        startMigraine(painLevel: painLevel, stressLevel: stressLevel, note: String(localized: "Started from Apple Watch"))
     }
 
     // MARK: - Widgets sync
     private func updateWidgetSharedState() {
         // Persist the latest migraine start date for the widget, and trigger pushes when either
         // the latest start OR the ongoing state changes. Also handle the empty state by pushing a reset.
-        let defaults = UserDefaults(suiteName: AppGroup.id)
+        let previous = sharedDefaults?.readSharedStatus()
+            ?? SharedMigraineStatus(lastMigraineStart: nil, hasOngoingMigraine: false)
 
-        // Determine the newest migraine start (newest-first array)
-        let latestStart = self.migraines.first?.startDate
-        let hasOngoing = self.ongoingMigraine != nil
+        let current = SharedMigraineStatus(
+            lastMigraineStart: migraines.first?.startDate,
+            hasOngoingMigraine: ongoingMigraine != nil
+        )
 
-        // Read previously stored values
-        let previousLast = defaults?.double(forKey: "lastMigraineStart")
-        let prevHasOngoing = defaults?.bool(forKey: "hasOngoingMigraine") ?? false
-
-        if let latestStart {
-            let newValue = latestStart.timeIntervalSince1970
-            // Normalize any previously stored milliseconds just in case
-            let prevLastNormalized = (previousLast ?? 0) > 10_000_000_000 ? ((previousLast ?? 0) / 1000.0) : (previousLast ?? 0)
-            let changedLastStart = abs(newValue - prevLastNormalized) > 0.5
-            let changedHasOngoing = prevHasOngoing != hasOngoing
-
-            // Persist the current ongoing flag
-            defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
-
-            // Only write the last start if it actually changed
-            if changedLastStart {
-                defaults?.set(newValue, forKey: "lastMigraineStart")
-                defaults?.synchronize()
-                WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
-            } else {
-                defaults?.synchronize()
+        let changedLastStart: Bool = {
+            switch (previous.lastMigraineStart, current.lastMigraineStart) {
+            case (nil, nil): return false
+            case let (old?, new?): return abs(new.timeIntervalSince(old)) > 0.5
+            default: return true
             }
+        }()
+        let changedHasOngoing = previous.hasOngoingMigraine != current.hasOngoingMigraine
 
-            // Push to watch if either last start or ongoing status changed
-            if changedLastStart || changedHasOngoing {
-                ComplicationSync.shared.pushStatus(lastMigraineStart: newValue, hasOngoing: hasOngoing)
-            }
-        } else {
-            // No migraines: clear last start, persist ongoing flag, reload widget, and push reset to watch
-            defaults?.removeObject(forKey: "lastMigraineStart")
-            defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
-            defaults?.synchronize()
-            WidgetCenter.shared.reloadTimelines(ofKind: "DaysSinceLastMigraine")
-            ComplicationSync.shared.pushStatus(lastMigraineStart: 0, hasOngoing: hasOngoing)
+        sharedDefaults?.writeSharedStatus(current)
+
+        if changedLastStart {
+            widgetReloader.reloadTimelines(ofKind: "DaysSinceLastMigraine")
+        }
+        if changedLastStart || changedHasOngoing {
+            watchPusher?.pushStatus(current)
+        }
+    }
+
+    // MARK: - App Intents donation & Spotlight indexing
+
+    /// Donates an intent so Siri can suggest it from the user's behavior.
+    private func donateIntent(_ intent: some AppIntent) {
+        guard !MygraApp.isRunningTests else { return }
+        Task {
+            do { _ = try await intent.donate() }
+            catch { Log.migraine.error("Intent donation failed: \(error)") }
+        }
+    }
+
+    /// Re-indexes all migraines for Spotlight semantic search.
+    private func indexForSpotlight() {
+        guard !MygraApp.isRunningTests else { return }
+        let entities = migraines.map(MigraineEntity.init)
+        Task {
+            do { try await CSSearchableIndex.default().indexAppEntities(entities) }
+            catch { Log.migraine.error("Spotlight indexing failed: \(error)") }
         }
     }
 
@@ -334,7 +362,7 @@ final class MigraineManager {
         do {
             try context.save()
         } catch {
-            print(MigraineError.saveFailed(underlying: error).localizedDescription)
+            Log.migraine.error("Save failed: \(error)")
         }
         Task { await refresh() }
     }
@@ -355,8 +383,7 @@ final class MigraineManager {
             let count = try context.fetchCount(FetchDescriptor<Migraine>())
             guard count == 5 else { return }
         } catch {
-            // If counting fails, do not attempt to prompt
-            print(MigraineError.fetchFailed(underlying: error).localizedDescription)
+            Log.migraine.error("Review-count fetch failed: \(error)")
             return
         }
 
@@ -364,16 +391,7 @@ final class MigraineManager {
         defaults.set(true, forKey: Self.reviewPromptFifthKey)
 
         // Request review using the provided scene when available.
-        if let scene {
-            if #available(iOS 18.0, *) {
-                AppStore.requestReview(in: scene)
-            } else {
-                SKStoreReviewController.requestReview(in: scene)
-            }
-        } else {
-            // No scene available; the scene-less API is deprecated. Skip requesting a review.
-            return
-        }
+        guard let scene else { return }
+        reviewRequester.requestReview(in: scene)
     }
 }
-

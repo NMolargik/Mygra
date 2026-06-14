@@ -8,7 +8,7 @@
 import Foundation
 
 /// Centralized unit conversion constants used throughout the app.
-enum UnitConversion {
+nonisolated enum UnitConversion {
     /// Liters to US fluid ounces (1 L = 33.814 fl oz)
     static let litersToFluidOunces: Double = 33.814
 

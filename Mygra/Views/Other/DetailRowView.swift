@@ -8,7 +8,7 @@ struct DetailRowView<Trailing: View>: View {
     let title: String
     let subtitle: String?
     let tint: Color
-    @ViewBuilder let trailing: () -> Trailing
+    @ContentBuilder let trailing: () -> Trailing
 
     init(
         style: Style,
@@ -16,7 +16,7 @@ struct DetailRowView<Trailing: View>: View {
         title: String,
         subtitle: String? = nil,
         tint: Color,
-        @ViewBuilder trailing: @escaping () -> Trailing = { EmptyView() }
+        @ContentBuilder trailing: @escaping () -> Trailing
     ) {
         self.style = style
         self.systemImage = systemImage
@@ -33,6 +33,25 @@ struct DetailRowView<Trailing: View>: View {
         case .insight:
             insightBody
         }
+    }
+}
+
+extension DetailRowView where Trailing == EmptyView {
+    init(
+        style: Style,
+        systemImage: String,
+        title: String,
+        subtitle: String? = nil,
+        tint: Color
+    ) {
+        self.init(
+            style: style,
+            systemImage: systemImage,
+            title: title,
+            subtitle: subtitle,
+            tint: tint,
+            trailing: { EmptyView() }
+        )
     }
 }
 
@@ -98,7 +117,7 @@ private extension DetailRowView {
 }
 
 private extension DetailRowView {
-    @ViewBuilder
+    @ContentBuilder
     func leadingCircle(size: CGFloat, iconSize: CGFloat, font: Font, backgroundOpacity: Double, hierarchical: Bool) -> some View {
         ZStack {
             Circle()

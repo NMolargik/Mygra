@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-enum Severity: String, Codable, CaseIterable, Sendable {
+nonisolated enum Severity: String, Codable, CaseIterable, Sendable {
     case low, medium, high
     
     public var color: Color {

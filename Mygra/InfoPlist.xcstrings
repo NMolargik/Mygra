@@ -1,0 +1,204 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "CFBundleDisplayName" : {
+      "comment" : "Bundle display name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mygra"
+          }
+        }
+      }
+    },
+    "CFBundleGetInfoString" : {
+      "comment" : "Get Info string",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : ""
+          }
+        }
+      }
+    },
+    "CFBundleName" : {
+      "comment" : "Bundle name",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Mygra"
+          }
+        }
+      }
+    },
+    "NSHealthShareUsageDescription" : {
+      "comment" : "Permission prompt shown when requesting read access to HealthKit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra reads your health data to track potential migraine triggers like hydration and sleep."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra lee tus datos de salud para detectar posibles desencadenantes de migraña, como la hidratación y el sueño."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra lit vos données de santé pour suivre les déclencheurs potentiels de migraine comme l'hydratation et le sommeil."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygraは、水分補給や睡眠など、片頭痛の潜在的な誘因を追跡するためにヘルスデータを読み取ります。"
+          }
+        }
+      }
+    },
+    "NSHealthUpdateUsageDescription" : {
+      "comment" : "Permission prompt shown when requesting write access to HealthKit.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra saves your water intake, calorie consumption, caffeine, and sleep data to HealthKit for better tracking"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra guarda en HealthKit tus datos de consumo de agua, calorías, cafeína y sueño para un mejor seguimiento."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra enregistre dans HealthKit vos données de consommation d'eau, de calories, de caféine et de sommeil pour un meilleur suivi."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygraは、より良い記録のために、水分摂取量、カロリー、カフェイン、睡眠のデータをHealthKitに保存します。"
+          }
+        }
+      }
+    },
+    "NSHumanReadableCopyright" : {
+      "comment" : "Copyright (human-readable)",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : ""
+          }
+        }
+      }
+    },
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "comment" : "Permission prompt shown when requesting location access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location is used to proactively warn of potential environmental triggers."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ubicación se usa para avisarte de forma proactiva sobre posibles desencadenantes ambientales."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre position est utilisée pour vous avertir de façon proactive des déclencheurs environnementaux potentiels."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在地は、環境的な誘因を事前に警告するために使用されます。"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Permission prompt shown when requesting location access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your location is used to proactively warn of potential environmental triggers."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ubicación se usa para avisarte de forma proactiva sobre posibles desencadenantes ambientales."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre position est utilisée pour vous avertir de façon proactive des déclencheurs environnementaux potentiels."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在地は、環境的な誘因を事前に警告するために使用されます。"
+          }
+        }
+      }
+    },
+    "NSWeatherUsageDescription" : {
+      "comment" : "Permission prompt shown when requesting weather access.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra uses weather data to provide personalized migraine insights."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra usa los datos meteorológicos para ofrecer información personalizada sobre tus migrañas."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra utilise les données météo pour fournir des renseignements personnalisés sur vos migraines."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygraは天気データを使用して、片頭痛に関するパーソナライズされた分析を提供します。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

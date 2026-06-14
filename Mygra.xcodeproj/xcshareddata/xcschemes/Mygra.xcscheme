@@ -35,20 +35,9 @@
             parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EB290ADD2E244A210061B1D0"
+               BlueprintIdentifier = "AA00DEC0DE0000000000A001"
                BuildableName = "MygraTests.xctest"
                BlueprintName = "MygraTests"
-               ReferencedContainer = "container:Mygra.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EB290AE72E244A210061B1D0"
-               BuildableName = "MygraUITests.xctest"
-               BlueprintName = "MygraUITests"
                ReferencedContainer = "container:Mygra.xcodeproj">
             </BuildableReference>
          </TestableReference>

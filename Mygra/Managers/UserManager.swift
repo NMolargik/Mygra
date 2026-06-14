@@ -8,27 +8,31 @@
 import Foundation
 import SwiftData
 import Observation
+import os
 
 @MainActor
 @Observable
-class UserManager {
+final class UserManager {
 
     // MARK: - Dependencies
+    // Retain the container: a ModelContext does not retain it.
+    @ObservationIgnored
+    private let container: ModelContainer
     @ObservationIgnored
     let context: ModelContext
 
     // MARK: - Source of truth
     private(set) var currentUser: User?
-    
+
     var isRefreshing: Bool = false
     var isRestoringFromCloud: Bool = false
 
     // MARK: - Init
-    init(context: ModelContext) {
-        self.context = context
+    init(container: ModelContainer) {
+        self.container = container
+        self.context = container.mainContext
         Task {
             await refresh()
-            print("User at start: \(currentUser.debugDescription)")
         }
     }
 
@@ -97,7 +101,6 @@ class UserManager {
             context.insert(newUser)
             try context.save()
             Task { await refresh() }
-            print("User Saved!")
         } catch {
             handle(UserError.saveFailed(underlying: error))
         }
@@ -136,7 +139,7 @@ class UserManager {
     // MARK: - Error Handling
     private func handle(_ error: UserError) {
         // Centralized place to log or send to analytics; expand as needed
-        print("UserManager error: \(error.description)")
+        Log.user.error("\(error.description)")
     }
 }
 

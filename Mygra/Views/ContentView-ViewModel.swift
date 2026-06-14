@@ -9,17 +9,9 @@ import SwiftUI
 
 extension ContentView {
     @Observable
-    class ViewModel {
+    final class ViewModel {
         // MARK: - App State
         var appStage: AppStage = .splash
-        
-        // MARK: - Dependencies
-        var cloudSyncManager: CloudSyncManager?
-        
-        // MARK: - Configuration
-        func configure(cloudSyncManager: CloudSyncManager) {
-            self.cloudSyncManager = cloudSyncManager
-        }
 
         // MARK: - Transitions
         var leadingTransition: AnyTransition {
@@ -29,10 +21,10 @@ extension ContentView {
             )
         }
 
-        func prepareApp(isOnboardingComplete: Bool) async {
-            await MainActor.run {
-                appStage = isOnboardingComplete ? .syncing : .splash
-            }
+        func prepareApp(isOnboardingComplete: Bool) {
+            // Returning users go straight to the app; iCloud sync runs in the
+            // background and surfaces through a toast rather than a blocking screen.
+            appStage = isOnboardingComplete ? .main : .splash
         }
     }
 }

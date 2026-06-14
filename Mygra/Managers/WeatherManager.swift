@@ -10,6 +10,7 @@ import CoreLocation
 import WeatherKit
 import Observation
 import MapKit
+import os
 
 @MainActor
 @Observable
@@ -128,12 +129,12 @@ final class WeatherManager {
             let next = lastAttempt.addingTimeInterval(refreshCooldownInterval)
             let msg = "You can refresh weather again at \(Self.shortTimeFormatter.string(from: next))."
             setTransientError(CooldownError(message: msg), duration: 3.0)
-            print("Too soon to refresh weather. Next eligible: \(next)")
+            Log.weather.info("Too soon to refresh weather. Next eligible: \(next)")
             return
         }
 
         guard let provider = locationManager else {
-            print("No location provider for WeatherManager")
+            Log.weather.error("No location provider for WeatherManager")
             error = WeatherError.locationProviderMissing
             return
         }
@@ -146,14 +147,14 @@ final class WeatherManager {
                 return
             }
             try await fetch(for: loc)
-            print("Got latest weather")
+            Log.weather.debug("Refreshed weather")
         } catch {
             if error is WeatherError {
                 self.error = error
             } else {
                 self.error = WeatherError.weatherServiceFailed
             }
-            print("WeatherManager: Failed to refresh: \(error)")
+            Log.weather.error("Failed to refresh: \(error)")
         }
     }
 
@@ -198,7 +199,8 @@ final class WeatherManager {
     private func setTransientError(_ error: Error, duration: TimeInterval) {
         self.error = error
         let currentDescription = (error as NSError).localizedDescription
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration) { [weak self] in
+        Task { [weak self] in
+            try? await Task.sleep(for: .seconds(duration))
             guard let self else { return }
             // Only clear if the error hasn't changed since
             let existingDescription = (self.error as NSError?)?.localizedDescription

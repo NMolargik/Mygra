@@ -9,20 +9,16 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(WeatherManager.self) private var weatherManager: WeatherManager
-    @Environment(NotificationManager.self) private var notificationManager: NotificationManager
+    @Environment(CloudSyncManager.self) private var cloudSyncManager
+    @Environment(MigraineManager.self) private var migraineManager
+    @Environment(ToastManager.self) private var toastManager
     @AppStorage(AppStorageKeys.isOnboardingComplete) private var isOnboardingComplete: Bool = false
 
     @Binding var pendingDeepLink: DeepLink?
 
     @State private var viewModel: ContentView.ViewModel = ViewModel()
-    @State private var migraineManager: MigraineManager?
-    @State private var insightManager: InsightManager?
-    @State private var healthManager: HealthManager = HealthManager()
-    @State private var userManager: UserManager?
-    @State private var tagManager: TagManager?
-    @State private var cloudSyncManager = CloudSyncManager()
+    @State private var didShowSyncToast = false
+    @State private var wasReturningUser = false
 
     var body: some View {
         ZStack {
@@ -38,107 +34,49 @@ struct ContentView: View {
                 .id("splash")
                 .transition(viewModel.leadingTransition)
                 .zIndex(1)
-                
+
             case .onboarding:
                 OnboardingView(onFinished: {
                     isOnboardingComplete = true
                     withAnimation(.easeInOut(duration: 0.3)) {
-                        viewModel.appStage = .syncing
+                        viewModel.appStage = .main
                     }
                 })
                 .id("onboarding")
-                .environment(healthManager)
-                .environment(weatherManager)
-                .environment(userManager)
                 .transition(viewModel.leadingTransition)
                 .zIndex(1)
-                
-            case .syncing:
-                SyncingView(
-                    onSyncComplete: { foundData in
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            viewModel.appStage = .main
-                        }
-                    }
-                )
-                .environment(userManager)
-                .environment(migraineManager)
-                .id("syncing")
-                .transition(viewModel.leadingTransition)
-                .zIndex(1)
-                
+
             case .main:
                 MainView(
                     pendingDeepLink: $pendingDeepLink
                 )
-                .environment(healthManager)
-                .environment(userManager)
-                .environment(migraineManager)
-                .environment(insightManager)
-                .environment(tagManager)
-                .environment(cloudSyncManager)
                 .id("main")
                 .transition(viewModel.leadingTransition)
                 .zIndex(0)
+                .onAppear { handleMainEntry() }
             }
         }
         .task {
-            // Ensure managers exist in the View
-            await MainActor.run {
-                // Ensure weatherManager has a location provider
-                if weatherManager.locationManager == nil {
-                    weatherManager.setLocationProvider(LocationManager())
-                }
-
-                if self.migraineManager == nil {
-                    self.migraineManager = MigraineManager(context: modelContext)
-                }
-
-                if self.userManager == nil {
-                    self.userManager = UserManager(context: modelContext)
-                }
-                
-                if self.tagManager == nil {
-                    self.tagManager = TagManager(context: modelContext)
-                }
-
-                if self.insightManager == nil {
-                    guard let userManager, let migraineManager else {
-                        // Defer InsightManager initialization until dependencies are ready
-                        return
-                    }
-                    self.insightManager = InsightManager(
-                        userManager: userManager,
-                        migraineManager: migraineManager,
-                        weatherManager: weatherManager,
-                        healthManager: healthManager
-                    )
-                }
-
-                // Configure cloud sync manager with model context
-                self.cloudSyncManager.configure(with: modelContext)
-            }
-            await viewModel.prepareApp(isOnboardingComplete: isOnboardingComplete)
+            wasReturningUser = isOnboardingComplete
+            viewModel.prepareApp(isOnboardingComplete: isOnboardingComplete)
         }
-        .onAppear {
-            viewModel.configure(cloudSyncManager: cloudSyncManager)
-        }
+    }
+
+    /// On first entry to the main app for a returning user, surface a
+    /// lightweight toast so they know iCloud sync is running in the background,
+    /// and nudge the local cache in case data arrived before managers were ready.
+    private func handleMainEntry() {
+        guard !didShowSyncToast, wasReturningUser, cloudSyncManager.isCloudAvailable else { return }
+        didShowSyncToast = true
+
+        toastManager.show(message: String(localized: "Syncing with iCloud…"), style: .info, icon: "icloud.fill")
+
+        Task { await migraineManager.refresh() }
     }
 }
 
 #Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(for: User.self, Migraine.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-    let previewWeatherManager = WeatherManager()
-    let previewNotificationManager = NotificationManager()
-
-    return ContentView(pendingDeepLink: .constant(nil))
-        .modelContainer(container)
-        .environment(previewWeatherManager)
-        .environment(previewNotificationManager)
+    let env = PreviewEnvironment()
+    ContentView(pendingDeepLink: .constant(nil))
+        .previewEnvironment(env)
 }
-

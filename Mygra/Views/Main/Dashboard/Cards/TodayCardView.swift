@@ -85,12 +85,9 @@ struct TodayCardView: View {
                                     .rotationEffect(.degrees(isQuickAddExpanded ? 180 : 0))
                                     .animation(.easeInOut(duration: 0.2), value: isQuickAddExpanded)
                             }
-                            .foregroundStyle(.white)
                         }
-                        .padding(8)
-                        .padding(.horizontal, 5)
-                        .adaptiveGlass(tint: .mygraPurple)
-                        .hoverEffect()
+                        .glassActionButton(prominent: false)
+                        .controlSize(.small)
                         .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
                         .accessibilityHint("Opens intake editor to log water, caffeine, food, or sleep")
                     }
@@ -155,7 +152,7 @@ struct TodayCardView: View {
                 }
             }
             .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .cardSurface()
             .clipped()
             .accessibilityElement(children: .contain)
             .alert("About This Data", isPresented: $showHealthSourceInfo) {
@@ -177,7 +174,7 @@ struct TodayCardView: View {
                     .foregroundStyle(.secondary)
             }
             .padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .cardSurface()
         }
     }
 

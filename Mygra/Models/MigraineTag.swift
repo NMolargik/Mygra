@@ -29,6 +29,10 @@ final class MigraineTag {
     /// CloudKit doesn't support Color directly.
     var colorHex: String = "#8B5CF6"  // Default purple
 
+    /// User-defined ordering for the tag list. Lower comes first.
+    /// Additive, defaulted property so existing CloudKit records migrate cleanly.
+    var sortIndex: Int = 0
+
     // MARK: - Relationships
     /// The migraines associated with this tag.
     /// Many-to-many relationship with Migraine.
@@ -39,12 +43,14 @@ final class MigraineTag {
         id: UUID = UUID(),
         createdAt: Date = Date(),
         name: String = "",
-        colorHex: String = "#8B5CF6"
+        colorHex: String = "#8B5CF6",
+        sortIndex: Int = 0
     ) {
         self.id = id
         self.createdAt = createdAt
         self.name = name
         self.colorHex = colorHex
+        self.sortIndex = sortIndex
     }
 
     // MARK: - Computed Properties
@@ -62,7 +68,7 @@ final class MigraineTag {
 
 // MARK: - Color Extensions for Hex Conversion
 
-extension Color {
+nonisolated extension Color {
     /// Initialize a Color from a hex string (e.g., "#FF5733" or "FF5733").
     init?(hex: String) {
         var hexSanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)

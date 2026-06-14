@@ -127,7 +127,7 @@ struct QuickBitsSectionView: View {
             }
         }
         .padding(14)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .cardSurface()
     }
 }
 

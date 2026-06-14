@@ -13,6 +13,7 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(UserManager.self) private var userManager: UserManager
     @Environment(TagManager.self) private var tagManager: TagManager
+    @Environment(MigraineManager.self) private var migraineManager: MigraineManager
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
@@ -334,8 +335,9 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
     private func startNetworkMonitoring() {
         let monitor = NWPathMonitor()
         monitor.pathUpdateHandler = { path in
-            DispatchQueue.main.async {
-                self.isOnline = (path.status == .satisfied)
+            let satisfied = path.status == .satisfied
+            Task { @MainActor in
+                self.isOnline = satisfied
             }
         }
         let queue = DispatchQueue(label: "NetworkMonitor")
@@ -363,12 +365,8 @@ Mygra may use on‑device intelligence to generate wellness insights. These insi
         exportError = nil
 
         do {
-            // Fetch all migraines (most recent first)
-            var desc = FetchDescriptor<Migraine>(
-                sortBy: [SortDescriptor(\.startDate, order: .reverse)]
-            )
-            desc.fetchLimit = nil
-            let migraines = try modelContext.fetch(desc)
+            // Fetch all migraines (most recent first), unfiltered
+            let migraines = try migraineManager.allMigraines()
 
             // Compose PDF data
             let user = userManager.currentUser
@@ -448,25 +446,8 @@ private struct DashboardStatToggle: View {
 }
 
 #Preview {
-    let container: ModelContainer
-    do {
-        // Mirror the app schema but use an in-memory store for previews
-        container = try ModelContainer(
-            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-            MigraineTag.self, IntensitySample.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewTagManager = TagManager(context: container.mainContext)
-
-    return SettingsView(
+    SettingsView(
             onMigrainesDeletionTriggered: {}
         )
-        .modelContainer(container)
-        .environment(previewUserManager)
-        .environment(previewTagManager)
+        .previewEnvironment()
 }

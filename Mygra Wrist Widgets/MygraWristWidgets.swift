@@ -8,11 +8,6 @@
 import WidgetKit
 import SwiftUI
 
-/// Shared App Group identifier for cross-target data sharing
-private enum AppGroup {
-    static let id = "group.com.molargiksoftware.Mygra"
-}
-
 struct Mygra_Wrist_Widgets: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "DaysSinceLastMigraineWatch", provider: WatchDaysProvider()) { entry in
@@ -51,20 +46,12 @@ struct WatchDaysProvider: TimelineProvider {
     }
 
     private func makeEntry() -> WatchDaysSinceEntry {
-        let defaults = UserDefaults(suiteName: AppGroup.id)
-        let ts = defaults?.double(forKey: "lastMigraineStart") ?? 0
-        let lastStart = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
-        return .init(date: .now, daysSince: daysSince(lastStart))
-    }
-
-    private func daysSince(_ date: Date?) -> Int {
-        guard let d = date else { return 0 }
-        let cal = Calendar.current
-        return max(0, cal.dateComponents([.day], from: cal.startOfDay(for: d), to: cal.startOfDay(for: .now)).day ?? 0)
+        let status = SharedMigraineStatus(defaults: UserDefaults(suiteName: AppGroup.id))
+        return .init(date: .now, daysSince: MigraineDates.daysSince(status.lastMigraineStart))
     }
 
     private func nextMidnight() -> Date {
-        Calendar.current.nextDate(after: .now, matching: DateComponents(hour: 0, minute: 0, second: 5), matchingPolicy: .nextTimePreservingSmallerComponents) ?? .now.addingTimeInterval(3600)
+        MigraineDates.nextMidnight()
     }
 }
 

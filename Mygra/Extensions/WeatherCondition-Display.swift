@@ -80,7 +80,7 @@ extension WeatherCondition {
     }
 
     /// Ready-to-use symbol view with palette colors. Apply font/effects at call site.
-    @ViewBuilder
+    @ContentBuilder
     func mygraSymbolView() -> some View {
         let colors = mygraSymbolColors
         Image(systemName: mygraSymbolName)

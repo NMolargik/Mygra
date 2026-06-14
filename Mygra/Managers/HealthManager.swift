@@ -7,6 +7,7 @@
 
 import Foundation
 import HealthKit
+import os
 
 protocol HealthStore: Sendable {
     static func isHealthDataAvailable() -> Bool
@@ -218,7 +219,7 @@ final class HealthManager {
             let err = HealthError.healthDataUnavailable
             self.lastError = err
             self.isAuthorized = false
-            print("[Health] Health data unavailable on this device: \(err)")
+            Log.health.error("Health data unavailable on this device: \(err)")
             return
         }
 
@@ -240,7 +241,7 @@ final class HealthManager {
         } catch {
             self.isAuthorized = false
             self.lastError = HealthError.authorizationFailed(underlying: error)
-            print("[Health] requestAuthorization failed: \(error)")
+            Log.health.error("requestAuthorization failed: \(error)")
         }
     }
 
@@ -249,13 +250,13 @@ final class HealthManager {
         do {
             let readReqStatus = try await store.statusForAuthorizationRequest(toShare: [], read: readTypes)
             switch readReqStatus {
-            case .unknown: print("[Health] Read request status: UNKNOWN")
-            case .unnecessary: print("[Health] Read request status: UNNECESSARY")
-            case .shouldRequest: print("[Health] Read request status: SHOULD REQUEST")
-            @unknown default: print("[Health] Read request status: UNKNOWN(default)")
+            case .unknown: Log.health.info("Read request status: UNKNOWN")
+            case .unnecessary: Log.health.info("Read request status: UNNECESSARY")
+            case .shouldRequest: Log.health.info("Read request status: SHOULD REQUEST")
+            @unknown default: Log.health.info("Read request status: UNKNOWN(default)")
             }
         } catch {
-            print("[Health] Failed to get overall read request status: \(error)")
+            Log.health.error("Failed to get overall read request status: \(error)")
             self.lastError = HealthError.readRequestStatusFailed(underlying: error)
         }
 
@@ -263,13 +264,13 @@ final class HealthManager {
             do {
                 let shareReqStatus = try await store.statusForAuthorizationRequest(toShare: shareTypes, read: [])
                 switch shareReqStatus {
-                case .unknown: print("[Health] Share request status: UNKNOWN")
-                case .unnecessary: print("[Health] Share request status: UNNECESSARY")
-                case .shouldRequest: print("[Health] Share request status: SHOULD REQUEST")
-                @unknown default: print("[Health] Share request status: UNKNOWN(default)")
+                case .unknown: Log.health.info("Share request status: UNKNOWN")
+                case .unnecessary: Log.health.info("Share request status: UNNECESSARY")
+                case .shouldRequest: Log.health.info("Share request status: SHOULD REQUEST")
+                @unknown default: Log.health.info("Share request status: UNKNOWN(default)")
                 }
             } catch {
-                print("[Health] Failed to get share request status: \(error)")
+                Log.health.error("Failed to get share request status: \(error)")
                 self.lastError = HealthError.shareRequestStatusFailed(underlying: error)
             }
         }
@@ -281,7 +282,7 @@ final class HealthManager {
                 let status = store.authorizationStatus(for: sampleType)
                 if status == .notDetermined {
                     readOK = false
-                    print("[Health] Read authorization NOT DETERMINED for \(obj.identifier)")
+                    Log.health.info("Read authorization NOT DETERMINED for \(obj.identifier)")
                 }
             }
         }
@@ -291,21 +292,21 @@ final class HealthManager {
             let status = store.authorizationStatus(for: sample)
             if status != .sharingAuthorized {
                 shareOK = false
-                print("[Health] Share authorization NOT AUTHORIZED for \(sample.identifier) (status=\(status.rawValue))")
+                Log.health.info("Share authorization NOT AUTHORIZED for \(sample.identifier) (status=\(status.rawValue))")
             }
         }
 
         // Use readOK to set the overall flag (and log shareOK to avoid unused variable warnings).
         // If you want to require share authorization too, replace `readOK` with `(readOK && shareOK)`.
         self.isAuthorized = readOK
-        print("[Health] Overall authorization flag (based on read): \(self.isAuthorized). Share authorized: \(shareOK)")
+        Log.health.info("Overall authorization flag (based on read): \(self.isAuthorized). Share authorized: \(shareOK)")
     }
     
     private func ensureAuthorized() async throws {
         if !isAuthorized {
             await requestAuthorization()
             if !isAuthorized {
-                print("HEALTH NOT AUTHORIZED (isAuthorized=false). lastError=\(lastError?.localizedDescription ?? "nil")")
+                Log.health.error("Health not authorized (isAuthorized=false). lastError=\(self.lastError?.localizedDescription ?? "nil")")
                 throw HealthError.authorizationDenied
             }
         }
@@ -377,7 +378,7 @@ final class HealthManager {
             self.latestData = snapshot
             self.lastError = nil
         } catch {
-            print("Refresh of Health Data failed! error=\(error)")
+            Log.health.error("Refresh of Health Data failed: \(error)")
             self.latestData = nil
             self.lastError = HealthError.snapshotFailed(underlying: error)
         }
@@ -385,7 +386,7 @@ final class HealthManager {
 
     /// Convenience: refresh the latest snapshot for "today" (midnight to now) in the current calendar/time zone.
     func refreshLatestForToday(calendar: Calendar = .current) async {
-        print("Fetching today's health snapshot")
+        Log.health.debug("Fetching today's health snapshot")
         let now = Date()
         let startOfDay = calendar.startOfDay(for: now)
         await refreshLatest(from: startOfDay, to: now)
@@ -478,7 +479,7 @@ final class HealthManager {
         do {
             try await saveHeadache(start: migraine.startDate, end: end, severity: migraine.severity)
         } catch {
-            print("[Health] Failed to save headache for migraine \(migraine.id): \(error)")
+            Log.health.error("Failed to save headache for migraine \(migraine.id): \(error)")
             self.lastError = HealthError.saveFailed(kind: "headache", underlying: error)
         }
     }

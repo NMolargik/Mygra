@@ -7,6 +7,7 @@
 
 import SwiftUI
 import WeatherKit
+import os
 
 extension MigraineEntryView {
     @MainActor
@@ -428,7 +429,7 @@ extension MigraineEntryView {
                     addSleepHours = 0
                 } catch {
                     // If saving staged intake fails, proceed without blocking migraine creation
-                    print("Failed to save staged intake to HealthKit during migraine submit: \(error)")
+                    Log.app.error("Failed to save staged intake to HealthKit during migraine submit: \(error)")
                 }
             }
 
@@ -440,7 +441,7 @@ extension MigraineEntryView {
                 healthModel = snapshot
             } catch {
                 // proceed without health
-                print("Failed to fetch Health snapshot for migraine window: \(error)")
+                Log.app.error("Failed to fetch Health snapshot for migraine window: \(error)")
             }
 
             // Ensure we have a recent weather reading; then build a WeatherData using the migraine's start date

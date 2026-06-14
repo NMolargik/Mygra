@@ -13,8 +13,8 @@ import CoreLocation
 
 struct WeatherCardView: View {
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
-    let temperatureString: String?
-    let pressureString: String?
+    let temperature: Measurement<UnitTemperature>?
+    let pressure: Measurement<UnitPressure>?
     let humidityPercentString: String?
     let condition: WeatherCondition?
     let lastUpdated: Date?
@@ -29,8 +29,8 @@ struct WeatherCardView: View {
 
     var body: some View {
         Group {
-            if let temp = temperatureString,
-               let press = pressureString,
+            if let temp = temperature,
+               let press = pressure,
                let humid = humidityPercentString,
                let condition {
                 HStack(spacing: 15) {
@@ -67,12 +67,12 @@ struct WeatherCardView: View {
                         
                         // Temperature with metrics to the right
                         HStack(alignment: .firstTextBaseline, spacing: 12) {
-                            Text(displayTemperature(temp))
+                            Text(formattedTemperature(temp))
                                 .font(.system(size: 34, weight: .semibold, design: .rounded))
                                 .monospacedDigit()
                             
                             HStack(spacing: 8) {
-                                Label(displayPressure(press), systemImage: "gauge.with.dots.needle.bottom.50percent")
+                                Label(formattedPressure(press), systemImage: "gauge.with.dots.needle.bottom.50percent")
                                 Divider()
                                     .frame(height: 12)
                                 Label(humid, systemImage: "humidity")
@@ -94,8 +94,7 @@ struct WeatherCardView: View {
                         .font(.caption)
                     }
                 }
-                .padding(14)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .cardStyle()
                 // Detect condition changes and trigger a single bounce
                 .onChange(of: condition) {
                     switch (previousCondition, condition as WeatherCondition?) {
@@ -111,7 +110,8 @@ struct WeatherCardView: View {
                 .onChange(of: userFacingErrorMessage(from: error)) { _, newMessage in
                     guard newMessage != nil else { return }
                     showErrorOverlay = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    Task {
+                        try? await Task.sleep(for: .seconds(2))
                         withAnimation { showErrorOverlay = false }
                     }
                 }
@@ -123,9 +123,10 @@ struct WeatherCardView: View {
                 }
             } else {
                 HStack(spacing: 15) {
-                    Image(systemName: "location")
+                    Image(systemName: "location.slash")
                         .font(.title)
-                        .foregroundStyle(.blue)
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(.secondary)
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("Weather Unavailable")
@@ -154,11 +155,7 @@ struct WeatherCardView: View {
                                 Button(action: openAppSettings) {
                                     Label("Settings", systemImage: "gearshape")
                                 }
-                                .padding(8)
-                                .padding(.horizontal, 4)
-                                .foregroundStyle(.white)
-                                .adaptiveGlass(tint: .mygraPurple)
-                                .hoverEffect()
+                                .glassActionButton(prominent: false)
                                 .accessibilityLabel("Open location settings")
                             }
 
@@ -166,16 +163,12 @@ struct WeatherCardView: View {
                                 Label("Refresh", systemImage: "arrow.clockwise")
                                     .labelStyle(.iconOnly)
                             }
-                            .padding(8)
-                            .foregroundStyle(.white)
-                            .adaptiveGlass(tint: .mygraPurple)
-                            .hoverEffect()
+                            .glassActionButton(prominent: false)
                             .accessibilityLabel("Refresh weather data")
                         }
                     }
                 }
-                .padding(14)
-                .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .cardStyle()
             }
         }
         .accessibilityElement(children: .combine)
@@ -256,50 +249,21 @@ struct WeatherCardView: View {
 
 
     // MARK: - Unit display helpers
-    private func displayTemperature(_ raw: String) -> String {
-        guard useMetricUnits else { return raw }
-        // Try to parse a numeric value; assume Fahrenheit if no unit specified and value looks plausible
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Extract first number (including decimal)
-        let numberString = trimmed.replacingOccurrences(of: ",(?=\\d)", with: "", options: .regularExpression)
-        let regex = try! NSRegularExpression(pattern: "-?\\d+(?:\\.\\d+)?")
-        let ns = numberString as NSString
-        guard let match = regex.firstMatch(in: numberString, range: NSRange(location: 0, length: ns.length)) else { return raw }
-        let val = Double(ns.substring(with: match.range)) ?? 0
-        let isCelsius = trimmed.lowercased().contains("c")
-        let isFahrenheit = trimmed.lowercased().contains("f") || !isCelsius // default to F when ambiguous
-        if isFahrenheit {
-            let c = (val - 32) * 5.0 / 9.0
-            let rounded = Int((c).rounded())
-            return "\(rounded)°"
-        } else {
-            // Already Celsius, return as-is (remove explicit unit if present to match design)
-            return trimmed.replacingOccurrences(of: "°c", with: "°", options: .caseInsensitive)
-        }
+
+    /// Formats the temperature for the user's unit preference, e.g. "78°".
+    private func formattedTemperature(_ measurement: Measurement<UnitTemperature>) -> String {
+        let converted = measurement.converted(to: useMetricUnits ? .celsius : .fahrenheit)
+        return "\(Int(converted.value.rounded()))°"
     }
 
-    private func displayPressure(_ raw: String) -> String {
-        guard useMetricUnits else { return raw }
-        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Extract number
-        let regex = try! NSRegularExpression(pattern: "-?\\d+(?:\\.\\d+)?")
-        let ns = trimmed as NSString
-        guard let match = regex.firstMatch(in: trimmed, range: NSRange(location: 0, length: ns.length)) else { return raw }
-        let val = Double(ns.substring(with: match.range)) ?? 0
-        if trimmed.lowercased().contains("inhg") {
-            // inHg -> hPa
-            let hpa = val * 33.8638866667
-            let out = Int(hpa.rounded())
-            return "\(out) hPa"
-        } else if trimmed.lowercased().contains("mb") {
-            // millibar ~ hPa
-            let out = Int(val.rounded())
-            return "\(out) hPa"
-        } else if trimmed.lowercased().contains("hpa") {
-            return trimmed // already metric
+    /// Formats the pressure for the user's unit preference, e.g. "1013 hPa" or "29.92 inHg".
+    private func formattedPressure(_ measurement: Measurement<UnitPressure>) -> String {
+        if useMetricUnits {
+            let hpa = measurement.converted(to: .hectopascals).value
+            return "\(Int(hpa.rounded())) hPa"
         } else {
-            // Unknown unit; keep original
-            return raw
+            let inhg = measurement.converted(to: .inchesOfMercury).value
+            return String(format: "%.2f inHg", inhg)
         }
     }
 }
@@ -308,8 +272,8 @@ struct WeatherCardView: View {
 
 #Preview("Sunny in Indy") {
     WeatherCardView(
-        temperatureString: "78°",
-        pressureString: "29.9 inHg",
+        temperature: Measurement(value: 78, unit: .fahrenheit),
+        pressure: Measurement(value: 29.9, unit: .inchesOfMercury),
         humidityPercentString: "45% RH",
         condition: .clear,
         lastUpdated: Date(),
@@ -323,8 +287,8 @@ struct WeatherCardView: View {
 
 #Preview("Fetching…") {
     WeatherCardView(
-        temperatureString: "78°",
-        pressureString: "29.9 inHg",
+        temperature: Measurement(value: 78, unit: .fahrenheit),
+        pressure: Measurement(value: 29.9, unit: .inchesOfMercury),
         humidityPercentString: "45% RH",
         condition: .partlyCloudy,
         lastUpdated: Date(),
@@ -340,8 +304,8 @@ struct WeatherCardView: View {
     let sampleError = NSError(domain: NSURLErrorDomain, code: -1009, userInfo: [NSLocalizedDescriptionKey: "The Internet connection appears to be offline."]) as Error
 
     return WeatherCardView(
-        temperatureString: nil,
-        pressureString: nil,
+        temperature: nil,
+        pressure: nil,
         humidityPercentString: nil,
         condition: nil,
         lastUpdated: nil,

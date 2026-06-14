@@ -7,6 +7,9 @@
 
 import Foundation
 import ActivityKit
+import os
+
+private let logger = Logger(subsystem: "com.molargiksoftware.Mygra", category: "liveActivity")
 
 enum MigraineActivityCenter {
 
@@ -34,36 +37,30 @@ enum MigraineActivityCenter {
                 pushType: nil
             )
         } catch {
-            print("Failed to start Migraine Live Activity: \(error)")
+            logger.error("Failed to start Migraine Live Activity: \(error)")
         }
     }
 
     // Ensure a Live Activity exists for a given migraine ID; start one if missing (e.g., after app relaunch).
     static func ensureStarted(for migraineID: UUID, startDate: Date, severity: Int, stressLevel: Int, notes: String) {
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
-        let activities = Activity<MigraineActivityAttributes>.activities
-        let matching = activities.filter { $0.content.state.migraineID == migraineID }
+        let matching = Activity<MigraineActivityAttributes>.activities
+            .filter { $0.content.state.migraineID == migraineID }
         if matching.isEmpty {
             start(for: migraineID, startDate: startDate, severity: severity, stressLevel: stressLevel, notes: notes)
             return
         }
-        // If there are duplicates for the same migraine, keep the newest and end the rest.
-        if matching.count > 1 {
-            // Sort by start time if available, else by id as fallback
-            let sorted = matching.sorted { a, b in
-                let ad = a.content.state.startDate
-                let bd = b.content.state.startDate
-                return ad > bd
+        // If there are duplicates for the same migraine, keep the newest and end
+        // the rest, then refresh the kept one with the latest content.
+        guard matching.count > 1 else { return }
+        Task.detached {
+            let sorted = Activity<MigraineActivityAttributes>.activities
+                .filter { $0.content.state.migraineID == migraineID }
+                .sorted { $0.content.state.startDate > $1.content.state.startDate }
+            for act in sorted.dropFirst() {
+                await act.end(nil, dismissalPolicy: .immediate)
             }
-            let toKeep = sorted.first
-            let toEnd = sorted.dropFirst()
-            for act in toEnd {
-                Task {
-                    await act.end(nil, dismissalPolicy: .immediate)
-                }
-            }
-            // Optionally, we could refresh the kept one with latest content if severity/notes changed.
-            if let keep = toKeep {
+            if let keep = sorted.first {
                 let state = MigraineActivityAttributes.ContentState(
                     migraineID: migraineID,
                     startDate: startDate,
@@ -71,42 +68,36 @@ enum MigraineActivityCenter {
                     stressLevel: stressLevel,
                     notes: notes
                 )
-                let staleDate = Date().addingTimeInterval(5 * 60)
-                let content = ActivityContent(state: state, staleDate: staleDate)
-                Task {
-                    await keep.update(content)
-                }
+                let content = ActivityContent(state: state, staleDate: Date().addingTimeInterval(5 * 60))
+                await keep.update(content)
             }
         }
     }
 
     // Update the Live Activity for a given migraine ID with new severity/notes
     static func update(for migraineID: UUID, severity: Int, stressLevel: Int, notes: String) {
-        let activities = Activity<MigraineActivityAttributes>.activities
-        guard let activity = activities.first(where: { $0.content.state.migraineID == migraineID }) else {
-            return
-        }
-
-        let state = MigraineActivityAttributes.ContentState(
-            migraineID: migraineID,
-            startDate: activity.content.state.startDate,
-            severity: severity,
-            stressLevel: stressLevel,
-            notes: notes
-        )
-        let staleDate = Date().addingTimeInterval(5 * 60)
-        let content = ActivityContent(state: state, staleDate: staleDate)
-
-        Task {
+        Task.detached {
+            guard let activity = Activity<MigraineActivityAttributes>.activities
+                .first(where: { $0.content.state.migraineID == migraineID }) else {
+                return
+            }
+            let state = MigraineActivityAttributes.ContentState(
+                migraineID: migraineID,
+                startDate: activity.content.state.startDate,
+                severity: severity,
+                stressLevel: stressLevel,
+                notes: notes
+            )
+            let content = ActivityContent(state: state, staleDate: Date().addingTimeInterval(5 * 60))
             await activity.update(content)
         }
     }
 
     // End the Live Activity for a given migraine ID
     static func end(for migraineID: UUID) {
-        let activities = Activity<MigraineActivityAttributes>.activities
-        if let activity = activities.first(where: { $0.content.state.migraineID == migraineID }) {
-            Task {
+        Task.detached {
+            if let activity = Activity<MigraineActivityAttributes>.activities
+                .first(where: { $0.content.state.migraineID == migraineID }) {
                 await activity.end(nil, dismissalPolicy: .immediate)
             }
         }

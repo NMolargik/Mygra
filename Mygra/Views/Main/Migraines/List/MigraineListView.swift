@@ -54,11 +54,7 @@ struct MigraineListView: View {
                                     } label: {
                                         Label("Show All", systemImage: "pin.slash")
                                     }
-                                    .padding(8)
-                                    .padding(.horizontal, 5)
-                                    .foregroundStyle(.white)
-                                    .adaptiveGlass(tint: .yellow)
-                                    .hoverEffect()
+                                    .glassActionButton(prominent: false)
                                     .accessibilityIdentifier("emptyShowAllButton")
                                 }
                                 Button {
@@ -67,11 +63,7 @@ struct MigraineListView: View {
                                 } label: {
                                     Label("Clear Filters", systemImage: "xmark.circle")
                                 }
-                                .padding(8)
-                                .padding(.horizontal, 5)
-                                .foregroundStyle(.white)
-                                .adaptiveGlass(tint: .mygraBlue)
-                                .hoverEffect()
+                                .glassActionButton()
                                 .accessibilityIdentifier("emptyClearFiltersButton")
                             }
                             .padding(.top, 4)
@@ -83,11 +75,7 @@ struct MigraineListView: View {
                         } label: {
                             Label("Adjust Filters", systemImage: "slider.horizontal.3")
                         }
-                        .padding(8)
-                        .padding(.horizontal, 5)
-                        .foregroundStyle(.white)
-                        .adaptiveGlass(tint: .green)
-                        .hoverEffect()
+                        .glassActionButton(prominent: false)
                     }
                 } else {
                     ScrollView {
@@ -166,11 +154,7 @@ struct MigraineListView: View {
                                         } label: {
                                             Label("Show All", systemImage: "pin.slash")
                                         }
-                                        .padding(8)
-                                        .padding(.horizontal, 5)
-                                        .foregroundStyle(.white)
-                                        .adaptiveGlass(tint: .yellow)
-                                        .hoverEffect()
+                                        .glassActionButton(prominent: false)
                                         .controlSize(.small)
                                         .accessibilityIdentifier("footerShowAllButton")
                                     }
@@ -186,25 +170,17 @@ struct MigraineListView: View {
                                     } label: {
                                         Label("Clear Filters", systemImage: "xmark.circle")
                                     }
-                                    .padding(8)
-                                    .padding(.horizontal, 5)
-                                    .foregroundStyle(.white)
-                                    .adaptiveGlass(tint: .mygraBlue)
-                                    .hoverEffect()
+                                    .glassActionButton()
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerClearFiltersButton")
-                                    
+
                                     Button {
                                         Haptics.lightImpact()
                                         viewModel.showingFilterSheet = true
                                     } label: {
                                         Label("Adjust", systemImage: "slider.horizontal.3")
                                     }
-                                    .padding(8)
-                                    .padding(.horizontal, 5)
-                                    .foregroundStyle(.white)
-                                    .adaptiveGlass(tint: .green)
-                                    .hoverEffect()
+                                    .glassActionButton(prominent: false)
                                     .controlSize(.small)
                                     .accessibilityIdentifier("footerAdjustFiltersButton")
                                 }
@@ -268,18 +244,6 @@ struct MigraineListView: View {
 }
 
 #Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(
-            for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-    let previewMigraineManager = MigraineManager(context: container.mainContext)
-        
-    return MigraineListView(showingEntrySheet: .constant(false))
-        .modelContainer(container)
-        .environment(previewMigraineManager)
+    MigraineListView(showingEntrySheet: .constant(false))
+        .previewEnvironment()
 }

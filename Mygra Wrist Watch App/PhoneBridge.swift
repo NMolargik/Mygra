@@ -9,11 +9,6 @@ import Foundation
 import WatchConnectivity
 import WidgetKit
 
-/// Shared App Group identifier for cross-target data sharing
-enum AppGroup {
-    static let id = "group.com.molargiksoftware.Mygra"
-}
-
 final class PhoneBridge: NSObject, WCSessionDelegate {
     static let shared = PhoneBridge()
     private override init() { super.init() }
@@ -24,30 +19,27 @@ final class PhoneBridge: NSObject, WCSessionDelegate {
         WCSession.default.activate()
     }
 
-    func session(_ session: WCSession, didReceiveComplicationUserInfo userInfo: [String : Any] = [:]) {
+    /// Stores a pushed payload into the App Group defaults and refreshes complications.
+    private func storePayload(_ payload: [String: Any], notify: Bool) {
         let defaults = UserDefaults(suiteName: AppGroup.id)
-        if let ts = userInfo["lastMigraineStart"] as? TimeInterval {
-            defaults?.set(ts, forKey: "lastMigraineStart")
+        if let ts = payload[SharedMigraineStatus.Keys.lastMigraineStart] as? TimeInterval {
+            defaults?.set(ts, forKey: SharedMigraineStatus.Keys.lastMigraineStart)
         }
-        if let ongoing = userInfo["hasOngoingMigraine"] as? Bool {
-            defaults?.set(ongoing, forKey: "hasOngoingMigraine")
+        if let ongoing = payload[SharedMigraineStatus.Keys.hasOngoingMigraine] as? Bool {
+            defaults?.set(ongoing, forKey: SharedMigraineStatus.Keys.hasOngoingMigraine)
         }
-        defaults?.synchronize()
-        // Tell the watch complication to refresh
         WidgetCenter.shared.reloadAllTimelines()
+        if notify {
+            NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
+        }
+    }
+
+    func session(_ session: WCSession, didReceiveComplicationUserInfo userInfo: [String : Any] = [:]) {
+        storePayload(userInfo, notify: false)
     }
 
     func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        let defaults = UserDefaults(suiteName: AppGroup.id)
-        if let ts = applicationContext["lastMigraineStart"] as? TimeInterval {
-            defaults?.set(ts, forKey: "lastMigraineStart")
-        }
-        if let ongoing = applicationContext["hasOngoingMigraine"] as? Bool {
-            defaults?.set(ongoing, forKey: "hasOngoingMigraine")
-        }
-        defaults?.synchronize()
-        WidgetCenter.shared.reloadAllTimelines()
-        NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
+        storePayload(applicationContext, notify: true)
     }
 
     // Notify the app when phone reachability changes so UI can prompt the user
@@ -88,11 +80,12 @@ final class PhoneBridge: NSObject, WCSessionDelegate {
         if error == nil {
             requestStatus { hasOngoing, lastStart in
                 let defaults = UserDefaults(suiteName: AppGroup.id)
+                var status = SharedMigraineStatus(defaults: defaults)
                 if let lastStart {
-                    defaults?.set(lastStart.timeIntervalSince1970, forKey: "lastMigraineStart")
+                    status.lastMigraineStart = lastStart
                 }
-                defaults?.set(hasOngoing, forKey: "hasOngoingMigraine")
-                defaults?.synchronize()
+                status.hasOngoingMigraine = hasOngoing
+                status.write(to: defaults)
                 WidgetCenter.shared.reloadAllTimelines()
                 NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
             }

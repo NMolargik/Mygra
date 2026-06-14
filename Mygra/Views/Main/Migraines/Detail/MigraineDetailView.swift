@@ -8,6 +8,7 @@
 import SwiftUI
 import WeatherKit
 import SwiftData
+import os
 
 struct MigraineDetailView: View {
     @Environment(MigraineManager.self) private var migraineManager: MigraineManager
@@ -201,7 +202,7 @@ struct MigraineDetailView: View {
                                 try await healthManager.saveSleep(from: begin, to: end)
                             }
                         } catch {
-                            print("[Detail] Failed to save staged HealthKit intake: \(error)")
+                            Log.app.error("Failed to save staged HealthKit intake: \(error)")
                         }
                     }
 
@@ -219,7 +220,7 @@ struct MigraineDetailView: View {
                                 m.health = health
                             }
                         } catch {
-                            print("[Detail] Failed to fetch Health snapshot for edited migraine: \(error)")
+                            Log.app.error("Failed to fetch Health snapshot for edited migraine: \(error)")
                         }
 
                         // Weather: only attach if the edited start date is today; otherwise skip
@@ -236,8 +237,7 @@ struct MigraineDetailView: View {
                             migraineManager.update(migraine) { m in
                                 m.weather = nil
                             }
-                            // Present a transient alert via print here; UI alert handled below
-                            print("[Detail] Skipped attaching weather for past-dated migraine.")
+                            Log.app.info("Skipped attaching weather for past-dated migraine.")
                             pendingWeatherAlertMessage = "Weather isn't attached for past start dates."
                             showPendingWeatherAlert = true
                         }
@@ -338,35 +338,14 @@ struct MigraineDetailView: View {
 }
 
 #Preview("Migraine Detail – Sample") {
-    let container: ModelContainer = {
-        do {
-            return try ModelContainer(
-                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-            )
-        } catch {
-            fatalError("Preview ModelContainer setup failed: \(error)")
-        }
-    }()
-    
     // Provide defaults for AppStorage-backed preferences in preview
     UserDefaults.standard.register(defaults: [
         AppStorageKeys.useMetricUnits: false,
         AppStorageKeys.useDayMonthYearDates: false
     ])
-    
-    // Lightweight preview managers
-    let previewHealthManager = HealthManager()
-    let previewWeatherManager = WeatherManager()
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
-    let previewInsightManager = InsightManager(
-        userManager: previewUserManager,
-        migraineManager: previewMigraineManager,
-        weatherManager: previewWeatherManager,
-        healthManager: previewHealthManager
-    )
-    
+
+    let env = PreviewEnvironment()
+
     // Sample associated data
     let sampleWeather = WeatherData(
         barometricPressureHpa: 1008,
@@ -407,16 +386,12 @@ struct MigraineDetailView: View {
         health: sampleHealth
     )
     
-    container.mainContext.insert(sampleMigraine)
-    
+    env.container.mainContext.insert(sampleMigraine)
+
     return NavigationStack {
         MigraineDetailView(migraine: sampleMigraine)
     }
-    .modelContainer(container)
-    .environment(previewMigraineManager)
-    .environment(previewInsightManager)
-    .environment(previewWeatherManager)
-    .environment(previewHealthManager)
+    .previewEnvironment(env)
     .environment(\.locale, .init(identifier: "en_US"))
 }
 

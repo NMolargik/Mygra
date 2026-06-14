@@ -95,11 +95,7 @@ struct IntakeSection: View {
                         Haptics.lightImpact()
                         withAnimation { isEditing = true }
                     }
-                    .padding(8)
-                    .padding(.horizontal, 5)
-                    .foregroundStyle(.white)
-                    .adaptiveGlass(tint: .mygraPurple)
-                    .hoverEffect()
+                    .glassActionButton(prominent: false)
                     Spacer()
                 }
                 .padding([.top, .horizontal])

@@ -261,6 +261,8 @@ struct MigraineEntryView: View {
                             step: 1
                         )
                         .tint(viewModel.gradientColor(for: viewModel.painLevel))
+                        .accessibilityLabel(Text("Pain Level"))
+                        .accessibilityValue(Text("\(viewModel.painLevel) out of 10"))
                     }
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -279,6 +281,8 @@ struct MigraineEntryView: View {
                             step: 1
                         )
                         .tint(.indigo)
+                        .accessibilityLabel(Text("Stress Level"))
+                        .accessibilityValue(Text("\(viewModel.stressLevel) out of 10"))
                     }
                     Toggle("Pin this migraine", isOn: $viewModel.pinned)
                         .onChange(of: $viewModel.pinned.wrappedValue) { _, _ in Haptics.lightImpact() }

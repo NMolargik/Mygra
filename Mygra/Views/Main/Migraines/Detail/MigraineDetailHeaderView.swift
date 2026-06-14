@@ -53,11 +53,9 @@ struct MigraineDetailHeaderView: View {
                     Label("End Migraine", systemImage: "stop.circle.fill")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
-                        .foregroundStyle(.white)
                 }
-                .padding(8)
-                .padding(.horizontal, 5)
-                .adaptiveGlass(tint: .mygraPurple)
+                .glassActionButton()
+                .controlSize(.large)
                 .accessibilityIdentifier("endMigraineButton")
             }
 

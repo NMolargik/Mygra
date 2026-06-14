@@ -173,11 +173,8 @@ struct IntakeEditorView: View {
                     Haptics.lightImpact()
                     onCancel()
                 }
-                .foregroundStyle(.white)
-                .padding(8)
-                .adaptiveGlass(tint: .gray)
-                .hoverEffect()
-                
+                .glassActionButton(tint: .gray, prominent: false)
+
                 if !allAddsAreZero {
                     Button(isSaving ? "Adding..." : "Add") {
                         // Only fire success haptic if the action is actually going to run
@@ -186,12 +183,8 @@ struct IntakeEditorView: View {
                         }
                         onAdd()
                     }
-                    .foregroundStyle(.white)
                     .disabled(isSaving)
-                    .padding(8)
-                    .padding(.horizontal, 10)
-                    .adaptiveGlass(tint: .mygraPurple)
-                    .hoverEffect()
+                    .glassActionButton()
                 }
 
                 
@@ -216,7 +209,8 @@ struct IntakeEditorView: View {
         Haptics.lightImpact()
 
         // Close gate after a short delay
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+        Task {
+            try? await Task.sleep(for: .seconds(0.15))
             self[keyPath: gateKeyPath] = false
         }
     }

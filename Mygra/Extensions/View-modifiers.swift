@@ -18,15 +18,82 @@ extension View {
         self.modifier(AdaptiveGlassModifier(tint: tint))
     }
 
-    /// Standard card styling used throughout the app.
-    func cardStyle() -> some View {
-        self.padding(14)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    /// The standard card surface — material fill, hairline border, soft shadow —
+    /// without padding, for views that manage their own internal spacing.
+    func cardSurface(cornerRadius: CGFloat = 18) -> some View {
+        self
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(.quaternary)
+            )
+            .shadow(color: .black.opacity(0.06), radius: 10, x: 0, y: 4)
     }
+
+    /// Standard card styling used throughout the app: padded content on the
+    /// shared card surface. Prefer `InsightCard` for titled cards.
+    func cardStyle(cornerRadius: CGFloat = 18) -> some View {
+        self.padding(16).cardSurface(cornerRadius: cornerRadius)
+    }
+
+    /// Minimizes the toolbar on scroll where the OS supports it (iOS 27+).
+    @ContentBuilder
+    func minimizeToolbarOnScrollIfAvailable() -> some View {
+        if #available(iOS 27.0, *) {
+            self.toolbarMinimizeBehavior(.onScrollDown)
+        } else {
+            self
+        }
+    }
+
+    /// Conditionally applies a transform — keeps call sites declarative.
+    @ContentBuilder
+    func `if`<Transformed: View>(_ condition: Bool, transform: (Self) -> Transformed) -> some View {
+        if condition { transform(self) } else { self }
+    }
+}
+
+extension View {
+    /// The app's standard action-button treatment. Uses the native Liquid
+    /// Glass button styles on iOS 26+ (falling back to bordered styles), so
+    /// call sites stop hand-rolling tinted glass pills. Reserve `prominent`
+    /// for the single primary action in a given context.
+    @ContentBuilder
+    func glassActionButton(tint: Color = .mygraBlue, prominent: Bool = true) -> some View {
+        if #available(iOS 26.0, *) {
+            if prominent {
+                self.buttonStyle(.glassProminent).tint(tint)
+            } else {
+                self.buttonStyle(.glass).tint(tint)
+            }
+        } else {
+            if prominent {
+                self.buttonStyle(.borderedProminent).tint(tint)
+            } else {
+                self.buttonStyle(.bordered).tint(tint)
+            }
+        }
+    }
+}
+
+/// Material pill background for compact stat chips.
+struct StatPillBackground: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .background(
+                Capsule(style: .continuous).fill(.ultraThinMaterial)
+            )
+            .overlay(Capsule(style: .continuous).strokeBorder(.quaternary))
+    }
+}
+
+extension View {
+    func statPillBackground() -> some View { modifier(StatPillBackground()) }
 }
 
 extension LinearGradient {
     /// The standard Mygra brand gradient (purple to blue, top-trailing to bottom-leading).
+    @MainActor
     static var mygra: LinearGradient {
         LinearGradient(
             colors: [.mygraPurple, .mygraBlue],
@@ -35,29 +102,6 @@ extension LinearGradient {
         )
     }
 }
-
-#if os(iOS)
-public extension View {
-    @ViewBuilder
-    func tabViewBottomAccessoryIfAvailable<Accessory: View>(@ViewBuilder _ accessory: () -> Accessory) -> some View {
-        if #available(iOS 26.0, *) {
-            // Only use the new API when available at runtime
-            self.tabViewBottomAccessory(content: accessory)
-        } else {
-            // On earlier OS versions, do nothing
-            self
-        }
-    }
-}
-#else
-public extension View {
-    @ViewBuilder
-    func tabViewBottomAccessoryIfAvailable<Accessory: View>(@ViewBuilder _ accessory: () -> Accessory) -> some View {
-        // Non-iOS platforms: no-op to keep API usage consistent
-        self
-    }
-}
-#endif
 
 
 

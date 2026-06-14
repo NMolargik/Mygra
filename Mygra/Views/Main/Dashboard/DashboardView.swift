@@ -31,8 +31,8 @@ struct DashboardView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     WeatherCardView(
-                        temperatureString: weatherManager.temperatureString,
-                        pressureString: weatherManager.pressureString,
+                        temperature: weatherManager.temperature,
+                        pressure: weatherManager.pressure,
                         humidityPercentString: weatherManager.humidityPercentString,
                         condition: weatherManager.condition,
                         lastUpdated: weatherManager.lastUpdated,
@@ -236,40 +236,7 @@ struct DashboardView: View {
         AppStorageKeys.useMetricUnits: false
     ])
 
-    // In-memory model container for preview
-    let container: ModelContainer = {
-        do {
-            return try ModelContainer(
-                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-            )
-        } catch {
-            fatalError("Preview ModelContainer setup failed: \(error)")
-        }
-    }()
-
-    // Lightweight managers for environment
-    let previewHealthManager = HealthManager()
-    let previewWeatherManager = WeatherManager()
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
-    let previewInsightManager = InsightManager(
-        userManager: previewUserManager,
-        migraineManager: previewMigraineManager,
-        weatherManager: previewWeatherManager,
-        healthManager: previewHealthManager
-    )
-
-    let previewTagManager = TagManager(context: container.mainContext)
-
-    // Note: InsightManager.insights has a restricted setter; leaving insights empty for preview.
-
     return DashboardView(showingEntrySheet: .constant(false), deleteAllMigraines: {})
-        .modelContainer(container)
-        .environment(previewInsightManager)
-        .environment(previewHealthManager)
-        .environment(previewWeatherManager)
-        .environment(previewMigraineManager)
-        .environment(previewTagManager)
+        .previewEnvironment()
 }
 

@@ -9,11 +9,11 @@ import SwiftUI
 
 extension OnboardingView {
     @Observable
-    class ViewModel {
+    final class ViewModel {
         var currentStep: OnboardingStep = .privacy
         var newUser: User = User()
         var userFormComplete: Bool = false
-        
+
         var canContinue: Bool {
             switch currentStep {
             case .privacy, .location, .health, .notification, .complete:
@@ -31,39 +31,25 @@ extension OnboardingView {
                 return false
             }
         }
-        
-        func handleContinueTapped() {
-            switch currentStep {
-            case .privacy:
-                currentStep = .health
-            case .health:
-                currentStep = .location
-            case .location:
-                currentStep = .notification
-            case .notification:
-                currentStep = .user
-            case .user:
-                currentStep = .complete
-            case .complete:
-                break
+
+        /// The step after `currentStep` in `OnboardingStep.allCases`, or nil when on the last step.
+        private var nextStep: OnboardingStep? {
+            let steps = OnboardingStep.allCases
+            guard let index = steps.firstIndex(of: currentStep),
+                  steps.index(after: index) < steps.endIndex else {
+                return nil
             }
+            return steps[steps.index(after: index)]
         }
-        
+
+        func handleContinueTapped() {
+            guard let nextStep else { return }
+            currentStep = nextStep
+        }
+
         func handleSkipTapped() {
-            switch currentStep {
-            case .privacy:
-                currentStep = .health
-            case .health:
-                break
-            case .location:
-                currentStep = .notification
-            case .notification:
-                currentStep = .user
-            case .user:
-                break
-            case .complete:
-                break
-            }
+            guard showsSkip, let nextStep else { return }
+            currentStep = nextStep
         }
     }
 }

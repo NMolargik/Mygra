@@ -35,17 +35,13 @@ struct IntelligenceCardView: View {
             Spacer()
             
             Button(action: onOpen) {
-                Text("Chat")
+                Label("Chat", systemImage: "sparkles")
             }
-            .padding(8)
-            .padding(.horizontal, 5)
-            .foregroundStyle(.white)
-            .adaptiveGlass(tint: .mygraPurple)
-            .hoverEffect()
+            .glassActionButton()
             .accessibilityLabel("Open Migraine Assistant")
         }
-        .padding(14)
-        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(16)
+        .cardSurface()
         .accessibilityElement(children: .combine)
     }
 }

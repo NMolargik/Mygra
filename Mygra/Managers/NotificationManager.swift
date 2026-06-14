@@ -10,7 +10,6 @@ enum LocalNotificationCategory: String {
 
 @Observable
 final class NotificationManager {
-    static let shared = NotificationManager()
     private let center = UNUserNotificationCenter.current()
 
     /// Current authorization status (synchronous, observable)
@@ -60,11 +59,7 @@ final class NotificationManager {
     
     /// Get a list of all pending notification requests (async)
     func pendingRequests() async -> [UNNotificationRequest] {
-        return await withCheckedContinuation { continuation in
-            center.getPendingNotificationRequests { requests in
-                continuation.resume(returning: requests)
-            }
-        }
+        await center.pendingNotificationRequests()
     }
     
     /// Send a local notification immediately.

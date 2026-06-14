@@ -35,16 +35,30 @@ struct TagManagementView: View {
                 }
             } else {
                 Section("Your Tags") {
-                    ForEach(tagManager.tags) { tag in
+                    let rows = ForEach(tagManager.tags) { tag in
                         TagRowView(tag: tag) {
                             editingTag = tag
                         }
                     }
                     .onDelete(perform: deleteTags)
+                    .onMove(perform: tagManager.move)
+
+                    // iOS 27 adds drag-anywhere reordering via `reorderable()`;
+                    // earlier releases reorder through Edit mode + `onMove`.
+                    if #available(iOS 27.0, *) {
+                        rows.reorderable()
+                    } else {
+                        rows
+                    }
                 }
             }
         }
         .navigationTitle("Manage Tags")
+        .toolbar {
+            if !tagManager.tags.isEmpty {
+                EditButton()
+            }
+        }
         .sheet(isPresented: $showingAddSheet) {
             TagEditSheet(
                 mode: .create,
@@ -98,6 +112,10 @@ private struct TagRowView: View {
             }
         }
         .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("\(tag.name), \((tag.migraines ?? []).count) migraines"))
+        .accessibilityHint(Text("Double tap to edit this tag"))
+        .accessibilityAddTraits(.isButton)
     }
 }
 

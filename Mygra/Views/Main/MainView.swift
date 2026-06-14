@@ -8,7 +8,6 @@
 import SwiftUI
 import SwiftData
 import WeatherKit
-import Combine
 
 struct MainView: View {
     @Environment(\.modelContext) private var modelContext
@@ -24,10 +23,10 @@ struct MainView: View {
     @State private var appTab: AppTab = .dashboard
     @State private var showingEntrySheet: Bool = false
     @State private var showingOngoingAlert: Bool = false
+    @State private var showingAssistant: Bool = false
     @State private var listPath = NavigationPath()
     @State private var calendarPath = NavigationPath()
     @State private var lastPushedMigraineID: UUID? = nil
-    @State private var now: Date = Date()
 
     var body: some View {
         Group {
@@ -52,26 +51,16 @@ struct MainView: View {
                             }
                         )
                         .navigationTitle("Mygra")
-                        .toolbar { regularWidthTopBarToolbar }
-                            .navigationDestination(for: UUID.self) { migraineID in
-                                if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
-                                                   ?? migraineManager.migraines.first { $0.id == migraineID }) {
-                                    MigraineDetailView(migraine: migraine, onClose: {
-                                        if !listPath.isEmpty {
-                                            listPath.removeLast()
-                                        }
-                                    })
-                                } else {
-                                    ContentUnavailableView(
-                                        "Migraine Not Found",
-                                        systemImage: "exclamationmark.triangle",
-                                        description: Text("The selected migraine could not be loaded.")
-                                    )
+                        .toolbar { addMigraineToolbar(title: "New Migraine") }
+                        .navigationDestination(for: UUID.self) { migraineID in
+                            migraineDestination(for: migraineID, onClose: {
+                                if !listPath.isEmpty {
+                                    listPath.removeLast()
                                 }
-                            }
+                            })
+                        }
                     }
                 }
-                .tabViewBottomAccessoryIfAvailable { bottomAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(onMigraineSaved: { migraine, reviewScene in
                         createNewMigraine(migraine: migraine, reviewScene: reviewScene)
@@ -94,7 +83,7 @@ struct MainView: View {
                             }
                         )
                         .navigationTitle("Mygra")
-                        .toolbar { dashboardTopBarToolbar }
+                        .toolbar { addMigraineToolbar(title: "New Migraine") }
                     }
                     .tint(nil)
                     .tabItem {
@@ -106,17 +95,9 @@ struct MainView: View {
                     NavigationStack(path: $calendarPath) {
                         MigraineCalendarView()
                             .navigationDestination(for: UUID.self) { migraineID in
-                                if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
-                                                   ?? migraineManager.migraines.first { $0.id == migraineID }) {
-                                    MigraineDetailView(migraine: migraine)
-                                } else {
-                                    ContentUnavailableView(
-                                        "Migraine Not Found",
-                                        systemImage: "exclamationmark.triangle",
-                                        description: Text("The selected migraine could not be loaded.")
-                                    )
-                                }
+                                migraineDestination(for: migraineID)
                             }
+                            .toolbar { addMigraineToolbar(title: "New Migraine") }
                     }
                     .tint(nil)
                     .tabItem {
@@ -131,18 +112,9 @@ struct MainView: View {
                         )
                         .navigationTitle(AppTab.list.rawValue)
                         .navigationDestination(for: UUID.self) { migraineID in
-                            if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
-                                               ?? migraineManager.migraines.first { $0.id == migraineID }) {
-                                MigraineDetailView(migraine: migraine)
-                            } else {
-                                ContentUnavailableView(
-                                    "Migraine Not Found",
-                                    systemImage: "exclamationmark.triangle",
-                                    description: Text("The selected migraine could not be loaded.")
-                                )
-                            }
+                            migraineDestination(for: migraineID)
                         }
-                        .toolbar { listTopBarToolbar }
+                        .toolbar { addMigraineToolbar(title: "New Migraine") }
                     }
                     .tint(nil)
                     .tabItem {
@@ -167,7 +139,6 @@ struct MainView: View {
                     .tag(AppTab.settings)
                 }
                 .tint(appTab.color())
-                .tabViewBottomAccessoryIfAvailable { bottomAccessory }
                 .sheet(isPresented: $showingEntrySheet) {
                     MigraineEntryView(
                         onMigraineSaved: { migraine, reviewScene in
@@ -200,6 +171,11 @@ struct MainView: View {
         } message: {
             Text("You already have an ongoing migraine. End it before starting a new one.")
         }
+        .sheet(isPresented: $showingAssistant) {
+            if #available(iOS 26.0, *) {
+                MigraineAssistantView()
+            }
+        }
         .onChange(of: pendingDeepLink) { _, newLink in
             handleDeepLink(newLink)
         }
@@ -219,204 +195,96 @@ struct MainView: View {
 
         switch link {
         case .newMigraine:
-            showingEntrySheet = true
+            handleAddTapped()
         case .home:
             appTab = .dashboard
+        case .calendar:
+            appTab = .calendar
         case .list:
             appTab = .list
         case .settings:
             appTab = .settings
+        case .migraine(let id):
+            navigateToMigraine(id: id)
+        case .assistant:
+            if #available(iOS 26.0, *) {
+                showingAssistant = true
+            }
+        case .endOngoing:
+            migraineManager.endOngoingMigraine()
         }
     }
 
-    // MARK: - Ongoing accessory
-    @ViewBuilder
-    private var ongoingAccessory: some View {
-        if let ongoing = migraineManager.ongoingMigraine {
-            Button {
-                if !isRegularWidth {
-                    appTab = .list
-                }
-                if lastPushedMigraineID == ongoing.id {
-                    return
-                }
-                listPath.append(ongoing.id)
-                lastPushedMigraineID = ongoing.id
-            } label: {
-                HStack(spacing: 8) {
-                    Group {
-                        if #available(iOS 26.0, *) {
-                            Image(systemName: "waveform.path.ecg")
-                                .symbolVariant(.fill)
-                                .foregroundStyle(LinearGradient(colors: [.mygraPurple, .mygraBlue], startPoint: .leading, endPoint: .trailing))
-                                .symbolEffect(.breathe.pulse.byLayer, isActive: true)
-                        } else {
-                            Image(systemName: "waveform.path.ecg")
-                                .symbolVariant(.fill)
-                                .foregroundStyle(LinearGradient(colors: [.mygraPurple, .mygraBlue], startPoint: .leading, endPoint: .trailing))
-                                .symbolEffect(.pulse, value: now)
-                        }
-                    }
+    // MARK: - Toolbar / navigation helpers
 
-                    Text("Ongoing Migraine")
-                        .font(.headline)
-                    
-                    Text("•")
-                        .foregroundStyle(.secondary)
-                    
-                    Text(durationString(since: ongoing.startDate, now: now))
+    /// Top-trailing toolbar item shown on the Dashboard, Calendar, and
+    /// Migraines pages. When a migraine is ongoing it surfaces a tappable
+    /// pulsing indicator (jumping to that migraine); otherwise it offers the
+    /// "New Migraine" action.
+    @ToolbarContentBuilder
+    private func addMigraineToolbar(title: LocalizedStringKey, systemImage: String? = nil) -> some ToolbarContent {
+        ToolbarItem(placement: .topBarTrailing) {
+            if let ongoing = migraineManager.ongoingMigraine {
+                ongoingMigraineButton(for: ongoing)
+            } else {
+                Button {
+                    handleAddTapped()
+                } label: {
+                    if let systemImage {
+                        Label(title, systemImage: systemImage)
+                            .bold()
+                            .foregroundStyle(.mygraBlue)
+                    } else {
+                        Text(title)
+                            .bold()
+                            .foregroundStyle(.mygraBlue)
+                    }
+                }
+                .accessibilityIdentifier("addEntryButton")
+                .accessibilityLabel(Text("Log a new migraine"))
+            }
+        }
+    }
+
+    /// The pulsing "ongoing migraine" indicator that replaces the add button
+    /// while a migraine is in progress. Tapping it opens that migraine.
+    private func ongoingMigraineButton(for ongoing: Migraine) -> some View {
+        Button {
+            navigateToMigraine(id: ongoing.id)
+        } label: {
+            TimelineView(.periodic(from: .now, by: 1)) { context in
+                HStack(spacing: 6) {
+                    Image(systemName: "waveform.path.ecg")
+                        .symbolVariant(.fill)
+                        .foregroundStyle(LinearGradient(colors: [.mygraPurple, .mygraBlue], startPoint: .leading, endPoint: .trailing))
+                        .symbolEffect(.pulse, options: .repeating)
+                    Text(MigraineDates.elapsedString(since: ongoing.startDate, now: context.date))
+                        .font(.subheadline.weight(.semibold))
                         .monospacedDigit()
                         .foregroundStyle(.secondary)
-                    
-                    Spacer(minLength: 0)
-                    
-                    Image(systemName: "chevron.right")
-                        .foregroundStyle(.secondary)
                 }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 10)
-            }
-            .buttonStyle(.plain)
-            .onReceive(timer) { tick in
-                let quantized = Date(timeIntervalSince1970: floor(tick.timeIntervalSince1970))
-                self.now = quantized
             }
         }
+        .accessibilityIdentifier("ongoingMigraineButton")
+        .accessibilityLabel(Text("Ongoing migraine in progress, tap to view"))
     }
 
-    // MARK: - Bottom accessory
-    @ViewBuilder
-    private var bottomAccessory: some View {
-        // If there's an ongoing migraine, show the existing ongoing accessory and nothing else
-        if migraineManager.ongoingMigraine != nil {
-            ongoingAccessory
-        } else if !isRegularWidth {
-            // iPhone only (compact width)
-            HStack(spacing: 12) {
-                // Leading: days since last migraine
-                Text(daysSinceLastMigraineString())
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                Spacer(minLength: 0)
-
-                // Trailing: New Migraine button
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Text("New Migraine")
-                        .bold()
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButtonBottom")
+    /// Resolves a UUID pushed onto a navigation path to its detail view.
+    @ContentBuilder
+    private func migraineDestination(for migraineID: UUID, onClose: (() -> Void)? = nil) -> some View {
+        if let migraine = (migraineManager.visibleMigraines.first { $0.id == migraineID }
+                           ?? migraineManager.migraines.first { $0.id == migraineID }) {
+            if let onClose {
+                MigraineDetailView(migraine: migraine, onClose: onClose)
+            } else {
+                MigraineDetailView(migraine: migraine)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 10)
-        }
-    }
-
-    // MARK: - Toolbar helpers
-    @ToolbarContentBuilder
-    private var dashboardTopBarToolbar: some ToolbarContent {
-        if #unavailable(iOS 26) {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Text("New Migraine")
-                        .bold()
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
-        } else if isRegularWidth {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Text("New Migraine")
-                        .bold()
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
-        }
-    }
-
-    @ToolbarContentBuilder
-    private var listTopBarToolbar: some ToolbarContent {
-        if #unavailable(iOS 26) {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Label("Add", systemImage: "plus")
-                        .bold()
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
-        } else if isRegularWidth {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Label("Add", systemImage: "plus")
-                        .bold()
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
-        }
-    }
-
-    @ToolbarContentBuilder
-    private var regularWidthTopBarToolbar: some ToolbarContent {
-        if #unavailable(iOS 26) {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Text("New Migraine")
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
-        } else if isRegularWidth {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    handleAddTapped()
-                } label: {
-                    Text("New Migraine")
-                        .foregroundStyle(.mygraBlue)
-                }
-                .accessibilityIdentifier("addEntryButton")
-            }
-        }
-    }
-
-    private func daysSinceLastMigraineString() -> String {
-        // Determine the most recent migraine end date or start date if never ended
-        let lastDate: Date? = {
-            // Consider visibleMigraines first; if empty, fall back to all migraines
-            let all = migraineManager.visibleMigraines.isEmpty ? migraineManager.migraines : migraineManager.visibleMigraines
-            guard !all.isEmpty else { return nil }
-            // Sort by the most relevant date: endDate if present, otherwise startDate
-            return all
-                .compactMap { $0.endDate ?? $0.startDate }
-                .max()
-        }()
-
-        guard let date = lastDate else {
-            return "Streak: 0 days"
-        }
-        let days = max(0, Int(Date().timeIntervalSince(date) / 86_400))
-        if days == 0 {
-            return "Streak: 0 days"
-        } else if days == 1 {
-            return "Streak: 1 day"
         } else {
-            return "Streak: \(days) days"
+            ContentUnavailableView(
+                "Migraine Not Found",
+                systemImage: "exclamationmark.triangle",
+                description: Text("The selected migraine could not be loaded.")
+            )
         }
     }
 
@@ -424,22 +292,6 @@ struct MainView: View {
 
     private var isRegularWidth: Bool {
         hSizeClass == .regular
-    }
-
-    private var timer: Publishers.Autoconnect<Timer.TimerPublisher> {
-        Timer.publish(every: 1.0, on: .main, in: .common).autoconnect()
-    }
-
-    private func durationString(since start: Date, now: Date) -> String {
-        let elapsed = max(0, Int(now.timeIntervalSince(start)))
-        let hours = elapsed / 3600
-        let minutes = (elapsed % 3600) / 60
-        let seconds = elapsed % 60
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
     }
 
     private func handleAddTapped() {
@@ -450,20 +302,6 @@ struct MainView: View {
         }
     }
 
-    // MARK: - Deep link processing (from ContentView)
-
-    private func endMigraineIfRequested(for id: UUID, action: String?) {
-        guard action?.lowercased() == "end" else { return }
-        if let migraine = (migraineManager.visibleMigraines.first { $0.id == id }
-                           ?? migraineManager.migraines.first { $0.id == id }) {
-            if migraine.endDate == nil {
-                migraineManager.update(migraine) { m in
-                    m.endDate = Date()
-                }
-            }
-        }
-    }
-    
     private func createNewMigraine(migraine: Migraine, reviewScene: UIWindowScene?) {
         migraineManager.create(migraine: migraine, reviewScene: reviewScene)
         
@@ -516,38 +354,9 @@ struct MainView: View {
         AppStorageKeys.useMetricUnits: false
     ])
 
-    // In-memory model container for preview
-    let container: ModelContainer = {
-        do {
-            return try ModelContainer(
-                for: User.self, Migraine.self, WeatherData.self, HealthData.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-            )
-        } catch {
-            fatalError("Preview ModelContainer setup failed: \(error)")
-        }
-    }()
-
-    // Lightweight managers for environment
-    let previewHealthManager = HealthManager()
-    let previewWeatherManager = WeatherManager()
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewMigraineManager = MigraineManager(context: container.mainContext, healthManager: previewHealthManager)
-    let previewInsightManager = InsightManager(
-        userManager: previewUserManager,
-        migraineManager: previewMigraineManager,
-        weatherManager: previewWeatherManager,
-        healthManager: previewHealthManager
-    )
-
     return MainView(
         pendingDeepLink: .constant(nil)
     )
-    .modelContainer(container)
-    .environment(previewInsightManager)
-    .environment(previewHealthManager)
-    .environment(previewWeatherManager)
-    .environment(previewUserManager)
-    .environment(previewMigraineManager)
+    .previewEnvironment()
 }
 

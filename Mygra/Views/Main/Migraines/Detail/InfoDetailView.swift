@@ -12,7 +12,7 @@ struct InfoDetailView<Content: View, Trailing: View>: View {
     let trailing: () -> Trailing
     let content: () -> Content
     
-    init(title: String, @ViewBuilder trailing: @escaping () -> Trailing = { EmptyView() }, @ViewBuilder content: @escaping () -> Content) {
+    init(title: String, @ContentBuilder trailing: @escaping () -> Trailing = { EmptyView() }, @ContentBuilder content: @escaping () -> Content) {
         self.title = title
         self.trailing = trailing
         self.content = content

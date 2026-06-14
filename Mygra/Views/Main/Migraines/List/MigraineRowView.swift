@@ -199,7 +199,7 @@ struct MigraineRowView: View {
         )
     }
 
-    @ViewBuilder
+    @ContentBuilder
     private func triggerDots(count: Int) -> some View {
         let limited = min(count, 10)
         HStack(spacing: 3) {
@@ -219,7 +219,7 @@ struct MigraineRowView: View {
     }
     
     
-    @ViewBuilder
+    @ContentBuilder
     private func durationPill() -> some View {
         TimelineView(.periodic(from: .now, by: 1.0)) { context in
             let now = context.date

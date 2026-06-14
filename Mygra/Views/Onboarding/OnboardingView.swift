@@ -38,19 +38,22 @@ struct OnboardingView: View {
                 .padding(.horizontal, 24)
                 .padding(.top, 16)
                 .padding(.bottom, 8)
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel("Onboarding progress")
+                .accessibilityValue("Step \(currentIndex + 1) of \(steps.count)")
             }
 
-            // Content
+            // Content (page order follows OnboardingStep.allCases)
             TabView(selection: $viewModel.currentStep) {
                 OnboardingPrivacyPage()
                     .tag(OnboardingStep.privacy)
-                
-                OnboardingHealthPage()
-                    .tag(OnboardingStep.health)
-                
+
                 OnboardingLocationPage()
                     .tag(OnboardingStep.location)
-                
+
+                OnboardingHealthPage()
+                    .tag(OnboardingStep.health)
+
                 OnboardingNotificationPage()
                     .tag(OnboardingStep.notification)
 
@@ -83,6 +86,8 @@ struct OnboardingView: View {
                         .foregroundStyle(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 14))
                     }
+                    .accessibilityLabel("Continue")
+                    .accessibilityHint("Moves to the next onboarding step.")
 
                     // Skip Button (optional steps only)
                     if viewModel.showsSkip {
@@ -94,6 +99,8 @@ struct OnboardingView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
+                        .accessibilityLabel("Skip for now")
+                        .accessibilityHint("Skips this step and moves to the next one.")
                     }
                 }
                 .frame(maxWidth: 500)
@@ -113,23 +120,7 @@ struct OnboardingView: View {
 }
 
 #Preview {
-    let container: ModelContainer
-    do {
-        container = try ModelContainer(for: User.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
-    } catch {
-        fatalError("Preview ModelContainer setup failed: \(error)")
-    }
-    let previewUserManager = UserManager(context: container.mainContext)
-    let previewHealthManager = HealthManager()
-    let previewWeatherManager = WeatherManager()
-    let previewNotificationManager = NotificationManager()
-    let previewLocationManager = LocationManager()
-
-    return OnboardingView(onFinished: {})
-        .modelContainer(container)
-        .environment(previewUserManager)
-        .environment(previewWeatherManager)
-        .environment(previewHealthManager)
-        .environment(previewLocationManager)
-        .environment(previewNotificationManager)
+    OnboardingView(onFinished: {})
+        .environment(LocationManager())
+        .previewEnvironment()
 }

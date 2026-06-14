@@ -67,7 +67,7 @@ struct IntensityChartView: View {
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
-    @ViewBuilder
+    @ContentBuilder
     private var singleSampleView: some View {
         let sample = sortedSamples[0]
         HStack(spacing: 24) {
@@ -100,7 +100,7 @@ struct IntensityChartView: View {
         .padding(.vertical, 8)
     }
 
-    @ViewBuilder
+    @ContentBuilder
     private var chartView: some View {
         Chart {
             ForEach(sortedSamples) { sample in
@@ -165,7 +165,7 @@ private struct LegendItem: View {
 
 // MARK: - Square Shape for Chart Symbol
 
-private struct Square: ChartSymbolShape {
+private nonisolated struct Square: ChartSymbolShape {
     var perceptualUnitRect: CGRect {
         CGRect(x: 0, y: 0, width: 1, height: 1)
     }
