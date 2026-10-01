@@ -80,10 +80,7 @@ let package = Package(
         ),
         .target(
             name: "MygraFeatureDashboard",
-            dependencies: [
-                "MygraCore", "MygraDesignSystem", "MygraServices", "MygraFeatureShared",
-                "MygraFeatureCalendar", "MygraFeatureAssistant", "MygraFeatureSettings",
-            ],
+            dependencies: ["MygraCore", "MygraDesignSystem", "MygraServices", "MygraFeatureShared", "MygraFeatureAssistant"],
             swiftSettings: isolation
         ),
         .target(

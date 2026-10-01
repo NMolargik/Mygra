@@ -12,14 +12,14 @@ import MygraCore
 @MainActor
 struct CloudSyncManagerTests {
     @Test func startsIdleAndUnsynced() {
-        let sut = CloudSyncManager()
+        let sut = CloudSyncManager(cloudAvailability: { true })
         #expect(sut.syncStatus == .idle)
         #expect(!sut.hasReceivedRemoteChange)
         #expect(sut.lastSyncDate == nil)
     }
 
     @Test func offlineTakesPrecedence() {
-        let sut = CloudSyncManager()
+        let sut = CloudSyncManager(cloudAvailability: { true })
         sut.handleNetworkChange(isAvailable: false)
         #expect(sut.syncStatus == .offline)
         #expect(!sut.isOnline)
@@ -29,7 +29,7 @@ struct CloudSyncManagerTests {
 
     @Test func importEventsRelayIntoTheChangeStream() async {
         let center = MigraineChangeCenter()
-        let sut = CloudSyncManager(changeCenter: center)
+        let sut = CloudSyncManager(changeCenter: center, cloudAvailability: { true })
         var iterator = center.changes().makeAsyncIterator()
 
         sut.handleCloudEvent(.init(isImport: true, isFinished: false, succeeded: false, errorDescription: nil))
@@ -42,7 +42,7 @@ struct CloudSyncManagerTests {
     }
 
     @Test func failedEventsSurfaceTheError() {
-        let sut = CloudSyncManager()
+        let sut = CloudSyncManager(cloudAvailability: { true })
         sut.handleCloudEvent(.init(isImport: false, isFinished: true, succeeded: false, errorDescription: "quota"))
         #expect(sut.syncStatus == .error("quota"))
         #expect(sut.lastErrorMessage == "quota")
@@ -52,10 +52,35 @@ struct CloudSyncManagerTests {
     }
 
     @Test func remoteChangeMarksAndResets() {
-        let sut = CloudSyncManager()
+        let sut = CloudSyncManager(cloudAvailability: { true })
         sut.handleRemoteChange()
         #expect(sut.hasReceivedRemoteChange)
         sut.resetRemoteChangeTracking()
         #expect(!sut.hasReceivedRemoteChange)
+    }
+
+    @Test func manualSyncReportsOfflineWithoutTouchingTheStore() async {
+        let sut = CloudSyncManager(cloudAvailability: { true })
+        sut.handleNetworkChange(isAvailable: false)
+        await sut.triggerSync()
+        #expect(sut.syncStatus == .offline)
+        #expect(sut.lastSyncDate == nil)
+    }
+
+    @Test func statusLabelsCoverEveryCase() {
+        #expect(CloudSyncManager.SyncStatus.error("x").isError)
+        #expect(!CloudSyncManager.SyncStatus.idle.isError)
+        #expect(!CloudSyncManager.SyncStatus.synced(Date()).shortText.isEmpty)
+        #expect(CloudSyncManager.SyncStatus.syncing.systemImage == "arrow.triangle.2.circlepath.icloud")
+    }
+
+    @Test func signedOutDevicesReportUnavailableInsteadOfErrors() async {
+        let sut = CloudSyncManager(cloudAvailability: { false })
+        sut.handleCloudEvent(.init(isImport: false, isFinished: true, succeeded: false, errorDescription: "no account"))
+        #expect(sut.syncStatus == .unavailable)
+        #expect(!sut.isCloudAvailable)
+        await sut.triggerSync()
+        #expect(sut.syncStatus == .unavailable)
+        #expect(sut.syncStatus.systemImage == "person.icloud")
     }
 }

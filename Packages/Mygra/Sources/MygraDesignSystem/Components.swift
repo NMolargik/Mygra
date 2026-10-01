@@ -22,7 +22,7 @@ public struct InsightCard<Content: View>: View {
         title: String? = nil,
         systemImage: String? = nil,
         accent: Color = .mygraBlue,
-        @ViewBuilder content: () -> Content
+        @ContentBuilder content: () -> Content
     ) {
         self.title = title
         self.systemImage = systemImage
@@ -75,8 +75,8 @@ public struct InfoDetailView<Content: View, Trailing: View>: View {
 
     public init(
         title: String,
-        @ViewBuilder trailing: @escaping () -> Trailing = { EmptyView() },
-        @ViewBuilder content: @escaping () -> Content
+        @ContentBuilder trailing: @escaping () -> Trailing = { EmptyView() },
+        @ContentBuilder content: @escaping () -> Content
     ) {
         self.title = title
         self.trailing = trailing
@@ -144,7 +144,7 @@ public struct MetricRowView<Value: View>: View {
     let title: String
     let valueView: Value
 
-    public init(_ title: String, @ViewBuilder value: () -> Value) {
+    public init(_ title: String, @ContentBuilder value: () -> Value) {
         self.title = title
         self.valueView = value()
     }
@@ -279,7 +279,7 @@ public struct DetailRowView<Trailing: View>: View {
     let title: String
     let subtitle: String?
     let tint: Color
-    @ViewBuilder let trailing: () -> Trailing
+    @ContentBuilder let trailing: () -> Trailing
 
     public init(
         style: Style,
@@ -287,7 +287,7 @@ public struct DetailRowView<Trailing: View>: View {
         title: String,
         subtitle: String? = nil,
         tint: Color,
-        @ViewBuilder trailing: @escaping () -> Trailing
+        @ContentBuilder trailing: @escaping () -> Trailing
     ) {
         self.style = style
         self.systemImage = systemImage

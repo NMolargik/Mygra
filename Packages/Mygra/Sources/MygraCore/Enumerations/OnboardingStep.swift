@@ -27,11 +27,32 @@ nonisolated public enum OnboardingStep: CaseIterable, Sendable, Hashable {
         }
     }
 
-    /// Steps the user may skip without granting anything.
+    /// The SF Symbol that represents this step (progress indicators, headers).
+    public var systemImage: String {
+        switch self {
+        case .privacy: return "lock.shield.fill"
+        case .location: return "location.fill"
+        case .health: return "heart.fill"
+        case .notification: return "bell.fill"
+        case .user: return "person.fill"
+        case .complete: return "checkmark.circle.fill"
+        }
+    }
+
+    /// Steps that ask for a system permission. Per the HIG these are never required:
+    /// the user may skip any of them and grant access later from Settings.
+    public var isPermissionStep: Bool {
+        switch self {
+        case .location, .health, .notification: return true
+        case .privacy, .user, .complete: return false
+        }
+    }
+
+    /// Steps the user may skip without granting or entering anything.
     public var isSkippable: Bool {
         switch self {
-        case .privacy, .location, .notification: return true
-        case .health, .user, .complete: return false
+        case .privacy, .location, .health, .notification, .user: return true
+        case .complete: return false
         }
     }
 
@@ -42,5 +63,12 @@ nonisolated public enum OnboardingStep: CaseIterable, Sendable, Hashable {
             return nil
         }
         return steps[steps.index(after: index)]
+    }
+
+    /// The step before this one, or nil on the first step.
+    public var previous: OnboardingStep? {
+        let steps = Self.allCases
+        guard let index = steps.firstIndex(of: self), index > steps.startIndex else { return nil }
+        return steps[steps.index(before: index)]
     }
 }

@@ -2,7 +2,8 @@
 //  MigraineCalendarView.swift
 //  MygraFeatureCalendar
 //
-//  Month calendar with an optional tag filter and the selected day's migraines.
+//  Month calendar with an optional tag filter and the selected day's migraines. Swipe
+//  horizontally to change months; the month title animates numerically.
 //
 
 #if os(iOS)
@@ -14,9 +15,7 @@ import MygraFeatureShared
 public struct MigraineCalendarView: View {
     @Environment(MigraineDataModel.self) private var migraineData
     @Environment(TagDataModel.self) private var tagData
-
-    /// When provided, rows are buttons that call back instead of pushing a navigation value.
-    var onSelectMigraine: ((UUID) -> Void)?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var selectedDate = Date()
     @State private var displayedMonth = Date()
@@ -24,9 +23,7 @@ public struct MigraineCalendarView: View {
 
     private let calendar = Calendar.current
 
-    public init(onSelectMigraine: ((UUID) -> Void)? = nil) {
-        self.onSelectMigraine = onSelectMigraine
-    }
+    public init() {}
 
     private var filteredMigraines: [Migraine] {
         guard let selectedTag else { return migraineData.migraines }
@@ -37,72 +34,122 @@ public struct MigraineCalendarView: View {
         MigraineStatistics.migraines(filteredMigraines, on: selectedDate, calendar: calendar)
     }
 
+    private var monthMigraineCount: Int {
+        filteredMigraines.filter { calendar.isDate($0.startDate, equalTo: displayedMonth, toGranularity: .month) }.count
+    }
+
     public var body: some View {
+        Group {
+            if horizontalSizeClass == .regular {
+                HStack(alignment: .top, spacing: 0) {
+                    calendarPane
+                        .frame(maxWidth: 520)
+                    Divider()
+                    dayList
+                }
+            } else {
+                VStack(spacing: 0) {
+                    calendarPane
+                    Divider().padding(.top, Brand.Space.lg)
+                    dayList
+                }
+            }
+        }
+        .navigationTitle("Calendar")
+        .navigationSubtitleIfAvailable(monthSubtitle)
+        .toolbar {
+            ToolbarItem(placement: .secondaryAction) {
+                Button(action: goToToday) {
+                    Label("Today", systemImage: "calendar.circle")
+                }
+                .disabled(calendar.isDate(displayedMonth, equalTo: Date(), toGranularity: .month) && calendar.isDateInToday(selectedDate))
+                .keyboardShortcut("t", modifiers: .command)
+            }
+        }
+    }
+
+    private var monthSubtitle: String {
+        monthMigraineCount == 1
+            ? String(localized: "1 migraine this month")
+            : String(localized: "\(monthMigraineCount) migraines this month")
+    }
+
+    // MARK: - Panes
+
+    private var calendarPane: some View {
         VStack(spacing: 0) {
             MonthHeaderView(
                 displayedMonth: displayedMonth,
                 onPrevious: { changeMonth(by: -1) },
-                onNext: { changeMonth(by: 1) },
-                onToday: goToToday
+                onNext: { changeMonth(by: 1) }
             )
             .padding(.horizontal)
-            .padding(.vertical, 8)
+            .padding(.vertical, Brand.Space.sm)
 
             if !tagData.tags.isEmpty {
                 TagFilterView(tags: tagData.tags, selectedTag: $selectedTag)
                     .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .padding(.bottom, Brand.Space.sm)
             }
 
             CalendarGridView(displayedMonth: displayedMonth, selectedDate: $selectedDate, migraines: filteredMigraines)
                 .padding(.horizontal)
-
-            Divider()
-                .padding(.top, 16)
-
-            if migrainesForSelectedDate.isEmpty {
-                ContentUnavailableView(
-                    "No Migraines",
-                    systemImage: "calendar.badge.checkmark",
-                    description: Text("No migraines recorded on \(formattedDate(selectedDate))")
-                )
-                .frame(maxHeight: .infinity)
-            } else {
-                List {
-                    Section {
-                        ForEach(migrainesForSelectedDate) { migraine in
-                            if let onSelectMigraine {
-                                Button {
-                                    onSelectMigraine(migraine.id)
-                                } label: {
-                                    MigraineCalendarRowView(migraine: migraine)
-                                }
-                                .tint(.primary)
-                            } else {
-                                NavigationLink(value: migraine.id) {
-                                    MigraineCalendarRowView(migraine: migraine)
-                                }
-                            }
+                .id(calendar.dateInterval(of: .month, for: displayedMonth)?.start ?? displayedMonth)
+                .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
+                .gesture(
+                    DragGesture(minimumDistance: 40)
+                        .onEnded { value in
+                            guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                            changeMonth(by: value.translation.width < 0 ? 1 : -1)
                         }
-                    } header: {
-                        Text("\(migrainesForSelectedDate.count) migraines on \(formattedDate(selectedDate))")
-                    }
-                }
-                .listStyle(.insetGrouped)
-            }
+                )
+                .accessibilityAction(named: Text("Next month")) { changeMonth(by: 1) }
+                .accessibilityAction(named: Text("Previous month")) { changeMonth(by: -1) }
         }
-        .navigationTitle("Calendar")
     }
+
+    @ContentBuilder
+    private var dayList: some View {
+        if migrainesForSelectedDate.isEmpty {
+            ContentUnavailableView {
+                Label("No Migraines", systemImage: "calendar.badge.checkmark")
+            } description: {
+                Text("No migraines recorded on \(formattedDate(selectedDate))")
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        } else {
+            List {
+                Section {
+                    ForEach(migrainesForSelectedDate) { migraine in
+                        NavigationLink(value: migraine.id) {
+                            MigraineCalendarRowView(migraine: migraine)
+                        }
+                        .hoverHighlight()
+                    }
+                } header: {
+                    Text(migrainesForSelectedDate.count == 1
+                         ? String(localized: "1 migraine on \(formattedDate(selectedDate))")
+                         : String(localized: "\(migrainesForSelectedDate.count) migraines on \(formattedDate(selectedDate))"))
+                }
+            }
+            .listStyle(.insetGrouped)
+            .animation(.snappy, value: selectedDate)
+        }
+    }
+
+    // MARK: - Actions
 
     private func changeMonth(by value: Int) {
         guard let newMonth = calendar.date(byAdding: .month, value: value, to: displayedMonth) else { return }
-        withAnimation(.easeInOut(duration: 0.2)) {
+        Haptics.lightImpact()
+        withAnimation(.snappy) {
             displayedMonth = newMonth
         }
     }
 
     private func goToToday() {
-        withAnimation(.easeInOut(duration: 0.2)) {
+        Haptics.lightImpact()
+        withAnimation(.snappy) {
             displayedMonth = Date()
             selectedDate = Date()
         }
@@ -119,41 +166,40 @@ private struct MonthHeaderView: View {
     let displayedMonth: Date
     let onPrevious: () -> Void
     let onNext: () -> Void
-    let onToday: () -> Void
 
     var body: some View {
         HStack {
             Button(action: onPrevious) {
-                Image(systemName: "chevron.left")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                Label("Previous month", systemImage: "chevron.left")
+                    .labelStyle(.iconOnly)
+                    .font(.title3.weight(.semibold))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Previous month")
+            .glassActionButton(tint: .mygraPurple, prominent: false)
+            .hoverHighlight()
 
             Spacer()
 
-            Text(displayedMonth.formatted(.dateTime.month(.wide).year()))
-                .font(.title2)
-                .fontWeight(.bold)
+            VStack(spacing: 2) {
+                Text(displayedMonth, format: .dateTime.month(.wide))
+                    .font(.title2.weight(.bold))
+                    .contentTransition(.numericText())
+                Text(displayedMonth, format: .dateTime.year())
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.numericText())
+            }
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isHeader)
 
             Spacer()
 
             Button(action: onNext) {
-                Image(systemName: "chevron.right")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                Label("Next month", systemImage: "chevron.right")
+                    .labelStyle(.iconOnly)
+                    .font(.title3.weight(.semibold))
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Next month")
-
-            Button(action: onToday) {
-                Text("Today")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-            }
-            .buttonStyle(.bordered)
-            .padding(.leading, 8)
+            .glassActionButton(tint: .mygraPurple, prominent: false)
+            .hoverHighlight()
         }
     }
 }
@@ -166,7 +212,7 @@ private struct TagFilterView: View {
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 8) {
+            HStack(spacing: Brand.Space.sm) {
                 FilterChip(label: String(localized: "All"), color: .gray, isSelected: selectedTag == nil) {
                     selectedTag = nil
                 }
@@ -176,7 +222,10 @@ private struct TagFilterView: View {
                     }
                 }
             }
+            .padding(.vertical, 2)
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Filter by tag")
     }
 }
 
@@ -187,17 +236,21 @@ private struct FilterChip: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            Haptics.lightImpact()
+            withAnimation(.snappy) { onTap() }
+        } label: {
             Text(label)
-                .font(.subheadline)
-                .fontWeight(isSelected ? .semibold : .regular)
-                .padding(.horizontal, 12)
+                .font(.subheadline.weight(isSelected ? .semibold : .regular))
+                .padding(.horizontal, Brand.Space.md)
                 .padding(.vertical, 6)
-                .background(Capsule().fill(isSelected ? color.opacity(0.2) : Color.clear))
-                .overlay(Capsule().strokeBorder(color, lineWidth: isSelected ? 0 : 1))
+                .background(Capsule(style: .continuous).fill(isSelected ? color.opacity(0.22) : Color.clear))
+                .overlay(Capsule(style: .continuous).strokeBorder(color.opacity(isSelected ? 0 : 0.6), lineWidth: 1))
                 .foregroundStyle(isSelected ? color : .primary)
         }
         .buttonStyle(.plain)
+        .hoverHighlight()
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 
@@ -207,20 +260,21 @@ private struct MigraineCalendarRowView: View {
     let migraine: Migraine
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Brand.Space.md) {
             Circle()
-                .fill(migraine.severity.color)
+                .fill(migraine.severity.color.gradient)
                 .frame(width: 10, height: 10)
+                .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(migraine.startDate.formatted(date: .omitted, time: .shortened))
+            VStack(alignment: .leading, spacing: Brand.Space.xs) {
+                Text(migraine.startDate, format: .dateTime.hour().minute())
                     .font(.headline)
                 if migraine.isOngoing {
-                    Text("Ongoing")
+                    Label("Ongoing", systemImage: "waveform.path.ecg")
                         .font(.subheadline)
-                        .foregroundStyle(.orange)
+                        .foregroundStyle(.mygraPurple)
                 } else if let duration = migraine.duration {
-                    Text(MigraineDates.compactDurationString(duration))
+                    Label(MigraineDates.compactDurationString(duration), systemImage: "clock")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -232,13 +286,14 @@ private struct MigraineCalendarRowView: View {
                 Text("Pain")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text("\(migraine.painLevel)")
-                    .font(.title3)
-                    .fontWeight(.semibold)
+                Text(migraine.painLevel, format: .number)
+                    .font(.title3.weight(.semibold))
+                    .monospacedDigit()
+                    .foregroundStyle(migraine.severity.color)
             }
 
             if let tags = migraine.tags, !tags.isEmpty {
-                HStack(spacing: 4) {
+                HStack(spacing: Brand.Space.xs) {
                     ForEach(tags.prefix(2)) { tag in
                         Circle()
                             .fill(tag.color)
@@ -250,9 +305,11 @@ private struct MigraineCalendarRowView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .accessibilityLabel(Text("\(tags.count) tags"))
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, Brand.Space.xs)
+        .accessibilityElement(children: .combine)
     }
 }
 

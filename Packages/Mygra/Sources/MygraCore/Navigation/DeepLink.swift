@@ -2,8 +2,9 @@
 //  DeepLink.swift
 //  MygraCore
 //
-//  Deep link actions triggered from widgets, App Intents, menu-bar commands, the Live
-//  Activity, or external `mygra://` URLs. Parsing is pure so it is host-tested.
+//  Deep link actions triggered from widgets, App Intents, Home Screen quick actions,
+//  menu-bar commands, the Live Activity, or external `mygra://` URLs. Parsing is pure
+//  so it is host-tested.
 //
 
 import Foundation
@@ -14,6 +15,7 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
     case calendar
     case list
     case settings
+    case tags
     case migraine(UUID)
     case assistant
     case endOngoing
@@ -23,7 +25,7 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
 
     /// Parses a `mygra://` URL. Supported forms:
     /// - `mygra://new-migraine`
-    /// - `mygra://home`, `calendar`, `list`, `settings`, `assistant`, `end-ongoing`
+    /// - `mygra://home`, `calendar`, `list`, `settings`, `tags`, `assistant`, `end-ongoing`
     /// - `mygra://migraine/<uuid>`
     public init?(url: URL) {
         guard url.scheme == Self.scheme, let host = url.host() else { return nil }
@@ -33,6 +35,7 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
         case "calendar": self = .calendar
         case "list": self = .list
         case "settings": self = .settings
+        case "tags": self = .tags
         case "assistant": self = .assistant
         case "end-ongoing": self = .endOngoing
         case "migraine":
@@ -53,11 +56,24 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
         case .calendar: path = "calendar"
         case .list: path = "list"
         case .settings: path = "settings"
+        case .tags: path = "tags"
         case .assistant: path = "assistant"
         case .endOngoing: path = "end-ongoing"
         case .migraine(let id): path = "migraine/\(id.uuidString)"
         }
         return URL(string: "\(Self.scheme)://\(path)")!
+    }
+
+    /// The tab this link lands on, or nil for links that don't change tabs (the
+    /// assistant sheet, ending the ongoing migraine).
+    public var destinationTab: AppTab? {
+        switch self {
+        case .home, .newMigraine: return .dashboard
+        case .calendar: return .calendar
+        case .list, .migraine: return .list
+        case .settings, .tags: return .settings
+        case .assistant, .endOngoing: return nil
+        }
     }
 }
 
@@ -80,4 +96,12 @@ extension DeepLink {
         defaults?.removeObject(forKey: Self.pendingDefaultsKey)
         return DeepLink(url: url)
     }
+}
+
+// MARK: - User activities
+
+/// `NSUserActivity` types the app publishes for Handoff / Siri on-screen awareness.
+nonisolated public enum UserActivityType {
+    /// The user is looking at one migraine's detail screen.
+    public static let viewingMigraine = "com.molargiksoftware.Mygra.viewingMigraine"
 }

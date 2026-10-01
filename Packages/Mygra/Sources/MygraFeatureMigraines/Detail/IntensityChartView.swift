@@ -31,9 +31,9 @@ struct IntensityChartView: View {
                         Label("Update", systemImage: "waveform.path.ecg")
                             .font(.subheadline)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .glassActionButton(tint: .mygraPurple)
                     .controlSize(.small)
-                    .tint(.mygraPurple)
+                    .hoverHighlight()
                 }
             }
 
@@ -52,8 +52,8 @@ struct IntensityChartView: View {
             }
             .font(.caption)
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(Brand.Space.lg)
+        .cardSurface()
     }
 
     private func singleSampleView(_ sample: IntensitySample) -> some View {

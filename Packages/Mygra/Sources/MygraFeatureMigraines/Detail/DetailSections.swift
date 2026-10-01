@@ -27,16 +27,30 @@ struct TriggersDetailView: View {
 
     var body: some View {
         InfoDetailView(title: String(localized: "Triggers")) {
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(triggers, id: \.self) { trigger in
-                    Label(trigger.displayName, systemImage: "minus")
-                }
-                ForEach(customTriggers, id: \.self) { trigger in
-                    Label(trigger, systemImage: "minus")
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
+            TriggerChipFlow(labels: triggers.map(\.displayName) + customTriggers)
+                .frame(maxWidth: .infinity, alignment: .leading)
         }
+    }
+}
+
+/// Trigger names as wrapping chips, so a long list reads at a glance.
+private struct TriggerChipFlow: View {
+    let labels: [String]
+
+    var body: some View {
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: Brand.Space.sm, alignment: .leading)], alignment: .leading, spacing: Brand.Space.sm) {
+            ForEach(labels, id: \.self) { label in
+                Text(label)
+                    .font(.subheadline)
+                    .lineLimit(1)
+                    .padding(.horizontal, Brand.Space.md)
+                    .padding(.vertical, 6)
+                    .background(Capsule(style: .continuous).fill(Color.mygraPurple.opacity(0.14)))
+                    .foregroundStyle(.primary)
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(Text("Triggers: \(labels.joined(separator: ", "))"))
     }
 }
 

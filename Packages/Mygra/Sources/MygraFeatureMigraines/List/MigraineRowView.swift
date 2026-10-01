@@ -2,6 +2,9 @@
 //  MigraineRowView.swift
 //  MygraFeatureMigraines
 //
+//  One migraine in the list: a severity bar, the date (or live elapsed time), pain and
+//  stress chips, and a quiet second line with pin, trigger count, and note.
+//
 
 #if os(iOS)
 import SwiftUI
@@ -14,84 +17,112 @@ struct MigraineRowView: View {
     let migraine: Migraine
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            if migraine.isOngoing {
-                TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { context in
-                    RoundedRectangle(cornerRadius: 4, style: .continuous)
-                        .fill(pulseColor(at: context.date))
-                        .frame(width: 8)
-                        .accessibilityHidden(true)
-                }
-            } else {
-                RoundedRectangle(cornerRadius: 4, style: .continuous)
-                    .fill(migraine.severity.color)
-                    .frame(width: 8)
-                    .accessibilityHidden(true)
-            }
+        HStack(alignment: .center, spacing: Brand.Space.md) {
+            severityBar
 
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text(primaryTitle)
-                        .font(.subheadline)
-                        .monospacedDigit()
-                        .fontWeight(.bold)
-
-                    Spacer()
-
+            VStack(alignment: .leading, spacing: Brand.Space.xs) {
+                HStack(alignment: .firstTextBaseline, spacing: Brand.Space.sm) {
                     if migraine.isOngoing {
-                        durationPill
+                        Label("Ongoing", systemImage: "waveform.path.ecg")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.mygraPurple)
+                            .symbolEffect(.pulse, options: .repeating)
+                    } else {
+                        Text(DateFormatting.compactDateTime(migraine.startDate, useDMY: useDayMonthYearDates))
+                            .font(.subheadline.weight(.semibold))
+                            .monospacedDigit()
                     }
 
-                    HStack(spacing: 4) {
-                        metricPill(value: migraine.painLevel, tint: migraine.severity.color)
-                        metricPill(value: migraine.stressLevel, tint: .mygraPurple)
+                    Spacer(minLength: Brand.Space.xs)
+
+                    HStack(spacing: Brand.Space.xs) {
+                        levelChip(migraine.painLevel, systemImage: "bolt.fill", tint: migraine.severity.color)
+                        levelChip(migraine.stressLevel, systemImage: "brain.head.profile", tint: .indigo)
                     }
                 }
 
-                let triggerCount = migraine.triggers.count + migraine.customTriggers.count
-                let hasNote = migraine.note?.isEmpty == false
-                if migraine.isPinned || triggerCount > 0 || hasNote {
-                    HStack(alignment: .center, spacing: 8) {
-                        if migraine.isPinned {
-                            Image(systemName: "pin.fill")
-                                .padding(.trailing, 8)
-                                .padding(.vertical, 4)
-                                .foregroundStyle(.yellow)
-                                .accessibilityLabel(Text("Pinned"))
-                        }
-                        if triggerCount > 0 {
-                            triggerDots(count: triggerCount)
-                        }
-                        if hasNote, let note = migraine.note {
-                            Text("\"\(note)\"")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                        }
+                HStack(spacing: Brand.Space.sm) {
+                    if migraine.isOngoing {
+                        durationLabel
+                    } else if let duration = migraine.duration {
+                        Label(MigraineDates.compactDurationString(duration), systemImage: "clock")
+                            .labelStyle(.titleAndIcon)
                     }
-                    .frame(height: 30, alignment: .center)
+                    if migraine.isPinned {
+                        Image(systemName: "pin.fill")
+                            .foregroundStyle(.yellow)
+                            .accessibilityLabel(Text("Pinned"))
+                    }
+                    let triggerCount = migraine.triggers.count + migraine.customTriggers.count
+                    if triggerCount > 0 {
+                        Label("\(triggerCount)", systemImage: "exclamationmark.triangle")
+                            .accessibilityLabel(Text("\(triggerCount) triggers"))
+                    }
+                    if let note = migraine.note, !note.isEmpty {
+                        Text(note)
+                            .italic()
+                            .lineLimit(1)
+                            .truncationMode(.tail)
+                    }
                 }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .frame(minHeight: 16)
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, Brand.Space.xs)
         .accessibilityElement(children: .combine)
         .accessibilityLabel(accessibilitySummary)
     }
 
-    // MARK: - Derived
+    // MARK: - Pieces
 
-    private var primaryTitle: String {
-        migraine.isOngoing
-            ? String(localized: "Ongoing")
-            : DateFormatting.compactDateTime(migraine.startDate, useDMY: useDayMonthYearDates)
+    @ContentBuilder
+    private var severityBar: some View {
+        if migraine.isOngoing {
+            TimelineView(.periodic(from: .now, by: 1.0 / 20.0)) { context in
+                RoundedRectangle(cornerRadius: 3, style: .continuous)
+                    .fill(pulseColor(at: context.date))
+                    .frame(width: 6)
+            }
+            .accessibilityHidden(true)
+        } else {
+            RoundedRectangle(cornerRadius: 3, style: .continuous)
+                .fill(migraine.severity.color.gradient)
+                .frame(width: 6)
+                .accessibilityHidden(true)
+        }
+    }
+
+    private func levelChip(_ value: Int, systemImage: String, tint: Color) -> some View {
+        HStack(spacing: 3) {
+            Image(systemName: systemImage)
+                .font(.caption2)
+            Text(value, format: .number)
+                .font(.caption.weight(.bold))
+                .monospacedDigit()
+        }
+        .foregroundStyle(tint)
+        .padding(.horizontal, 7)
+        .padding(.vertical, 3)
+        .background(Capsule(style: .continuous).fill(tint.opacity(0.14)))
+        .accessibilityHidden(true)
+    }
+
+    private var durationLabel: some View {
+        TimelineView(.periodic(from: .now, by: 1.0)) { context in
+            Label(MigraineDates.durationString(context.date.timeIntervalSince(migraine.startDate)), systemImage: "clock.fill")
+                .monospacedDigit()
+                .foregroundStyle(.mygraBlue)
+                .contentTransition(.numericText())
+        }
     }
 
     /// A color that pulses between clear and purple using a sine wave.
     private func pulseColor(at time: Date, pulseDuration: Double = 1.5) -> Color {
         let t = time.timeIntervalSinceReferenceDate / pulseDuration
         let phase = (sin(t * .pi * 2) + 1) / 2
-        return Color.mygraPurple.opacity(phase)
+        return Color.mygraPurple.opacity(0.35 + 0.65 * phase)
     }
 
     private var accessibilitySummary: String {
@@ -106,6 +137,7 @@ struct MigraineRowView: View {
         }
         parts.append(String(localized: "Pain \(migraine.painLevel)"))
         parts.append(String(localized: "Stress \(migraine.stressLevel)"))
+        if migraine.isPinned { parts.append(String(localized: "Pinned")) }
         let triggerCount = migraine.triggers.count + migraine.customTriggers.count
         if triggerCount > 0 {
             parts.append(String(localized: "Triggers \(triggerCount)"))
@@ -114,54 +146,6 @@ struct MigraineRowView: View {
             parts.append(String(localized: "Note \(note)"))
         }
         return parts.joined(separator: ", ")
-    }
-
-    // MARK: - Pieces
-
-    private func metricPill(value: Int, tint: Color) -> some View {
-        Text("\(value) / 10")
-            .font(.caption).bold()
-            .monospacedDigit()
-            .foregroundStyle(.primary)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(tint.opacity(0.5)))
-    }
-
-    private func triggerDots(count: Int) -> some View {
-        let limited = min(count, 10)
-        return HStack(spacing: 3) {
-            ForEach(0..<limited, id: \.self) { _ in
-                Circle()
-                    .fill(.secondary)
-                    .frame(width: 4, height: 4)
-            }
-            if count > limited {
-                Text("+\(count - limited)")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .accessibilityLabel("\(count) triggers")
-        .font(.caption)
-    }
-
-    private var durationPill: some View {
-        TimelineView(.periodic(from: .now, by: 1.0)) { context in
-            let duration = MigraineDates.durationString(context.date.timeIntervalSince(migraine.startDate))
-            VStack(spacing: 2) {
-                Image(systemName: "clock.fill")
-                    .imageScale(.small)
-                Text(duration)
-                    .font(.caption).bold()
-                    .monospacedDigit()
-                    .lineLimit(1)
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(Color.mygraBlue))
-            .accessibilityLabel("Ongoing duration \(duration)")
-        }
     }
 }
 

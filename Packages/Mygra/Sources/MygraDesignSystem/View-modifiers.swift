@@ -3,7 +3,9 @@
 //  MygraDesignSystem
 //
 //  The shared building blocks of the HIG / Liquid Glass surface language: card
-//  surfaces, the standard action button, stat pills, shimmer, and small conditionals.
+//  surfaces, the standard action buttons, OS-gated tab/toolbar accessories, stat pills,
+//  shimmer, hover affordances, and small conditionals. Everything that needs an iOS 26+
+//  or 27+ API is gated here once so feature code stays free of `#available` noise.
 //
 
 import SwiftUI
@@ -53,7 +55,7 @@ extension View {
     }
 
     /// Conditionally applies a transform — keeps call sites declarative.
-    @ViewBuilder
+    @ContentBuilder
     public func `if`<Transformed: View>(_ condition: Bool, transform: (Self) -> Transformed) -> some View {
         if condition { transform(self) } else { self }
     }
@@ -66,14 +68,36 @@ extension View {
     public func statPillBackground() -> some View {
         modifier(StatPillBackground())
     }
+
+    /// Pointer/hover highlight for iPad trackpads and Mac — a no-op elsewhere.
+    @ContentBuilder
+    public func hoverHighlight() -> some View {
+        #if os(iOS)
+        hoverEffect(.highlight)
+        #else
+        self
+        #endif
+    }
+
+    /// Pointer lift for card-like tappable surfaces.
+    @ContentBuilder
+    public func hoverLift() -> some View {
+        #if os(iOS)
+        hoverEffect(.lift)
+        #else
+        self
+        #endif
+    }
 }
+
+// MARK: - Buttons
 
 #if os(iOS)
 extension View {
     /// The app's standard action-button treatment: native Liquid Glass button styles on
     /// iOS 26+ (bordered fallback), so call sites never hand-roll tinted glass pills.
     /// Reserve `prominent` for the single primary action in a given context.
-    @ViewBuilder
+    @ContentBuilder
     public func glassActionButton(tint: Color = .mygraBlue, prominent: Bool = true) -> some View {
         if #available(iOS 26.0, *) {
             if prominent {
@@ -92,7 +116,7 @@ extension View {
 }
 #else
 extension View {
-    @ViewBuilder
+    @ContentBuilder
     public func glassActionButton(tint: Color = .mygraBlue, prominent: Bool = true) -> some View {
         if prominent {
             buttonStyle(.borderedProminent).tint(tint)
@@ -102,6 +126,117 @@ extension View {
     }
 }
 #endif
+
+extension View {
+    /// The full-width primary call to action (onboarding, splash, end-migraine): large
+    /// prominent glass in the brand purple, readable-width capped.
+    public func primaryActionButton(tint: Color = .mygraPurple) -> some View {
+        glassActionButton(tint: tint, prominent: true)
+            .controlSize(.large)
+            .frame(maxWidth: Brand.readableWidth)
+            .hoverHighlight()
+    }
+
+    /// The full-width secondary call to action next to a primary one.
+    public func secondaryActionButton(tint: Color = .mygraBlue) -> some View {
+        glassActionButton(tint: tint, prominent: false)
+            .controlSize(.large)
+            .frame(maxWidth: Brand.readableWidth)
+            .hoverHighlight()
+    }
+}
+
+// MARK: - OS-gated navigation chrome
+
+extension View {
+    /// Attaches a tab-bar bottom accessory where it belongs — an iPhone/iPad idiom on
+    /// iOS 26+. The accessory is always present, so give it content worth the space
+    /// (a status strip, a persistent action); an empty accessory still renders as a
+    /// blank glass bar. No-op on earlier releases and on Mac ("Designed for iPad"),
+    /// where a floating bottom accessory reads as out of place under the Mac chrome.
+    @ContentBuilder
+    public func tabViewBottomAccessoryIfAvailable<Accessory: View>(@ContentBuilder _ accessory: () -> Accessory) -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *), !ProcessInfo.processInfo.isiOSAppOnMac {
+            tabViewBottomAccessory(content: accessory)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+
+    /// Lets the tab bar collapse while scrolling down (iOS 26+), giving content room.
+    @ContentBuilder
+    public func minimizeTabBarOnScrollIfAvailable() -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
+            tabBarMinimizeBehavior(.onScrollDown)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+
+    /// Lets the search field minimize into the toolbar (iOS 26+).
+    @ContentBuilder
+    public func minimizingSearchIfAvailable() -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
+            searchToolbarBehavior(.minimize)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+
+    /// Soft scroll-edge effect under glass bars (iOS 26+), hard edge otherwise.
+    @ContentBuilder
+    public func softScrollEdgesIfAvailable() -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
+            scrollEdgeEffectStyle(.soft, for: .all)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+
+    /// Lets a hero image extend under the glass navigation bar (iOS 26+).
+    @ContentBuilder
+    public func backgroundExtensionIfAvailable() -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
+            backgroundExtensionEffect()
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+
+    /// A navigation subtitle under the large title (iOS 26+), ignored elsewhere.
+    @ContentBuilder
+    public func navigationSubtitleIfAvailable(_ subtitle: String) -> some View {
+        #if os(iOS)
+        if #available(iOS 26.0, *) {
+            navigationSubtitle(subtitle)
+        } else {
+            self
+        }
+        #else
+        self
+        #endif
+    }
+}
 
 // MARK: - Pills & shimmer
 
@@ -136,4 +271,55 @@ struct ShimmerModifier: ViewModifier {
                 }
             }
     }
+}
+
+// MARK: - Label styles
+
+/// A label whose icon sits in a fixed-width column so stacked rows align (Settings,
+/// feature lists). Mirrors the suite-wide `AlignedIconLabelStyle`.
+public struct AlignedIconLabelStyle: LabelStyle {
+    let width: CGFloat
+
+    public init(width: CGFloat = 28) {
+        self.width = width
+    }
+
+    public func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: Brand.Space.md) {
+            configuration.icon
+                .frame(width: width, alignment: .center)
+            configuration.title
+        }
+    }
+}
+
+extension LabelStyle where Self == AlignedIconLabelStyle {
+    public static var alignedIcon: AlignedIconLabelStyle { AlignedIconLabelStyle() }
+}
+
+/// The iOS-Settings idiom: a white glyph on a tinted rounded square, then the title.
+public struct SettingsIconLabelStyle: LabelStyle {
+    let tint: Color
+
+    public init(tint: Color) {
+        self.tint = tint
+    }
+
+    public func makeBody(configuration: Configuration) -> some View {
+        HStack(spacing: Brand.Space.md) {
+            configuration.icon
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(width: 29, height: 29)
+                .background(RoundedRectangle(cornerRadius: 7, style: .continuous).fill(tint.gradient))
+                .accessibilityHidden(true)
+            configuration.title
+                .foregroundStyle(.primary)
+        }
+    }
+}
+
+extension LabelStyle where Self == SettingsIconLabelStyle {
+    /// `Label("Units", systemImage: "ruler").labelStyle(.settingsIcon(.green))`
+    public static func settingsIcon(_ tint: Color) -> SettingsIconLabelStyle { SettingsIconLabelStyle(tint: tint) }
 }

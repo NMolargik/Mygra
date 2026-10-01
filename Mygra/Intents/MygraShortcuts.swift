@@ -41,6 +41,25 @@ struct MygraShortcuts: AppShortcutsProvider {
             systemImageName: "calendar"
         )
         AppShortcut(
+            intent: GetMigraineStatusIntent(),
+            phrases: [
+                "Am I having a migraine in \(.applicationName)",
+                "Check my migraine status in \(.applicationName)",
+                "How long has my migraine lasted in \(.applicationName)",
+            ],
+            shortTitle: "Migraine Status",
+            systemImageName: "waveform.path.ecg"
+        )
+        AppShortcut(
+            intent: UpdateMigraineIntensityIntent(),
+            phrases: [
+                "Update my migraine in \(.applicationName)",
+                "Log my pain level in \(.applicationName)",
+            ],
+            shortTitle: "Update Intensity",
+            systemImageName: "slider.horizontal.3"
+        )
+        AppShortcut(
             intent: LogMigraineIntent(),
             phrases: [
                 "Log a migraine with \(.applicationName)",

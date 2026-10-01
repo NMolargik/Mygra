@@ -41,3 +41,39 @@ public enum MigraineStatistics {
         items.filter { calendar.isDate($0.startDate, inSameDayAs: date) }
     }
 }
+
+// MARK: - List grouping
+
+/// One month's worth of migraines, newest first — a section in the Migraines list.
+nonisolated public struct MigraineMonthGroup: Identifiable, Equatable, Sendable {
+    /// The first instant of the month (the section identity).
+    public let monthStart: Date
+    public let migraineIDs: [UUID]
+
+    public var id: Date { monthStart }
+
+    public init(monthStart: Date, migraineIDs: [UUID]) {
+        self.monthStart = monthStart
+        self.migraineIDs = migraineIDs
+    }
+}
+
+extension MigraineStatistics {
+    /// Groups migraines by the calendar month they started in, newest month first and
+    /// newest migraine first within each month. Order of `items` does not matter.
+    public static func monthGroups(_ items: [Migraine], calendar: Calendar = .current) -> [MigraineMonthGroup] {
+        let sorted = items.sorted { $0.startDate > $1.startDate }
+        var groups: [MigraineMonthGroup] = []
+        var buckets: [Date: [UUID]] = [:]
+        var order: [Date] = []
+        for migraine in sorted {
+            let start = calendar.dateInterval(of: .month, for: migraine.startDate)?.start ?? migraine.startDate
+            if buckets[start] == nil { order.append(start) }
+            buckets[start, default: []].append(migraine.id)
+        }
+        for start in order {
+            groups.append(MigraineMonthGroup(monthStart: start, migraineIDs: buckets[start] ?? []))
+        }
+        return groups
+    }
+}

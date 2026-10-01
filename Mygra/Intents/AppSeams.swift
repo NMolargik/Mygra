@@ -3,8 +3,9 @@
 //  Mygra
 //
 //  Production conformances for the Core seams whose framework types can't live in the
-//  package: Spotlight indexing (AppEntity), intent donation (AppIntents), and the App
-//  Store review prompt (needs the window scene).
+//  package: Spotlight indexing (AppEntity), intent donation (AppIntents), Siri's
+//  on-screen awareness (entity identifiers on NSUserActivity), and the App Store review
+//  prompt (needs the window scene).
 //
 
 import AppIntents
@@ -51,6 +52,17 @@ struct IntentDonor: IntentDonating {
                 Log.migraine.error("Intent donation failed: \(error.localizedDescription)")
             }
         }
+    }
+}
+
+/// Tags the detail screen's user activity with the migraine's app-entity identifier so
+/// Siri can resolve "this migraine" from what's on screen.
+struct MigraineActivityAnnotator: MigraineActivityAnnotating {
+    nonisolated init() {}
+
+    func annotate(_ activity: NSUserActivity, migraineID: UUID) {
+        guard #available(iOS 18.2, *) else { return }
+        activity.appEntityIdentifier = EntityIdentifier(for: MigraineEntity.self, identifier: migraineID)
     }
 }
 

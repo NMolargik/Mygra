@@ -26,12 +26,46 @@ struct AppGlueTests {
         #expect(MygraScreen.calendar.deepLink == .calendar)
         #expect(MygraScreen.migraines.deepLink == .list)
         #expect(MygraScreen.settings.deepLink == .settings)
+        #expect(MygraScreen.tags.deepLink == .tags)
         #expect(MygraScreen.assistant.deepLink == .assistant)
     }
 
     @Test("Every background intent is surfaced as an App Shortcut")
     func shortcutsCoverIntents() {
-        #expect(MygraShortcuts.appShortcuts.count == 4)
+        #expect(MygraShortcuts.appShortcuts.count == 6)
+    }
+
+    @Test("Quick actions declared in Info.plist are valid deep links")
+    func quickActionsRoute() throws {
+        let items = try #require(Bundle.main.object(forInfoDictionaryKey: "UIApplicationShortcutItems") as? [[String: Any]])
+        #expect(items.count == 4)
+        for item in items {
+            let type = try #require(item["UIApplicationShortcutItemType"] as? String)
+            let url = try #require(URL(string: type))
+            #expect(DeepLink(url: url) != nil, "\(type) must parse as a deep link")
+        }
+    }
+
+    @Test("The quick-action relay hands its URL to the session's router once")
+    func quickActionRelay() throws {
+        let relay = QuickActionRelay()
+        #expect(relay.url == nil)
+        relay.url = DeepLink.calendar.url
+        let router = AppRouter()
+        #expect(router.open(url: try #require(relay.url)))
+        relay.url = nil
+        #expect(router.selectedTab == .calendar)
+        #expect(router.pendingDeepLink == .calendar)
+    }
+
+    @Test("The activity annotator tags the detail activity with the entity identifier")
+    func activityAnnotation() {
+        let activity = NSUserActivity(activityType: UserActivityType.viewingMigraine)
+        let id = UUID()
+        MigraineActivityAnnotator().annotate(activity, migraineID: id)
+        if #available(iOS 18.2, *) {
+            #expect(activity.appEntityIdentifier != nil)
+        }
     }
 
     @Test("The entity mirrors the migraine it indexes")

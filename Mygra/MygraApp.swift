@@ -3,9 +3,9 @@
 //  Mygra
 //
 //  Thin shell: builds the SessionController (composition root in MygraComposition),
-//  registers it for App Intents, hosts the window, and owns the two things only an app
-//  process can: BGTaskScheduler registration and the foreground weather-risk timer.
-//  All feature code lives in Packages/Mygra.
+//  registers it for App Intents, hosts the window, and owns the things only an app
+//  process can: BGTaskScheduler registration, the foreground weather-risk timer, and
+//  Home Screen quick actions. All feature code lives in Packages/Mygra.
 //
 
 import AppIntents
@@ -20,9 +20,11 @@ import os
 
 @main
 struct MygraApp: App {
+    @UIApplicationDelegateAdaptor(QuickActionAppDelegate.self) private var appDelegate
     @Environment(\.scenePhase) private var scenePhase
     @AppStorage(AppStorageKeys.bgWeatherTaskScheduled) private var bgWeatherTaskScheduled: Bool = false
 
+    @State private var quickActions = QuickActionRelay.shared
     private let session: SessionController
 
     /// True when the process is hosting a unit-test bundle. Under the test host the app
@@ -45,7 +47,8 @@ struct MygraApp: App {
             container: Self.isRunningTests ? Self.testContainer : nil,
             indexer: Self.isRunningTests ? nil : SpotlightIndexer(),
             reviewRequester: AppStoreReviewRequester(),
-            intentDonor: Self.isRunningTests ? nil : IntentDonor()
+            intentDonor: Self.isRunningTests ? nil : IntentDonor(),
+            activityAnnotator: MigraineActivityAnnotator()
         )
         self.session = session
 
@@ -73,12 +76,15 @@ struct MygraApp: App {
                         bgWeatherTaskScheduled = BackgroundWeatherRefresh.schedule()
                     case .active:
                         session.consumePendingDeepLinkFromIntents()
+                        consumeQuickAction()
                     default:
                         break
                     }
                 }
+                .onChange(of: quickActions.url) { _, _ in consumeQuickAction() }
                 .task {
                     session.start()
+                    consumeQuickAction()
                     await session.notificationManager.refreshAuthorizationStatus()
                     guard !Self.isRunningTests else { return }
                     await runForegroundWeatherChecks()
@@ -87,6 +93,13 @@ struct MygraApp: App {
         .commands {
             MygraCommands(session: session)
         }
+    }
+
+    /// Routes a Home Screen quick action through the same deep-link path as URLs.
+    private func consumeQuickAction() {
+        guard let url = quickActions.url else { return }
+        quickActions.url = nil
+        session.handle(url: url)
     }
 
     /// Checks the weather every 90 minutes while the app is in the foreground.

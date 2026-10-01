@@ -15,6 +15,7 @@ struct DeepLinkTests {
         ("mygra://calendar", DeepLink.calendar),
         ("mygra://list", DeepLink.list),
         ("mygra://settings", DeepLink.settings),
+        ("mygra://tags", DeepLink.tags),
         ("mygra://assistant", DeepLink.assistant),
         ("mygra://end-ongoing", DeepLink.endOngoing),
     ])
@@ -37,10 +38,23 @@ struct DeepLinkTests {
 
     @Test("every case round-trips through its URL")
     func roundTrip() {
-        let links: [DeepLink] = [.newMigraine, .home, .calendar, .list, .settings, .assistant, .endOngoing, .migraine(UUID())]
+        let links: [DeepLink] = [.newMigraine, .home, .calendar, .list, .settings, .tags, .assistant, .endOngoing, .migraine(UUID())]
         for link in links {
             #expect(DeepLink(url: link.url) == link)
         }
+    }
+
+    @Test("every link lands on the right tab")
+    func destinationTabs() {
+        #expect(DeepLink.home.destinationTab == .dashboard)
+        #expect(DeepLink.newMigraine.destinationTab == .dashboard)
+        #expect(DeepLink.calendar.destinationTab == .calendar)
+        #expect(DeepLink.list.destinationTab == .list)
+        #expect(DeepLink.migraine(UUID()).destinationTab == .list)
+        #expect(DeepLink.settings.destinationTab == .settings)
+        #expect(DeepLink.tags.destinationTab == .settings)
+        #expect(DeepLink.assistant.destinationTab == nil)
+        #expect(DeepLink.endOngoing.destinationTab == nil)
     }
 
     @Test("store then take returns the same deep link and clears it")

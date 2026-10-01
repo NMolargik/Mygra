@@ -21,29 +21,21 @@ import MygraFeatureSettings
 struct OnboardingPrivacyPage: View {
     var body: some View {
         ScrollView {
-            VStack(spacing: 32) {
-                VStack(spacing: 16) {
-                    Image(systemName: "lock.shield.fill")
-                        .font(.system(size: 64))
-                        .foregroundStyle(.mygraPurple)
-                        .accessibilityHidden(true)
-                    Text("Your Privacy Matters")
-                        .font(.title.bold())
-                    Text("Mygra is designed to keep your data private and secure.")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .padding(.top, 24)
+            VStack(spacing: Brand.Space.xxl) {
+                OnboardingHeader(
+                    systemImage: "lock.shield.fill",
+                    tint: .mygraPurple,
+                    title: "Your Privacy Matters",
+                    description: "Mygra is designed to keep your data private and secure."
+                )
 
                 FeatureCard {
                     PermissionFeatureRow(icon: "iphone", iconColor: .mygraBlue, title: "On-Device Storage", description: "Your migraine data stays on your device and in your personal iCloud.")
-                    Divider().padding(.leading, 56)
+                    Divider().padding(.leading, 60)
                     PermissionFeatureRow(icon: "person.fill.checkmark", iconColor: .mygraPurple, title: "Your Data, Your Control", description: "Only you can access your migraine history and health insights.")
-                    Divider().padding(.leading, 56)
+                    Divider().padding(.leading, 60)
                     PermissionFeatureRow(icon: "server.rack", iconColor: .mygraBlue, title: "No External Servers", description: "We never send your health data to third-party servers.")
-                    Divider().padding(.leading, 56)
+                    Divider().padding(.leading, 60)
                     PermissionFeatureRow(icon: "checkmark.shield.fill", iconColor: .green, title: "End-to-End Encrypted", description: "iCloud data is encrypted and only accessible by you.")
                 }
 
@@ -95,6 +87,8 @@ struct OnboardingLocationPage: View {
             onRequest: { locationManager?.requestAuthorization() }
         ) {
             PermissionFeatureRow(icon: "sun.max.fill", iconColor: .yellow, title: "Local Weather", description: "See current conditions on your dashboard.")
+            Divider().padding(.leading, 60)
+            PermissionFeatureRow(icon: "barometer", iconColor: .teal, title: "Pressure Alerts", description: "Get a heads-up when barometric swings make migraines more likely.")
         }
     }
 }
@@ -129,7 +123,13 @@ struct OnboardingHealthPage: View {
             requestButtonIcon: "heart.fill",
             requestButtonColor: .pink,
             onRequest: { Task { await healthManager.requestAuthorization() } }
-        )
+        ) {
+            PermissionFeatureRow(icon: "drop.fill", iconColor: .blue, title: "Hydration & Caffeine", description: "See intake alongside each migraine and log it with Quick Add.")
+            Divider().padding(.leading, 60)
+            PermissionFeatureRow(icon: "bed.double.fill", iconColor: .indigo, title: "Sleep", description: "Spot short nights that line up with attacks.")
+            Divider().padding(.leading, 60)
+            PermissionFeatureRow(icon: "brain.head.profile", iconColor: .pink, title: "Headache Records", description: "Completed migraines are written back to Health as headaches.")
+        }
     }
 }
 
@@ -153,7 +153,7 @@ struct OnboardingNotificationPage: View {
         case .denied:
             return PermissionPresentation(icon: "bell.slash.fill", color: .orange, title: "Notifications Disabled", description: "Enable notifications in Settings to receive alerts.")
         case .notRequested:
-            return PermissionPresentation(icon: "bell.circle.fill", color: .mygraBlue, title: "Enable Notifications", description: "Allow notifications to get weather alerts and migraine reminders.")
+            return PermissionPresentation(icon: "bell.badge.fill", color: .mygraBlue, title: "Enable Notifications", description: "Allow notifications to get weather alerts and migraine reminders.")
         }
     }
 
@@ -166,6 +166,8 @@ struct OnboardingNotificationPage: View {
             onRequest: { Task { try? await notificationManager.requestAuthorization() } }
         ) {
             PermissionFeatureRow(icon: "cloud.sun.fill", iconColor: .orange, title: "Weather Alerts", description: "Get notified about conditions that may trigger migraines.")
+            Divider().padding(.leading, 60)
+            PermissionFeatureRow(icon: "waveform.path.ecg", iconColor: .mygraPurple, title: "Live Activity", description: "An ongoing migraine shows on your Lock Screen and Dynamic Island.")
         }
     }
 }
@@ -176,36 +178,27 @@ struct OnboardingUserPage: View {
     let user: User
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 32) {
-                VStack(spacing: 16) {
-                    Image(systemName: "person.circle.fill")
-                        .font(.system(size: 64))
-                        .foregroundStyle(.mygraBlue)
-                        .accessibilityHidden(true)
-                    Text("About You")
-                        .font(.title.bold())
-                    Text("Tell us a bit about yourself so Mygra can personalize insights and track patterns. All data stays on your device or encrypted in iCloud.")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .padding(.top, 24)
-
-                Form {
-                    UserEditView(user: user)
-                }
-                .scrollDisabled(true)
-                .scrollContentBackground(.hidden)
-                .frame(minHeight: 1600)
-                .frame(maxWidth: Brand.readableWidth)
-
-                Spacer(minLength: 120)
+        Form {
+            Section {
+                OnboardingHeader(
+                    systemImage: "person.crop.circle.fill",
+                    tint: .mygraBlue,
+                    title: "About You",
+                    description: "A few details let Mygra personalize insights and spot patterns. Everything stays on your device or encrypted in iCloud, and you can change it anytime."
+                )
+                .frame(maxWidth: .infinity)
+                .padding(.bottom, Brand.Space.sm)
+                .listRowBackground(Color.clear)
+                .listRowInsets(EdgeInsets())
             }
-            .frame(maxWidth: .infinity)
+
+            UserEditView(user: user)
         }
-        .scrollIndicators(.hidden)
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .scrollDismissesKeyboard(.interactively)
+        .frame(maxWidth: Brand.readableWidth + 2 * Brand.Space.xl)
+        .frame(maxWidth: .infinity)
     }
 }
 
@@ -214,6 +207,7 @@ struct OnboardingUserPage: View {
 struct OnboardingCompletePage: View {
     let onFinish: () -> Void
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var showContent = false
     @State private var showButton = false
 
@@ -228,14 +222,16 @@ struct OnboardingCompletePage: View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 16) {
+            VStack(spacing: Brand.Space.lg) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(.green)
+                    .font(.system(size: 88))
+                    .symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(.green.gradient)
                     .symbolEffect(.bounce, value: showContent)
                     .accessibilityHidden(true)
                 Text("You're All Set!")
                     .font(.largeTitle.bold())
+                    .accessibilityAddTraits(.isHeader)
                 Text("Here's what you can do with Mygra")
                     .font(.body)
                     .foregroundStyle(.secondary)
@@ -247,26 +243,30 @@ struct OnboardingCompletePage: View {
 
             FeatureCard {
                 ForEach(Array(features.enumerated()), id: \.offset) { index, feature in
-                    HStack(spacing: 14) {
+                    HStack(spacing: Brand.Space.md) {
                         Image(systemName: feature.icon)
                             .font(.title3)
+                            .symbolRenderingMode(.hierarchical)
                             .foregroundStyle(feature.color)
-                            .frame(width: 28)
+                            .frame(width: 32, height: 32)
+                            .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(feature.color.opacity(0.12)))
+                            .accessibilityHidden(true)
                         Text(feature.title)
                             .font(.body)
                         Spacer()
                         Image(systemName: "checkmark")
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.green)
+                            .accessibilityHidden(true)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 14)
+                    .padding(.horizontal, Brand.Space.lg)
+                    .padding(.vertical, Brand.Space.md)
                     .opacity(showContent ? 1 : 0)
-                    .offset(x: showContent ? 0 : (index.isMultiple(of: 2) ? -30 : 30))
+                    .offset(x: showContent || reduceMotion ? 0 : (index.isMultiple(of: 2) ? -30 : 30))
                     .animation(.spring(response: 0.6, dampingFraction: 0.8).delay(Double(index) * 0.1), value: showContent)
 
                     if index < features.count - 1 {
-                        Divider().padding(.leading, 56)
+                        Divider().padding(.leading, 60)
                     }
                 }
             }
@@ -277,26 +277,25 @@ struct OnboardingCompletePage: View {
                 Haptics.mediumImpact()
                 onFinish()
             } label: {
-                HStack(spacing: 8) {
-                    Text("Enter Mygra")
-                        .font(.headline)
-                    Image(systemName: "arrow.right")
-                        .font(.headline)
-                }
-                .frame(maxWidth: .infinity)
-                .frame(height: 54)
-                .background(Color.mygraPurple)
-                .foregroundStyle(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 14))
+                Label("Enter Mygra", systemImage: "arrow.right")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 24)
             }
-            .frame(maxWidth: Brand.readableWidth)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 40)
+            .primaryActionButton()
+            .keyboardShortcut(.defaultAction)
+            .padding(.horizontal, Brand.Space.xl)
+            .padding(.bottom, Brand.Space.xxl)
             .opacity(showButton ? 1 : 0)
             .offset(y: showButton ? 0 : 20)
         }
         .background(groupedBackground)
         .task {
+            if reduceMotion {
+                showContent = true
+                showButton = true
+                return
+            }
             try? await Task.sleep(for: .milliseconds(300))
             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) { showContent = true }
             try? await Task.sleep(for: .milliseconds(800))
@@ -307,6 +306,10 @@ struct OnboardingCompletePage: View {
 
 #Preview("Privacy") {
     OnboardingPrivacyPage()
+}
+
+#Preview("About You") {
+    OnboardingUserPage(user: User())
 }
 
 #Preview("Complete") {

@@ -21,23 +21,38 @@ public struct TagManagementView: View {
 
     public var body: some View {
         List {
-            Section {
-                Button {
-                    showingAddSheet = true
-                } label: {
-                    Label("Add New Tag", systemImage: "plus.circle.fill")
-                        .foregroundStyle(.mygraBlue)
-                }
-            }
-
             if tagData.tags.isEmpty {
-                Section {
-                    ContentUnavailableView("No Tags", systemImage: "tag.slash", description: Text("Create tags to categorize your migraines"))
+                ContentUnavailableView {
+                    Label("No Tags", systemImage: "tag.slash")
+                } description: {
+                    Text("Create tags to categorize your migraines")
+                } actions: {
+                    Button {
+                        Haptics.lightImpact()
+                        showingAddSheet = true
+                    } label: {
+                        Label("Add Tag", systemImage: "plus")
+                    }
+                    .glassActionButton(tint: .mygraPurple)
                 }
+                .listRowBackground(Color.clear)
             } else {
-                Section("Your Tags") {
+                Section {
                     let rows = ForEach(tagData.tags) { tag in
                         TagRowView(tag: tag) { editingTag = tag }
+                            .contextMenu {
+                                Button {
+                                    editingTag = tag
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                Button(role: .destructive) {
+                                    Haptics.error()
+                                    tagData.delete(tag)
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                     }
                     .onDelete(perform: deleteTags)
                     .onMove(perform: tagData.move)
@@ -48,13 +63,29 @@ public struct TagManagementView: View {
                     } else {
                         rows
                     }
+                } header: {
+                    Text("Your Tags")
+                } footer: {
+                    Text("Drag to arrange. Tags appear in this order in the calendar filter.")
                 }
             }
         }
         .navigationTitle("Manage Tags")
+        .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if !tagData.tags.isEmpty {
-                EditButton()
+                ToolbarItem(placement: .secondaryAction) {
+                    EditButton()
+                }
+            }
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    Haptics.lightImpact()
+                    showingAddSheet = true
+                } label: {
+                    Label("Add Tag", systemImage: "plus")
+                }
+                .accessibilityHint("Creates a new tag")
             }
         }
         .sheet(isPresented: $showingAddSheet) {
@@ -82,22 +113,28 @@ private struct TagRowView: View {
 
     var body: some View {
         Button(action: onEdit) {
-            HStack(spacing: 12) {
+            HStack(spacing: Brand.Space.md) {
                 Circle()
-                    .fill(tag.color)
-                    .frame(width: 16, height: 16)
+                    .fill(tag.color.gradient)
+                    .frame(width: 18, height: 18)
+                    .overlay(Circle().strokeBorder(.white.opacity(0.35), lineWidth: 1))
+                    .accessibilityHidden(true)
                 Text(tag.name)
                     .foregroundStyle(.primary)
                 Spacer()
-                Text("\(tag.migraineCount)")
+                Text(tag.migraineCount, format: .number)
                     .font(.subheadline)
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
                 Image(systemName: "chevron.right")
-                    .font(.caption)
+                    .font(.footnote.weight(.semibold))
                     .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .hoverHighlight()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text("\(tag.name), \(tag.migraineCount) migraines"))
         .accessibilityHint(Text("Double tap to edit this tag"))
@@ -117,6 +154,7 @@ private struct TagEditSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var name = ""
     @State private var selectedColor: Color = .purple
+    @FocusState private var nameFocused: Bool
 
     private var title: LocalizedStringKey {
         if case .create = mode { return "New Tag" }
@@ -134,48 +172,63 @@ private struct TagEditSheet: View {
             Form {
                 Section("Name") {
                     TextField("Tag name", text: $name)
+                        .focused($nameFocused)
+                        .submitLabel(.done)
+                        .onSubmit(save)
                 }
                 Section("Color") {
-                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
+                    LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: Brand.Space.md) {
                         ForEach(colorOptions, id: \.self) { color in
                             ColorOptionButton(color: color, isSelected: selectedColor == color) {
+                                Haptics.lightImpact()
                                 selectedColor = color
                             }
                         }
                     }
-                    .padding(.vertical, 8)
+                    .padding(.vertical, Brand.Space.sm)
+                    .accessibilityElement(children: .contain)
+                    .accessibilityLabel("Tag color")
                 }
                 Section("Preview") {
-                    HStack(spacing: 12) {
+                    HStack(spacing: Brand.Space.md) {
                         Circle()
-                            .fill(selectedColor)
-                            .frame(width: 16, height: 16)
+                            .fill(selectedColor.gradient)
+                            .frame(width: 18, height: 18)
                         Text(name.isEmpty ? String(localized: "Tag Preview") : name)
                             .foregroundStyle(name.isEmpty ? .secondary : .primary)
+                            .contentTransition(.opacity)
                     }
                 }
             }
+            .formStyle(.grouped)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Cancel", role: .cancel) { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        onSave(name.trimmingCharacters(in: .whitespacesAndNewlines), selectedColor.toHex() ?? MigraineTag.defaultColorHex)
-                        dismiss()
-                    }
-                    .disabled(!isValid)
+                    Button("Save", action: save)
+                        .disabled(!isValid)
                 }
             }
             .onAppear {
                 if case .edit(let tag) = mode {
                     name = tag.name
                     selectedColor = tag.color
+                } else {
+                    nameFocused = true
                 }
             }
         }
+        .presentationDetents([.medium, .large])
+    }
+
+    private func save() {
+        guard isValid else { return }
+        onSave(name.trimmingCharacters(in: .whitespacesAndNewlines), selectedColor.toHex() ?? MigraineTag.defaultColorHex)
+        Haptics.success()
+        dismiss()
     }
 }
 
@@ -187,18 +240,24 @@ private struct ColorOptionButton: View {
     var body: some View {
         Button(action: onTap) {
             Circle()
-                .fill(color)
+                .fill(color.gradient)
                 .frame(width: 36, height: 36)
                 .overlay {
                     if isSelected {
-                        Circle()
-                            .stroke(.white, lineWidth: 2)
-                            .padding(4)
+                        Image(systemName: "checkmark")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.white)
+                            .transition(.scale.combined(with: .opacity))
                     }
                 }
-                .shadow(color: isSelected ? color.opacity(0.5) : .clear, radius: 4)
+                .overlay(Circle().strokeBorder(.white.opacity(isSelected ? 0.9 : 0), lineWidth: 2).padding(2))
+                .scaleEffect(isSelected ? 1.08 : 1)
+                .shadow(color: isSelected ? color.opacity(0.5) : .clear, radius: 5)
+                .animation(.snappy, value: isSelected)
         }
         .buttonStyle(.plain)
+        .hoverHighlight()
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 }
 

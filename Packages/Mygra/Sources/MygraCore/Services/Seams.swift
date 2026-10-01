@@ -18,6 +18,8 @@ nonisolated public protocol KeyValueStoring: AnyObject {
     func integer(forKey defaultName: String) -> Int
     func string(forKey defaultName: String) -> String?
     func data(forKey defaultName: String) -> Data?
+    /// The raw stored value, used to tell "never set" apart from `false`/`0`.
+    func object(forKey defaultName: String) -> Any?
     func set(_ value: Any?, forKey defaultName: String)
     func removeObject(forKey defaultName: String)
 }
@@ -75,6 +77,16 @@ public protocol HeadacheRecording: AnyObject {
 public protocol MigraineIndexing {
     /// Replaces the index contents with entries for the given migraines.
     func reindex(migraines: [Migraine])
+}
+
+// MARK: - Siri on-screen awareness
+
+/// Tags the detail screen's `NSUserActivity` with the migraine's App Intents entity
+/// identifier so Siri can resolve "this migraine" from what's on screen (AppIntents
+/// impl in the app target, where the entity type lives).
+@MainActor
+public protocol MigraineActivityAnnotating {
+    func annotate(_ activity: NSUserActivity, migraineID: UUID)
 }
 
 // MARK: - App Intents donation

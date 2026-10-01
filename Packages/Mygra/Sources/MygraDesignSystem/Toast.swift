@@ -119,7 +119,7 @@ public struct ToastView: View {
             .accessibilityAddTraits(.isStaticText)
     }
 
-    @ViewBuilder
+    @ContentBuilder
     private var toastContent: some View {
         if #available(iOS 26.0, *) {
             toastBody

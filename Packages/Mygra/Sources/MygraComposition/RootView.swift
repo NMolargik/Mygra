@@ -31,6 +31,7 @@ public struct RootView: View {
     public var body: some View {
         stageView
             .toastContainer()
+            .environment(session.router)
             .environment(session.migraineData)
             .environment(session.tagData)
             .environment(session.userData)

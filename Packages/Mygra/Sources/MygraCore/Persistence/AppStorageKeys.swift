@@ -23,4 +23,8 @@ nonisolated public enum AppStorageKeys {
     public static let showOxygenStat = "showOxygenStat"
     public static let showGlucoseStat = "showGlucoseStat"
     public static let showTriggersStat = "showTriggersStat"
+
+    // MARK: - Dashboard Stat Order
+    /// JSON-encoded `[DashboardStat]` giving the user's tile order on the Today card.
+    public static let dashboardStatOrder = "dashboardStatOrder"
 }

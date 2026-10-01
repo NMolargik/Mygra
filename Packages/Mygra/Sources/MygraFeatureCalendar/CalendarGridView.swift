@@ -78,11 +78,15 @@ private struct DayCell: View {
     private let calendar = Calendar.current
 
     var body: some View {
-        Button(action: onTap) {
+        Button {
+            Haptics.lightImpact()
+            withAnimation(.snappy) { onTap() }
+        } label: {
             VStack(spacing: 4) {
-                Text("\(calendar.component(.day, from: date))")
+                Text(calendar.component(.day, from: date), format: .number)
                     .font(.body)
-                    .fontWeight(isToday ? .bold : .regular)
+                    .fontWeight(isToday || isSelected ? .bold : .regular)
+                    .monospacedDigit()
                     .foregroundStyle(isSelected ? .white : (isToday ? .mygraBlue : .primary))
 
                 if migrainesForDay.isEmpty {
@@ -104,10 +108,20 @@ private struct DayCell: View {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 44)
-            .background(RoundedRectangle(cornerRadius: 8).fill(isSelected ? Color.mygraBlue : Color.clear))
+            .background(
+                RoundedRectangle(cornerRadius: Brand.Radius.chip, style: .continuous)
+                    .fill(isSelected ? AnyShapeStyle(LinearGradient.mygra) : AnyShapeStyle(Color.clear))
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: Brand.Radius.chip, style: .continuous)
+                    .strokeBorder(isToday && !isSelected ? Color.mygraBlue.opacity(0.6) : Color.clear, lineWidth: 1.5)
+            )
+            .contentShape(RoundedRectangle(cornerRadius: Brand.Radius.chip, style: .continuous))
         }
         .buttonStyle(.plain)
+        .hoverHighlight()
         .accessibilityLabel(accessibilityLabel)
+        .accessibilityAddTraits(isSelected ? [.isButton, .isSelected] : .isButton)
     }
 
     private var accessibilityLabel: String {

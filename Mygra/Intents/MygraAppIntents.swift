@@ -21,6 +21,7 @@ enum MygraScreen: String, AppEnum {
     case calendar
     case migraines
     case settings
+    case tags
     case assistant
 
     nonisolated static var typeDisplayRepresentation: TypeDisplayRepresentation {
@@ -33,6 +34,7 @@ enum MygraScreen: String, AppEnum {
             .calendar: "Calendar",
             .migraines: "Migraines",
             .settings: "Settings",
+            .tags: "Manage Tags",
             .assistant: "Migraine Assistant",
         ]
     }
@@ -43,6 +45,7 @@ enum MygraScreen: String, AppEnum {
         case .calendar: return .calendar
         case .migraines: return .list
         case .settings: return .settings
+        case .tags: return .tags
         case .assistant: return .assistant
         }
     }
@@ -148,5 +151,60 @@ struct DaysSinceLastMigraineIntent: AppIntent {
                 ? "It's been 1 day since your last migraine."
                 : "It's been \(days) days since your last migraine."
         return .result(value: days, dialog: dialog)
+    }
+}
+
+// MARK: - Current status (read-only)
+
+/// Whether a migraine is in progress right now, and for how long — the question Siri
+/// gets asked most while someone is lying down.
+struct GetMigraineStatusIntent: AppIntent {
+    static let title: LocalizedStringResource = "Check Migraine Status"
+    static let description = IntentDescription("Tells you whether a migraine is in progress and how long it has lasted.")
+
+    @Dependency private var session: SessionController
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ReturnsValue<Bool> & ProvidesDialog {
+        let migraines = try session.loadMigraines()
+        guard let ongoing = migraines.first(where: \.isOngoing) else {
+            let days = MigraineDates.daysSince(MigraineStatistics.lastMigraineDate(migraines))
+            if migraines.isEmpty {
+                return .result(value: false, dialog: "No migraine in progress, and none logged yet.")
+            }
+            return .result(value: false, dialog: "No migraine in progress. It's been \(days) days since your last one.")
+        }
+        let elapsed = MigraineDates.durationString(Date().timeIntervalSince(ongoing.startDate))
+        return .result(value: true, dialog: "Your migraine has been going for \(elapsed), at pain level \(ongoing.painLevel) of 10.")
+    }
+}
+
+// MARK: - Update the ongoing migraine's intensity (background)
+
+/// Records a new pain/stress sample on the ongoing migraine without opening the app —
+/// the same write the detail screen's Update Intensity sheet makes.
+struct UpdateMigraineIntensityIntent: AppIntent {
+    static let title: LocalizedStringResource = "Update Migraine Intensity"
+    static let description = IntentDescription("Records your current pain and stress levels on the ongoing migraine.")
+
+    @Parameter(title: "Pain Level", default: 5, inclusiveRange: (0, 10))
+    var painLevel: Int
+
+    @Parameter(title: "Stress Level", default: 5, inclusiveRange: (0, 10))
+    var stressLevel: Int
+
+    @Dependency private var session: SessionController
+
+    static var parameterSummary: some ParameterSummary {
+        Summary("Update pain to \(\.$painLevel) and stress to \(\.$stressLevel)")
+    }
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        guard let ongoing = try session.loadMigraines().first(where: \.isOngoing) else {
+            return .result(dialog: "You don't have a migraine in progress.")
+        }
+        _ = try session.recordIntensitySample(for: ongoing, painLevel: painLevel, stressLevel: stressLevel, note: String(localized: "Updated with Siri"))
+        return .result(dialog: "Noted — pain \(painLevel), stress \(stressLevel).")
     }
 }

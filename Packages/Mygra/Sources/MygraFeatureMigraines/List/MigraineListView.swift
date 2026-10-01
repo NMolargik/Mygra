@@ -2,7 +2,9 @@
 //  MigraineListView.swift
 //  MygraFeatureMigraines
 //
-//  The filterable migraine list with pin/delete swipes and the filter sheet.
+//  The searchable, filterable migraine history: pinned entries first, then one section
+//  per month. Swipe to pin or delete, long-press for the same actions, and a filter
+//  sheet for everything else.
 //
 
 #if os(iOS)
@@ -13,50 +15,68 @@ import MygraFeatureShared
 
 public struct MigraineListView: View {
     @Environment(MigraineDataModel.self) private var migraineData
+    @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
 
     @State private var showingFilterSheet = false
+    @State private var searchText = ""
 
     public init() {}
 
     private var filter: MigraineFilter { migraineData.filter }
 
+    /// The search field is kept out of the persisted filter so clearing it never
+    /// disturbs the user's pin/trigger choices.
+    private var searchFilter: MigraineFilter {
+        var combined = filter
+        combined.searchText = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        return combined
+    }
+
+    private var visible: [Migraine] {
+        migraineData.migraines.filter { searchFilter.matches($0) }
+    }
+
+    private var pinned: [Migraine] { visible.filter(\.isPinned) }
+    private var unpinned: [Migraine] { visible.filter { !$0.isPinned } }
+
+    private var monthGroups: [MigraineMonthGroup] {
+        MigraineStatistics.monthGroups(unpinned)
+    }
+
+    private var migrainesByID: [UUID: Migraine] {
+        Dictionary(unpinned.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    }
+
     public var body: some View {
         Group {
-            if migraineData.visibleMigraines.isEmpty {
-                if filter.isActive {
+            if visible.isEmpty {
+                if searchFilter.isActive {
                     filteredEmptyState
                 } else {
-                    ScrollView {
-                        ContentUnavailableView(
-                            "No Migraines Yet",
-                            systemImage: "list.bullet.rectangle",
-                            description: Text("Your logged migraines will appear here.")
-                        )
-                    }
+                    emptyState
                 }
             } else {
                 list
             }
         }
+        .searchable(text: $searchText, prompt: Text("Search notes, triggers, and insights"))
+        .minimizingSearchIfAvailable()
+        .navigationSubtitleIfAvailable(subtitle)
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
+            ToolbarItem(placement: .secondaryAction) {
                 Button {
                     Haptics.lightImpact()
                     showingFilterSheet = true
                 } label: {
-                    Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                    Label("Filter", systemImage: filter.hasCriteria ? "line.3.horizontal.decrease.circle.fill" : "line.3.horizontal.decrease.circle")
+                        .symbolRenderingMode(filter.hasCriteria ? .multicolor : .monochrome)
                 }
                 .accessibilityIdentifier("filterButton")
+                .accessibilityValue(filter.hasCriteria ? Text("Active") : Text("Off"))
             }
-            ToolbarItem(placement: .topBarLeading) {
-                Button {
-                    Haptics.lightImpact()
-                    migraineData.filter.pinnedOnly.toggle()
-                } label: {
-                    Label(
-                        filter.pinnedOnly ? "Show All" : "Show Pinned",
-                        systemImage: filter.pinnedOnly ? "pin.fill" : "pin"
-                    )
+            ToolbarItem(placement: .secondaryAction) {
+                Toggle(isOn: pinnedOnlyBinding) {
+                    Label("Pinned Only", systemImage: filter.pinnedOnly ? "pin.fill" : "pin")
                 }
                 .accessibilityIdentifier("pinnedOnlyToggle")
             }
@@ -73,6 +93,7 @@ public struct MigraineListView: View {
                 )
             }
             .presentationDetents([.large])
+            .presentationSizing(.page)
             .interactiveDismissDisabled()
         }
         .refreshable {
@@ -81,30 +102,47 @@ public struct MigraineListView: View {
         }
     }
 
+    private var subtitle: String {
+        let count = visible.count
+        if searchFilter.isActive {
+            return String(localized: "\(count) matching")
+        }
+        return count == 1 ? String(localized: "1 migraine") : String(localized: "\(count) migraines")
+    }
+
+    private var pinnedOnlyBinding: Binding<Bool> {
+        Binding(
+            get: { filter.pinnedOnly },
+            set: { newValue in
+                Haptics.lightImpact()
+                migraineData.filter.pinnedOnly = newValue
+            }
+        )
+    }
+
     // MARK: - List
 
     private var list: some View {
         List {
-            ForEach(migraineData.visibleMigraines) { migraine in
-                NavigationLink(value: migraine.id) {
-                    MigraineRowView(migraine: migraine)
-                }
-                .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                    Button {
-                        Haptics.lightImpact()
-                        migraineData.togglePinned(migraine)
-                    } label: {
-                        Label(migraine.isPinned ? "Unpin" : "Pin", systemImage: migraine.isPinned ? "pin.slash" : "pin")
+            if !pinned.isEmpty {
+                Section {
+                    ForEach(pinned) { migraine in
+                        row(migraine)
                     }
-                    .tint(.yellow)
+                } header: {
+                    Label("Pinned", systemImage: "pin.fill")
+                        .foregroundStyle(.yellow)
                 }
-                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                    Button(role: .destructive) {
-                        Haptics.error()
-                        migraineData.delete(migraine)
-                    } label: {
-                        Label("Delete", systemImage: "trash")
+            }
+
+            let lookup = migrainesByID
+            ForEach(monthGroups) { group in
+                Section {
+                    ForEach(group.migraineIDs.compactMap { lookup[$0] }) { migraine in
+                        row(migraine)
                     }
+                } header: {
+                    Text(group.monthStart, format: .dateTime.month(.wide).year())
                 }
             }
 
@@ -112,48 +150,109 @@ public struct MigraineListView: View {
                 Section {
                     EmptyView()
                 } footer: {
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack(spacing: 8) {
-                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                .foregroundStyle(.secondary)
-                            Text("Filters are applied")
-                                .font(.footnote).bold()
-                                .foregroundStyle(.secondary)
-                        }
-                        VStack(alignment: .leading, spacing: 10) {
-                            if filter.pinnedOnly {
-                                showAllButton
-                                    .controlSize(.small)
-                                    .accessibilityIdentifier("footerShowAllButton")
-                            }
-                            if !filter.requiredTriggers.isEmpty {
-                                Text(filter.requiredTriggerSummary)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .accessibilityIdentifier("footerTriggerSummary")
-                            }
-                            clearFiltersButton
-                                .controlSize(.small)
-                                .accessibilityIdentifier("footerClearFiltersButton")
-                            adjustFiltersButton(title: "Adjust")
-                                .controlSize(.small)
-                                .accessibilityIdentifier("footerAdjustFiltersButton")
-                        }
-                    }
-                    .padding(.top, 4)
+                    activeFilterFooter
                 }
             }
         }
+        .listStyle(.insetGrouped)
+        .animation(.snappy, value: visible.map(\.id))
     }
 
-    // MARK: - Empty state
+    private func row(_ migraine: Migraine) -> some View {
+        NavigationLink(value: migraine.id) {
+            MigraineRowView(migraine: migraine)
+        }
+        .hoverHighlight()
+        .swipeActions(edge: .leading, allowsFullSwipe: true) {
+            Button {
+                Haptics.lightImpact()
+                migraineData.togglePinned(migraine)
+            } label: {
+                Label(migraine.isPinned ? "Unpin" : "Pin", systemImage: migraine.isPinned ? "pin.slash" : "pin")
+            }
+            .tint(.yellow)
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                Haptics.error()
+                migraineData.delete(migraine)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        }
+        .contextMenu {
+            Button {
+                Haptics.lightImpact()
+                migraineData.togglePinned(migraine)
+            } label: {
+                Label(migraine.isPinned ? "Unpin" : "Pin", systemImage: migraine.isPinned ? "pin.slash" : "pin")
+            }
+            if migraine.isOngoing {
+                Button {
+                    Haptics.success()
+                    migraineData.endOngoing()
+                } label: {
+                    Label("End Migraine", systemImage: "stop.circle")
+                }
+            }
+            Divider()
+            Button(role: .destructive) {
+                Haptics.error()
+                migraineData.delete(migraine)
+            } label: {
+                Label("Delete", systemImage: "trash")
+            }
+        } preview: {
+            MigraineRowView(migraine: migraine)
+                .padding()
+                .frame(width: 340)
+        }
+    }
+
+    private var activeFilterFooter: some View {
+        VStack(alignment: .leading, spacing: Brand.Space.sm) {
+            Label("Filters are applied", systemImage: "line.3.horizontal.decrease.circle")
+                .font(.footnote.weight(.semibold))
+            if !filter.requiredTriggers.isEmpty {
+                Text(filter.requiredTriggerSummary)
+                    .font(.caption)
+                    .accessibilityIdentifier("footerTriggerSummary")
+            }
+            HStack(spacing: Brand.Space.sm) {
+                if filter.pinnedOnly {
+                    showAllButton
+                        .controlSize(.small)
+                        .accessibilityIdentifier("footerShowAllButton")
+                }
+                clearFiltersButton
+                    .controlSize(.small)
+                    .accessibilityIdentifier("footerClearFiltersButton")
+                adjustFiltersButton(title: "Adjust")
+                    .controlSize(.small)
+                    .accessibilityIdentifier("footerAdjustFiltersButton")
+            }
+        }
+        .padding(.top, Brand.Space.xs)
+    }
+
+    // MARK: - Empty states
+
+    private var emptyState: some View {
+        ContentUnavailableView {
+            Label("No Migraines Yet", systemImage: "list.bullet.rectangle")
+        } description: {
+            Text("Your logged migraines will appear here. Tap New Migraine to add your first.")
+        }
+    }
 
     private var filteredEmptyState: some View {
         ContentUnavailableView {
-            Label("No Results", systemImage: "line.3.horizontal.decrease.circle")
+            Label("No Results", systemImage: searchText.isEmpty ? "line.3.horizontal.decrease.circle" : "magnifyingglass")
         } description: {
-            VStack(spacing: 8) {
-                if filter.pinnedOnly && filter.hasCriteria {
+            VStack(spacing: Brand.Space.sm) {
+                if !searchText.isEmpty {
+                    Text("Nothing matches “\(searchText)”.")
+                } else if filter.pinnedOnly && filter.hasCriteria {
                     Text("Pinned-only and other filters are applied. Try clearing them to see more migraines.")
                 } else if filter.pinnedOnly {
                     Text("Showing pinned only. Turn it off to see all migraines.")
@@ -164,20 +263,20 @@ public struct MigraineListView: View {
                     Text(filter.requiredTriggerSummary)
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                HStack(spacing: 12) {
-                    if filter.pinnedOnly {
-                        showAllButton
-                            .accessibilityIdentifier("emptyShowAllButton")
-                    }
+            }
+        } actions: {
+            HStack(spacing: Brand.Space.md) {
+                if filter.pinnedOnly {
+                    showAllButton
+                        .accessibilityIdentifier("emptyShowAllButton")
+                }
+                if filter.hasCriteria {
                     clearFiltersButton
                         .accessibilityIdentifier("emptyClearFiltersButton")
                 }
-                .padding(.top, 4)
+                adjustFiltersButton(title: "Adjust Filters")
             }
-        } actions: {
-            adjustFiltersButton(title: "Adjust Filters")
         }
     }
 
@@ -197,6 +296,7 @@ public struct MigraineListView: View {
         Button {
             Haptics.success()
             migraineData.filter = MigraineFilter()
+            searchText = ""
         } label: {
             Label("Clear Filters", systemImage: "xmark.circle")
         }

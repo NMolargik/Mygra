@@ -20,7 +20,6 @@ public struct MigraineDetailView: View {
     @Environment(WeatherManager.self) private var weatherManager
     @Environment(HealthManager.self) private var healthManager
     @Environment(\.dismiss) private var dismiss
-    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
@@ -73,17 +72,21 @@ public struct MigraineDetailView: View {
                     HealthDetailView(health: health, useMetricUnits: useMetricUnits)
                 }
             }
+            .frame(maxWidth: 760)
+            .frame(maxWidth: .infinity)
             .padding()
         }
-        .navigationTitle("Migraine")
+        .softScrollEdgesIfAvailable()
+        .navigationTitle(migraine.isOngoing ? Text("Ongoing Migraine") : Text("Migraine"))
+        .navigationSubtitleIfAvailable(DateFormatting.date(migraine.startDate, useDMY: useDayMonthYearDates))
         .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(horizontalSizeClass == .regular)
         .toolbar { toolbarContent }
         .sheet(isPresented: $showingIntensitySheet) {
             IntensityUpdateSheet(migraine: migraine) { pain, stress, note in
                 migraineData.addIntensitySample(to: migraine, painLevel: pain, stressLevel: stress, note: note)
             }
             .presentationDetents([.large])
+            .presentationSizing(.form)
         }
         .sheet(isPresented: $showingEndSheet) {
             EndMigraineSheet(startDate: migraine.startDate, initialEndDate: defaultEndDate) { selected in
@@ -97,6 +100,7 @@ public struct MigraineDetailView: View {
                 close()
             }
             .presentationDetents([.medium])
+            .presentationSizing(.form)
         }
         .sheet(isPresented: $showingModifySheet) {
             ModifyMigraineSheetView(
@@ -107,9 +111,11 @@ public struct MigraineDetailView: View {
                     showingModifySheet = false
                 }
             )
+            .presentationSizing(.page)
         }
-        .alert("Delete this migraine?", isPresented: $showDeleteConfirm) {
-            Button("Delete", role: .destructive) {
+        .confirmationDialog("Delete this migraine?", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("Delete Migraine", role: .destructive) {
+                Haptics.error()
                 migraineData.delete(migraine)
                 close()
             }
@@ -126,43 +132,42 @@ public struct MigraineDetailView: View {
 
     // MARK: - Toolbar
 
+    /// Pin stays a one-tap action; the rarer edit/delete actions live in a menu so the
+    /// bar never crowds on iPhone and destructive actions aren't a stray tap away.
     @ToolbarContentBuilder
     private var toolbarContent: some ToolbarContent {
-        if horizontalSizeClass == .regular {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(action: close) {
-                    Label("Back", systemImage: "chevron.left")
-                }
-            }
-        }
-        ToolbarItem(placement: .topBarTrailing) {
+        ToolbarItem(placement: .primaryAction) {
             Button {
+                Haptics.lightImpact()
                 migraineData.togglePinned(migraine)
             } label: {
                 Label(migraine.isPinned ? "Unpin" : "Pin", systemImage: migraine.isPinned ? "pin.fill" : "pin")
-                    .foregroundStyle(migraine.isPinned ? .yellow : .secondary)
+                    .symbolEffect(.bounce, value: migraine.isPinned)
             }
-            .labelStyle(.iconOnly)
+            .tint(migraine.isPinned ? .yellow : nil)
             .accessibilityLabel(migraine.isPinned ? "Unpin migraine" : "Pin migraine")
             .accessibilityHint("Pinned migraines appear at the top of the list")
         }
         if !migraine.isOngoing {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showingModifySheet = true
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button {
+                        showingModifySheet = true
+                    } label: {
+                        Label("Modify", systemImage: "slider.horizontal.3")
+                    }
+                    .accessibilityIdentifier("modifyMigraineButton")
+                    Divider()
+                    Button(role: .destructive) {
+                        showDeleteConfirm = true
+                    } label: {
+                        Label("Delete Migraine", systemImage: "trash")
+                    }
+                    .accessibilityIdentifier("deleteMigraineButton")
                 } label: {
-                    Label("Modify", systemImage: "slider.horizontal.3")
+                    Label("More", systemImage: "ellipsis")
                 }
-                .accessibilityIdentifier("modifyMigraineButton")
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    showDeleteConfirm = true
-                } label: {
-                    Label("Delete Migraine", systemImage: "trash")
-                }
-                .tint(.red)
-                .accessibilityIdentifier("deleteMigraineButton")
+                .accessibilityIdentifier("migraineMoreMenu")
             }
         }
     }

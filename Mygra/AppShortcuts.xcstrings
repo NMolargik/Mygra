@@ -1,0 +1,196 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "Start tracking a migraine in ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Start tracking a migraine in ${applicationName}",
+              "Log a new migraine in ${applicationName}",
+              "I have a migraine, ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Empezar a registrar una migraña en ${applicationName}"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Commencer le suivi d’une migraine dans ${applicationName}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName}で片頭痛の記録を開始"
+          }
+        }
+      }
+    },
+    "End my migraine in ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "End my migraine in ${applicationName}",
+              "My migraine is over in ${applicationName}",
+              "Stop tracking my migraine in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminar mi migraña en ${applicationName}"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminer ma migraine dans ${applicationName}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName}で片頭痛を終了"
+          }
+        }
+      }
+    },
+    "How long since my last migraine in ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "How long since my last migraine in ${applicationName}",
+              "When was my last migraine in ${applicationName}",
+              "Days since my last migraine in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cuánto hace de mi última migraña en ${applicationName}"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Depuis combien de temps ma dernière migraine dans ${applicationName}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName}で最後の片頭痛からの日数"
+          }
+        }
+      }
+    },
+    "Am I having a migraine in ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Am I having a migraine in ${applicationName}",
+              "Check my migraine status in ${applicationName}",
+              "How long has my migraine lasted in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tengo una migraña en ${applicationName}"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Est-ce que j’ai une migraine dans ${applicationName}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName}で片頭痛の状態を確認"
+          }
+        }
+      }
+    },
+    "Update my migraine in ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Update my migraine in ${applicationName}",
+              "Log my pain level in ${applicationName}"
+            ]
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actualizar mi migraña en ${applicationName}"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mettre à jour ma migraine dans ${applicationName}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName}で片頭痛を更新"
+          }
+        }
+      }
+    },
+    "Log a migraine with ${applicationName}": {
+      "localizations": {
+        "en": {
+          "stringSet": {
+            "state": "translated",
+            "values": [
+              "Log a migraine with ${applicationName}",
+              "Open ${applicationName} to log a migraine"
+            ]
+          }
+        },
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrar una migraña con ${applicationName}"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Consigner une migraine avec ${applicationName}"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "${applicationName}で片頭痛を記録"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

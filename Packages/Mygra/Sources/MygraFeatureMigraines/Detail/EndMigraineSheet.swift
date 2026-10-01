@@ -37,6 +37,7 @@ struct EndMigraineSheet: View {
                 }
             }
             .navigationTitle("End Migraine")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel) { dismiss() }
@@ -44,7 +45,8 @@ struct EndMigraineSheet: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("End") { onConfirm(endDate) }
                         .bold()
-                        .tint(.red)
+                        .tint(.mygraPurple)
+                        .keyboardShortcut(.defaultAction)
                 }
             }
         }

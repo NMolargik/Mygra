@@ -2,7 +2,9 @@
 //  UserEditView.swift
 //  MygraFeatureSettings
 //
-//  Form sections that edit a `User` in place (onboarding and Settings).
+//  Form sections that edit a `User` in place (onboarding and Settings). Every control
+//  is a native form row: compact date picker, menu pickers, and steppers with their
+//  units spelled out, so the form reads cleanly at any width and in VoiceOver.
 //
 
 #if os(iOS)
@@ -17,7 +19,6 @@ public struct UserEditView: View {
 
     @State private var newCondition = ""
     @State private var newDietaryRestriction = ""
-    @FocusState private var isFirstNameFocused: Bool
     @FocusState private var isAddingConditionFocused: Bool
     @FocusState private var isAddingRestrictionFocused: Bool
 
@@ -26,105 +27,101 @@ public struct UserEditView: View {
     }
 
     public var body: some View {
-        Section("First Name") {
+        Section {
             TextField("First Name", text: $user.name)
-                .focused($isFirstNameFocused)
-        }
+                .textContentType(.givenName)
+                .submitLabel(.done)
 
-        Section("Birthday") {
             DatePicker("Birthday", selection: $user.birthday, in: ...Date(), displayedComponents: .date)
-                .datePickerStyle(.graphical)
                 .tint(.mygraPurple)
-                .onChange(of: user.birthday) { isFirstNameFocused = false }
-        }
-
-        Section("Anatomy") {
-            Toggle("Use Metric Units", isOn: $useMetricUnits)
-                .tint(.green)
 
             Picker("Biological Sex", selection: $user.biologicalSex) {
                 ForEach(BiologicalSex.allCases, id: \.self) { sex in
                     Text(sex.displayName).tag(sex)
                 }
             }
-            .pickerStyle(.segmented)
-
-            HStack {
-                Text("Height:")
-                Spacer()
-                if useMetricUnits {
-                    Stepper(value: $user.heightCentimeters, in: 100...220, step: 1) {
-                        Text("\(Int(user.heightCentimeters)) cm")
-                    }
-                } else {
-                    Stepper(value: $user.heightInches, in: 48...84, step: 1) {
-                        let feet = Int(user.heightInches) / 12
-                        let inches = Int(user.heightInches) % 12
-                        Text("\(feet)' \(inches)\"")
-                    }
-                }
-            }
-
-            HStack {
-                Text("Weight:")
-                Spacer()
-                if useMetricUnits {
-                    Picker("Weight (kg)", selection: Binding(get: { Int(user.weightKilograms) }, set: { user.weightKilograms = Double($0) })) {
-                        ForEach(35...200, id: \.self) { value in
-                            Text("\(value) kg").tag(value)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: 120)
-                    .frame(height: 100)
-                } else {
-                    Picker("Weight (lbs)", selection: Binding(get: { Int(user.weightPounds) }, set: { user.weightPounds = Double($0) })) {
-                        ForEach(80...440, id: \.self) { value in
-                            Text("\(value) lbs").tag(value)
-                        }
-                    }
-                    .pickerStyle(.wheel)
-                    .frame(maxWidth: 120)
-                    .frame(height: 100)
-                }
-            }
+            .pickerStyle(.menu)
+        } header: {
+            Label("Basics", systemImage: "person.text.rectangle")
+        } footer: {
+            Text("Used to tailor insights and the migraine assistant. Everything stays on your device and in your iCloud.")
         }
 
-        Section("Intake Stats") {
-            HStack {
-                Image(systemName: "cup.and.saucer.fill")
-                Stepper(
-                    value: Binding(
-                        get: { user.averageCaffeineMg / UnitConversion.caffeineMgPerCup },
-                        set: { user.averageCaffeineMg = $0 * UnitConversion.caffeineMgPerCup }
-                    ),
-                    in: 0...10,
-                    step: 1
-                ) {
+        Section {
+            Toggle("Use Metric Units", isOn: $useMetricUnits)
+                .tint(.green)
+
+            if useMetricUnits {
+                Stepper(value: $user.heightCentimeters, in: 100...220, step: 1) {
+                    LabeledContent("Height", value: "\(Int(user.heightCentimeters)) cm")
+                }
+                Stepper(value: $user.weightKilograms, in: 35...200, step: 1) {
+                    LabeledContent("Weight", value: "\(Int(user.weightKilograms)) kg")
+                }
+            } else {
+                Stepper(value: $user.heightInches, in: 48...84, step: 1) {
+                    let feet = Int(user.heightInches) / 12
+                    let inches = Int(user.heightInches) % 12
+                    LabeledContent("Height", value: "\(feet)′ \(inches)″")
+                }
+                Stepper(value: $user.weightPounds, in: 80...440, step: 1) {
+                    LabeledContent("Weight", value: "\(Int(user.weightPounds)) lbs")
+                }
+            }
+        } header: {
+            Label("Body", systemImage: "figure.stand")
+        }
+
+        Section {
+            Stepper(
+                value: Binding(
+                    get: { user.averageCaffeineMg / UnitConversion.caffeineMgPerCup },
+                    set: { user.averageCaffeineMg = $0 * UnitConversion.caffeineMgPerCup }
+                ),
+                in: 0...10,
+                step: 1
+            ) {
+                LabeledContent {
                     Text("\(Int(user.averageCaffeineMg / UnitConversion.caffeineMgPerCup)) cups (\(Int(user.averageCaffeineMg)) mg)")
+                } label: {
+                    Label("Caffeine per day", systemImage: "cup.and.saucer.fill")
+                        .labelStyle(.alignedIcon)
                 }
             }
             Stepper(value: $user.averageSleepHours, in: 0...12, step: 0.5) {
-                Text("Sleep: \(String(format: "%.1f", user.averageSleepHours)) hrs")
+                LabeledContent {
+                    Text("\(user.averageSleepHours, format: .number.precision(.fractionLength(1))) hrs")
+                } label: {
+                    Label("Sleep per night", systemImage: "bed.double.fill")
+                        .labelStyle(.alignedIcon)
+                }
             }
+        } header: {
+            Label("Typical Intake", systemImage: "chart.bar.fill")
+        } footer: {
+            Text("Your usual amounts let Mygra spot days that differ from your baseline.")
         }
 
-        Section("Chronic Conditions") {
+        Section {
             ListEditor(
                 items: $user.chronicConditions,
                 newItem: $newCondition,
                 placeholder: "Add Condition",
                 focus: $isAddingConditionFocused
             )
+        } header: {
+            Label("Chronic Conditions", systemImage: "stethoscope")
         }
 
-        Section("Dietary Restrictions") {
+        Section {
             ListEditor(
                 items: $user.dietaryRestrictions,
                 newItem: $newDietaryRestriction,
                 placeholder: "Add Restriction",
                 focus: $isAddingRestrictionFocused
             )
+        } header: {
+            Label("Dietary Restrictions", systemImage: "leaf.fill")
         }
     }
 }
@@ -140,37 +137,46 @@ private struct ListEditor: View {
         HStack {
             TextField(placeholder, text: $newItem)
                 .focused(focus)
+                .submitLabel(.done)
                 .onSubmit {
                     add()
                     focus.wrappedValue = true
                 }
-            if !newItem.isEmpty {
+            if !newItem.trimmingCharacters(in: .whitespaces).isEmpty {
                 Button(action: add) {
                     Image(systemName: "plus.circle.fill")
                         .foregroundStyle(.green)
-                        .font(.title)
-                }
-                .buttonStyle(.borderless)
-            }
-        }
-        ForEach(items, id: \.self) { item in
-            HStack {
-                Text(item)
-                Spacer()
-                Button(role: .destructive) {
-                    items.removeAll { $0 == item }
-                } label: {
-                    Image(systemName: "trash")
                         .font(.title2)
                 }
                 .buttonStyle(.borderless)
+                .accessibilityLabel("Add")
+                .transition(.scale.combined(with: .opacity))
             }
+        }
+        .animation(.snappy, value: newItem.isEmpty)
+        ForEach(items, id: \.self) { item in
+            Text(item)
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        Haptics.lightImpact()
+                        items.removeAll { $0 == item }
+                    } label: {
+                        Label("Remove", systemImage: "trash")
+                    }
+                }
+        }
+        .onDelete { offsets in
+            items.remove(atOffsets: offsets)
         }
     }
 
     private func add() {
         let trimmed = newItem.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmed.isEmpty else { return }
+        guard !trimmed.isEmpty, !items.contains(where: { $0.caseInsensitiveCompare(trimmed) == .orderedSame }) else {
+            newItem = ""
+            return
+        }
+        Haptics.lightImpact()
         items.append(trimmed)
         newItem = ""
     }

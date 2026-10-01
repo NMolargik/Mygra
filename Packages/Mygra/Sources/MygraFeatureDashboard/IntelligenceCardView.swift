@@ -30,7 +30,8 @@ struct IntelligenceCardView: View {
             Button(action: onOpen) {
                 Label("Chat", systemImage: "sparkles")
             }
-            .glassActionButton()
+            .glassActionButton(tint: .mygraPurple)
+            .hoverHighlight()
             .accessibilityLabel("Open Migraine Assistant")
         }
         .padding(16)

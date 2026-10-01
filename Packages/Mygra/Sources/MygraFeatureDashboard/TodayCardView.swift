@@ -29,6 +29,8 @@ struct TodayCardView: View {
 
     @State private var showHealthSourceInfo = false
 
+    // Visibility toggles are observed individually so the card updates live; the order
+    // is one JSON preference. `DashboardStat` owns the rules for both.
     @AppStorage(AppStorageKeys.showWaterStat) private var showWater = true
     @AppStorage(AppStorageKeys.showSleepStat) private var showSleep = true
     @AppStorage(AppStorageKeys.showFoodStat) private var showFood = true
@@ -37,6 +39,7 @@ struct TodayCardView: View {
     @AppStorage(AppStorageKeys.showHeartRateStat) private var showHeartRate = false
     @AppStorage(AppStorageKeys.showOxygenStat) private var showOxygen = false
     @AppStorage(AppStorageKeys.showGlucoseStat) private var showGlucose = false
+    @AppStorage(AppStorageKeys.dashboardStatOrder) private var statOrderData: Data?
 
     var body: some View {
         if isAuthorized {
@@ -84,6 +87,7 @@ struct TodayCardView: View {
                 }
                 .glassActionButton(prominent: false)
                 .controlSize(.small)
+                .hoverHighlight()
                 .accessibilityLabel(isQuickAddExpanded ? "Hide Quick Add" : "Show Quick Add")
                 .accessibilityHint("Opens intake editor to log water, caffeine, food, or sleep")
             }
@@ -91,12 +95,12 @@ struct TodayCardView: View {
             if let data = latestData {
                 let stats = visibleStats
                 if stats.isEmpty {
-                    Text("No stats selected. Go to Settings to select dashboard stats.")
+                    Text("No stats selected. Choose dashboard stats in Settings.")
                         .foregroundStyle(.secondary)
                         .font(.footnote)
                         .padding(.top, 4)
                 } else {
-                    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 140), spacing: Brand.Space.md)], spacing: Brand.Space.md) {
                         ForEach(stats) { stat in
                             StatTileView(
                                 title: stat.displayName,
@@ -106,6 +110,7 @@ struct TodayCardView: View {
                             )
                         }
                     }
+                    .animation(.snappy, value: stats)
                 }
             } else {
                 HStack {
@@ -113,8 +118,8 @@ struct TodayCardView: View {
                         .foregroundStyle(.secondary)
                     Spacer()
                     Button("Fetch", action: onRefreshHealth)
-                        .buttonStyle(.bordered)
-                        .tint(.mygraBlue)
+                        .glassActionButton(prominent: false)
+                        .controlSize(.small)
                 }
                 .padding(.top, 4)
             }
@@ -155,9 +160,11 @@ struct TodayCardView: View {
                 Label("Today", systemImage: "calendar")
                     .font(.headline)
                 Spacer()
-                Button("Connect Health", action: onConnectHealth)
-                    .buttonStyle(.borderedProminent)
-                    .tint(.pink)
+                Button(action: onConnectHealth) {
+                    Label("Connect Health", systemImage: "heart.fill")
+                }
+                .glassActionButton(tint: .pink)
+                .hoverHighlight()
             }
             Text("Connect Apple Health to see your daily stats.")
                 .foregroundStyle(.secondary)
@@ -169,16 +176,21 @@ struct TodayCardView: View {
     // MARK: - Stats
 
     private var visibleStats: [DashboardStat] {
-        var stats: [DashboardStat] = []
-        if showWater { stats.append(.water) }
-        if showSleep { stats.append(.sleep) }
-        if showFood { stats.append(.food) }
-        if showCaffeine { stats.append(.caffeine) }
-        if showSteps { stats.append(.steps) }
-        if showHeartRate { stats.append(.restingHeartRate) }
-        if showOxygen { stats.append(.bloodOxygen) }
-        if showGlucose { stats.append(.bloodGlucose) }
-        return stats
+        DashboardStat.order(from: statOrderData).filter(isVisible)
+    }
+
+    private func isVisible(_ stat: DashboardStat) -> Bool {
+        switch stat {
+        case .water: showWater
+        case .sleep: showSleep
+        case .food: showFood
+        case .caffeine: showCaffeine
+        case .steps: showSteps
+        case .restingHeartRate: showHeartRate
+        case .bloodOxygen: showOxygen
+        case .bloodGlucose: showGlucose
+        case .topTriggers: false
+        }
     }
 
     private func displayValue(for stat: DashboardStat, data: HealthData) -> String {

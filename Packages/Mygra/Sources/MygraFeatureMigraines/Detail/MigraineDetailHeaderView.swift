@@ -2,6 +2,9 @@
 //  MigraineDetailHeaderView.swift
 //  MygraFeatureMigraines
 //
+//  The headline card: timing rows, pain and stress meters, and (while ongoing) the
+//  live elapsed time plus the single prominent End action.
+//
 
 #if os(iOS)
 import SwiftUI
@@ -17,16 +20,22 @@ struct MigraineDetailHeaderView: View {
     let onEndTap: () -> Void
 
     var body: some View {
-        VStack(spacing: 14) {
-            VStack(alignment: .leading, spacing: 8) {
+        VStack(spacing: Brand.Space.lg) {
+            if migraine.isOngoing {
+                liveTimer
+            }
+
+            VStack(alignment: .leading, spacing: Brand.Space.sm) {
                 MetricRowView(String(localized: "Start"), value: startText)
                 MetricRowView(String(localized: "End"), value: endText)
-                MetricRowView(String(localized: "Duration"), value: durationText)
+                if !migraine.isOngoing {
+                    MetricRowView(String(localized: "Duration"), value: durationText)
+                }
             }
-            .padding(12)
-            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .padding(Brand.Space.md)
+            .background(.thinMaterial, in: RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous))
 
-            HStack(spacing: 12) {
+            HStack(spacing: Brand.Space.md) {
                 StatMeter(
                     title: String(localized: "Pain"),
                     value: Double(migraine.painLevel) / 10.0,
@@ -39,7 +48,7 @@ struct MigraineDetailHeaderView: View {
                     value: Double(migraine.stressLevel) / 10.0,
                     display: "\(migraine.stressLevel)/10",
                     systemImage: "brain.head.profile",
-                    tint: .mygraPurple
+                    tint: .indigo
                 )
             }
 
@@ -49,22 +58,39 @@ struct MigraineDetailHeaderView: View {
                         .font(.headline)
                         .frame(maxWidth: .infinity)
                 }
-                .glassActionButton()
-                .controlSize(.large)
+                .primaryActionButton(tint: .mygraPurple)
                 .accessibilityIdentifier("endMigraineButton")
             }
 
             if let endError {
-                Text(endError)
+                Label(endError, systemImage: "exclamationmark.triangle.fill")
                     .font(.footnote)
                     .foregroundStyle(.red)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
-        .padding()
-        .background(RoundedRectangle(cornerRadius: 16, style: .continuous).fill(secondaryBackground))
+        .padding(Brand.Space.lg)
+        .cardSurface()
         .accessibilityElement(children: .contain)
         .accessibilityLabel(migraine.isOngoing ? "Ongoing migraine" : "Migraine details")
+    }
+
+    private var liveTimer: some View {
+        TimelineView(.periodic(from: .now, by: 1)) { context in
+            VStack(spacing: Brand.Space.xs) {
+                Text(MigraineDates.elapsedString(since: migraine.startDate, now: context.date))
+                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(LinearGradient.mygraHorizontal)
+                    .contentTransition(.numericText())
+                Label("Elapsed", systemImage: "waveform.path.ecg")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .symbolEffect(.pulse, options: .repeating)
+            }
+            .frame(maxWidth: .infinity)
+            .accessibilityElement(children: .combine)
+        }
     }
 }
 
@@ -76,33 +102,28 @@ private struct StatMeter: View {
     let tint: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
-                Image(systemName: systemImage)
-                    .imageScale(.medium)
-                Text(title)
-                    .font(.subheadline.weight(.semibold))
-            }
-            .foregroundStyle(tint)
+        VStack(alignment: .leading, spacing: Brand.Space.sm) {
+            Label(title, systemImage: systemImage)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(tint)
 
-            ZStack(alignment: .leading) {
-                Capsule(style: .continuous)
-                    .fill(.quaternary)
-                    .frame(height: 8)
-                GeometryReader { geo in
-                    Capsule(style: .continuous)
-                        .fill(tint)
-                        .frame(width: max(8, min(geo.size.width * value, geo.size.width)), height: 8)
-                }
-                .frame(height: 8)
+            Gauge(value: value) {
+                EmptyView()
             }
+            .gaugeStyle(.accessoryLinearCapacity)
+            .tint(tint.gradient)
 
             Text(display)
-                .font(.caption2)
+                .font(.caption.weight(.semibold))
+                .monospacedDigit()
                 .foregroundStyle(.secondary)
+                .contentTransition(.numericText())
         }
-        .padding(12)
-        .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(tertiaryBackground))
+        .padding(Brand.Space.md)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Text("\(title) \(display)"))
     }
 }
 

@@ -37,7 +37,7 @@ public struct MigraineEntryView: View {
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 8)
 
-                Section("Duration") {
+                Section {
                     DurationSection(
                         startTitle: "Started",
                         startDate: $viewModel.startDate,
@@ -45,9 +45,11 @@ public struct MigraineEntryView: View {
                         endDate: $viewModel.endDate,
                         showLiveActivityNote: true
                     )
+                } header: {
+                    Label("Duration", systemImage: "clock")
                 }
 
-                Section("Data Retrieval") {
+                Section {
                     healthCapsule
                     if let health = healthManager.latestData, viewModel.healthError == nil {
                         IntakeSection(
@@ -65,16 +67,25 @@ public struct MigraineEntryView: View {
                     if viewModel.didPullWeather, let reading = weatherManager.reading {
                         weatherSummary(reading)
                     }
+                } header: {
+                    Label("Context", systemImage: "heart.text.square")
+                } footer: {
+                    Text("Health and weather for this time window are attached to the record automatically.")
                 }
 
-                Section("Experience") {
+                Section {
                     LevelSlider.pain(level: $viewModel.painLevel)
                     LevelSlider.stress(level: $viewModel.stressLevel)
-                    Toggle("Pin this migraine", isOn: $viewModel.pinned)
-                        .onChange(of: viewModel.pinned) { _, _ in Haptics.lightImpact() }
+                    Toggle(isOn: $viewModel.pinned) {
+                        Label("Pin this migraine", systemImage: "pin")
+                    }
+                    .tint(.yellow)
+                    .onChange(of: viewModel.pinned) { _, _ in Haptics.lightImpact() }
+                } header: {
+                    Label("Experience", systemImage: "bolt.heart")
                 }
 
-                Section("Possible Triggers") {
+                Section {
                     SearchField("Search triggers", text: $viewModel.triggerSearchText)
                     TriggerPickerSection(selection: $viewModel.selectedTriggers, searchText: viewModel.triggerSearchText)
                     customTriggerEditor
@@ -84,10 +95,13 @@ public struct MigraineEntryView: View {
                         Text("\(viewModel.selectedTriggerCount) selected")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
+                            .contentTransition(.numericText())
                     }
+                } header: {
+                    Label("Possible Triggers", systemImage: "exclamationmark.triangle")
                 }
 
-                Section("Food Sensitivities") {
+                Section {
                     TextEditor(text: $viewModel.foodsText)
                         .frame(minHeight: 80)
                         .overlay(alignment: .topLeading) {
@@ -95,9 +109,11 @@ public struct MigraineEntryView: View {
                                 placeholder("List foods eaten around this time (comma or newline separated)")
                             }
                         }
+                } header: {
+                    Label("Food Sensitivities", systemImage: "fork.knife")
                 }
 
-                Section("Notes") {
+                Section {
                     TextEditor(text: $viewModel.noteText)
                         .frame(minHeight: 120)
                         .overlay(alignment: .topLeading) {
@@ -105,9 +121,14 @@ public struct MigraineEntryView: View {
                                 placeholder("Add any details you want to remember")
                             }
                         }
+                } header: {
+                    Label("Notes", systemImage: "note.text")
                 }
             }
+            .formStyle(.grouped)
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("New Migraine")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel", role: .cancel) {
@@ -115,10 +136,9 @@ public struct MigraineEntryView: View {
                         viewModel.clearStagedIntake()
                         dismiss()
                     }
-                    .foregroundStyle(.red)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(viewModel.isOngoing ? "Start" : "Submit") {
+                    Button(viewModel.isOngoing ? "Start" : "Save") {
                         Haptics.lightImpact()
                         Task {
                             guard viewModel.validateBeforeSave() else {
@@ -130,10 +150,13 @@ public struct MigraineEntryView: View {
                             onMigraineSaved(migraine)
                         }
                     }
-                    .foregroundStyle(.mygraBlue)
+                    .tint(.mygraBlue)
+                    .keyboardShortcut(.defaultAction)
+                    .accessibilityIdentifier("saveMigraineButton")
                 }
             }
         }
+        .presentationSizing(.page)
         .task {
             viewModel.resetGreeting()
             if viewModel.endDate < viewModel.startDate { viewModel.endDate = viewModel.startDate }

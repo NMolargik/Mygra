@@ -3,7 +3,8 @@
 //  MygraFeatureDashboard
 //
 //  Weather, the assistant entry, today's Health stats with Quick Add, and Quick Bits.
-//  On regular widths it also hosts the calendar and settings as sheets.
+//  Cards stack on iPhone and flow into two balanced columns at regular widths (iPad
+//  windows, Mac), so a resized window never shows a single stretched column.
 //
 
 #if os(iOS)
@@ -12,89 +13,54 @@ import MygraCore
 import MygraDesignSystem
 import MygraServices
 import MygraFeatureShared
-import MygraFeatureCalendar
 import MygraFeatureAssistant
-import MygraFeatureSettings
 
 public struct DashboardView: View {
     @Environment(InsightModel.self) private var insights
     @Environment(HealthManager.self) private var healthManager
     @Environment(WeatherManager.self) private var weatherManager
+    @Environment(MigraineDataModel.self) private var migraineData
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
-    /// Regular-width hosts route calendar selections into their navigation stack.
-    var onNavigateToMigraine: ((UUID) -> Void)?
-
     @State private var viewModel = ViewModel()
 
-    public init(onNavigateToMigraine: ((UUID) -> Void)? = nil) {
-        self.onNavigateToMigraine = onNavigateToMigraine
-    }
+    public init() {}
+
+    private var isRegularWidth: Bool { horizontalSizeClass == .regular }
 
     public var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                WeatherCardView(
-                    reading: weatherManager.reading,
-                    isFetching: weatherManager.isFetching,
-                    error: weatherManager.error,
-                    locationString: weatherManager.locationString,
-                    onRefresh: {
-                        Haptics.lightImpact()
-                        Task { await weatherManager.refresh() }
-                    }
-                )
+            VStack(alignment: .leading, spacing: Brand.Space.lg) {
+                StreakHeaderView(daysSince: MigraineStatistics.streakDays(migraineData.migraines), hasOngoing: migraineData.ongoingMigraine != nil, total: migraineData.migraines.count)
 
-                if #available(iOS 26.0, *) {
-                    if insights.supportsAppleIntelligence {
-                        IntelligenceCardView {
-                            Haptics.lightImpact()
-                            viewModel.isShowingAssistant = true
-                            Task { await insights.startChat() }
+                if isRegularWidth {
+                    HStack(alignment: .top, spacing: Brand.Space.lg) {
+                        VStack(spacing: Brand.Space.lg) {
+                            weatherCard
+                            assistantCard
+                            todayCard
+                        }
+                        VStack(spacing: Brand.Space.lg) {
+                            quickBits
                         }
                     }
                 } else {
-                    IntelligenceUpgradeCardView()
+                    weatherCard
+                    assistantCard
+                    todayCard
+                    quickBits
                 }
 
-                TodayCardView(
-                    isAuthorized: healthManager.isAuthorized,
-                    latestData: healthManager.latestData,
-                    useMetricUnits: useMetricUnits,
-                    isQuickAddExpanded: $viewModel.isQuickAddExpanded,
-                    additions: $viewModel.additions,
-                    isSavingIntake: viewModel.isSavingIntake,
-                    intakeError: viewModel.intakeError,
-                    onConnectHealth: {
-                        Haptics.lightImpact()
-                        Task { await healthManager.requestAuthorization() }
-                    },
-                    onRefreshHealth: {
-                        Haptics.lightImpact()
-                        Task { await healthManager.refreshLatestForToday() }
-                    },
-                    onSaveIntake: {
-                        Haptics.lightImpact()
-                        Task { await saveIntake() }
-                    },
-                    onCancelIntake: {
-                        Haptics.lightImpact()
-                        viewModel.resetIntake()
-                    }
-                )
-
-                QuickBitsSectionView {
-                    Haptics.lightImpact()
-                    insights.refresh()
-                }
-
-                Color.clear.frame(height: 12)
+                Color.clear.frame(height: Brand.Space.md)
             }
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
+            .frame(maxWidth: 1000)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, Brand.Space.lg)
+            .padding(.top, Brand.Space.sm)
         }
+        .softScrollEdgesIfAvailable()
         .refreshable {
             await refreshAll()
             Haptics.success()
@@ -109,49 +75,70 @@ public struct DashboardView: View {
         .onChange(of: viewModel.isQuickAddExpanded) { _, _ in
             Haptics.lightImpact()
         }
-        .toolbar {
-            if horizontalSizeClass == .regular {
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        Haptics.mediumImpact()
-                        viewModel.isShowingCalendar = true
-                    } label: {
-                        Label("Calendar", systemImage: "calendar")
-                    }
-                }
-                ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        viewModel.isShowingSettings = true
-                    } label: {
-                        Label("Settings", systemImage: "gearshape.fill")
-                    }
+    }
+
+    // MARK: - Cards
+
+    private var weatherCard: some View {
+        WeatherCardView(
+            reading: weatherManager.reading,
+            isFetching: weatherManager.isFetching,
+            error: weatherManager.error,
+            locationString: weatherManager.locationString,
+            onRefresh: {
+                Haptics.lightImpact()
+                Task { await weatherManager.refresh() }
+            }
+        )
+    }
+
+    @ContentBuilder
+    private var assistantCard: some View {
+        if #available(iOS 26.0, *) {
+            if insights.supportsAppleIntelligence {
+                IntelligenceCardView {
+                    Haptics.lightImpact()
+                    viewModel.isShowingAssistant = true
+                    Task { await insights.startChat() }
                 }
             }
+        } else {
+            IntelligenceUpgradeCardView()
         }
-        .sheet(isPresented: $viewModel.isShowingSettings) {
-            NavigationStack {
-                SettingsView()
-                    .navigationTitle("Settings")
-                    .toolbar {
-                        ToolbarItem(placement: .topBarTrailing) {
-                            Button("Close") { viewModel.isShowingSettings = false }
-                        }
-                    }
+    }
+
+    private var todayCard: some View {
+        TodayCardView(
+            isAuthorized: healthManager.isAuthorized,
+            latestData: healthManager.latestData,
+            useMetricUnits: useMetricUnits,
+            isQuickAddExpanded: $viewModel.isQuickAddExpanded,
+            additions: $viewModel.additions,
+            isSavingIntake: viewModel.isSavingIntake,
+            intakeError: viewModel.intakeError,
+            onConnectHealth: {
+                Haptics.lightImpact()
+                Task { await healthManager.requestAuthorization() }
+            },
+            onRefreshHealth: {
+                Haptics.lightImpact()
+                Task { await healthManager.refreshLatestForToday() }
+            },
+            onSaveIntake: {
+                Haptics.lightImpact()
+                Task { await saveIntake() }
+            },
+            onCancelIntake: {
+                Haptics.lightImpact()
+                viewModel.resetIntake()
             }
-            .presentationDetents([.large])
-        }
-        .sheet(isPresented: $viewModel.isShowingCalendar) {
-            NavigationStack {
-                MigraineCalendarView { migraineID in
-                    viewModel.isShowingCalendar = false
-                    onNavigateToMigraine?(migraineID)
-                }
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Done") { viewModel.isShowingCalendar = false }
-                    }
-                }
-            }
+        )
+    }
+
+    private var quickBits: some View {
+        QuickBitsSectionView {
+            Haptics.lightImpact()
+            insights.refresh()
         }
     }
 
@@ -190,13 +177,64 @@ extension DashboardView {
         var intakeError: String?
         var isQuickAddExpanded = false
         var isShowingAssistant = false
-        var isShowingCalendar = false
-        var isShowingSettings = false
 
         func resetIntake() {
             additions = .none
             intakeError = nil
         }
+    }
+}
+
+// MARK: - Streak header
+
+/// The one number that matters most, up top: days since the last migraine (or the
+/// ongoing state), with a quiet lifetime count.
+private struct StreakHeaderView: View {
+    let daysSince: Int
+    let hasOngoing: Bool
+    let total: Int
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: Brand.Space.md) {
+            VStack(alignment: .leading, spacing: 2) {
+                if hasOngoing {
+                    Text("Migraine in progress")
+                        .font(.title2.weight(.bold))
+                        .foregroundStyle(LinearGradient.mygraHorizontal)
+                    Text("Hang in there — log updates as it changes.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else if total == 0 {
+                    Text("Welcome to Mygra")
+                        .font(.title2.weight(.bold))
+                    Text("Log your first migraine to start seeing patterns.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else if daysSince == 0 {
+                    Text("Last migraine today")
+                        .font(.title2.weight(.bold))
+                    Text("Rest up — \(total) logged in total.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    HStack(alignment: .firstTextBaseline, spacing: Brand.Space.xs) {
+                        Text(daysSince, format: .number)
+                            .font(.system(size: 40, weight: .bold, design: .rounded))
+                            .monospacedDigit()
+                            .foregroundStyle(LinearGradient.mygraHorizontal)
+                            .contentTransition(.numericText())
+                        Text(daysSince == 1 ? "day migraine-free" : "days migraine-free")
+                            .font(.headline)
+                    }
+                    Text("\(total) logged in total")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, Brand.Space.xs)
+        .accessibilityElement(children: .combine)
     }
 }
 

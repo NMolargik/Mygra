@@ -80,46 +80,51 @@ struct WeatherCardView: View {
     }
 
     private var unavailableCard: some View {
-        HStack(spacing: 15) {
-            Image(systemName: "location.slash")
-                .font(.title)
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(.secondary)
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Weather Unavailable")
-                    .font(.headline)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.9)
-                Text(unavailableSubtitle)
-                    .font(.subheadline)
+        VStack(alignment: .leading, spacing: Brand.Space.md) {
+            HStack(alignment: .top, spacing: Brand.Space.md) {
+                Image(systemName: "location.slash")
+                    .font(.title)
+                    .symbolRenderingMode(.hierarchical)
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .frame(width: 36)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: Brand.Space.xs) {
+                    Text("Weather Unavailable")
+                        .font(.headline)
+                    Text(unavailableSubtitle)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 0)
+
+                if isFetching {
+                    ProgressView()
+                        .controlSize(.small)
+                        .tint(.mygraPurple)
+                        .accessibilityLabel("Loading weather data")
+                }
             }
-            .layoutPriority(1)
 
-            Spacer()
-
-            if isFetching {
-                ProgressView()
-                    .controlSize(.small)
-                    .tint(.mygraPurple)
-                    .accessibilityLabel("Loading weather data")
-            } else {
-                HStack(spacing: 8) {
+            if !isFetching {
+                HStack(spacing: Brand.Space.sm) {
                     if isLocationPermissionError {
                         Button(action: openAppSettings) {
-                            Label("Settings", systemImage: "gearshape")
+                            Label("Open Settings", systemImage: "gear")
                         }
                         .glassActionButton(prominent: false)
+                        .controlSize(.small)
+                        .hoverHighlight()
                         .accessibilityLabel("Open location settings")
                     }
                     Button(action: onRefresh) {
                         Label("Refresh", systemImage: "arrow.clockwise")
-                            .labelStyle(.iconOnly)
                     }
                     .glassActionButton(prominent: false)
+                    .controlSize(.small)
+                    .hoverHighlight()
                     .accessibilityLabel("Refresh weather data")
                 }
             }

@@ -26,6 +26,45 @@
 		</dict>
 		<dict/>
 	</array>
+	<key>NSUserActivityTypes</key>
+	<array>
+		<string>com.molargiksoftware.Mygra.viewingMigraine</string>
+	</array>
+	<key>UIApplicationShortcutItems</key>
+	<array>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>plus.circle.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>New Migraine</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>mygra://new-migraine</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>stop.circle.fill</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>End Ongoing Migraine</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>mygra://end-ongoing</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>calendar</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Calendar</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>mygra://calendar</string>
+		</dict>
+		<dict>
+			<key>UIApplicationShortcutItemIconSymbolName</key>
+			<string>sparkles</string>
+			<key>UIApplicationShortcutItemTitle</key>
+			<string>Migraine Assistant</string>
+			<key>UIApplicationShortcutItemType</key>
+			<string>mygra://assistant</string>
+		</dict>
+	</array>
 	<key>NSWeatherUsageDescription</key>
 	<string>Mygra uses weather data to provide personalized migraine insights.</string>
 	<key>UIApplicationSceneManifest</key>

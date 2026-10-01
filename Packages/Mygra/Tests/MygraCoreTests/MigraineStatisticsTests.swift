@@ -54,4 +54,22 @@ struct MigraineStatisticsTests {
         let otherDay = makeMigraine(start: day.addingTimeInterval(-86_400))
         #expect(MigraineStatistics.migraines([sameDay, otherDay], on: day, calendar: cal).count == 1)
     }
+
+    @Test func monthGroupsAreNewestFirstAndBackfillNothing() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        func date(_ y: Int, _ m: Int, _ d: Int) -> Date {
+            calendar.date(from: DateComponents(year: y, month: m, day: d, hour: 12))!
+        }
+        let older = makeMigraine(start: date(2025, 6, 3))
+        let newer = makeMigraine(start: date(2025, 8, 20))
+        let sameMonthEarlier = makeMigraine(start: date(2025, 8, 2))
+
+        let groups = MigraineStatistics.monthGroups([older, sameMonthEarlier, newer], calendar: calendar)
+        #expect(groups.count == 2)
+        #expect(groups[0].monthStart == date(2025, 8, 1).addingTimeInterval(-12 * 3600))
+        #expect(groups[0].migraineIDs == [newer.id, sameMonthEarlier.id])
+        #expect(groups[1].migraineIDs == [older.id])
+        #expect(MigraineStatistics.monthGroups([], calendar: calendar).isEmpty)
+    }
 }

@@ -3,8 +3,9 @@
 //  MygraFeatureOnboarding
 //
 //  Shared layout for the permission pages (Health, Location, Notifications): a large
-//  tinted status icon, title, description, status indicator, optional feature list, and
-//  an action button whose behavior follows `state`.
+//  animated status symbol, title, description, status pill, optional feature list, and
+//  an action button whose behavior follows `state`. The HIG asks for the "why" before
+//  the system prompt, so the request button is the explicit opt-in.
 //
 
 #if os(iOS)
@@ -34,12 +35,21 @@ struct PermissionPageScaffold<Features: View>: View {
     var requestButtonColor: Color = .mygraBlue
     var isRequestEnabled = true
     let onRequest: () -> Void
-    @ViewBuilder let features: () -> Features
+    @ContentBuilder let features: () -> Features
+
+    @State private var appeared = false
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 32) {
-                header
+            VStack(spacing: Brand.Space.xxl) {
+                OnboardingHeader(
+                    systemImage: presentation.icon,
+                    tint: presentation.color,
+                    title: presentation.title,
+                    description: presentation.description
+                ) {
+                    statusIndicator
+                }
 
                 FeatureCard { features() }
 
@@ -57,31 +67,9 @@ struct PermissionPageScaffold<Features: View>: View {
         }
     }
 
-    private var header: some View {
-        VStack(spacing: 16) {
-            Image(systemName: presentation.icon)
-                .font(.system(size: 64))
-                .foregroundStyle(presentation.color)
-                .contentTransition(.symbolEffect(.replace))
-                .accessibilityHidden(true)
-
-            Text(presentation.title)
-                .font(.title.bold())
-
-            Text(presentation.description)
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-
-            statusIndicator
-        }
-        .padding(.top, 24)
-    }
-
     private var statusText: LocalizedStringKey {
         switch state {
-        case .notRequested: return "Not yet requested"
+        case .notRequested: return "Optional — you can enable this later"
         case .granted: return "Access granted"
         case .denied: return "Access denied"
         }
@@ -97,20 +85,20 @@ struct PermissionPageScaffold<Features: View>: View {
 
     private var statusIndicator: some View {
         HStack(spacing: 6) {
-            Circle()
-                .fill(statusColor)
-                .frame(width: 8, height: 8)
+            Image(systemName: state == .granted ? "checkmark.circle.fill" : (state == .denied ? "exclamationmark.circle.fill" : "circle.dashed"))
+                .foregroundStyle(statusColor)
+                .contentTransition(.symbolEffect(.replace))
             Text(statusText)
                 .font(.footnote.weight(.medium))
                 .foregroundStyle(.secondary)
         }
-        .padding(.horizontal, 12)
+        .padding(.horizontal, Brand.Space.md)
         .padding(.vertical, 6)
-        .background(.ultraThinMaterial, in: Capsule())
+        .statPillBackground()
         .accessibilityElement(children: .combine)
     }
 
-    @ViewBuilder
+    @ContentBuilder
     private var actionButton: some View {
         switch state {
         case .notRequested:
@@ -121,14 +109,11 @@ struct PermissionPageScaffold<Features: View>: View {
                 Label(requestButtonTitle, systemImage: requestButtonIcon)
                     .font(.headline)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(requestButtonColor.opacity(isRequestEnabled ? 1 : 0.4))
-                    .foregroundStyle(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .frame(height: 24)
             }
+            .primaryActionButton(tint: requestButtonColor)
             .disabled(!isRequestEnabled)
-            .frame(maxWidth: Brand.readableWidth)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, Brand.Space.xl)
             .accessibilityHint(isRequestEnabled ? "Shows the system permission prompt." : "This permission can't be requested right now.")
         case .denied:
             Button {
@@ -139,13 +124,10 @@ struct PermissionPageScaffold<Features: View>: View {
                 Label("Open Settings", systemImage: "gear")
                     .font(.headline)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 50)
-                    .background(Color.secondary.opacity(0.2))
-                    .foregroundStyle(.primary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .frame(height: 24)
             }
-            .frame(maxWidth: Brand.readableWidth)
-            .padding(.horizontal, 20)
+            .secondaryActionButton(tint: .orange)
+            .padding(.horizontal, Brand.Space.xl)
             .accessibilityHint("Opens the Settings app where you can grant access.")
         case .granted:
             EmptyView()
@@ -176,18 +158,74 @@ extension PermissionPageScaffold where Features == EmptyView {
     }
 }
 
+/// The large tinted symbol + title + description every onboarding page opens with.
+/// The symbol bounces in on appear and swaps with a replace effect when it changes.
+struct OnboardingHeader<Accessory: View>: View {
+    let systemImage: String
+    let tint: Color
+    let title: LocalizedStringKey
+    let description: LocalizedStringKey
+    @ContentBuilder let accessory: () -> Accessory
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var bounce = false
+
+    init(
+        systemImage: String,
+        tint: Color,
+        title: LocalizedStringKey,
+        description: LocalizedStringKey,
+        @ContentBuilder accessory: @escaping () -> Accessory = { EmptyView() }
+    ) {
+        self.systemImage = systemImage
+        self.tint = tint
+        self.title = title
+        self.description = description
+        self.accessory = accessory
+    }
+
+    var body: some View {
+        VStack(spacing: Brand.Space.lg) {
+            Image(systemName: systemImage)
+                .font(.system(size: 64))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(tint.gradient)
+                .contentTransition(.symbolEffect(.replace))
+                .symbolEffect(.bounce, options: reduceMotion ? .nonRepeating.speed(100) : .nonRepeating, value: bounce)
+                .frame(height: 80)
+                .accessibilityHidden(true)
+
+            Text(title)
+                .font(.title.bold())
+                .multilineTextAlignment(.center)
+                .accessibilityAddTraits(.isHeader)
+
+            Text(description)
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: Brand.readableWidth)
+                .padding(.horizontal, Brand.Space.xl)
+
+            accessory()
+        }
+        .padding(.top, Brand.Space.xl)
+        .onAppear { bounce.toggle() }
+    }
+}
+
 /// The rounded grouped card that holds feature/privacy rows (hidden when empty).
 struct FeatureCard<Content: View>: View {
-    @ViewBuilder let content: () -> Content
+    @ContentBuilder let content: () -> Content
 
     var body: some View {
         VStack(spacing: 0) {
             content()
         }
         .background(secondaryGroupedBackground)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous))
         .frame(maxWidth: Brand.readableWidth)
-        .padding(.horizontal, 20)
+        .padding(.horizontal, Brand.Space.xl)
     }
 }
 
@@ -199,11 +237,13 @@ struct PermissionFeatureRow: View {
     let description: LocalizedStringKey
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .top, spacing: Brand.Space.md) {
             Image(systemName: icon)
                 .font(.title3)
+                .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(iconColor)
-                .frame(width: 28)
+                .frame(width: 32, height: 32)
+                .background(RoundedRectangle(cornerRadius: 8, style: .continuous).fill(iconColor.opacity(0.12)))
                 .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 2) {
@@ -212,12 +252,13 @@ struct PermissionFeatureRow: View {
                 Text(description)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
-            Spacer()
+            Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.horizontal, Brand.Space.lg)
+        .padding(.vertical, Brand.Space.md)
         .accessibilityElement(children: .combine)
     }
 }

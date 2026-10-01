@@ -69,6 +69,9 @@ struct QuickBitsSectionView: View {
                             }
                             .contentShape(Rectangle())
                             .onTapGesture { toggle(insight, key: key) }
+                            .hoverLift()
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityHint(expandedKeys.contains(key) ? "Collapses the explanation" : "Explains this insight with Apple Intelligence")
 
                             if expandedKeys.contains(key), loadingKeys.contains(key) || explanations[key] != nil {
                                 QuickBitExplanationBubble(

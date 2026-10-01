@@ -139,7 +139,7 @@ public struct IntakeEditorView: View {
     }
 
     /// Energy is stored as kcal; metric users see kilojoules.
-    @ViewBuilder
+    @ContentBuilder
     private var foodRow: some View {
         let kJ = UnitConversion.kilocaloriesToKilojoules
         if useMetricUnits {

@@ -51,15 +51,26 @@ public final class SessionController {
     public let findMigraine: any FindMigraine
     public let startMigraine: any StartMigraine
     public let endOngoingMigraine: any EndOngoingMigraine
+    public let recordIntensitySample: any RecordIntensitySample
     public let observeMigraineChanges: any ObserveMigraineChanges
 
     // MARK: - App-wide state
 
-    /// Deep link waiting to be routed (set by onOpenURL, widgets, menu commands, and
-    /// App Intents; consumed by MainView).
-    public var pendingDeepLink: DeepLink?
+    /// Navigation state: the selected tab and the deep link waiting to be routed (set by
+    /// onOpenURL, widgets, quick actions, menu commands, and App Intents; consumed by
+    /// MainView).
+    public let router = AppRouter()
+
+    /// Convenience over `router.pendingDeepLink`, kept for commands and tests.
+    public var pendingDeepLink: DeepLink? {
+        get { router.pendingDeepLink }
+        set {
+            if let newValue { router.open(newValue) } else { router.pendingDeepLink = nil }
+        }
+    }
 
     @ObservationIgnored private let indexer: (any MigraineIndexing)?
+    @ObservationIgnored private let activityAnnotator: (any MigraineActivityAnnotating)?
     @ObservationIgnored private let sharedDefaults: (any KeyValueStoring)?
     @ObservationIgnored private var indexObservationTask: Task<Void, Never>?
     @ObservationIgnored private var pendingIndexTask: Task<Void, Never>?
@@ -72,7 +83,7 @@ public final class SessionController {
     ///   - container: The SwiftData container (defaults to the CloudKit-backed store).
     ///   - defaults: Standard defaults (review-prompt bookkeeping).
     ///   - sharedDefaults: The App Group suite (widget/watch status, intent hand-off).
-    ///   - indexer/reviewRequester/intentDonor: App-target seams (nil in tests/previews).
+    ///   - indexer/reviewRequester/intentDonor/activityAnnotator: App-target seams (nil in tests/previews).
     public init(
         container: ModelContainer? = nil,
         defaults: any KeyValueStoring = UserDefaults.standard,
@@ -80,12 +91,14 @@ public final class SessionController {
         indexer: (any MigraineIndexing)? = nil,
         reviewRequester: (any ReviewRequesting)? = nil,
         intentDonor: (any IntentDonating)? = nil,
+        activityAnnotator: (any MigraineActivityAnnotating)? = nil,
         widgetReloader: (any WidgetTimelineReloading)? = WidgetCenterReloader(),
         indexDebounce: Duration = .milliseconds(750)
     ) {
         let container = container ?? MygraStore.makeContainer()
         self.container = container
         self.indexer = indexer
+        self.activityAnnotator = activityAnnotator
         self.sharedDefaults = sharedDefaults
         self.indexDebounce = indexDebounce
 
@@ -113,11 +126,13 @@ public final class SessionController {
         let endOngoing = EndOngoingMigraineUseCase(repository: migraineRepository, update: updateMigraine, donor: intentDonor)
         let observeChanges = ObserveMigraineChangesUseCase(center: changeCenter)
         let loadUser = LoadUserUseCase(repository: userRepository)
+        let recordSample = RecordIntensitySampleUseCase(repository: migraineRepository)
 
         self.loadMigraines = loadMigraines
         self.findMigraine = findMigraine
         self.startMigraine = startMigraine
         self.endOngoingMigraine = endOngoing
+        self.recordIntensitySample = recordSample
         self.observeMigraineChanges = observeChanges
 
         #if DEBUG
@@ -136,7 +151,7 @@ public final class SessionController {
             endOngoing: endOngoing,
             deleteMigraine: DeleteMigraineUseCase(repository: migraineRepository),
             deleteAll: DeleteAllMigrainesUseCase(repository: migraineRepository),
-            recordIntensitySample: RecordIntensitySampleUseCase(repository: migraineRepository),
+            recordIntensitySample: recordSample,
             removeIntensitySample: RemoveIntensitySampleUseCase(repository: migraineRepository),
             observeChanges: observeChanges,
             reviewRequester: reviewRequester,
@@ -226,6 +241,9 @@ public final class SessionController {
         pendingIndexTask?.cancel()
     }
 
+    /// Whether a migraine is in progress (menu-bar command state).
+    public var hasOngoingMigraine: Bool { migraineData.ongoingMigraine != nil }
+
     // MARK: - Startup
 
     /// One-time launch work: status sync, watch connectivity, Spotlight seeding, and the
@@ -248,15 +266,26 @@ public final class SessionController {
 
     /// Parses and stages an external URL (`mygra://…`); MainView consumes it.
     public func handle(url: URL) {
-        guard let link = DeepLink(url: url) else { return }
-        pendingDeepLink = link
+        router.open(url: url)
     }
 
     /// Picks up a deep link stashed by an `openAppWhenRun` App Intent (call on activation).
     public func consumePendingDeepLinkFromIntents() {
         if let link = DeepLink.takePending(from: sharedDefaults) {
-            pendingDeepLink = link
+            router.open(link)
         }
+    }
+
+    // MARK: - Siri on-screen awareness
+
+    /// Publishes the detail screen's user activity, tagged with the migraine's entity
+    /// identifier so Siri can act on "this migraine". Safe without an annotator (tests).
+    public func annotateViewingActivity(_ activity: NSUserActivity, migraineID: UUID) {
+        activity.title = String(localized: "Migraine")
+        activity.isEligibleForHandoff = false
+        activity.isEligibleForSearch = false
+        activity.userInfo = ["migraineID": migraineID.uuidString]
+        activityAnnotator?.annotate(activity, migraineID: migraineID)
     }
 
     // MARK: - Spotlight

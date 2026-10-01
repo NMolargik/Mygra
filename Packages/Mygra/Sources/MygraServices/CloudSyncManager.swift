@@ -27,6 +27,8 @@ public final class CloudSyncManager {
         case synced(Date)
         case error(String)
         case offline
+        /// No iCloud account is signed in on this device, so nothing can sync.
+        case unavailable
 
         public var displayText: String {
             switch self {
@@ -35,6 +37,25 @@ public final class CloudSyncManager {
             case .synced(let date): return String(localized: "Last synced \(date.formatted(.relative(presentation: .named)))")
             case .error(let message): return String(localized: "Error: \(message)")
             case .offline: return String(localized: "Offline")
+            case .unavailable: return String(localized: "Not signed in to iCloud")
+            }
+        }
+
+        /// Whether this status represents a failure the user may want to act on.
+        public var isError: Bool {
+            if case .error = self { return true }
+            return false
+        }
+
+        /// A short, stable status label for pills and accessibility values.
+        public var shortText: String {
+            switch self {
+            case .idle: return String(localized: "Ready")
+            case .syncing: return String(localized: "Syncing")
+            case .synced: return String(localized: "Up to date")
+            case .error: return String(localized: "Needs attention")
+            case .offline: return String(localized: "Offline")
+            case .unavailable: return String(localized: "Not signed in")
             }
         }
 
@@ -45,6 +66,7 @@ public final class CloudSyncManager {
             case .synced: return "checkmark.icloud"
             case .error: return "exclamationmark.icloud"
             case .offline: return "icloud.slash"
+            case .unavailable: return "person.icloud"
             }
         }
     }
@@ -59,6 +81,7 @@ public final class CloudSyncManager {
     public private(set) var lastErrorMessage: String?
 
     @ObservationIgnored private let changeCenter: MigraineChangeCenter?
+    @ObservationIgnored private let cloudAvailability: @MainActor () -> Bool
     @ObservationIgnored private var modelContext: ModelContext?
     @ObservationIgnored private var networkMonitor: NWPathMonitor?
     @ObservationIgnored private var isNetworkAvailable: Bool = true
@@ -66,8 +89,16 @@ public final class CloudSyncManager {
 
     // MARK: - Initialization
 
-    public init(changeCenter: MigraineChangeCenter? = nil) {
+    /// - Parameters:
+    ///   - changeCenter: Receives `.bulk` on every CloudKit import.
+    ///   - cloudAvailability: Whether an iCloud account is signed in (injectable for tests;
+    ///     defaults to the ubiquity identity token check).
+    public init(
+        changeCenter: MigraineChangeCenter? = nil,
+        cloudAvailability: @escaping @MainActor () -> Bool = { FileManager.default.ubiquityIdentityToken != nil }
+    ) {
         self.changeCenter = changeCenter
+        self.cloudAvailability = cloudAvailability
     }
 
     public func configure(with context: ModelContext) {
@@ -193,6 +224,8 @@ public final class CloudSyncManager {
     private func updateSyncStatus() {
         if !isNetworkAvailable {
             syncStatus = .offline
+        } else if !isCloudAvailable {
+            syncStatus = .unavailable
         } else if isSyncing {
             syncStatus = .syncing
         } else if let message = lastErrorMessage {
@@ -206,11 +239,19 @@ public final class CloudSyncManager {
 
     // MARK: - Manual Sync
 
-    /// Saves pending changes (which schedules a CloudKit export) and briefly waits for
-    /// the resulting event stream to settle.
+    /// How long a manual sync waits for the CloudKit event stream to settle.
+    public var manualSyncTimeout: Duration = .seconds(6)
+
+    /// Saves pending changes (which schedules a CloudKit export) and waits for the
+    /// resulting event stream to settle — up to `manualSyncTimeout` — so the Settings
+    /// row can show a truthful "Last synced" time rather than a fixed delay.
     public func triggerSync() async {
         guard isNetworkAvailable else {
             syncStatus = .offline
+            return
+        }
+        guard isCloudAvailable else {
+            syncStatus = .unavailable
             return
         }
         guard let context = modelContext else {
@@ -221,7 +262,12 @@ public final class CloudSyncManager {
             if context.hasChanges {
                 try context.save()
             }
-            try await Task.sleep(for: .milliseconds(500))
+            // Give CloudKit a moment to start an export, then wait for it to finish.
+            let deadline = ContinuousClock.now.advanced(by: manualSyncTimeout)
+            try await Task.sleep(for: .milliseconds(300))
+            while isSyncing, ContinuousClock.now < deadline {
+                try await Task.sleep(for: .milliseconds(150))
+            }
             if !isSyncing, lastErrorMessage == nil {
                 lastSyncDate = Date()
             }
@@ -233,7 +279,7 @@ public final class CloudSyncManager {
 
     /// Whether an iCloud account is signed in on this device.
     public var isCloudAvailable: Bool {
-        FileManager.default.ubiquityIdentityToken != nil
+        cloudAvailability()
     }
 
     /// Whether the network is reachable (also drives the Settings delete gate).

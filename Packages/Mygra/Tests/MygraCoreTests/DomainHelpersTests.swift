@@ -43,7 +43,11 @@ struct DomainHelpersTests {
         #expect(OnboardingStep.user.next == .complete)
         #expect(OnboardingStep.complete.next == nil)
         #expect(OnboardingStep.location.isSkippable)
-        #expect(!OnboardingStep.health.isSkippable)
+        // Permissions are never required (HIG): every permission page can be skipped.
+        #expect(OnboardingStep.allCases.filter { $0.isPermissionStep }.allSatisfy { $0.isSkippable })
+        #expect(!OnboardingStep.complete.isSkippable)
+        #expect(OnboardingStep.privacy.previous == nil)
+        #expect(OnboardingStep.complete.previous == .user)
     }
 
     @Test func triggerCatalogCoversEveryCaseExactlyOnce() {
@@ -81,6 +85,40 @@ struct DomainHelpersTests {
         #expect(DashboardStat.water.defaultVisibility)
         #expect(!DashboardStat.steps.defaultVisibility)
         #expect(DashboardStat.healthKitStats.count + DashboardStat.insightStats.count == DashboardStat.allCases.count)
+    }
+
+    @Test func dashboardStatVisibilityFallsBackToDefaultsUntilSet() {
+        let store = FakeKeyValueStore()
+        #expect(DashboardStat.water.isVisible(in: store))
+        #expect(!DashboardStat.steps.isVisible(in: store))
+        store.set(false, forKey: DashboardStat.water.storageKey)
+        store.set(true, forKey: DashboardStat.steps.storageKey)
+        #expect(!DashboardStat.water.isVisible(in: store))
+        #expect(DashboardStat.steps.isVisible(in: store))
+    }
+
+    @Test func dashboardStatOrderRoundTripsAndBackfills() {
+        let store = FakeKeyValueStore()
+        #expect(DashboardStat.loadOrder(from: store) == DashboardStat.defaultOrder)
+
+        DashboardStat.saveOrder([.steps, .water], to: store)
+        let loaded = DashboardStat.loadOrder(from: store)
+        #expect(Array(loaded.prefix(2)) == [.steps, .water])
+        #expect(Set(loaded) == Set(DashboardStat.defaultOrder))
+        #expect(loaded.count == DashboardStat.defaultOrder.count)
+
+        // Garbage and insight-only stats never leak into the tile order.
+        #expect(DashboardStat.order(from: Data("nope".utf8)) == DashboardStat.defaultOrder)
+        #expect(DashboardStat.order(from: DashboardStat.encodeOrder([.topTriggers, .sleep])).first == .sleep)
+        #expect(!DashboardStat.order(from: DashboardStat.encodeOrder([.topTriggers])).contains(.topTriggers))
+    }
+
+    @Test func visibleStatsHonorOrderAndVisibility() {
+        let store = FakeKeyValueStore()
+        DashboardStat.saveOrder([.caffeine, .steps, .water, .sleep, .food], to: store)
+        store.set(true, forKey: DashboardStat.steps.storageKey)
+        store.set(false, forKey: DashboardStat.sleep.storageKey)
+        #expect(DashboardStat.visibleStats(in: store) == [.caffeine, .steps, .water, .food])
     }
 
     @Test func uniquedKeepsFirstOccurrence() {

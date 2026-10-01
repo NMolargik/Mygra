@@ -186,6 +186,7 @@ public final class HealthManager: HeadacheRecording {
     public init(store: any HealthStore) {
         self.store = store
         self.queryClient = HealthQueryClient(store: store)
+        refreshAuthorizationStatus()
     }
 
     public convenience init() {
@@ -254,6 +255,18 @@ public final class HealthManager: HeadacheRecording {
         Log.health.info("Health authorization flag: \(self.isAuthorized)")
     }
 
+    /// Re-reads the authorization state **without** prompting, so returning users are
+    /// recognized at launch and the dashboard never surprises anyone with the system
+    /// sheet. The only prompt paths are the explicit Connect Health buttons and saving a
+    /// migraine that needs a Health snapshot.
+    public func refreshAuthorizationStatus() {
+        guard type(of: store).isHealthDataAvailable() else {
+            isAuthorized = false
+            return
+        }
+        updateAuthorizationFlag()
+    }
+
     private func ensureAuthorized() async throws {
         if !isAuthorized {
             await requestAuthorization()
@@ -303,8 +316,15 @@ public final class HealthManager: HeadacheRecording {
         return try await fetchSnapshot(from: window.start, to: window.end)
     }
 
-    /// Refreshes `latestData` for a window; failures land in `lastError`.
+    /// Refreshes `latestData` for a window; failures land in `lastError`. This is the
+    /// passive path (dashboard, pull-to-refresh) — it never triggers the system
+    /// authorization prompt; without access it simply clears the snapshot.
     public func refreshLatest(from start: Date, to end: Date) async {
+        refreshAuthorizationStatus()
+        guard isAuthorized else {
+            latestData = nil
+            return
+        }
         do {
             latestData = try await fetchSnapshot(from: start, to: end)
             lastError = nil
