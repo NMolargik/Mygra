@@ -1,13 +1,15 @@
 //
 //  MygraWidgetsDaysSinceLastMigraine.swift
-//  Mygra
+//  MygraWidgets
 //
-//  Created by Nick Molargik on 9/16/25.
+//  Days since the last migraine, from the App Group status the app keeps in sync.
+//  Refreshes at local midnight so the count bumps naturally.
 //
 
 import Foundation
 import WidgetKit
 import SwiftUI
+import MygraCore
 
 struct DaysSinceLastMigraineEntry: TimelineEntry {
     let date: Date
@@ -24,73 +26,69 @@ private struct DaysSinceLastMigraineProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<DaysSinceLastMigraineEntry>) -> Void) {
-        let entry = makeEntry()
-        // Update again at the next local midnight to bump the count naturally.
-        completion(Timeline(entries: [entry], policy: .after(MigraineDates.nextMidnight())))
+        completion(Timeline(entries: [makeEntry()], policy: .after(MigraineDates.nextMidnight())))
     }
 
     private func makeEntry() -> DaysSinceLastMigraineEntry {
-        let status = SharedMigraineStatus(defaults: UserDefaults(suiteName: AppGroup.id))
+        let status = SharedMigraineStatus(defaults: AppGroup.defaults)
         return DaysSinceLastMigraineEntry(date: Date(), daysSince: MigraineDates.daysSince(status.lastMigraineStart))
     }
 }
 
 private struct DaysSinceLastMigraineView: View {
-    var entry: DaysSinceLastMigraineEntry
+    let entry: DaysSinceLastMigraineEntry
 
     @Environment(\.widgetFamily) private var family
 
     private func encouragement(for days: Int) -> String {
-        if days == 0 { return "Hang in there." }
-        if days <= 2 { return "Keep it up!" }
-        if days >= 14 { return "Great job!" }
+        if days == 0 { return String(localized: "Hang in there.") }
+        if days <= 2 { return String(localized: "Keep it up!") }
+        if days >= 14 { return String(localized: "Great job!") }
         let options = [
-            "Small steps add up.",
-            "You're doing your best.",
-            "One day at a time.",
-            "Progress over perfection.",
-            "You've got this."
+            String(localized: "Small steps add up."),
+            String(localized: "You're doing your best."),
+            String(localized: "One day at a time."),
+            String(localized: "Progress over perfection."),
+            String(localized: "You've got this."),
         ]
-        return options.randomElement() ?? "You've got this."
+        return options.randomElement() ?? options[0]
     }
 
     var body: some View {
-        ZStack {
-            VStack(alignment: .center, spacing: 4) {
-                Text("Days Since Last Migraine")
-                    .font(.caption2)
+        VStack(alignment: .center, spacing: 4) {
+            Text("Days Since Last Migraine")
+                .font(.caption2)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+                .lineSpacing(1.5)
+                .textCase(.uppercase)
+                .tracking(0.5)
+                .frame(maxWidth: .infinity, alignment: .center)
+
+            Spacer(minLength: 0)
+
+            Text(String(entry.daysSince))
+                .font(.system(size: 56, weight: .black, design: .rounded))
+                .monospacedDigit()
+                .minimumScaleFactor(0.4)
+                .lineLimit(1)
+                .shadow(radius: 4)
+                .frame(maxWidth: .infinity, alignment: .center)
+                .accessibilityLabel("Days since last migraine: \(entry.daysSince)")
+
+            if family != .systemSmall {
+                Text(encouragement(for: entry.daysSince))
+                    .font(.title3)
                     .fontWeight(.semibold)
                     .multilineTextAlignment(.center)
-                    .lineSpacing(1.5)
-                    .textCase(.uppercase)
-                    .tracking(0.5)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.8)
+                    .padding(.top, 2)
                     .frame(maxWidth: .infinity, alignment: .center)
-
-                Spacer(minLength: 0)
-
-                Text(String(entry.daysSince))
-                    .font(.system(size: 56, weight: .black, design: .rounded))
-                    .monospacedDigit()
-                    .minimumScaleFactor(0.4)
-                    .lineLimit(1)
-                    .shadow(radius: 4)
-                    .frame(maxWidth: .infinity, alignment: .center)
-                    .accessibilityLabel("Days since last migraine: \(entry.daysSince)")
-
-                if family != .systemSmall {
-                    Text(encouragement(for: entry.daysSince))
-                        .font(.title3)
-                        .fontWeight(.semibold)
-                        .multilineTextAlignment(.center)
-                        .lineLimit(2)
-                        .minimumScaleFactor(0.8)
-                        .padding(.top, 2)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                }
             }
-            .padding(12)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
+        .padding(12)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         .containerBackground(for: .widget) {
             LinearGradient(
                 colors: [Color.mygraPurple.opacity(0.25), Color.mygraBlue.opacity(0.25)],
@@ -102,10 +100,8 @@ private struct DaysSinceLastMigraineView: View {
 }
 
 struct MygraWidgetsDaysSinceLastMigraine: Widget {
-    static let kind = "DaysSinceLastMigraine"
-
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: Self.kind, provider: DaysSinceLastMigraineProvider()) { entry in
+        StaticConfiguration(kind: WidgetKind.daysSinceLastMigraine, provider: DaysSinceLastMigraineProvider()) { entry in
             DaysSinceLastMigraineView(entry: entry)
         }
         .configurationDisplayName("Days Since Last Migraine")
@@ -113,7 +109,6 @@ struct MygraWidgetsDaysSinceLastMigraine: Widget {
         .supportedFamilies([.systemSmall, .systemMedium])
     }
 }
-
 
 #Preview("Widget – Small", as: .systemSmall) {
     MygraWidgetsDaysSinceLastMigraine()
@@ -130,4 +125,3 @@ struct MygraWidgetsDaysSinceLastMigraine: Widget {
     DaysSinceLastMigraineEntry(date: .now, daysSince: 2)
     DaysSinceLastMigraineEntry(date: .now, daysSince: 21)
 }
-

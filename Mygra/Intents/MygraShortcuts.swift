@@ -2,9 +2,8 @@
 //  MygraShortcuts.swift
 //  Mygra
 //
-//  Registers App Shortcuts so the custom intents are discoverable in Spotlight,
-//  Siri, and the Shortcuts app without any user setup. Phrases use
-//  \(.applicationName) so Siri matches "Mygra" automatically.
+//  Registers App Shortcuts so the custom intents are discoverable in Spotlight, Siri,
+//  and the Shortcuts app without any user setup.
 //
 
 import AppIntents
@@ -16,7 +15,7 @@ struct MygraShortcuts: AppShortcutsProvider {
             phrases: [
                 "Start tracking a migraine in \(.applicationName)",
                 "Log a new migraine in \(.applicationName)",
-                "I have a migraine, \(.applicationName)"
+                "I have a migraine, \(.applicationName)",
             ],
             shortTitle: "Start Migraine",
             systemImageName: "bolt.heart"
@@ -26,7 +25,7 @@ struct MygraShortcuts: AppShortcutsProvider {
             phrases: [
                 "End my migraine in \(.applicationName)",
                 "My migraine is over in \(.applicationName)",
-                "Stop tracking my migraine in \(.applicationName)"
+                "Stop tracking my migraine in \(.applicationName)",
             ],
             shortTitle: "End Migraine",
             systemImageName: "checkmark.circle"
@@ -36,7 +35,7 @@ struct MygraShortcuts: AppShortcutsProvider {
             phrases: [
                 "How long since my last migraine in \(.applicationName)",
                 "When was my last migraine in \(.applicationName)",
-                "Days since my last migraine in \(.applicationName)"
+                "Days since my last migraine in \(.applicationName)",
             ],
             shortTitle: "Days Since Last Migraine",
             systemImageName: "calendar"
@@ -45,7 +44,7 @@ struct MygraShortcuts: AppShortcutsProvider {
             intent: LogMigraineIntent(),
             phrases: [
                 "Log a migraine with \(.applicationName)",
-                "Open \(.applicationName) to log a migraine"
+                "Open \(.applicationName) to log a migraine",
             ],
             shortTitle: "Log a Migraine",
             systemImageName: "plus.circle"

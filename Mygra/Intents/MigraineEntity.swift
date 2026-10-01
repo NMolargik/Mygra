@@ -2,15 +2,16 @@
 //  MigraineEntity.swift
 //  Mygra
 //
-//  An App Intents entity mirroring a logged migraine. Conforms to
-//  IndexedEntity so migraines are surfaced in Spotlight semantic search, and
-//  backs intents that take a specific migraine as a parameter.
+//  An App Intents entity mirroring a logged migraine. Conforms to IndexedEntity so
+//  migraines are surfaced in Spotlight semantic search, and backs intents that take a
+//  specific migraine as a parameter.
 //
 
 import AppIntents
 import CoreSpotlight
 import Foundation
-import SwiftData
+import MygraComposition
+import MygraCore
 
 struct MigraineEntity: AppEntity, IndexedEntity {
     let id: UUID
@@ -28,13 +29,10 @@ struct MigraineEntity: AppEntity, IndexedEntity {
 
     var displayRepresentation: DisplayRepresentation {
         let dateText = startDate.formatted(date: .abbreviated, time: .shortened)
-        let subtitle = note?.isEmpty == false
+        let subtitle: LocalizedStringResource = (note?.isEmpty == false)
             ? LocalizedStringResource(stringLiteral: note!)
             : "Pain \(painLevel)/10"
-        return DisplayRepresentation(
-            title: "Migraine — \(dateText)",
-            subtitle: subtitle
-        )
+        return DisplayRepresentation(title: "Migraine — \(dateText)", subtitle: subtitle)
     }
 
     /// Spotlight metadata enabling semantic, on-device search.
@@ -55,37 +53,32 @@ struct MigraineEntity: AppEntity, IndexedEntity {
 extension MigraineEntity {
     @MainActor
     init(_ migraine: Migraine) {
-        self.id = migraine.id
-        self.startDate = migraine.startDate
-        self.endDate = migraine.endDate
-        self.painLevel = migraine.painLevel
-        self.note = migraine.note
-        self.triggerNames = migraine.triggers.map(\.displayName)
-            + migraine.customTriggers
+        id = migraine.id
+        startDate = migraine.startDate
+        endDate = migraine.endDate
+        painLevel = migraine.painLevel
+        note = migraine.note
+        triggerNames = migraine.allTriggerNames
     }
 }
 
 // MARK: - Query
 
 struct MigraineEntityQuery: EntityQuery {
-    func entities(for identifiers: [UUID]) async throws -> [MigraineEntity] {
-        try await fetch { migraines in
-            migraines.filter { identifiers.contains($0.id) }
-        }
-    }
+    @Dependency private var session: SessionController
 
-    func suggestedEntities() async throws -> [MigraineEntity] {
-        try await fetch { Array($0.prefix(10)) }
+    @MainActor
+    func entities(for identifiers: [UUID]) async throws -> [MigraineEntity] {
+        try session.loadMigraines()
+            .filter { identifiers.contains($0.id) }
+            .map(MigraineEntity.init)
     }
 
     @MainActor
-    private func fetch(_ transform: ([Migraine]) -> [Migraine]) throws -> [MigraineEntity] {
-        let context = MygraModelContainer.shared.mainContext
-        let descriptor = FetchDescriptor<Migraine>(
-            sortBy: [SortDescriptor(\.startDate, order: .reverse)]
-        )
-        let all = try context.fetch(descriptor)
-        return transform(all).map(MigraineEntity.init)
+    func suggestedEntities() async throws -> [MigraineEntity] {
+        try session.loadMigraines()
+            .prefix(10)
+            .map(MigraineEntity.init)
     }
 }
 
@@ -105,7 +98,7 @@ struct ViewMigraineIntent: AppIntent {
 
     @MainActor
     func perform() async throws -> some IntentResult {
-        DeepLink.migraine(migraine.id).storePending(in: UserDefaults(suiteName: AppGroup.id))
+        DeepLink.migraine(migraine.id).storePending(in: AppGroup.defaults)
         return .result()
     }
 }

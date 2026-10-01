@@ -1,9 +1,13 @@
 {
+  "features" : [
+    "refractivity"
+  ],
   "fill" : {
     "solid" : "extended-gray:1.00000,1.00000"
   },
   "groups" : [
     {
+      "blur-material" : null,
       "layers" : [
         {
           "fill-specializations" : [
@@ -48,10 +52,17 @@
           }
         }
       ],
+      "lighting" : "combined",
+      "refractivity" : {
+        "depth" : 0.153125,
+        "enabled" : true,
+        "strength" : 0.492421875
+      },
       "shadow" : {
         "kind" : "neutral",
         "opacity" : 0.5
       },
+      "specular" : true,
       "translucency" : {
         "enabled" : true,
         "value" : 0.5

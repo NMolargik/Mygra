@@ -7,10 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DEC0DE000000000000000011 /* MygraComposition in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000010 /* MygraComposition */; };
+		DEC0DE000000000000000013 /* MygraCore in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000012 /* MygraCore */; };
+		DEC0DE000000000000000015 /* MygraData in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000014 /* MygraData */; };
+		DEC0DE000000000000000021 /* MygraCore in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000020 /* MygraCore */; };
+		DEC0DE000000000000000031 /* MygraCore in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000030 /* MygraCore */; };
+		DEC0DE000000000000000033 /* MygraServices in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000032 /* MygraServices */; };
+		DEC0DE000000000000000041 /* MygraCore in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000040 /* MygraCore */; };
+		DEC0DE000000000000000051 /* MygraCore in Frameworks */ = {isa = PBXBuildFile; productRef = DEC0DE000000000000000050 /* MygraCore */; };
 		EB0E1B1A2E62838E0060F834 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E62E59536C00AAA8C1 /* WidgetKit.framework */; };
 		EB0E1B1B2E62838E0060F834 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */; };
 		EB0E1B282E62838F0060F834 /* MygraWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		EB290BA22E2494AB0061B1D0 /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = EB290BA12E2494AB0061B1D0 /* README.md */; };
 		EB5E66472E8D61FD009872C2 /* Mygra Wrist Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		EBD0218C2E8D70C3007DDFC3 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E62E59536C00AAA8C1 /* WidgetKit.framework */; };
 		EBD0218D2E8D70C3007DDFC3 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */; };
@@ -89,7 +96,6 @@
 		EB01AE952E7A01D900034627 /* MygraWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MygraWidgetsExtension.entitlements; sourceTree = "<group>"; };
 		EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MygraWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB290ACD2E244A200061B1D0 /* Mygra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Mygra.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		EB290BA12E2494AB0061B1D0 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Mygra Wrist Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBB762E62E59536C00AAA8C1 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		EBB762E82E59536C00AAA8C1 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
@@ -108,21 +114,9 @@
 		EB0E1B2E2E6283FC0060F834 /* Exceptions for "Mygra" folder in "MygraWidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Domain/MigraineDates.swift,
-				Domain/SharedStatus.swift,
-				"Extensions/MigraineActivityAttributes.ContentState-sample.swift",
 				MygraIcon.icon,
 			);
 			target = EB0E1B182E62838E0060F834 /* MygraWidgetsExtension */;
-		};
-		EB0E1B3A2E62851E0060F834 /* Exceptions for "MygraWidgets" folder in "Mygra" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				MigraineActivityCenter.swift,
-				MygraWidgetsDaysSinceLastMigraine.swift,
-				MygraWidgetsLiveActivity.swift,
-			);
-			target = EB290ACC2E244A200061B1D0 /* Mygra */;
 		};
 		EB290AF02E244A210061B1D0 /* Exceptions for "Mygra" folder in "Mygra" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
@@ -141,17 +135,6 @@
 		EBD022CF2E8D9F85007DDFC3 /* Exceptions for "Mygra" folder in "Mygra Wrist Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Domain/MigraineDates.swift,
-				Domain/SharedStatus.swift,
-				Enumerations/MenstrualPhase.swift,
-				Enumerations/MigraineTrigger.swift,
-				Enumerations/Severity.swift,
-				Enumerations/UnitConversion.swift,
-				Models/HealthData.swift,
-				Models/IntensitySample.swift,
-				Models/Migraine.swift,
-				Models/MigraineTag.swift,
-				Models/WeatherData.swift,
 				MygraIcon.icon,
 			);
 			target = EB5E66262E8D61FC009872C2 /* Mygra Wrist Watch App */;
@@ -159,17 +142,6 @@
 		EBD022D02E8D9F85007DDFC3 /* Exceptions for "Mygra" folder in "Mygra Wrist WidgetsExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
-				Domain/MigraineDates.swift,
-				Domain/SharedStatus.swift,
-				Enumerations/MenstrualPhase.swift,
-				Enumerations/MigraineTrigger.swift,
-				Enumerations/Severity.swift,
-				Enumerations/UnitConversion.swift,
-				Models/HealthData.swift,
-				Models/IntensitySample.swift,
-				Models/Migraine.swift,
-				Models/MigraineTag.swift,
-				Models/WeatherData.swift,
 				MygraIcon.icon,
 			);
 			target = EBD0218A2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension */;
@@ -185,7 +157,6 @@
 		EB0E1B1C2E62838E0060F834 /* MygraWidgets */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				EB0E1B3A2E62851E0060F834 /* Exceptions for "MygraWidgets" folder in "Mygra" target */,
 				EB0E1B2C2E62838F0060F834 /* Exceptions for "MygraWidgets" folder in "MygraWidgetsExtension" target */,
 			);
 			path = MygraWidgets;
@@ -222,6 +193,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0DE000000000000000021 /* MygraCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -229,6 +201,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0DE000000000000000031 /* MygraCore in Frameworks */,
+				DEC0DE000000000000000033 /* MygraServices in Frameworks */,
 				EB0E1B1B2E62838E0060F834 /* SwiftUI.framework in Frameworks */,
 				EB0E1B1A2E62838E0060F834 /* WidgetKit.framework in Frameworks */,
 			);
@@ -238,6 +212,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0DE000000000000000011 /* MygraComposition in Frameworks */,
+				DEC0DE000000000000000013 /* MygraCore in Frameworks */,
+				DEC0DE000000000000000015 /* MygraData in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,6 +222,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0DE000000000000000041 /* MygraCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -252,6 +230,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DEC0DE000000000000000051 /* MygraCore in Frameworks */,
 				EBD0218D2E8D70C3007DDFC3 /* SwiftUI.framework in Frameworks */,
 				EBD0218C2E8D70C3007DDFC3 /* WidgetKit.framework in Frameworks */,
 			);
@@ -265,7 +244,6 @@
 			children = (
 				EBD022C72E8D8B1D007DDFC3 /* Mygra Wrist WidgetsExtension.entitlements */,
 				EB01AE952E7A01D900034627 /* MygraWidgetsExtension.entitlements */,
-				EB290BA12E2494AB0061B1D0 /* README.md */,
 				EB290ACF2E244A200061B1D0 /* Mygra */,
 				EB0E1B1C2E62838E0060F834 /* MygraWidgets */,
 				EB5E66282E8D61FC009872C2 /* Mygra Wrist Watch App */,
@@ -318,6 +296,7 @@
 			);
 			name = MygraTests;
 			packageProductDependencies = (
+				DEC0DE000000000000000020 /* MygraCore */,
 			);
 			productName = MygraTests;
 			productReference = AA00DEC0DE0000000000A002 /* MygraTests.xctest */;
@@ -340,6 +319,8 @@
 			);
 			name = MygraWidgetsExtension;
 			packageProductDependencies = (
+				DEC0DE000000000000000030 /* MygraCore */,
+				DEC0DE000000000000000032 /* MygraServices */,
 			);
 			productName = MygraWidgetsExtension;
 			productReference = EB0E1B192E62838E0060F834 /* MygraWidgetsExtension.appex */;
@@ -366,6 +347,9 @@
 			);
 			name = Mygra;
 			packageProductDependencies = (
+				DEC0DE000000000000000010 /* MygraComposition */,
+				DEC0DE000000000000000012 /* MygraCore */,
+				DEC0DE000000000000000014 /* MygraData */,
 			);
 			productName = Mygra;
 			productReference = EB290ACD2E244A200061B1D0 /* Mygra.app */;
@@ -390,6 +374,7 @@
 			);
 			name = "Mygra Wrist Watch App";
 			packageProductDependencies = (
+				DEC0DE000000000000000040 /* MygraCore */,
 			);
 			productName = "Mygra Wrist Watch App";
 			productReference = EB5E66272E8D61FC009872C2 /* Mygra Wrist Watch App.app */;
@@ -412,6 +397,7 @@
 			);
 			name = "Mygra Wrist WidgetsExtension";
 			packageProductDependencies = (
+				DEC0DE000000000000000050 /* MygraCore */,
 			);
 			productName = "Mygra Wrist WidgetsExtension";
 			productReference = EBD0218B2E8D70C3007DDFC3 /* Mygra Wrist WidgetsExtension.appex */;
@@ -425,7 +411,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2620;
+				LastUpgradeCheck = 2700;
 				TargetAttributes = {
 					AA00DEC0DE0000000000A001 = {
 						CreatedOnToolsVersion = 26.0;
@@ -457,6 +443,9 @@
 			);
 			mainGroup = EB290AC42E244A200061B1D0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = EB290ACE2E244A200061B1D0 /* Products */;
 			projectDirPath = "";
@@ -490,7 +479,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				EB290BA22E2494AB0061B1D0 /* README.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -641,7 +629,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -676,7 +664,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -742,7 +730,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -812,7 +800,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -832,6 +820,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -885,7 +874,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -897,6 +886,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
@@ -943,7 +933,7 @@
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 			};
@@ -973,7 +963,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1008,7 +998,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1044,7 +1034,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1079,7 +1069,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = watchos;
 				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -1149,6 +1139,56 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/Mygra;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		DEC0DE000000000000000010 /* MygraComposition */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraComposition;
+		};
+		DEC0DE000000000000000012 /* MygraCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraCore;
+		};
+		DEC0DE000000000000000014 /* MygraData */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraData;
+		};
+		DEC0DE000000000000000020 /* MygraCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraCore;
+		};
+		DEC0DE000000000000000030 /* MygraCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraCore;
+		};
+		DEC0DE000000000000000032 /* MygraServices */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraServices;
+		};
+		DEC0DE000000000000000040 /* MygraCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraCore;
+		};
+		DEC0DE000000000000000050 /* MygraCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DEC0DE000000000000000001 /* XCLocalSwiftPackageReference "Packages/Mygra" */;
+			productName = MygraCore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = EB290AC52E244A200061B1D0 /* Project object */;
 }

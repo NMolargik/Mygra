@@ -1,16 +1,14 @@
 //
-//  Mygra_Wrist_WidgetsBundle.swift
+//  MygraWristWidgetsBundle.swift
 //  Mygra Wrist Widgets
-//
-//  Created by Nick Molargik on 10/1/25.
 //
 
 import WidgetKit
 import SwiftUI
 
 @main
-struct Mygra_Wrist_WidgetsBundle: WidgetBundle {
+struct MygraWristWidgetsBundle: WidgetBundle {
     var body: some Widget {
-        Mygra_Wrist_Widgets()
+        MygraWristWidgets()
     }
 }

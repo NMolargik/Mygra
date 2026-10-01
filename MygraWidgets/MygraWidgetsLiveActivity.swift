@@ -2,62 +2,38 @@
 //  MygraWidgetsLiveActivity.swift
 //  MygraWidgets
 //
-//  Created by Nick Molargik on 8/29/25.
+//  The ongoing-migraine Live Activity (Lock Screen, Dynamic Island, and the watchOS
+//  Smart Stack). The attributes live in MygraServices and are shared with the app.
 //
 
 import ActivityKit
 import WidgetKit
 import SwiftUI
+import MygraCore
+import MygraServices
 
-// MARK: - Attributes for Migraine Live Activity
-// nonisolated: ActivityKit encodes and observes these off the main actor.
-nonisolated struct MigraineActivityAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
-        // Dynamic state for the activity
-        let migraineID: UUID
-        let startDate: Date
-        let severity: Int // Pain level (0-10)
-        let stressLevel: Int // Stress level (0-10)
-        let notes: String? // Optional short notes or triggers for context
-    }
-}
-
-// MARK: - Live Activity Widget
 struct MygraWidgetsLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: MigraineActivityAttributes.self) { context in
-            // Lock screen / banner UI
             MigraineActivityContentView(context: context)
-
         } dynamicIsland: { context in
             DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     HStack(spacing: 8) {
-                        Image(systemName: "brain.head.profile.fill")
-                            .symbolRenderingMode(.multicolor)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color.mygraPurple, Color.mygraBlue],
-                                    startPoint: .topTrailing,
-                                    endPoint: .bottomLeading
-                                )
-                            )
+                        brainIcon
                             .font(.title3)
                             .accessibilityLabel("Migraine Indicator")
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text("Pain: \(context.state.severity)")
-                                    .font(.caption.bold())
-                                    .foregroundStyle(severityColor(severity: context.state.severity))
-                                Text("Stress: \(context.state.stressLevel)")
-                                    .font(.caption.bold())
-                                    .foregroundStyle(stressColor(level: context.state.stressLevel))
-                            }
+                        HStack(spacing: 6) {
+                            Text("Pain: \(context.state.severity)")
+                                .font(.caption.bold())
+                                .foregroundStyle(severityColor(context.state.severity))
+                            Text("Stress: \(context.state.stressLevel)")
+                                .font(.caption.bold())
+                                .foregroundStyle(stressColor)
                         }
                     }
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    // Live timer with improved styling
                     Text(context.state.startDate, style: .timer)
                         .monospacedDigit()
                         .font(.title3)
@@ -78,64 +54,47 @@ struct MygraWidgetsLiveActivity: Widget {
                                 .lineLimit(2)
                                 .frame(maxWidth: .infinity)
                         }
-                        // Deep link to end the migraine in-app
-                        if let url = URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)?action=end") {
-                            Link(destination: url) {
-                                Label("End Migraine", systemImage: "stop.circle.fill")
-                                    .font(.headline.bold())
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 8)
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                            }
-                            .tint(.mygraPurple)
-                            .buttonStyle(.borderedProminent)
+                        Link(destination: DeepLink.migraine(context.state.migraineID).url) {
+                            Label("End Migraine", systemImage: "stop.circle.fill")
+                                .font(.headline.bold())
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
+                        .tint(.mygraPurple)
+                        .buttonStyle(.borderedProminent)
                     }
                 }
             } compactLeading: {
-                // Compact leading - Minimal icon with subtle animation if possible (but static here)
-                Image(systemName: "brain.head.profile.fill")
-                    .foregroundStyle(LinearGradient(
-                        colors: [Color.mygraPurple, Color.mygraBlue],
-                        startPoint: .topTrailing,
-                        endPoint: .bottomLeading
-                    ))
+                brainIcon
             } compactTrailing: {
-                // Compact trailing - Ultra-compact severity chips for pain/stress
                 HStack(spacing: 2) {
-                    Text("\(context.state.severity)")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
-                        .background(severityColor(severity: context.state.severity))
-                        .clipShape(Capsule())
-                    Text("\(context.state.stressLevel)")
-                        .font(.caption2.bold())
-                        .foregroundStyle(.black)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 2)
-                        .background(stressColor(level: context.state.stressLevel))
-                        .clipShape(Capsule())
+                    levelChip(context.state.severity, color: severityColor(context.state.severity))
+                    levelChip(context.state.stressLevel, color: stressColor)
                 }
             } minimal: {
-                // Minimal - Icon with severity color overlay
-                Image(systemName: "brain.head.profile.fill")
-                    .foregroundStyle(LinearGradient(
-                        colors: [Color.mygraPurple, Color.mygraBlue],
-                        startPoint: .topTrailing,
-                        endPoint: .bottomLeading
-                    ))
+                brainIcon
                     .padding()
             }
-            .widgetURL(URL(string: "mygra://migraine/\(context.state.migraineID.uuidString)"))
+            .widgetURL(DeepLink.migraine(context.state.migraineID).url)
             .keylineTint(.red.opacity(0.5))
         }
-        .supplementalActivityFamilies([.small]) // Enables compact presentation on watchOS Smart Stack
+        .supplementalActivityFamilies([.small])
+    }
+
+    private func levelChip(_ value: Int, color: Color) -> some View {
+        Text("\(value)")
+            .font(.caption2.bold())
+            .foregroundStyle(.black)
+            .padding(.horizontal, 4)
+            .padding(.vertical, 2)
+            .background(color)
+            .clipShape(Capsule())
     }
 }
 
-// MARK: - Cross-platform content view that adapts by ActivityFamily
+// MARK: - Content view (Lock Screen / banner / watch Smart Stack)
+
 private struct MigraineActivityContentView: View {
     let context: ActivityViewContext<MigraineActivityAttributes>
     @Environment(\.activityFamily) private var activityFamily
@@ -143,138 +102,121 @@ private struct MigraineActivityContentView: View {
     var body: some View {
         Group {
             if activityFamily == .small {
-                // Compact layout tailored for Apple Watch Smart Stack (icon • timer • severity badge)
-                
-                VStack(spacing: 5) {
-                    HStack {
-                        Text("Ongoing Migraine")
-                        
-                        Spacer()
-                    }
-                    .padding(.leading, 8)
-                    HStack(alignment: .center, spacing: 6) {
-                        Image(systemName: "brain.head.profile.fill")
-                            .symbolRenderingMode(.multicolor)
-                            .foregroundStyle(
-                                LinearGradient(
-                                    colors: [Color.mygraPurple, Color.mygraBlue],
-                                    startPoint: .topTrailing,
-                                    endPoint: .bottomLeading
-                                )
-                            )
-                            .font(.system(size: 14, weight: .semibold))
-                            .accessibilityHidden(true)
-                        
-                        // Timer given highest priority to avoid truncation
-                        Text(context.state.startDate, style: .timer)
-                            .monospacedDigit()
-                            .font(.body)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            .layoutPriority(1)
-                        
-                        Spacer(minLength: 4)
-
-                        // Circular badges for pain and stress
-                        HStack(spacing: 4) {
-                            ZStack {
-                                Circle()
-                                    .fill(severityColor(severity: context.state.severity))
-                                Text("\(context.state.severity)")
-                                    .font(.caption2.bold())
-                                    .monospacedDigit()
-                                    .foregroundStyle(.black)
-                            }
-                            .frame(width: 22, height: 22)
-                            .accessibilityLabel("Pain \(context.state.severity) out of 10")
-
-                            ZStack {
-                                Circle()
-                                    .fill(stressColor(level: context.state.stressLevel))
-                                Text("\(context.state.stressLevel)")
-                                    .font(.caption2.bold())
-                                    .monospacedDigit()
-                                    .foregroundStyle(.black)
-                            }
-                            .frame(width: 22, height: 22)
-                            .accessibilityLabel("Stress \(context.state.stressLevel) out of 10")
-                        }
-                    }
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 6)
-                    .accessibilityElement(children: .combine)
-                    .accessibilityLabel("Migraine, timer \(Text(context.state.startDate, style: .timer)), pain \(context.state.severity), stress \(context.state.stressLevel)")
-                }
+                smallLayout
             } else {
-                // iOS Lock screen / banner (original fuller layout)
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 12) {
-                        Image(systemName: "brain.head.profile.fill")
-                            .symbolRenderingMode(.multicolor)
-                            .foregroundStyle(LinearGradient(
-                                colors: [Color.mygraPurple, Color.mygraBlue],
-                                startPoint: .topTrailing,
-                                endPoint: .bottomLeading
-                            ))
-                            .ignoresSafeArea()
-                            .font(.system(size: 24))
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Ongoing Migraine")
-                                .font(.headline.bold())
-                            // Live timer since start
-                            Text(context.state.startDate, style: .timer)
-                                .monospacedDigit()
-                                .foregroundStyle(.secondary)
-                                .font(.subheadline)
-                        }
-                        Spacer()
-                        HStack(spacing: 6) {
-                            Text("Pain: \(context.state.severity)")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 4)
-                                .background(severityColor(severity: context.state.severity))
-                                .foregroundStyle(.black)
-                                .clipShape(Capsule())
-                            Text("Stress: \(context.state.stressLevel)")
-                                .font(.caption2.bold())
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 4)
-                                .background(stressColor(level: context.state.stressLevel))
-                                .foregroundStyle(.black)
-                                .clipShape(Capsule())
-                        }
-                    }
-                    if let notes = context.state.notes, !notes.isEmpty {
-                        Text(notes)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-                    }
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 12)
+                fullLayout
             }
         }
         .containerBackground(for: .widget) { Color.clear }
     }
+
+    private var smallLayout: some View {
+        VStack(spacing: 5) {
+            HStack {
+                Text("Ongoing Migraine")
+                Spacer()
+            }
+            .padding(.leading, 8)
+            HStack(alignment: .center, spacing: 6) {
+                brainIcon
+                    .font(.system(size: 14, weight: .semibold))
+                    .accessibilityHidden(true)
+
+                Text(context.state.startDate, style: .timer)
+                    .monospacedDigit()
+                    .font(.body)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .layoutPriority(1)
+
+                Spacer(minLength: 4)
+
+                HStack(spacing: 4) {
+                    levelBadge(context.state.severity, color: severityColor(context.state.severity))
+                        .accessibilityLabel("Pain \(context.state.severity) out of 10")
+                    levelBadge(context.state.stressLevel, color: stressColor)
+                        .accessibilityLabel("Stress \(context.state.stressLevel) out of 10")
+                }
+            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .accessibilityElement(children: .combine)
+        }
+    }
+
+    private var fullLayout: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 12) {
+                brainIcon
+                    .font(.system(size: 24))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Ongoing Migraine")
+                        .font(.headline.bold())
+                    Text(context.state.startDate, style: .timer)
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                        .font(.subheadline)
+                }
+                Spacer()
+                HStack(spacing: 6) {
+                    levelPill("Pain: \(context.state.severity)", color: severityColor(context.state.severity))
+                    levelPill("Stress: \(context.state.stressLevel)", color: stressColor)
+                }
+            }
+            if let notes = context.state.notes, !notes.isEmpty {
+                Text(notes)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+    }
+
+    private func levelBadge(_ value: Int, color: Color) -> some View {
+        ZStack {
+            Circle().fill(color)
+            Text("\(value)")
+                .font(.caption2.bold())
+                .monospacedDigit()
+                .foregroundStyle(.black)
+        }
+        .frame(width: 22, height: 22)
+    }
+
+    private func levelPill(_ text: String, color: Color) -> some View {
+        Text(text)
+            .font(.caption2.bold())
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
+            .background(color)
+            .foregroundStyle(.black)
+            .clipShape(Capsule())
+    }
 }
 
-// MARK: - Helper Functions
-private func severityColor(severity: Int) -> Color {
+// MARK: - Shared pieces
+
+private var brainIcon: some View {
+    Image(systemName: "brain.head.profile.fill")
+        .symbolRenderingMode(.multicolor)
+        .foregroundStyle(
+            LinearGradient(colors: [Color.mygraPurple, Color.mygraBlue], startPoint: .topTrailing, endPoint: .bottomLeading)
+        )
+}
+
+private func severityColor(_ severity: Int) -> Color {
     switch severity {
     case 1...3: return .green
     case 4...6: return .yellow
     case 7...8: return .orange
-    case 9...10: return .red
     default: return .red
     }
 }
 
-private func stressColor(level: Int) -> Color {
-    return .indigo
-}
+private let stressColor: Color = .indigo
 
 #Preview("Lock Screen", as: .content, using: MigraineActivityAttributes()) {
     MygraWidgetsLiveActivity()
@@ -293,18 +235,3 @@ private func stressColor(level: Int) -> Color {
 } contentStates: {
     MigraineActivityAttributes.ContentState.sample
 }
-
-#Preview("Dynamic Island - Minimal", as: .dynamicIsland(.minimal), using: MigraineActivityAttributes()) {
-    MygraWidgetsLiveActivity()
-} contentStates: {
-    MigraineActivityAttributes.ContentState.sample
-}
-
-#if os(watchOS)
-#Preview("Apple Watch – Smart Stack", as: .content, using: MigraineActivityAttributes()) {
-    MygraWidgetsLiveActivity()
-} contentStates: {
-    MigraineActivityAttributes.ContentState.sample
-}
-#endif
-

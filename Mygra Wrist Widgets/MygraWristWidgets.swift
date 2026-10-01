@@ -1,16 +1,65 @@
 //
-//  Mygra_Wrist_Widgets.swift
+//  MygraWristWidgets.swift
 //  Mygra Wrist Widgets
 //
-//  Created by Nick Molargik on 10/1/25.
+//  Days-since complication from the App Group status the watch app caches.
 //
 
 import WidgetKit
 import SwiftUI
+import MygraCore
 
-struct Mygra_Wrist_Widgets: Widget {
+struct WatchDaysSinceEntry: TimelineEntry {
+    let date: Date
+    let daysSince: Int
+}
+
+struct WatchDaysProvider: TimelineProvider {
+    func placeholder(in context: Context) -> WatchDaysSinceEntry {
+        WatchDaysSinceEntry(date: .now, daysSince: 0)
+    }
+
+    func getSnapshot(in context: Context, completion: @escaping (WatchDaysSinceEntry) -> Void) {
+        completion(makeEntry())
+    }
+
+    func getTimeline(in context: Context, completion: @escaping (Timeline<WatchDaysSinceEntry>) -> Void) {
+        completion(Timeline(entries: [makeEntry()], policy: .after(MigraineDates.nextMidnight())))
+    }
+
+    private func makeEntry() -> WatchDaysSinceEntry {
+        let status = SharedMigraineStatus(defaults: AppGroup.defaults)
+        return WatchDaysSinceEntry(date: .now, daysSince: MigraineDates.daysSince(status.lastMigraineStart))
+    }
+}
+
+struct WatchDaysSinceView: View {
+    let entry: WatchDaysSinceEntry
+    @Environment(\.widgetFamily) private var family
+
+    var body: some View {
+        switch family {
+        case .accessoryCircular:
+            Text("\(entry.daysSince)")
+                .containerBackground(for: .widget) { Color.clear }
+                .widgetLabel { Text("Days") }
+        case .accessoryRectangular:
+            HStack {
+                Text("Migraine Free")
+                Spacer()
+                Text("\(entry.daysSince) days").bold().monospacedDigit()
+            }
+            .containerBackground(for: .widget) { Color.clear }
+        default:
+            Text("\(entry.daysSince)")
+                .containerBackground(for: .widget) { Color.clear }
+        }
+    }
+}
+
+struct MygraWristWidgets: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "DaysSinceLastMigraineWatch", provider: WatchDaysProvider()) { entry in
+        StaticConfiguration(kind: WidgetKind.daysSinceLastMigraineWatch, provider: WatchDaysProvider()) { entry in
             WatchDaysSinceView(entry: entry)
         }
         .configurationDisplayName("Days Since")
@@ -20,61 +69,9 @@ struct Mygra_Wrist_Widgets: Widget {
 }
 
 #Preview(as: .accessoryRectangular) {
-    Mygra_Wrist_Widgets()
+    MygraWristWidgets()
 } timeline: {
     WatchDaysSinceEntry(date: .now, daysSince: 1)
     WatchDaysSinceEntry(date: .now, daysSince: 2)
     WatchDaysSinceEntry(date: .now, daysSince: 356)
-}
-
-
-import WidgetKit
-import SwiftUI
-
-struct WatchDaysSinceEntry: TimelineEntry {
-    let date: Date
-    let daysSince: Int
-}
-
-struct WatchDaysProvider: TimelineProvider {
-    func placeholder(in: Context) -> WatchDaysSinceEntry { .init(date: .now, daysSince: 0) }
-    func getSnapshot(in: Context, completion: @escaping (WatchDaysSinceEntry) -> Void) {
-        completion(makeEntry())
-    }
-    func getTimeline(in: Context, completion: @escaping (Timeline<WatchDaysSinceEntry>) -> Void) {
-        completion(Timeline(entries: [makeEntry()], policy: .after(nextMidnight())))
-    }
-
-    private func makeEntry() -> WatchDaysSinceEntry {
-        let status = SharedMigraineStatus(defaults: UserDefaults(suiteName: AppGroup.id))
-        return .init(date: .now, daysSince: MigraineDates.daysSince(status.lastMigraineStart))
-    }
-
-    private func nextMidnight() -> Date {
-        MigraineDates.nextMidnight()
-    }
-}
-
-struct WatchDaysSinceView: View {
-    var entry: WatchDaysSinceEntry
-    @Environment(\.widgetFamily) private var family
-
-    var body: some View {
-        switch family {
-        case .accessoryCircular:
-            ZStack { Text("\(entry.daysSince)") }
-                .containerBackground(for: .widget) { Color.clear }
-                .widgetLabel { Text("Days") }
-        case .accessoryRectangular:
-            HStack {
-                Text("Migraine Free")
-                Spacer()
-                Text("\(entry.daysSince) \(entry.daysSince == 1 ? "day" : "days")").bold().monospacedDigit()
-            }
-            .containerBackground(for: .widget) { Color.clear }
-        default:
-            Text("\(entry.daysSince)")
-                .containerBackground(for: .widget) { Color.clear }
-        }
-    }
 }

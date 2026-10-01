@@ -1,21 +1,27 @@
 //
-//  Mygra_WristApp.swift
+//  MygraWristApp.swift
 //  Mygra Wrist Watch App
-//
-//  Created by Nick Molargik on 10/1/25.
 //
 
 import SwiftUI
 
 @main
-struct Mygra_Wrist_Watch_AppApp: App {
+struct MygraWristApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     init() {
         PhoneBridge.shared.activate()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(PhoneBridge.shared)
+                .onChange(of: scenePhase) { _, newPhase in
+                    if newPhase == .active {
+                        PhoneBridge.shared.refresh()
+                    }
+                }
         }
     }
 }

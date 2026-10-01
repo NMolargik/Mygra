@@ -1,136 +1,70 @@
-<img src="Icons/MygraIcon-iOS-Default-1024x1024@1x.png" alt="Mygra" width="128" height="128">
+<p align="center">
+  <img src="Icons/head.svg" width="120" alt="Mygra icon" />
+</p>
 
 # Mygra
 
-A personal iOS app for tracking migraines and surfacing actionable insights through pattern analysis.
-
-## Overview
-
-Mygra helps migraine sufferers understand their triggers by combining HealthKit data (sleep, hydration, caffeine, energy), local weather conditions via WeatherKit, and on-device Apple Intelligence to provide personalized guidance. Built with SwiftUI and SwiftData, it features seamless iCloud sync, Live Activities, and cross-device support with Apple Watch.
+Your intelligent migraine journal for iPhone and Apple Watch. Mygra logs migraines with intensity over time, attaches the Health and weather context around each attack, and turns the history into rule-based and Apple Intelligence insights — all synced privately through iCloud.
 
 ## Features
 
-### Migraine Tracking
-- Record migraines with severity levels and detailed notes
-- Automatic capture of weather conditions at migraine onset
-- Automatic capture of health data snapshot (sleep, hydration, caffeine, energy)
-- Live Activities showing ongoing migraine duration on lock screen
-
-### Insights Dashboard
-- **Weather Card**: Real-time conditions with pressure, humidity, and storm detection
-- **Today Card**: Current health metrics with quick-add for water, caffeine, food, and sleep
-- **Quick Bits**: Pattern highlights (e.g., hydration trends, sleep correlations)
-- Adaptive layout: side-by-side on iPad/landscape, stacked on phones
-
-### Migraine Assistant (Apple Intelligence)
-- Full-screen counselor-style chat with personalized advice
-- Context-aware guidance based on your migraine history and patterns
-- Requires compatible device with Apple Intelligence (iOS 26+)
-
-### Health Integration
-- Read sleep, hydration, caffeine, and energy data from HealthKit
-- Quick-add entries that write directly to HealthKit
-- Unit conversion support (metric/imperial)
-
-### Platform Integration
-- **iCloud Sync**: Seamless multi-device synchronization via CloudKit
-- **HealthKit**: Comprehensive health data read/write
-- **WeatherKit**: Weather conditions with high-risk alerts
-- **Widgets**: Home screen widget showing days since last migraine
-- **Apple Watch**: Companion app with real-time phone sync
+- **Migraine journal** — start an ongoing migraine (with a Live Activity and Dynamic Island timer) or log a completed one; pin, filter, and search your history.
+- **Intensity tracking** — record pain and stress as an attack evolves and see the curve on each migraine's detail screen.
+- **Health & weather context** — hydration, sleep, caffeine, energy, steps, heart rate, glucose, SpO₂, and cycle phase from Apple Health; temperature, pressure, humidity, and conditions from WeatherKit, attached at log time.
+- **Quick Bits** — deterministic insights across trends, triggers, foods, intake, sleep, weather, cycle phase, intensity patterns, and tags.
+- **Migraine Assistant** — on-device Apple Intelligence explanations and an analyst chat over your own entries (iOS 26+). No data leaves the device.
+- **Tags, calendar, export** — user-defined tags with drag-to-reorder, a month calendar, and PDF export.
+- **Weather risk alerts** — a notification when conditions move into migraine-risk territory.
+- **Widgets, Siri & Shortcuts, Spotlight** — days-since widget and complication, "Start / End my migraine" intents, menu-bar commands on iPad and Mac, and semantically searchable migraines.
+- **Apple Watch** — see days since your last migraine, start one, or end the ongoing one from your wrist.
 
 ## Requirements
 
-- iOS 17.0+
-- Xcode 16.0+
-- Apple Developer account (for CloudKit, HealthKit, and WeatherKit capabilities)
+- Xcode 27, Swift 6 language mode
+- iOS 18 / watchOS 10 (Apple Intelligence features on iOS 26+)
+- A real device for HealthKit writes, WeatherKit, and Apple Intelligence
+- iCloud container `iCloud.com.molargiksoftware.Mygra`, App Group `group.com.molargiksoftware.Mygra`
 
-## Setup
+## Building
 
-1. Clone the repository
-2. Open `Mygra.xcodeproj` in Xcode
-3. Configure signing with your Apple Developer account
-4. Update bundle identifiers and App Group/iCloud container identifiers
-5. Build and run
+Open `Mygra.xcworkspace` — it resolves the local package in `Packages/Mygra`. There are no external dependencies.
 
-### Required Capabilities
-
-Enable these in your Xcode project:
-- iCloud (CloudKit with private database)
-- HealthKit
-- App Groups (`group.com.molargiksoftware.Mygra`)
-- WeatherKit
-- Background Modes (location, remote notifications, fetch)
-
-## Architecture
-
-### App Lifecycle
-
-The app progresses through stages managed by `ContentView`:
-
+```sh
+xcodebuild -workspace Mygra.xcworkspace -scheme Mygra \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' build
 ```
-.splash → .onboarding → .main
-```
-
-### Manager Pattern
-
-Business logic lives in `@Observable` manager classes:
-
-| Manager | Responsibility |
-|---------|---------------|
-| `MigraineManager` | CRUD operations, Live Activities, widget updates |
-| `HealthManager` | HealthKit authorization and data streaming |
-| `WeatherManager` | WeatherKit with throttled updates (10-min interval) |
-| `InsightManager` | Pattern aggregation and correlation analysis |
-| `IntelligenceManager` | Apple Intelligence chat (iOS 26+) |
-| `LocationManager` | CoreLocation wrapper for weather positioning |
-| `NotificationManager` | High-risk weather alerts |
-| `ComplicationSync` | WatchConnectivity for real-time watch updates |
-
-### Data Layer
-
-- **SwiftData** with iCloud CloudKit sync
-- **App Groups** for widget and watch data sharing
-- **AppStorage** for user preferences
-
-### Key Patterns
-
-- **Dependency Injection**: Managers injected via SwiftUI `@Environment`
-- **Async/Await**: Modern Swift concurrency throughout
-- **AsyncStream**: Continuous updates for health and location data
 
 ## Project Structure
 
 ```
 Mygra/
-├── MygraApp.swift              # App entry point
-├── ContentView.swift           # App stage state machine
-├── Managers/                   # Business logic
-├── Models/                     # SwiftData models
-├── Views/
-│   ├── Splash/                 # Launch screen
-│   ├── Onboarding/             # Permission flow
-│   ├── Main/
-│   │   ├── Insights/           # Dashboard with cards
-│   │   ├── Migraines/          # List, entry, detail views
-│   │   ├── Assistant/          # Apple Intelligence chat
-│   │   └── Settings/           # Preferences, PDF export
-├── Enumerations/               # Shared enums
-├── Errors/                     # LocalizedError types
-└── Extensions/                 # Swift extensions
-
-MygraWidgets/                   # Home screen widgets
-Mygra Wrist Watch App/          # watchOS companion
+├── Mygra/                      # Thin app target: @main, App Intents, Spotlight, BGTask, menu commands
+├── MygraWidgets/               # Days-since widget + ongoing-migraine Live Activity
+├── Mygra Wrist Watch App/      # Watch companion (WatchConnectivity over Core wire types)
+├── Mygra Wrist Widgets/        # Watch complication
+├── Packages/Mygra/             # The real app (SPM umbrella package)
+│   ├── Sources/                #   Core · Data · Services · DesignSystem · FeatureShared ·
+│   │                           #   FeatureDashboard/Calendar/Migraines/Assistant/Settings/Onboarding · Composition
+│   └── Tests/                  #   Host-run suite (swift test, no simulator)
+└── Scripts/                    # Localization pinning tooling
 ```
+
+Dependencies point inward: features depend on the design system and core; data implements core's protocols; core depends on nothing but Foundation and SwiftData. See `CLAUDE.md` for the module-by-module tour.
+
+## Testing
+
+```sh
+cd Packages/Mygra && swift test
+```
+
+Domain rules, repositories, system-framework orchestration (over fakes), the shared feature models, and composition policy are all covered on the host. The hosted `MygraTests` target covers app-target glue only.
 
 ## Privacy
 
-Mygra is designed with privacy in mind:
-- All data stored in your private iCloud container
-- On-device Apple Intelligence processing
-- Location used only for weather context
+- All migraine data stays in your private iCloud container
+- Health data is read and written only with your permission, directly via HealthKit
+- Insights and the assistant run entirely on-device
 - No analytics or tracking
-- No health data leaves your devices
 
 ## License
 

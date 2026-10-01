@@ -2,18 +2,27 @@
   "sourceLanguage" : "en",
   "strings" : {
     "" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    " Weather" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "\"%@\"" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%@ / 10" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%@ h sleep" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%@, %lld migraines" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -21,9 +30,11 @@
             "value" : "%1$@, %2$lld migraines"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "%@: %@" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -31,34 +42,27 @@
             "value" : "%1$@: %2$@"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "%@. Consider hydration, rest, and minimizing triggers." : {
-
-    },
-    "%lld" : {
-
-    },
-    "%lld %@" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "%1$lld %2$@"
-          }
-        }
-      }
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld bpm" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld bpm RHR" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld cm" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld cups (%lld mg)" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -66,21 +70,27 @@
             "value" : "%1$lld cups (%2$lld mg)"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "%lld kg" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld lbs" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld mg caffeine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld mg/dL" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld migraine%@ on %@" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -88,21 +98,27 @@
             "value" : "%1$lld migraine%2$@ on %3$@"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "%lld out of 10" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld selected" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld steps" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld triggers" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "%lld' %lld\"" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -110,31 +126,44 @@
             "value" : "%1$lld' %2$lld\""
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "%lld%%" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "•" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "+" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "+%lld" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "0" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "10" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "A location request is already in progress." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "About health data source" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "About This Data" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "About You" : {
       "extractionState" : "manual",
@@ -157,49 +186,68 @@
             "value" : "あなたについて"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Active HR" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add %lld fluid ounces of water" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add %lld kilocalories of energy" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add %lld kilojoules of energy" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add %lld milligrams of caffeine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add %lld milliliters of water" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add any details you want to remember" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add Condition" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add Consumption" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add custom trigger" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add New Tag" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Add Restriction" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Adding..." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Adjust" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Adjust Filters" : {
       "extractionState" : "manual",
@@ -222,26 +270,60 @@
             "value" : "フィルタを調整"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
-    "All migraines will be deleted from all of your iCloud-enabled devices. Some entries may linger on devices until they are refreshed.\n\nData contributed to Apple Health will remain in Apple Health. Apple Health data must be removed manually from within the Apple Health application.\n\nAre you sure you want to proceed?" : {
-
+    "Aged cheeses" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
-    "An error occurred" : {
-      "comment" : "Error message displayed when an error occurs.",
-      "isCommentAutoGenerated" : true
+    "Air pollution" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Air Quality & Allergens" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Alcohol (beer / spirits)" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Alcohol (red wine)" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "All" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Allergens / pollen" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Anatomy" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Anxiety / depression" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Apple Intelligence" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Apple Intelligence is not available on this device." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Apple Intelligence. Update to %@ to access these features." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Apple Weather legal attribution, opens in browser" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Apply" : {
       "extractionState" : "manual",
@@ -264,7 +346,8 @@
             "value" : "適用"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Are you sure?" : {
       "extractionState" : "manual",
@@ -287,13 +370,20 @@
             "value" : "よろしいですか？"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Aspartame" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Assistant is typing" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "at start" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Back" : {
       "extractionState" : "manual",
@@ -316,10 +406,16 @@
             "value" : "戻る"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Barometric pressure changes" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Biological Sex" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Birthday" : {
       "extractionState" : "manual",
@@ -342,7 +438,44 @@
             "value" : "誕生日"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Blizzard" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Blood Oxygen" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Blowing Dust" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Blowing Snow" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Breezy" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Bright light / glare" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "caffeine" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Caffeine" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Caffeine withdrawal" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Calendar" : {
       "extractionState" : "manual",
@@ -365,7 +498,12 @@
             "value" : "カレンダー"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "calories" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Cancel" : {
       "extractionState" : "manual",
@@ -388,7 +526,8 @@
             "value" : "キャンセル"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Cannot Save" : {
       "extractionState" : "manual",
@@ -411,7 +550,12 @@
             "value" : "保存できません"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Certain medications" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Chat" : {
       "extractionState" : "manual",
@@ -434,16 +578,28 @@
             "value" : "チャット"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Chat session is not active. Please start a new analysis chat." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Chocolate" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Choose when this migraine ended. The end time must be after the start time." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Choose which health stats to display on the Today card." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Chronic Conditions" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Clear" : {
       "extractionState" : "manual",
@@ -466,7 +622,8 @@
             "value" : "クリア"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Clear Filters" : {
       "extractionState" : "manual",
@@ -489,13 +646,12 @@
             "value" : "フィルタをクリア"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Clear search" : {
-
-    },
-    "Clear trigger search" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Close" : {
       "extractionState" : "manual",
@@ -518,13 +674,32 @@
             "value" : "閉じる"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Cloudy" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Cold conditions during migraines" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Cold exposure" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Color" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Condition" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Connect Apple Health to see your daily stats." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Connect Health" : {
       "extractionState" : "manual",
@@ -547,7 +722,12 @@
             "value" : "ヘルスケアと連携"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Consider small, everyday adjustments like hydration, sleep regularity, and balanced meals." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Continue" : {
       "extractionState" : "manual",
@@ -570,7 +750,12 @@
             "value" : "続ける"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Coughing / sneezing strain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Create Tags" : {
       "extractionState" : "manual",
@@ -596,10 +781,12 @@
       }
     },
     "Create tags to categorize your migraines" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Current conditions" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Dashboard" : {
       "extractionState" : "manual",
@@ -622,13 +809,16 @@
             "value" : "ダッシュボード"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Dashboard Stats" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
-    "Data Retreival" : {
-
+    "Data Retrieval" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Date Range" : {
       "extractionState" : "manual",
@@ -651,13 +841,23 @@
             "value" : "期間"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Days Since Last Migraine" : {
 
     },
-    "Days since last migraine: %lld" : {
-
+    "Debug build only. Creates sample data to test calendar, intensity tracking, tags, and insights features." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "decreased" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Dehydration" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Delete" : {
       "extractionState" : "manual",
@@ -680,7 +880,8 @@
             "value" : "削除"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Delete All" : {
       "extractionState" : "manual",
@@ -703,7 +904,8 @@
             "value" : "すべて削除"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Delete All Migraines" : {
       "extractionState" : "manual",
@@ -726,7 +928,8 @@
             "value" : "すべての片頭痛を削除"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Delete Migraine" : {
       "extractionState" : "manual",
@@ -749,29 +952,46 @@
             "value" : "片頭痛を削除"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Delete this migraine?" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Deleting migraines requires an internet connection because they are stored in iCloud. Connect to the internet to proceed." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Deleting your migraines from iCloud now." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Developer" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Developer Tools" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Developer: Nick Molargik, opens LinkedIn profile" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Diet & Hydration" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Dietary Restrictions" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Dismiss" : {
       "comment" : "A button that dismisses a toast.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "manual",
+      "isCommentAutoGenerated" : true,
+      "shouldGenerateSymbol" : false
     },
     "Done" : {
       "extractionState" : "manual",
@@ -794,10 +1014,16 @@
             "value" : "完了"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Double tap to edit this tag" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Drizzle" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Duration" : {
       "extractionState" : "manual",
@@ -820,7 +1046,8 @@
             "value" : "継続時間"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Edit" : {
       "extractionState" : "manual",
@@ -843,7 +1070,8 @@
             "value" : "編集"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Edit User" : {
       "extractionState" : "manual",
@@ -866,7 +1094,12 @@
             "value" : "ユーザーを編集"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Enable location and refresh to see current weather." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "End" : {
       "extractionState" : "manual",
@@ -889,10 +1122,12 @@
             "value" : "終了"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "End Date" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "End Migraine" : {
       "extractionState" : "manual",
@@ -915,7 +1150,8 @@
             "value" : "片頭痛を終了"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "End My Migraine" : {
 
@@ -943,8 +1179,17 @@
         }
       }
     },
+    "End time cannot be in the future." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "End time must be after the start time." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
     "Ended" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Enter Mygra" : {
       "extractionState" : "manual",
@@ -967,13 +1212,16 @@
             "value" : "Mygraを開く"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Error: %@" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Experience" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Export Failed" : {
       "extractionState" : "manual",
@@ -996,7 +1244,8 @@
             "value" : "書き出しに失敗しました"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Export Migraines as PDF" : {
       "extractionState" : "manual",
@@ -1019,16 +1268,60 @@
             "value" : "片頭痛をPDFで書き出す"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Exporting…" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Eye strain / blue light" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to analyze migraine with Intelligence." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to fetch Health snapshot." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to fetch weather data." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to obtain a location update." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Failed to pull from Apple Health" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to pull weather" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to request Health authorization." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to resolve location name." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Failed to send counselor message." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Female" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Fetch" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Filter" : {
       "extractionState" : "manual",
@@ -1051,10 +1344,12 @@
             "value" : "フィルタ"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Filter by Date" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Filter Migraines" : {
       "extractionState" : "manual",
@@ -1077,28 +1372,80 @@
             "value" : "片頭痛をフィルタ"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Filters are applied" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Filters are applied. Try clearing them to see more migraines." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "First Name" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Flashing / strobe lights" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Flurries" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Fog" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Follicular" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Food" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Food Sensitivities" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Freezing Drizzle" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Freezing Rain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Frigid" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Generate" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Generate Test Data" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Generate Test Data?" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Generating explanation…" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Generating insight…" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Get personalized guidance powered by Apple Intelligence." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Get Started" : {
       "extractionState" : "manual",
@@ -1121,7 +1468,12 @@
             "value" : "始める"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Glucose" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Go" : {
       "extractionState" : "manual",
@@ -1144,13 +1496,32 @@
             "value" : "移動"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Graphics" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Graphics designer: Rahul Parmar, opens LinkedIn profile" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Hail" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Haze" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Health" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Health access was not authorized." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Health Data" : {
       "extractionState" : "manual",
@@ -1173,22 +1544,48 @@
             "value" : "ヘルスデータ"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Health data from %@" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Health data is unavailable on this device." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Health Info" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Heart Rate" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Heavy Rain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Heavy Snow" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Height:" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Here to help." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Here's what you can do with Mygra" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Hide Quick Add" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "High" : {
       "extractionState" : "manual",
@@ -1211,10 +1608,52 @@
             "value" : "高い"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "High altitude / cabin pressure" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "High heat" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "High humidity" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "High humidity linked to higher pain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "higher" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Higher glucose on migraine days" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Hormonal" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Hormonal changes" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Hot" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Hot conditions during migraines" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "How are you feeling?" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "How is your pain right now?" : {
       "extractionState" : "manual",
@@ -1237,7 +1676,8 @@
             "value" : "今の痛みはどの程度ですか？"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "How stressed are you feeling?" : {
       "extractionState" : "manual",
@@ -1260,16 +1700,43 @@
             "value" : "今のストレスはどの程度ですか？"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Humidity" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Hurricane" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Immediately starts tracking an ongoing migraine without opening the app." : {
 
     },
+    "increased" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Indoor mold / dampness" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Insight" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
     "Intake" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Intake Stats" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Intense exercise" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Intensity Over Time" : {
       "extractionState" : "manual",
@@ -1292,7 +1759,12 @@
             "value" : "時間ごとの強度"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Isolated Thunderstorms" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "It's been %lld days since your last migraine." : {
 
@@ -1300,29 +1772,116 @@
     "It's been 1 day since your last migraine." : {
 
     },
+    "Jet lag" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Lack of sleep" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
     "Last synced %@" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Legal" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Let-down after stress" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Let’s get you some relief." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "List foods eaten around this time (comma or newline separated)" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Loading insights" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Loading weather data" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Location" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Location access is needed to show local weather." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Location access is not authorized." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Location services are unavailable." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Log a Migraine" : {
 
     },
     "Log a new migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Log migraines and connect Health & Weather to see trends and associations." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "longer" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Loud noise" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Low" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Low energy intake on migraine days" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Low hydration on migraine days" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "lower" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Lower glucose on migraine days" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Lower oxygen saturation on migraine days" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Lower pressure linked to higher pain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Lower sleep, higher pain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Luteal" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Male" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Manage Tags" : {
       "extractionState" : "manual",
@@ -1345,7 +1904,8 @@
             "value" : "タグを管理"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Marked your migraine as ended." : {
 
@@ -1374,10 +1934,32 @@
             "value" : "医療免責事項"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Medication overuse" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Medications" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Medium" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Menstrual" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Menstrual Phase" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Message" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Migraine" : {
       "extractionState" : "manual",
@@ -1400,7 +1982,8 @@
             "value" : "片頭痛"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Migraine — %@" : {
 
@@ -1426,29 +2009,20 @@
             "value" : "片頭痛アシスタント"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Migraine details" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Migraine explanation" : {
-
-    },
-    "Migraine Indicator" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Migraine Not Found" : {
-
-    },
-    "Migraine, timer %@, pain %lld, stress %lld" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "new",
-            "value" : "Migraine, timer %1$@, pain %2$lld, stress %3$lld"
-          }
-        }
-      }
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Migraines" : {
       "extractionState" : "manual",
@@ -1471,10 +2045,12 @@
             "value" : "片頭痛"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Minimum Pain: %lld" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Modify" : {
       "extractionState" : "manual",
@@ -1497,7 +2073,8 @@
             "value" : "編集"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Modify Migraine" : {
       "extractionState" : "manual",
@@ -1520,25 +2097,52 @@
             "value" : "片頭痛を編集"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Molargik Software LLC" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Mostly Clear" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Mostly Cloudy" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Motion sickness" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Moves to the next onboarding step." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "MSG" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Mygra" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Mygra app logo" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Mygra Export" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Mygra is designed to keep your data private and secure." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Mygra may use on‑device intelligence to generate wellness insights. These insights are provided for informational purposes only and do not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare professional with any questions about your health. Do not ignore or delay seeking professional care because of something you read in this app. If you are experiencing a medical emergency, call your local emergency number immediately." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Mygra Screen" : {
 
@@ -1564,7 +2168,12 @@
             "value" : "名前"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Network issue. Check your connection and try again." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "New Migraine" : {
       "extractionState" : "manual",
@@ -1587,38 +2196,62 @@
             "value" : "新しい片頭痛"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Next month" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Nick Molargik" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No Data" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No health data was captured with this migraine." : {
       "comment" : "A description of a message that appears when a migraine has no health data.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "manual",
+      "isCommentAutoGenerated" : true,
+      "shouldGenerateSymbol" : false
     },
     "No health data yet for today." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No insights yet" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No intensity samples recorded yet" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "No location provider has been set." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "No migraine today." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No Migraines" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No migraines recorded on %@" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "No migraines recorded." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No Migraines Yet" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No Results" : {
       "extractionState" : "manual",
@@ -1641,49 +2274,72 @@
             "value" : "結果なし"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "No stats selected. Go to Settings to select dashboard stats." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No Tags" : {
-
-    },
-    "No tags created yet" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "No triggers selected" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Not configured" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Note" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Notes" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Notifications" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Notifications were not allowed." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Offline" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "OK" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Onboarding progress" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Ongoing" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Ongoing duration %@" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Ongoing migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Ongoing Migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Ongoing migraine in progress, tap to view" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Open ${migraine}" : {
 
@@ -1695,23 +2351,28 @@
 
     },
     "Open location settings" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Open Migraine Assistant" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Open Mygra" : {
 
     },
     "Open Settings" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Opens a specific migraine's details in Mygra." : {
 
     },
     "Opens intake editor to log water, caffeine, food, or sleep" : {
       "comment" : "A hint for the user to add data to their health.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "manual",
+      "isCommentAutoGenerated" : true,
+      "shouldGenerateSymbol" : false
     },
     "Opens Mygra to a specific screen." : {
 
@@ -1720,130 +2381,260 @@
 
     },
     "Opens the Settings app where you can grant access." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Optional" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Other" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Oversleeping" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Ovulatory" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Oxygen Saturation" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pain" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pain %lld out of 10" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pain %lld/10" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Pain and stress levels must be between 0 and 10." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pain Level" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pain Level: %lld" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Pain tends to build over time" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Pain tends to ease over time" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pain: %lld" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
-    "Permission status: %@" : {
-
+    "Partly Cloudy" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Peak pain occurs early" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Peak pain occurs later" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Physical Strain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pin" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pin migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pin this migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pinned" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pinned migraines appear at the top of the list" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pinned-only and other filters are applied. Try clearing them to see more migraines." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Poor posture / neck tension" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Possible Triggers" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Powered by Apple Intelligence" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Preview" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Previous month" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Processed meats / nitrates" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Psychological" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Publisher" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Publisher: Molargik Software LLC, opens website" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pulled from Apple Health" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Pulled local weather" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Pulling from Apple Health" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Pulling local weather" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Quick Add" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Quick Bits" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Quick Note (Optional)" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Rahul Parmar" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Rain" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Ready" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Recent Updates" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Refresh" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Refresh health data" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Refresh insights" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Refresh weather data" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Requires an internet connection to delete your iCloud data." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Resting HR" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Routine & Sleep" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Save" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Scattered Thunderstorms" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Screen" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Screen time / flicker" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Search" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Search notes or insights" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Search triggers" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Select one or more triggers to require them in results." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Send" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Sensory" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Set to zero for no minimum" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Settings" : {
       "extractionState" : "manual",
@@ -1866,43 +2657,103 @@
             "value" : "設定"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Sexual activity" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Shifted work hours" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Short sleep before migraines" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "shorter" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Show All" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Show Pinned" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Show Quick Add" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Showing pinned only. Turn it off to see all migraines." : {
-
-    },
-    "Shows how many days it has been since your last migraine." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Shows the system permission prompt." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Skip for now" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Skipped meals / hunger" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Skips this step and moves to the next one." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "sleep" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Sleep" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Sleep: %@ hrs" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Sleet" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Smoke exposure" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Smoky" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Snow" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Sorry you’re dealing with this..." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Sorry, I ran into a problem." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Start" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Start Migraine" : {
 
+    },
+    "Start time cannot be in the future." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Start Tracking a Migraine" : {
 
@@ -1911,12 +2762,18 @@
 
     },
     "Started from Apple Watch" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Started tracking your migraine. Feel better soon." : {
 
     },
+    "Started with Siri" : {
+      "comment" : "Note attached to a migraine started by Siri.",
+      "isCommentAutoGenerated" : true
+    },
     "Step %lld of %lld" : {
+      "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
@@ -1924,135 +2781,317 @@
             "value" : "Step %1$lld of %2$lld"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Steps" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Storms / wind" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Stress" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Stress %lld out of 10" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Stress decreases during migraines" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Stress increases during migraines" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Stress Level" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Stress Level: %lld" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Stress: %lld" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Strong odors / perfume" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Submit" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Substances" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Sun Flurries" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Sun Showers" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Switch between imperial and metric units for measurements" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Switch between Month–Day–Year and Day–Month–Year formats for dates." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Syncing with iCloud…" : {
       "comment" : "Text for a lightweight toast that appears when a user returns to the main app after the app has just been installed.",
-      "isCommentAutoGenerated" : true
+      "extractionState" : "manual",
+      "isCommentAutoGenerated" : true,
+      "shouldGenerateSymbol" : false
     },
     "Syncing..." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Tag name" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Tag Preview" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Tags" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Tags often appear together" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Tap to begin using Mygra" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Teeth grinding (bruxism)" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Tell us a bit about yourself so Mygra can personalize insights and track patterns. All data stays on your device or encrypted in iCloud." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Tells you how many days it has been since your last migraine." : {
       "comment" : "Text for the \"Days since last migraine\" intent.",
       "isCommentAutoGenerated" : true
     },
+    "Temperature" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "That record no longer exists." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
     "The selected migraine could not be loaded." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "These values are read from Apple Health. Use the Quick Add button to log intake, or add data directly in the Health app." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "This action cannot be undone." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "This device does not support Apple Intelligence." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "This may take a moment." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "This permission can't be requested right now." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "This will create 12-15 sample migraines with tags, intensity samples, health data, and weather data spread over the last 4 weeks. This is useful for testing features like the calendar, intensity charts, and insights." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Thunderstorms" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Time" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Tobacco / nicotine" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Today" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Too much caffeine" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Top Triggers" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Triggers" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Tropical Storm" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Type" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Unable to get current location." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Unpin" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Unpin migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Update" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Update Intensity" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Update to %@ to use the Migraine Assistant and AI‑powered Insights." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Use Day–Month–Year Dates" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Use Metric Units" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "User" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Using recent weather" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Version" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Very low oxygen saturation on migraine days" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "View Ongoing" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "water" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Water" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "We couldn't read your health data from Apple Health. This may happen if Mygra doesn't have permission to access Health data, or if there was a problem communicating with HealthKit.\n\nYou can still log this migraine, but health metrics won't be attached." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "We’ll help you through this!" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "We'll start a neat little Live Activity to help you track duration!" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "We’ve got you." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Weather" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Weather & Atmosphere" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Weather data isn't available yet. Try refreshing." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Weather isn't attached for past dates. We only attach current conditions for migraines started today." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Weather isn't attached for past start dates." : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Weather may trigger a migraine" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Weather Unavailable" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Weight (kg)" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Weight (lbs)" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Weight:" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Windy" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
+    "Wintry Mix" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "You already have a migraine in progress." : {
 
     },
     "You already have an ongoing migraine. End it before starting a new one." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "You don't have a migraine in progress." : {
 
@@ -2060,26 +3099,36 @@
     "You haven't logged any migraines yet." : {
 
     },
+    "You're All Set" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
     "You're All Set!" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Your Intelligent Migraine Journal" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Your logged migraines will appear here." : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Your most recent migraine was today." : {
 
     },
+    "Your Privacy" : {
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
+    },
     "Your Privacy Matters" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     },
     "Your Tags" : {
-
-    },
-    " Weather" : {
-
+      "extractionState" : "manual",
+      "shouldGenerateSymbol" : false
     }
   },
   "version" : "1.1"

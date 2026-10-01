@@ -2,166 +2,141 @@
 //  PhoneBridge.swift
 //  Mygra Wrist Watch App
 //
-//  Created by Nick Molargik on 10/1/25.
+//  The watch side of WatchConnectivity: caches the phone's pushed status in the App
+//  Group (for the complication), tracks reachability, and sends the status/start/end
+//  commands using the wire types from MygraCore. Delegate callbacks are nonisolated and
+//  extract Sendable values before hopping to the main actor.
 //
 
 import Foundation
+import Observation
 import WatchConnectivity
 import WidgetKit
+import MygraCore
 
-final class PhoneBridge: NSObject, WCSessionDelegate {
+@MainActor
+@Observable
+final class PhoneBridge: NSObject {
     static let shared = PhoneBridge()
-    private override init() { super.init() }
+
+    /// The last known migraine status (cached in the App Group across launches).
+    private(set) var status: SharedMigraineStatus
+    private(set) var isPhoneReachable = false
+    private(set) var isCompanionAppInstalled = false
+
+    private override init() {
+        status = SharedMigraineStatus(defaults: AppGroup.defaults)
+        super.init()
+    }
 
     func activate() {
         guard WCSession.isSupported() else { return }
         WCSession.default.delegate = self
         WCSession.default.activate()
+        refreshConnectivity()
+        applyReceivedApplicationContext()
     }
 
-    /// Stores a pushed payload into the App Group defaults and refreshes complications.
-    private func storePayload(_ payload: [String: Any], notify: Bool) {
-        let defaults = UserDefaults(suiteName: AppGroup.id)
-        if let ts = payload[SharedMigraineStatus.Keys.lastMigraineStart] as? TimeInterval {
-            defaults?.set(ts, forKey: SharedMigraineStatus.Keys.lastMigraineStart)
+    /// Re-reads reachability and any already-received application context, then asks
+    /// the phone for a fresh status.
+    func refresh() {
+        refreshConnectivity()
+        applyReceivedApplicationContext()
+        requestStatus()
+    }
+
+    // MARK: - Requests
+
+    /// Asks the phone for the current status (no-op when unreachable).
+    func requestStatus() {
+        guard WCSession.isSupported(), WCSession.default.isReachable else { return }
+        WCSession.default.sendMessage(WatchMessage(request: .status).payload) { reply in
+            guard let status = SharedMigraineStatus(payload: reply) else { return }
+            Task { @MainActor in
+                PhoneBridge.shared.apply(status)
+            }
+        } errorHandler: { _ in }
+    }
+
+    /// Ends the ongoing migraine on the phone.
+    func endOngoingMigraine() async -> WatchCommandReply {
+        await send(WatchMessage(command: .endMigraine))
+    }
+
+    /// Starts a migraine on the phone with the given levels.
+    func startMigraine(painLevel: Int = 5, stressLevel: Int = 5) async -> WatchCommandReply {
+        await send(WatchMessage(command: .startMigraine, painLevel: painLevel, stressLevel: stressLevel))
+    }
+
+    private func send(_ message: WatchMessage) async -> WatchCommandReply {
+        guard WCSession.isSupported(), WCSession.default.isReachable else {
+            return WatchCommandReply(success: false)
         }
-        if let ongoing = payload[SharedMigraineStatus.Keys.hasOngoingMigraine] as? Bool {
-            defaults?.set(ongoing, forKey: SharedMigraineStatus.Keys.hasOngoingMigraine)
+        return await withCheckedContinuation { continuation in
+            WCSession.default.sendMessage(message.payload) { reply in
+                continuation.resume(returning: WatchCommandReply(payload: reply))
+            } errorHandler: { _ in
+                continuation.resume(returning: WatchCommandReply(success: false))
+            }
         }
+    }
+
+    // MARK: - State
+
+    private func refreshConnectivity() {
+        guard WCSession.isSupported() else { return }
+        isPhoneReachable = WCSession.default.isReachable
+        isCompanionAppInstalled = WCSession.default.isCompanionAppInstalled
+    }
+
+    private func applyReceivedApplicationContext() {
+        guard WCSession.isSupported(), let status = SharedMigraineStatus(payload: WCSession.default.receivedApplicationContext) else { return }
+        apply(status)
+    }
+
+    /// Stores a status pushed by the phone and refreshes the complication.
+    func apply(_ status: SharedMigraineStatus) {
+        self.status = status
+        status.write(to: AppGroup.defaults)
         WidgetCenter.shared.reloadAllTimelines()
-        if notify {
-            NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
-        }
     }
+}
 
-    func session(_ session: WCSession, didReceiveComplicationUserInfo userInfo: [String : Any] = [:]) {
-        storePayload(userInfo, notify: false)
-    }
+// MARK: - WCSessionDelegate
 
-    func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String : Any]) {
-        storePayload(applicationContext, notify: true)
-    }
-
-    // Notify the app when phone reachability changes so UI can prompt the user
-    func sessionReachabilityDidChange(_ session: WCSession) {
+extension PhoneBridge: WCSessionDelegate {
+    nonisolated func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: (any Error)?) {
         let reachable = session.isReachable
         let installed = session.isCompanionAppInstalled
-        // New combined connectivity notification
-        NotificationCenter.default.post(
-            name: .phoneConnectivityStatusChanged,
-            object: nil,
-            userInfo: [
-                "reachable": reachable,
-                "installed": installed
-            ]
-        )
-        // Backward compatibility for any existing observers
-        NotificationCenter.default.post(
-            name: .phoneReachabilityChanged,
-            object: nil,
-            userInfo: [
-                "reachable": reachable
-            ]
-        )
-    }
-
-    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
-        // Publish connectivity immediately after activation
-        NotificationCenter.default.post(
-            name: .phoneConnectivityStatusChanged,
-            object: nil,
-            userInfo: [
-                "reachable": session.isReachable,
-                "installed": session.isCompanionAppInstalled
-            ]
-        )
-
-        // Optionally attempt to pull status if reachable; if not, iPhone should push via application context
-        if error == nil {
-            requestStatus { hasOngoing, lastStart in
-                let defaults = UserDefaults(suiteName: AppGroup.id)
-                var status = SharedMigraineStatus(defaults: defaults)
-                if let lastStart {
-                    status.lastMigraineStart = lastStart
-                }
-                status.hasOngoingMigraine = hasOngoing
-                status.write(to: defaults)
-                WidgetCenter.shared.reloadAllTimelines()
-                NotificationCenter.default.post(name: .phoneDataUpdated, object: nil)
-            }
-        }
-    }
-}
-
-extension PhoneBridge {
-    func requestStatus(completion: @escaping (_ hasOngoing: Bool, _ lastStart: Date?) -> Void) {
-        guard WCSession.isSupported() else { completion(false, nil); return }
-        let message: [String: Any] = ["request": "status"]
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(message) { reply in
-                let ongoing = reply["hasOngoingMigraine"] as? Bool ?? false
-                let ts = reply["lastMigraineStart"] as? TimeInterval ?? 0
-                let date = ts > 0 ? Date(timeIntervalSince1970: ts) : nil
-                completion(ongoing, date)
-            } errorHandler: { _ in
-                completion(false, nil)
-            }
-        } else {
-            completion(false, nil)
+        Task { @MainActor in
+            self.isPhoneReachable = reachable
+            self.isCompanionAppInstalled = installed
+            self.requestStatus()
         }
     }
 
-    func endOngoingMigraine(completion: @escaping (_ success: Bool) -> Void) {
-        guard WCSession.isSupported() else { completion(false); return }
-        let message: [String: Any] = ["command": "endMigraine"]
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(message) { reply in
-                completion(reply["success"] as? Bool ?? false)
-            } errorHandler: { _ in
-                completion(false)
-            }
-        } else {
-            completion(false)
+    nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
+        let reachable = session.isReachable
+        let installed = session.isCompanionAppInstalled
+        Task { @MainActor in
+            self.isPhoneReachable = reachable
+            self.isCompanionAppInstalled = installed
+            if reachable { self.requestStatus() }
         }
     }
 
-    /// Starts a new migraine on the iPhone with default values.
-    /// - Parameters:
-    ///   - painLevel: Initial pain level (0-10), defaults to 5
-    ///   - stressLevel: Initial stress level (0-10), defaults to 5
-    ///   - completion: Called with success status and optional error message
-    func startMigraine(
-        painLevel: Int = 5,
-        stressLevel: Int = 5,
-        completion: @escaping (_ success: Bool, _ error: String?) -> Void
-    ) {
-        guard WCSession.isSupported() else {
-            completion(false, "Watch connectivity not supported")
-            return
-        }
-
-        let message: [String: Any] = [
-            "command": "startMigraine",
-            "painLevel": painLevel,
-            "stressLevel": stressLevel
-        ]
-
-        if WCSession.default.isReachable {
-            WCSession.default.sendMessage(message) { reply in
-                let success = reply["success"] as? Bool ?? false
-                let error = reply["error"] as? String
-                completion(success, error)
-            } errorHandler: { error in
-                completion(false, error.localizedDescription)
-            }
-        } else {
-            completion(false, "iPhone not reachable")
-        }
+    nonisolated func session(_ session: WCSession, didReceiveComplicationUserInfo userInfo: [String: Any] = [:]) {
+        guard let status = SharedMigraineStatus(payload: userInfo) else { return }
+        Task { @MainActor in self.apply(status) }
     }
-}
 
-extension Notification.Name {
-    static let phoneReachabilityChanged = Notification.Name("PhoneBridge.reachabilityChanged")
-    static let phoneConnectivityStatusChanged = Notification.Name("PhoneBridge.connectivityStatusChanged")
-    static let phoneDataUpdated = Notification.Name("PhoneBridge.dataUpdated")
+    nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {
+        guard let status = SharedMigraineStatus(payload: applicationContext) else { return }
+        Task { @MainActor in self.apply(status) }
+    }
+
+    nonisolated func session(_ session: WCSession, didReceiveMessage message: [String: Any]) {
+        guard let status = SharedMigraineStatus(payload: message) else { return }
+        Task { @MainActor in self.apply(status) }
+    }
 }
