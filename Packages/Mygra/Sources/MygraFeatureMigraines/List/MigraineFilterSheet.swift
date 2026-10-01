@@ -129,9 +129,11 @@ struct MigraineFilterSheet: View {
     }
 }
 
+#if DEBUG
 #Preview("Default") {
     NavigationStack {
         MigraineFilterSheet(initialFilter: MigraineFilter(minPainLevel: 3), apply: { _ in }, cancel: {})
     }
 }
+#endif
 #endif

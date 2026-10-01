@@ -517,6 +517,7 @@ private struct UserEditSheet: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         SettingsView()
@@ -530,4 +531,5 @@ private struct UserEditSheet: View {
     }
     .previewEnvironment()
 }
+#endif
 #endif

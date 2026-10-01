@@ -36,9 +36,7 @@ public final class MigraineDataModel {
     @ObservationIgnored private let observeChanges: any ObserveMigraineChanges
     @ObservationIgnored private let reviewRequester: (any ReviewRequesting)?
     @ObservationIgnored private let defaults: any KeyValueStoring
-    #if DEBUG
     @ObservationIgnored private let generateSampleDataUseCase: (any GenerateSampleData)?
-    #endif
     @ObservationIgnored private let toastManager: ToastManager
 
     // MARK: - State
@@ -93,9 +91,7 @@ public final class MigraineDataModel {
         self.observeChanges = observeChanges
         self.reviewRequester = reviewRequester
         self.defaults = defaults
-        #if DEBUG
         self.generateSampleDataUseCase = generateSampleData
-        #endif
         self.toastManager = toastManager
         refresh()
         startObserving()

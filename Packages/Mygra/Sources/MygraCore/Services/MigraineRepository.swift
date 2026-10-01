@@ -258,11 +258,11 @@ public struct RemoveIntensitySampleUseCase: RemoveIntensitySample {
 
 // MARK: - Sample data (DEBUG)
 
-#if DEBUG
-/// Seeds demo tags + migraines (Settings' developer menu). The concrete generator lives
-/// in MygraData.
+/// Seeds demo tags + migraines (Settings' developer menu). The protocol is always
+/// available so the shared models keep one init signature; the concrete generator in
+/// MygraData is DEBUG-only and the composition root passes nil in release.
 @MainActor
 public protocol GenerateSampleData {
     func callAsFunction() throws(PersistenceError)
 }
-#endif
+

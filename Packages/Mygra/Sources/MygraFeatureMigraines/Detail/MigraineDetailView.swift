@@ -228,6 +228,7 @@ public struct MigraineDetailView: View {
     }
 }
 
+#if DEBUG
 #Preview("Migraine Detail") {
     let env = PreviewEnvironment()
     return NavigationStack {
@@ -235,4 +236,5 @@ public struct MigraineDetailView: View {
     }
     .previewEnvironment(env)
 }
+#endif
 #endif

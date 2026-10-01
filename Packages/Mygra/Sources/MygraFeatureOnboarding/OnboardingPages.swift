@@ -304,15 +304,21 @@ struct OnboardingCompletePage: View {
     }
 }
 
+#if DEBUG
 #Preview("Privacy") {
     OnboardingPrivacyPage()
 }
+#endif
 
+#if DEBUG
 #Preview("About You") {
     OnboardingUserPage(user: User())
 }
+#endif
 
+#if DEBUG
 #Preview("Complete") {
     OnboardingCompletePage(onFinish: {})
 }
+#endif
 #endif

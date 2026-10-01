@@ -244,6 +244,7 @@ private extension AnyTransition {
     }
 }
 
+#if DEBUG
 #Preview("Expanded Quick Add") {
     struct Wrapper: View {
         @State var expanded = true
@@ -267,7 +268,9 @@ private extension AnyTransition {
     }
     return Wrapper()
 }
+#endif
 
+#if DEBUG
 #Preview("Not Authorized") {
     TodayCardView(
         isAuthorized: false,
@@ -284,4 +287,5 @@ private extension AnyTransition {
     )
     .padding()
 }
+#endif
 #endif

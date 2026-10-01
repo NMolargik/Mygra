@@ -175,8 +175,10 @@ extension OnboardingView {
     }
 }
 
+#if DEBUG
 #Preview {
     OnboardingView(onFinished: {})
         .previewEnvironment()
 }
+#endif
 #endif

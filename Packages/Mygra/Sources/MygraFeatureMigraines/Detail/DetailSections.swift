@@ -170,6 +170,7 @@ struct HealthDetailView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ScrollView {
         VStack(spacing: 16) {
@@ -181,4 +182,5 @@ struct HealthDetailView: View {
         .padding()
     }
 }
+#endif
 #endif

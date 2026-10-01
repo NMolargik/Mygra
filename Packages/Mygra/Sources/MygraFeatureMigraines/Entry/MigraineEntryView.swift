@@ -331,8 +331,10 @@ public struct MigraineEntryView: View {
     }
 }
 
+#if DEBUG
 #Preview("Entry View") {
     MigraineEntryView(onMigraineSaved: { _ in })
         .previewEnvironment()
 }
+#endif
 #endif

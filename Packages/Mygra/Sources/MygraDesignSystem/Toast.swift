@@ -198,6 +198,7 @@ extension View {
     }
 }
 
+#if DEBUG
 #Preview("Toast Styles") {
     struct PreviewContainer: View {
         @State private var toastManager = ToastManager()
@@ -215,4 +216,5 @@ extension View {
     }
     return PreviewContainer()
 }
+#endif
 #endif

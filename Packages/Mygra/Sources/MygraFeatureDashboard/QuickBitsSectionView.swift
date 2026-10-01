@@ -193,9 +193,11 @@ private struct QuickBitExplanationBubble: View {
     }
 }
 
+#if DEBUG
 #Preview {
     QuickBitsSectionView(onRefresh: {})
         .padding()
         .previewEnvironment()
 }
+#endif
 #endif

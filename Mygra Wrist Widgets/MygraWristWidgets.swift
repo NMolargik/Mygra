@@ -68,6 +68,7 @@ struct MygraWristWidgets: Widget {
     }
 }
 
+#if DEBUG
 #Preview(as: .accessoryRectangular) {
     MygraWristWidgets()
 } timeline: {
@@ -75,3 +76,4 @@ struct MygraWristWidgets: Widget {
     WatchDaysSinceEntry(date: .now, daysSince: 2)
     WatchDaysSinceEntry(date: .now, daysSince: 356)
 }
+#endif

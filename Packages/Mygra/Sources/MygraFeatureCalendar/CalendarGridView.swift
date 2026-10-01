@@ -133,8 +133,10 @@ private struct DayCell: View {
     }
 }
 
+#if DEBUG
 #Preview("Calendar Grid") {
     CalendarGridView(displayedMonth: Date(), selectedDate: .constant(Date()), migraines: [Migraine.sample()])
         .padding()
 }
+#endif
 #endif

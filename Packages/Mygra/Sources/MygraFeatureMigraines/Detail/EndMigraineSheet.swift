@@ -53,7 +53,9 @@ struct EndMigraineSheet: View {
     }
 }
 
+#if DEBUG
 #Preview {
     EndMigraineSheet(startDate: Date().addingTimeInterval(-3600), initialEndDate: Date(), onConfirm: { _ in })
 }
+#endif
 #endif

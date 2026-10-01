@@ -218,20 +218,26 @@ private func severityColor(_ severity: Int) -> Color {
 
 private let stressColor: Color = .indigo
 
+#if DEBUG
 #Preview("Lock Screen", as: .content, using: MigraineActivityAttributes()) {
     MygraWidgetsLiveActivity()
 } contentStates: {
     MigraineActivityAttributes.ContentState.sample
 }
 
+#if DEBUG
 #Preview("Dynamic Island - Expanded", as: .dynamicIsland(.expanded), using: MigraineActivityAttributes()) {
     MygraWidgetsLiveActivity()
 } contentStates: {
     MigraineActivityAttributes.ContentState.sample
 }
+#endif
 
+#if DEBUG
 #Preview("Dynamic Island - Compact", as: .dynamicIsland(.compact), using: MigraineActivityAttributes()) {
     MygraWidgetsLiveActivity()
 } contentStates: {
     MigraineActivityAttributes.ContentState.sample
 }
+#endif
+#endif

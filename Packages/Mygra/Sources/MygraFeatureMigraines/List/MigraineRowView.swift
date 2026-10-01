@@ -149,13 +149,17 @@ struct MigraineRowView: View {
     }
 }
 
+#if DEBUG
 #Preview("Completed") {
     MigraineRowView(migraine: Migraine.sample())
         .padding()
 }
+#endif
 
+#if DEBUG
 #Preview("Ongoing") {
     MigraineRowView(migraine: Migraine.sampleOngoing())
         .padding()
 }
+#endif
 #endif

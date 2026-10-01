@@ -514,6 +514,7 @@ public struct TypingIndicator: View {
     }
 }
 
+#if DEBUG
 #Preview("Cards") {
     ScrollView {
         VStack(spacing: 16) {
@@ -530,3 +531,4 @@ public struct TypingIndicator: View {
         .padding()
     }
 }
+#endif

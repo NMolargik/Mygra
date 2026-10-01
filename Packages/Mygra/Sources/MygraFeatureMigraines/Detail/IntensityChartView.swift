@@ -135,8 +135,10 @@ private nonisolated struct Square: ChartSymbolShape {
     }
 }
 
+#if DEBUG
 #Preview("Empty") {
     IntensityChartView(samples: [])
         .padding()
 }
+#endif
 #endif

@@ -70,6 +70,7 @@ struct IntelligenceUpgradeCardView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     VStack {
         IntelligenceCardView(onOpen: {})
@@ -77,4 +78,5 @@ struct IntelligenceUpgradeCardView: View {
     }
     .padding()
 }
+#endif
 #endif

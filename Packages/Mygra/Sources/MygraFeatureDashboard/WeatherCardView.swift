@@ -172,6 +172,7 @@ struct WeatherCardView: View {
     }
 }
 
+#if DEBUG
 #Preview("Sunny") {
     WeatherCardView(
         reading: WeatherReading(temperature: Measurement(value: 78, unit: .fahrenheit), pressure: Measurement(value: 29.9, unit: .inchesOfMercury), humidity: 0.45, condition: .clear, fetchedAt: Date()),
@@ -182,7 +183,9 @@ struct WeatherCardView: View {
     )
     .padding()
 }
+#endif
 
+#if DEBUG
 #Preview("Unavailable") {
     WeatherCardView(
         reading: nil,
@@ -193,4 +196,5 @@ struct WeatherCardView: View {
     )
     .padding()
 }
+#endif
 #endif

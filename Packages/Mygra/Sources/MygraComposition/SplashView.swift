@@ -87,7 +87,9 @@ struct SplashView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     SplashView(onContinue: {})
 }
+#endif
 #endif

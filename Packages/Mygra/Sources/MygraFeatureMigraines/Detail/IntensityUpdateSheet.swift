@@ -128,7 +128,9 @@ struct IntensityUpdateSheet: View {
     }
 }
 
+#if DEBUG
 #Preview("Intensity Update") {
     IntensityUpdateSheet(migraine: Migraine.sampleOngoing(), onSave: { _, _, _ in })
 }
+#endif
 #endif

@@ -129,6 +129,7 @@ public struct IntakeSection: View {
     }
 }
 
+#if DEBUG
 #Preview {
     struct PreviewView: View {
         @State var isEditing = false
@@ -147,4 +148,5 @@ public struct IntakeSection: View {
     }
     return PreviewView()
 }
+#endif
 #endif

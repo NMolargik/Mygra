@@ -96,9 +96,11 @@ struct DashboardStatToggle: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         DashboardStatsSettingsView()
     }
 }
+#endif
 #endif

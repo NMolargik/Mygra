@@ -85,6 +85,7 @@ public struct SearchField: View {
     }
 }
 
+#if DEBUG
 #Preview {
     struct PreviewView: View {
         @State var selection: Set<MigraineTrigger> = [.stress]
@@ -100,4 +101,5 @@ public struct SearchField: View {
     }
     return PreviewView()
 }
+#endif
 #endif

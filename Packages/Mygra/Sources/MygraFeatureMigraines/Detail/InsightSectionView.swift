@@ -90,9 +90,11 @@ struct IntelligenceUpgradeNotice: View {
     }
 }
 
+#if DEBUG
 #Preview {
     InsightSectionView(migraine: Migraine.sample())
         .padding()
         .previewEnvironment()
 }
+#endif
 #endif

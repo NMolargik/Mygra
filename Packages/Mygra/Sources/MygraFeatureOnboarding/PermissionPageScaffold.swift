@@ -263,6 +263,7 @@ struct PermissionFeatureRow: View {
     }
 }
 
+#if DEBUG
 #Preview {
     PermissionPageScaffold(
         state: .notRequested,
@@ -274,4 +275,5 @@ struct PermissionFeatureRow: View {
         PermissionFeatureRow(icon: "cloud.sun.fill", iconColor: .orange, title: "Weather Alerts", description: "Get notified about conditions that may trigger migraines.")
     }
 }
+#endif
 #endif

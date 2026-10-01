@@ -222,6 +222,7 @@ private struct AmountPill: View {
     }
 }
 
+#if DEBUG
 #Preview("Imperial") {
     struct PreviewView: View {
         @State var additions = IntakeAdditions(waterLiters: 0.5, caffeineMg: 120, foodKilocalories: 500, sleepHours: 1)
@@ -231,7 +232,9 @@ private struct AmountPill: View {
     }
     return PreviewView().padding()
 }
+#endif
 
+#if DEBUG
 #Preview("Error") {
     struct PreviewView: View {
         @State var additions = IntakeAdditions(caffeineMg: 200)
@@ -241,4 +244,5 @@ private struct AmountPill: View {
     }
     return PreviewView().padding()
 }
+#endif
 #endif

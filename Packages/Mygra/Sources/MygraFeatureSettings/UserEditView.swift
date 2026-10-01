@@ -182,9 +182,11 @@ private struct ListEditor: View {
     }
 }
 
+#if DEBUG
 #Preview {
     Form {
         UserEditView(user: User(name: "Nick"))
     }
 }
+#endif
 #endif

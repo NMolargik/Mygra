@@ -150,7 +150,9 @@ struct ContentView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ContentView()
         .environment(PhoneBridge.shared)
 }
+#endif

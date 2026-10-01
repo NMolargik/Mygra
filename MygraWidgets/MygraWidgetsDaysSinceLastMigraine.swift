@@ -110,6 +110,7 @@ struct MygraWidgetsDaysSinceLastMigraine: Widget {
     }
 }
 
+#if DEBUG
 #Preview("Widget – Small", as: .systemSmall) {
     MygraWidgetsDaysSinceLastMigraine()
 } timeline: {
@@ -117,7 +118,9 @@ struct MygraWidgetsDaysSinceLastMigraine: Widget {
     DaysSinceLastMigraineEntry(date: .now, daysSince: 3)
     DaysSinceLastMigraineEntry(date: .now, daysSince: 14)
 }
+#endif
 
+#if DEBUG
 #Preview("Widget – Medium", as: .systemMedium) {
     MygraWidgetsDaysSinceLastMigraine()
 } timeline: {
@@ -125,3 +128,4 @@ struct MygraWidgetsDaysSinceLastMigraine: Widget {
     DaysSinceLastMigraineEntry(date: .now, daysSince: 2)
     DaysSinceLastMigraineEntry(date: .now, daysSince: 21)
 }
+#endif

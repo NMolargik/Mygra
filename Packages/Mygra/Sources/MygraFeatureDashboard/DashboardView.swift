@@ -238,6 +238,7 @@ private struct StreakHeaderView: View {
     }
 }
 
+#if DEBUG
 #Preview("Dashboard") {
     NavigationStack {
         DashboardView()
@@ -245,4 +246,5 @@ private struct StreakHeaderView: View {
     }
     .previewEnvironment()
 }
+#endif
 #endif

@@ -142,7 +142,9 @@ struct ModifyMigraineSheetView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     ModifyMigraineSheetView(migraine: Migraine.sample(), onCancel: {}, onSave: { _ in })
 }
+#endif
 #endif

@@ -179,8 +179,10 @@ public struct MigraineAssistantView: View {
     }
 }
 
+#if DEBUG
 #Preview("Migraine Assistant") {
     MigraineAssistantView()
         .previewEnvironment()
 }
+#endif
 #endif

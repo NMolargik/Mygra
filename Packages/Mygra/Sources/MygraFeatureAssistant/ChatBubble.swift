@@ -32,6 +32,7 @@ struct ChatBubble: View {
     }
 }
 
+#if DEBUG
 #Preview {
     VStack {
         ChatBubble(message: .assistant("Hey, how are things going?"))
@@ -39,4 +40,5 @@ struct ChatBubble: View {
     }
     .padding()
 }
+#endif
 #endif

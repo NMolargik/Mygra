@@ -127,6 +127,7 @@ private struct StatMeter: View {
     }
 }
 
+#if DEBUG
 #Preview {
     MigraineDetailHeaderView(
         migraine: Migraine.sampleOngoing(),
@@ -138,4 +139,5 @@ private struct StatMeter: View {
     )
     .padding()
 }
+#endif
 #endif

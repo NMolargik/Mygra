@@ -314,6 +314,7 @@ public struct MigraineListView: View {
     }
 }
 
+#if DEBUG
 #Preview {
     NavigationStack {
         MigraineListView()
@@ -321,4 +322,5 @@ public struct MigraineListView: View {
     }
     .previewEnvironment()
 }
+#endif
 #endif

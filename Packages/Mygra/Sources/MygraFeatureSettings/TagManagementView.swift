@@ -261,10 +261,12 @@ private struct ColorOptionButton: View {
     }
 }
 
+#if DEBUG
 #Preview("Tag Management") {
     NavigationStack {
         TagManagementView()
     }
     .previewEnvironment()
 }
+#endif
 #endif

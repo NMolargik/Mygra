@@ -313,10 +313,12 @@ private struct MigraineCalendarRowView: View {
     }
 }
 
+#if DEBUG
 #Preview("Calendar View") {
     NavigationStack {
         MigraineCalendarView()
     }
     .previewEnvironment()
 }
+#endif
 #endif
