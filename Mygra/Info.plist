@@ -30,6 +30,8 @@
 	<array>
 		<string>com.molargiksoftware.Mygra.viewingMigraine</string>
 	</array>
+	<key>NSWeatherUsageDescription</key>
+	<string>Mygra uses weather data to provide personalized migraine insights.</string>
 	<key>UIApplicationShortcutItems</key>
 	<array>
 		<dict>
@@ -65,15 +67,6 @@
 			<string>mygra://assistant</string>
 		</dict>
 	</array>
-	<key>NSWeatherUsageDescription</key>
-	<string>Mygra uses weather data to provide personalized migraine insights.</string>
-	<key>UIApplicationSceneManifest</key>
-	<dict>
-		<key>UIApplicationSupportsMultipleScenes</key>
-		<true/>
-		<key>UISceneConfigurations</key>
-		<dict/>
-	</dict>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
