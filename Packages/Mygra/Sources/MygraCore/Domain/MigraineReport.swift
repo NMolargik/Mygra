@@ -189,3 +189,84 @@ public enum MigraineReport {
         return parts.joined(separator: ", ")
     }
 }
+
+// MARK: - CSV
+
+extension MigraineReport {
+    /// Column headers for the raw CSV export. English and stable on purpose: the file is
+    /// meant for spreadsheets and other tools, not for reading in the app.
+    public static let csvHeaders: [String] = [
+        "Start", "End", "Ongoing", "Duration (minutes)", "Pain (0-10)", "Stress (0-10)", "Severity", "Pinned",
+        "Triggers", "Custom Triggers", "Foods", "Tags", "Note",
+        "Weather Condition", "Temperature", "Humidity (%)", "Pressure", "Weather Location",
+        "Water", "Sleep (h)", "Food (kcal)", "Caffeine (mg)", "Steps", "Resting HR (bpm)", "Active HR (bpm)",
+        "Glucose", "Blood Oxygen (%)", "Menstrual Phase", "Insight",
+    ]
+
+    /// One row per migraine, newest first, with ISO 8601 timestamps and the user's units.
+    public static func csv(migraines: [Migraine], useMetricUnits: Bool) -> String {
+        let formatter = ISO8601DateFormatter()
+        var lines = [csvLine(csvHeaders)]
+        for migraine in migraines.sorted(by: { $0.startDate > $1.startDate }) {
+            lines.append(csvLine(csvRow(for: migraine, useMetricUnits: useMetricUnits, formatter: formatter)))
+        }
+        return lines.joined(separator: "\n") + "\n"
+    }
+
+    static func csvRow(for migraine: Migraine, useMetricUnits: Bool, formatter: ISO8601DateFormatter) -> [String] {
+        let dash = ""
+        let weather = migraine.weather
+        let health = migraine.health
+        func number(_ value: Double?, precision: Int = 1) -> String {
+            guard let value else { return dash }
+            return String(format: "%.\(precision)f", locale: Locale(identifier: "en_US_POSIX"), value)
+        }
+        func integer(_ value: Int?) -> String { value.map(String.init) ?? dash }
+
+        let temperature = weather.map { useMetricUnits ? $0.temperatureCelsius : $0.temperatureFahrenheit }
+        let pressure = weather.map { useMetricUnits ? $0.barometricPressureHpa : $0.barometricPressureInHg }
+        let water = health?.waterLiters.map { useMetricUnits ? $0 : $0 * UnitConversion.litersToFluidOunces }
+        let glucose = health?.glucoseMgPerdL.map { useMetricUnits ? $0 / UnitConversion.glucoseMgDlToMmolL : $0 }
+
+        return [
+            formatter.string(from: migraine.startDate),
+            migraine.endDate.map(formatter.string(from:)) ?? dash,
+            migraine.isOngoing ? "true" : "false",
+            migraine.duration.map { String(Int(($0 / 60).rounded())) } ?? dash,
+            String(migraine.painLevel),
+            String(migraine.stressLevel),
+            migraine.severity.rawValue,
+            migraine.isPinned ? "true" : "false",
+            migraine.triggers.map(\.rawValue).joined(separator: "; "),
+            migraine.customTriggers.joined(separator: "; "),
+            migraine.foodsEaten.joined(separator: "; "),
+            (migraine.tags ?? []).map(\.name).sorted().joined(separator: "; "),
+            migraine.note ?? dash,
+            weather?.condition.rawValue ?? dash,
+            number(temperature),
+            weather.map { number($0.humidityPercent, precision: 0) } ?? dash,
+            number(pressure, precision: useMetricUnits ? 0 : 2),
+            weather?.locationDescription ?? dash,
+            number(water, precision: useMetricUnits ? 2 : 0),
+            number(health?.sleepHours),
+            number(health?.energyKilocalories, precision: 0),
+            number(health?.caffeineMg, precision: 0),
+            integer(health?.stepCount),
+            integer(health?.restingHeartRate),
+            integer(health?.activeHeartRate),
+            number(glucose, precision: useMetricUnits ? 1 : 0),
+            health?.bloodOxygenPercent.map { number($0 * 100, precision: 1) } ?? dash,
+            health?.menstrualPhase?.rawValue ?? dash,
+            migraine.insight ?? dash,
+        ]
+    }
+
+    /// RFC 4180 quoting: fields containing commas, quotes, or newlines are wrapped in
+    /// double quotes with embedded quotes doubled.
+    static func csvLine(_ fields: [String]) -> String {
+        fields.map { field in
+            guard field.contains(where: { $0 == "," || $0 == "\"" || $0.isNewline }) else { return field }
+            return "\"" + field.replacingOccurrences(of: "\"", with: "\"\"") + "\""
+        }.joined(separator: ",")
+    }
+}

@@ -25,4 +25,5 @@ nonisolated public enum Log {
     public static let liveActivity = Logger(subsystem: subsystem, category: "LiveActivity")
     public static let spotlight = Logger(subsystem: subsystem, category: "Spotlight")
     public static let notifications = Logger(subsystem: subsystem, category: "Notifications")
+    public static let subscription = Logger(subsystem: subsystem, category: "Subscription")
 }

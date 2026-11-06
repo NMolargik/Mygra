@@ -12,6 +12,12 @@ nonisolated public enum AppStorageKeys {
     public static let bgWeatherTaskScheduled = "bgWeatherTaskScheduled"
     public static let isOnboardingComplete = "isOnboardingComplete"
     public static let hasPromptedForFifthReview = "MigraineManager.hasPromptedForFifthReview"
+    public static let hasPromptedForExportReview = "Review.hasPromptedAfterFirstExport"
+
+    // MARK: - Mygra Plus
+    /// Cached grandfather verdict (absent = never checked).
+    public static let plusGrandfathered = "Plus.grandfathered"
+    public static let plusEarlySupporterThanksShown = "Plus.earlySupporterThanksShown"
 
     // MARK: - Dashboard Stat Visibility
     public static let showWaterStat = "showWaterStat"

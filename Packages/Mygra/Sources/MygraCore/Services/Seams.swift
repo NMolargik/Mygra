@@ -111,6 +111,25 @@ public protocol ReviewRequesting {
     func requestReview()
 }
 
+// MARK: - Mygra Plus
+
+/// Whether the user has Mygra Plus. StoreKit impl in MygraServices; a constant in tests.
+@MainActor
+public protocol EntitlementProviding: AnyObject {
+    var hasPlus: Bool { get }
+}
+
+extension EntitlementProviding {
+    public var gate: PlusGate { PlusGate(hasPlus: hasPlus) }
+}
+
+/// A fixed entitlement for previews and tests.
+@MainActor
+public final class FixedEntitlement: EntitlementProviding {
+    public var hasPlus: Bool
+    public init(hasPlus: Bool) { self.hasPlus = hasPlus }
+}
+
 // MARK: - Notifications
 
 /// Local notification delivery (UserNotifications impl in MygraServices).
