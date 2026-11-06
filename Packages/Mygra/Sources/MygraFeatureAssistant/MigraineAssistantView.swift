@@ -2,7 +2,8 @@
 //  MigraineAssistantView.swift
 //  MygraFeatureAssistant
 //
-//  The Apple Intelligence analyst chat over `InsightModel`.
+//  The Apple Intelligence analyst chat over `InsightModel`. A Mygra Plus feature: when
+//  the entitlement is missing the sheet shows the unlock prompt instead of the chat.
 //
 
 #if os(iOS)
@@ -14,6 +15,7 @@ import MygraFeatureShared
 public struct MigraineAssistantView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(InsightModel.self) private var insights
+    @Environment(PaywallPresenter.self) private var paywall
 
     @State private var inputText = ""
     @State private var lastMessageID: String?
@@ -37,83 +39,130 @@ public struct MigraineAssistantView: View {
                 LinearGradient.mygraWash
                     .ignoresSafeArea()
 
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            VStack(spacing: 8) {
-                                Text("Migraine Assistant")
-                                    .font(.title2).bold()
-                                AppleIntelligenceBadge(isGenerating: isBusy)
-                            }
-                            .id("assistantHeader")
+                if insights.canUseIntelligence {
+                    chat
+                } else {
+                    locked
+                }
+            }
+        }
+    }
 
-                            Divider().padding(.horizontal)
+    private var locked: some View {
+        VStack(spacing: Brand.Space.lg) {
+            Spacer()
+            AppleIntelligenceSymbol()
+                .font(.system(size: 48))
+            Text("Migraine Assistant")
+                .font(.title2).bold()
+            Text(PlusFeature.assistant.paywallReason)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+            Button {
+                Haptics.lightImpact()
+                dismiss()
+                paywall.present(.assistant)
+            } label: {
+                Label("Unlock with Mygra Plus", systemImage: "lock.open.fill")
+            }
+            .primaryActionButton()
+            Spacer()
+        }
+        .frame(maxWidth: Brand.readableWidth)
+        .frame(maxWidth: .infinity)
+        .padding(Brand.Space.xl)
+        .toolbar {
+            ToolbarItem(placement: .cancellationAction) {
+                Button(role: .cancel) {
+                    Haptics.lightImpact()
+                    dismiss()
+                } label: {
+                    Label("Close", systemImage: "xmark")
+                }
+                .tint(.red)
+            }
+        }
+    }
 
-                            ForEach(Array(visibleMessages.enumerated()), id: \.offset) { index, message in
-                                ChatBubble(message: message)
-                                    .id(messageID(for: index, message: message))
-                                    .padding(.horizontal, 12)
-                                    .onAppear { lastMessageID = messageID(for: index, message: message) }
-                            }
+    private var chat: some View {
+        Group {
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: 12) {
+                        VStack(spacing: 8) {
+                            Text("Migraine Assistant")
+                                .font(.title2).bold()
+                            AppleIntelligenceBadge(isGenerating: isBusy)
+                        }
+                        .id("assistantHeader")
 
-                            if isBusy {
-                                HStack {
-                                    TypingIndicator()
-                                        .padding(10)
-                                        .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(secondaryBackground))
-                                    Spacer()
-                                }
+                        Divider().padding(.horizontal)
+
+                        ForEach(Array(visibleMessages.enumerated()), id: \.offset) { index, message in
+                            ChatBubble(message: message)
+                                .id(messageID(for: index, message: message))
                                 .padding(.horizontal, 12)
-                                .transition(.opacity)
-                            }
+                                .onAppear { lastMessageID = messageID(for: index, message: message) }
+                        }
 
-                            Color.clear.frame(height: 8)
-                        }
-                        .padding(.top, 8)
-                    }
-                    .contentShape(Rectangle())
-                    .onTapGesture { Haptics.lightImpact() }
-                    .onChange(of: insights.conversation) { _, _ in
-                        scrollToBottom(proxy: proxy)
-                    }
-                    .onChange(of: isBusy) { wasBusy, nowBusy in
-                        scrollToBottom(proxy: proxy)
-                        guard wasBusy, !nowBusy else { return }
-                        let messages = visibleMessages
-                        if messages.count > lastConversationCount, let last = messages.last, last.role == .assistant {
-                            if last.content == InsightModel.chatFailureReply {
-                                Haptics.error()
-                            } else {
-                                Haptics.success()
+                        if isBusy {
+                            HStack {
+                                TypingIndicator()
+                                    .padding(10)
+                                    .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(secondaryBackground))
+                                Spacer()
                             }
+                            .padding(.horizontal, 12)
+                            .transition(.opacity)
                         }
-                        lastConversationCount = messages.count
+
+                        Color.clear.frame(height: 8)
                     }
-                    .onAppear {
-                        lastConversationCount = visibleMessages.count
-                        if !insights.isChatActive {
-                            Task { await insights.startChat() }
+                    .padding(.top, 8)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { Haptics.lightImpact() }
+                .onChange(of: insights.conversation) { _, _ in
+                    scrollToBottom(proxy: proxy)
+                }
+                .onChange(of: isBusy) { wasBusy, nowBusy in
+                    scrollToBottom(proxy: proxy)
+                    guard wasBusy, !nowBusy else { return }
+                    let messages = visibleMessages
+                    if messages.count > lastConversationCount, let last = messages.last, last.role == .assistant {
+                        if last.content == InsightModel.chatFailureReply {
+                            Haptics.error()
+                        } else {
+                            Haptics.success()
                         }
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            scrollToBottom(proxy: proxy)
-                        }
+                    }
+                    lastConversationCount = messages.count
+                }
+                .onAppear {
+                    lastConversationCount = visibleMessages.count
+                    if !insights.isChatActive {
+                        Task { await insights.startChat() }
+                    }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        scrollToBottom(proxy: proxy)
                     }
                 }
-                .safeAreaInset(edge: .bottom, spacing: 0) {
-                    inputBar
-                        .padding(.horizontal, 12)
-                        .padding(.vertical, 8)
-                }
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button(role: .cancel) {
-                            Haptics.lightImpact()
-                            dismiss()
-                        } label: {
-                            Label("Close", systemImage: "xmark")
-                        }
-                        .tint(.red)
+            }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                inputBar
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+            }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(role: .cancel) {
+                        Haptics.lightImpact()
+                        dismiss()
+                    } label: {
+                        Label("Close", systemImage: "xmark")
                     }
+                    .tint(.red)
                 }
             }
         }

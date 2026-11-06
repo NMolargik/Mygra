@@ -1351,6 +1351,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "A doctor-ready summary of your profile and every migraine." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un resumen de tu perfil y de todas tus migrañas, listo para tu médico."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un résumé de votre profil et de chaque migraine, prêt pour le médecin."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロフィールとすべての片頭痛をまとめた、医師に渡せるサマリーです。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "A few details let Mygra personalize insights and spot patterns. Everything stays on your device or encrypted in iCloud, and you can change it anytime." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3463,6 +3487,126 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Builds a spreadsheet of every migraine you can save or share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crea una hoja de cálculo con todas tus migrañas para guardar o compartir"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crée une feuille de calcul de toutes vos migraines à enregistrer ou partager"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべての片頭痛をまとめたスプレッドシートを作成し、保存や共有ができます"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Buys Mygra Plus once, with no subscription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compra Mygra Plus una sola vez, sin suscripción"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achète Mygra Plus une seule fois, sans abonnement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サブスクリプションなしで Mygra Plus を一回払いで購入します"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "CSV Export Ready" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportación CSV lista"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportation CSV prête"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV 書き出しの準備ができました"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "CSV export" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportación CSV"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportation CSV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV 書き出し"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "CSV export is part of Mygra Plus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La exportación CSV forma parte de Mygra Plus."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’exportation CSV fait partie de Mygra Plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV 書き出しは Mygra Plus の機能です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Caffeine" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3698,6 +3842,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "チャットセッションが有効ではありません。新しい分析チャットを開始してください。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Chat with on-device Apple Intelligence about your history." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conversa con Apple Intelligence en el dispositivo sobre tu historial."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discutez de votre historique avec Apple Intelligence, directement sur l’appareil."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デバイス上の Apple Intelligence とあなたの履歴について話せます。"
           }
         }
       },
@@ -4346,6 +4514,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "咳・くしゃみの負担"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Could not export CSV. %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo exportar el CSV. %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d’exporter le CSV. %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CSV を書き出せませんでした。%@"
           }
         }
       },
@@ -5142,6 +5334,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Doctor-ready PDF reports" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informes PDF listos para tu médico"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapports PDF prêts pour le médecin"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "医師に渡せる PDF レポート"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Done" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5281,6 +5497,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "持続時間：%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Early supporter" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usuario pionero"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partisan de la première heure"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初期サポーター"
           }
         }
       },
@@ -5859,6 +6099,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Every migraine as a spreadsheet row, with health and weather columns." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cada migraña como una fila de hoja de cálculo, con columnas de salud y clima."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque migraine sur une ligne de feuille de calcul, avec des colonnes santé et météo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛ごとに 1 行、健康と天候の列を含むスプレッドシートです。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Everything is unlocked on this device. Thank you for supporting Mygra." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo está desbloqueado en este dispositivo. Gracias por apoyar a Mygra."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout est déverrouillé sur cet appareil. Merci de soutenir Mygra."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このデバイスではすべての機能が利用できます。Mygra のご支援に感謝します。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Experience" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5926,6 +6214,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "書き出しに失敗しました"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Export Migraines as CSV" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exportar migrañas como CSV"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exporter les migraines en CSV"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛を CSV で書き出す"
           }
         }
       },
@@ -6915,6 +7227,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Get Mygra Plus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obtener Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obtenir Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus を入手"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Get Started" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6982,6 +7318,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "片頭痛の誘因となりうる天候を通知します。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Get notified when conditions turn migraine-prone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recibe avisos cuando las condiciones favorezcan una migraña."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soyez averti quand les conditions deviennent propices aux migraines."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛が起きやすい気象条件になると通知します。"
           }
         }
       },
@@ -8565,6 +8925,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Lifetime" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De por vida"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À vie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "買い切り"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Lifetime — %@ once" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De por vida: %@ una sola vez"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À vie — %@ une seule fois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "買い切り — %@（一回払い）"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "List foods eaten around this time (comma or newline separated)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8632,6 +9040,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インサイトを読み込み中"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Loading plans…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando planes…"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement des forfaits…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プランを読み込み中…"
           }
         }
       },
@@ -9067,6 +9499,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Logging is free forever. Plus adds the Migraine Assistant, Quick Bits, weather-risk alerts, PDF reports, and CSV export." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar migrañas es gratis para siempre. Plus añade el Asistente de migrañas, Quick Bits, alertas de riesgo meteorológico, informes PDF y exportación CSV."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’enregistrement est gratuit pour toujours. Plus ajoute l’Assistant migraine, les Quick Bits, les alertes de risque météo, les rapports PDF et l’exportation CSV."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録はいつまでも無料です。Plus では片頭痛アシスタント、Quick Bits、天候リスク通知、PDF レポート、CSV 書き出しが追加されます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Logging stays free forever. Plus adds the insight layer." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar migrañas seguirá siendo gratis. Plus añade la capa de análisis."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’enregistrement reste gratuit pour toujours. Plus ajoute la couche d’analyse."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録はこれからも無料。Plus は分析レイヤーを追加します。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Loud noise" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9326,6 +9806,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "男性"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Manage Subscription" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gestionar suscripción"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gérer l’abonnement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サブスクリプションを管理"
           }
         }
       },
@@ -9634,6 +10138,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "片頭痛アシスタント"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Migraine Assistant, Quick Bits, weather-risk alerts, PDF reports, and CSV export are unlocked." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Asistente de migrañas, Quick Bits, alertas de riesgo meteorológico, informes PDF y exportación CSV están desbloqueados."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’Assistant migraine, les Quick Bits, les alertes de risque météo, les rapports PDF et l’exportation CSV sont déverrouillés."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛アシスタント、Quick Bits、天候リスク通知、PDF レポート、CSV 書き出しが利用できます。"
           }
         }
       },
@@ -10021,6 +10549,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Monthly" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensual"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mensuel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月額"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "More" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10208,6 +10760,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mygra 書き出し"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Mygra Plus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Mygra Plus restored" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus restaurado"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus restauré"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus を復元しました"
           }
         }
       },
@@ -10928,6 +11528,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "記録された片頭痛はありません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "No previous purchase was found." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró ninguna compra anterior."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun achat antérieur n’a été trouvé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "以前の購入は見つかりませんでした。"
           }
         }
       },
@@ -11953,6 +12577,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Opens the Mygra Plus plans" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abre los planes de Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvre les forfaits Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus のプランを開きます"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Opens the Settings app where you can grant access." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12116,6 +12764,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "酸素飽和度"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "PDF Report Ready" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informe PDF listo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapport PDF prêt"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF レポートの準備ができました"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "PDF reports are part of Mygra Plus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los informes PDF forman parte de Mygra Plus."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les rapports PDF font partie de Mygra Plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDF レポートは Mygra Plus の機能です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "PLUS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PLUS"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PLUS"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PLUS"
           }
         }
       },
@@ -12625,6 +13345,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Plans could not be loaded. Check your connection and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar los planes. Comprueba tu conexión e inténtalo de nuevo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les forfaits. Vérifiez votre connexion et réessayez."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プランを読み込めませんでした。接続を確認して再試行してください。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Poor posture / neck tension" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12889,6 +13633,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Privacy Policy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Política de privacidad"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Politique de confidentialité"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プライバシーポリシー"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Processed meats / nitrates" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13105,6 +13873,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Purchases could not be restored." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron restaurar las compras."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les achats n’ont pas pu être restaurés."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "購入を復元できませんでした。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Quick Add" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13148,6 +13940,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クイックヒント"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Quick Bits & trigger analysis" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Bits y análisis de desencadenantes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Bits et analyse des déclencheurs"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Bits とトリガー分析"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Quick Bits and trigger analysis are part of Mygra Plus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Bits y el análisis de desencadenantes forman parte de Mygra Plus."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les Quick Bits et l’analyse des déclencheurs font partie de Mygra Plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quick Bits とトリガー分析は Mygra Plus の機能です。"
           }
         }
       },
@@ -13561,6 +14401,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Restore Purchases" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurar compras"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restaurer les achats"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "購入を復元"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Returns to the previous step." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13628,6 +14492,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "保存"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Save to Files" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guardar en Archivos"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer dans Fichiers"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「ファイル」に保存"
           }
         }
       },
@@ -14012,6 +14900,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "性行為"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compartir"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共有"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Share a clean summary with your care team." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comparte un resumen claro con tu equipo médico."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partagez un résumé clair avec votre équipe de soins."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "医療チームに見やすいまとめを共有できます。"
           }
         }
       },
@@ -14588,6 +15524,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "すみません、問題が発生しました。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Spot patterns across triggers, sleep, hydration, and weather." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detecta patrones entre desencadenantes, sueño, hidratación y clima."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repérez des tendances entre déclencheurs, sommeil, hydratation et météo."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トリガー、睡眠、水分、天候にまたがるパターンを見つけます。"
           }
         }
       },
@@ -15215,6 +16175,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Subscriptions renew automatically until cancelled in Settings. Family Sharing included." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las suscripciones se renuevan automáticamente hasta que las canceles en Ajustes. Incluye En familia."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les abonnements se renouvellent automatiquement jusqu’à leur annulation dans Réglages. Partage familial inclus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サブスクリプションは「設定」で解約するまで自動更新されます。ファミリー共有に対応。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Substances" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15577,6 +16561,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Take your raw data anywhere." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lleva tus datos en bruto a donde quieras."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emportez vos données brutes partout."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生データをどこへでも持ち出せます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Tap to begin using Mygra" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15745,6 +16753,78 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Terms of Use" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Condiciones de uso"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conditions d’utilisation"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "利用規約"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Thanks for being an early supporter — Mygra Plus is yours for life." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gracias por apoyarnos desde el principio: Mygra Plus es tuyo para siempre."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci d’avoir été là dès le début — Mygra Plus est à vous pour la vie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初期からのご支援に感謝します。Mygra Plus は生涯ご利用いただけます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Thanks for being an early supporter — Plus is yours for life." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gracias por apoyarnos desde el principio: Plus es tuyo para siempre."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Merci d’avoir été là dès le début — Plus est à vous pour la vie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初期からのご支援に感謝します。Plus は生涯ご利用いただけます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "That record no longer exists." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15764,6 +16844,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "その記録はもう存在しません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "The App Store could not verify this purchase." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El App Store no pudo verificar esta compra."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’App Store n’a pas pu vérifier cet achat."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "App Store がこの購入を検証できませんでした。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "The Migraine Assistant is part of Mygra Plus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El Asistente de migrañas forma parte de Mygra Plus."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’Assistant migraine fait partie de Mygra Plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛アシスタントは Mygra Plus の機能です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "The purchase could not be completed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo completar la compra."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’achat n’a pas pu être effectué."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "購入を完了できませんでした。"
           }
         }
       },
@@ -16225,6 +17377,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Try Again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "再試行"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Type" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16316,6 +17492,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不明なエラー"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Unlock" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déverrouiller"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ロック解除"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Unlock %@ with Mygra Plus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear %@ con Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déverrouiller %@ avec Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus で%@をロック解除"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Unlock with Mygra Plus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desbloquear con Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déverrouiller avec Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus でロック解除"
           }
         }
       },
@@ -17137,6 +18385,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Weather-risk alerts are part of Mygra Plus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las alertas de riesgo meteorológico forman parte de Mygra Plus."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les alertes de risque météo font partie de Mygra Plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天候リスク通知は Mygra Plus の機能です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Weather-risk forecasts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Previsiones de riesgo meteorológico"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Prévisions de risque météo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "天候リスク予報"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Weather: %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17305,6 +18601,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Welcome to Mygra Plus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienvenido a Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienvenue dans Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus へようこそ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "We’ll help you through this!" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17401,6 +18721,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Yearly" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anual"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "年額"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "You already have a migraine in progress." : {
       "localizations" : {
         "es" : {
@@ -17492,6 +18836,30 @@
           }
         }
       }
+    },
+    "You have Mygra Plus" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tienes Mygra Plus"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez Mygra Plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra Plus をご利用中です"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
     },
     "You haven't logged any migraines yet." : {
       "localizations" : {

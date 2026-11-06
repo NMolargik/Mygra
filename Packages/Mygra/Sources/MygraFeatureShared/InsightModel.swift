@@ -7,6 +7,8 @@
 //  Intelligence hand-offs (per-migraine analysis on log, Quick Bit explanations, and
 //  the analyst chat) through the `MigraineIntelligence` seam. Re-checks on every
 //  change-stream event; a `migraineLogged` payload triggers analysis of that record.
+//  Apple Intelligence work and Quick Bits are Mygra Plus features: every generative
+//  entry point checks the entitlement first, while insights stored earlier stay readable.
 //
 
 import Foundation
@@ -26,6 +28,7 @@ public final class InsightModel {
     @ObservationIgnored private let updateMigraine: any UpdateMigraine
     @ObservationIgnored private let observeChanges: any ObserveMigraineChanges
     @ObservationIgnored public let intelligence: any MigraineIntelligence
+    @ObservationIgnored private let entitlement: any EntitlementProviding
 
     // MARK: - State
 
@@ -44,8 +47,12 @@ public final class InsightModel {
 
     @ObservationIgnored private var observationTask: Task<Void, Never>?
 
-    /// Whether Apple Intelligence can be used on this device right now.
+    /// Whether Apple Intelligence can be used on this device right now (device capability).
     public var supportsAppleIntelligence: Bool { intelligence.isAvailable }
+    /// Whether the user may run Apple Intelligence features (capability + Mygra Plus).
+    public var canUseIntelligence: Bool { supportsAppleIntelligence && entitlement.gate.unlocks(.assistant) }
+    /// Whether rule-based Quick Bits are unlocked.
+    public var canViewQuickBits: Bool { entitlement.gate.unlocks(.quickBits) }
     public var conversation: [ChatMessage] { intelligence.conversation }
     public var isChatActive: Bool { intelligence.isChatActive }
 
@@ -57,7 +64,8 @@ public final class InsightModel {
         loadUser: any LoadUser,
         updateMigraine: any UpdateMigraine,
         observeChanges: any ObserveMigraineChanges,
-        intelligence: any MigraineIntelligence
+        intelligence: any MigraineIntelligence,
+        entitlement: any EntitlementProviding
     ) {
         self.loadMigraines = loadMigraines
         self.findMigraine = findMigraine
@@ -65,6 +73,7 @@ public final class InsightModel {
         self.updateMigraine = updateMigraine
         self.observeChanges = observeChanges
         self.intelligence = intelligence
+        self.entitlement = entitlement
         startObserving()
     }
 
@@ -106,9 +115,9 @@ public final class InsightModel {
     // MARK: - Per-migraine analysis
 
     /// Generates (or regenerates) the migraine's stored insight when Apple Intelligence
-    /// is available. No-op otherwise.
+    /// is available and the user has Plus. No-op otherwise.
     public func analyzeNewlyLogged(_ migraine: Migraine) async {
-        guard supportsAppleIntelligence else { return }
+        guard canUseIntelligence else { return }
         guard !isGeneratingGuidance else { return }
         isGeneratingGuidance = true
         generatingGuidanceForID = migraine.id
@@ -137,7 +146,7 @@ public final class InsightModel {
 
     /// Clears the stored insight and regenerates it (after the user edits the migraine).
     public func regenerateInsight(for migraine: Migraine) async {
-        guard supportsAppleIntelligence else { return }
+        guard canUseIntelligence else { return }
         if migraine.insight?.isEmpty == false {
             try? updateMigraine(migraine) { $0.insight = nil }
         }
@@ -148,7 +157,7 @@ public final class InsightModel {
 
     /// A cached (or freshly generated) explanation for an insight; nil when unavailable.
     public func explanation(for insight: Insight) async -> QuickBitExplanation? {
-        guard supportsAppleIntelligence else { return nil }
+        guard canUseIntelligence else { return nil }
         let key = insight.dedupeKey.key
         if let cached = quickBitExplanations[key] { return cached }
         do {
@@ -168,6 +177,7 @@ public final class InsightModel {
             record(.unavailable)
             return
         }
+        guard canUseIntelligence else { return }
         let migraines = (try? loadMigraines()) ?? []
         await intelligence.startChat(migraines: migraines, user: try? loadUser())
     }
@@ -178,6 +188,9 @@ public final class InsightModel {
         guard supportsAppleIntelligence else {
             record(.unavailable)
             return String(localized: "This device does not support Apple Intelligence.")
+        }
+        guard canUseIntelligence else {
+            return String(localized: "The Migraine Assistant is part of Mygra Plus.")
         }
         isSending = true
         defer { isSending = false }

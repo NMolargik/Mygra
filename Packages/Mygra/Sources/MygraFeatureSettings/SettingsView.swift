@@ -2,9 +2,10 @@
 //  SettingsView.swift
 //  MygraFeatureSettings
 //
-//  Grouped the way iOS Settings is: profile, iCloud, preferences, dashboard, tags,
-//  data (export / delete), about, and the DEBUG developer tools. Every row leads with
-//  a tinted icon tile and destructive actions carry the destructive role.
+//  Grouped the way iOS Settings is: profile, Mygra Plus, iCloud, preferences, dashboard,
+//  tags, data (export / delete), about, and the DEBUG developer tools. Every row leads
+//  with a tinted icon tile and destructive actions carry the destructive role. PDF and
+//  CSV export are Plus features: free users see the badge and land on the paywall.
 //
 
 #if os(iOS)
@@ -19,6 +20,8 @@ public struct SettingsView: View {
     @Environment(MigraineDataModel.self) private var migraineData
     @Environment(CloudSyncManager.self) private var cloudSync
     @Environment(ToastManager.self) private var toastManager
+    @Environment(SubscriptionManager.self) private var subscription
+    @Environment(PaywallPresenter.self) private var paywall
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
@@ -30,6 +33,7 @@ public struct SettingsView: View {
     public var body: some View {
         Form {
             profileSection
+            plusSection
             CloudSyncSection()
             preferencesSection
             dashboardSection
@@ -47,13 +51,10 @@ public struct SettingsView: View {
                 userData.apply(edited)
             }
         }
-        .sheet(isPresented: $viewModel.showDocumentPicker) {
-            if let url = viewModel.exportURL {
-                DocumentPickerView(url: url) {
-                    viewModel.cleanupExport()
-                }
-            }
+        .sheet(item: $viewModel.export, onDismiss: { viewModel.cleanupExport() }) { export in
+            ExportSheet(export: export)
         }
+        .manageSubscriptionsSheet(isPresented: $viewModel.showManageSubscriptions)
         .sheet(isPresented: $viewModel.showingFarewell) {
             FarewellView()
                 .interactiveDismissDisabled()
@@ -120,6 +121,86 @@ public struct SettingsView: View {
         return String(localized: "\(user.biologicalSex.displayName), \(age) years old")
     }
 
+    // MARK: Plus
+
+    private var plusSection: some View {
+        Section {
+            if subscription.hasPlus {
+                LabeledContent {
+                    Text(planDescription)
+                        .foregroundStyle(.secondary)
+                } label: {
+                    Label("Mygra Plus", systemImage: "sparkles")
+                        .labelStyle(.settingsIcon(.mygraPurple))
+                }
+                if subscription.currentPlan?.isSubscription == true {
+                    Button {
+                        Haptics.lightImpact()
+                        viewModel.showManageSubscriptions = true
+                    } label: {
+                        Label("Manage Subscription", systemImage: "creditcard.fill")
+                            .labelStyle(.settingsIcon(.mygraBlue))
+                    }
+                    .hoverHighlight()
+                }
+            } else {
+                Button {
+                    Haptics.lightImpact()
+                    paywall.present()
+                } label: {
+                    HStack {
+                        Label("Get Mygra Plus", systemImage: "sparkles")
+                            .labelStyle(.settingsIcon(.mygraPurple))
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                }
+                .foregroundStyle(.primary)
+                .hoverHighlight()
+                .accessibilityHint("Opens the Mygra Plus plans")
+                Button {
+                    Haptics.lightImpact()
+                    Task { await restorePurchases() }
+                } label: {
+                    HStack {
+                        Label("Restore Purchases", systemImage: "arrow.clockwise.circle.fill")
+                            .labelStyle(.settingsIcon(.gray))
+                        Spacer()
+                        if viewModel.isRestoring {
+                            ProgressView().controlSize(.small)
+                        }
+                    }
+                }
+                .foregroundStyle(.primary)
+                .disabled(viewModel.isRestoring)
+                .hoverHighlight()
+            }
+        } header: {
+            Text("Mygra Plus")
+        } footer: {
+            if subscription.hasPlus {
+                Text("Migraine Assistant, Quick Bits, weather-risk alerts, PDF reports, and CSV export are unlocked.")
+            } else {
+                Text("Logging is free forever. Plus adds the Migraine Assistant, Quick Bits, weather-risk alerts, PDF reports, and CSV export.")
+            }
+        }
+    }
+
+    private var planDescription: String {
+        if subscription.isGrandfathered == true, subscription.currentPlan == nil {
+            return String(localized: "Early supporter")
+        }
+        switch subscription.currentPlan {
+        case .lifetime: return String(localized: "Lifetime")
+        case .yearly: return String(localized: "Yearly")
+        case .monthly: return String(localized: "Monthly")
+        case nil: return String(localized: "Active")
+        }
+    }
+
     private var preferencesSection: some View {
         Section {
             Toggle(isOn: hapticBinding($useMetricUnits)) {
@@ -168,21 +249,15 @@ public struct SettingsView: View {
 
     private var dataSection: some View {
         Section {
-            Button {
-                export()
-            } label: {
-                HStack {
-                    Label("Export Migraines as PDF", systemImage: "doc.richtext.fill")
-                        .labelStyle(.settingsIcon(.orange))
-                    Spacer()
-                    if viewModel.isExporting {
-                        ProgressView().controlSize(.small)
-                    }
-                }
+            exportRow(title: "Export Migraines as PDF", systemImage: "doc.richtext.fill", tint: .orange, feature: .pdfReport) {
+                exportPDF()
             }
-            .disabled(viewModel.isExporting || migraineData.migraines.isEmpty)
-            .hoverHighlight()
             .accessibilityHint("Builds a PDF report you can save or share")
+
+            exportRow(title: "Export Migraines as CSV", systemImage: "tablecells.fill", tint: .green, feature: .csvExport) {
+                exportCSV()
+            }
+            .accessibilityHint("Builds a spreadsheet of every migraine you can save or share")
 
             Button(role: .destructive) {
                 Haptics.lightImpact()
@@ -203,6 +278,32 @@ public struct SettingsView: View {
                 Text("Log a migraine to enable export and deletion.")
             }
         }
+    }
+
+    /// A Plus-gated export row: free users see the badge and the paywall opens on tap.
+    private func exportRow(title: LocalizedStringKey, systemImage: String, tint: Color, feature: PlusFeature, action: @escaping () -> Void) -> some View {
+        let unlocked = subscription.gate.unlocks(feature)
+        return Button {
+            if unlocked {
+                action()
+            } else {
+                Haptics.lightImpact()
+                paywall.present(feature)
+            }
+        } label: {
+            HStack {
+                Label(title, systemImage: systemImage)
+                    .labelStyle(.settingsIcon(tint))
+                Spacer()
+                if !unlocked {
+                    PlusBadge()
+                } else if viewModel.isExporting {
+                    ProgressView().controlSize(.small)
+                }
+            }
+        }
+        .disabled(viewModel.isExporting || (unlocked && migraineData.migraines.isEmpty))
+        .hoverHighlight()
     }
 
     private var aboutSection: some View {
@@ -292,25 +393,58 @@ public struct SettingsView: View {
         )
     }
 
-    private func export() {
-        guard !viewModel.isExporting else { return }
-        Haptics.lightImpact()
-        viewModel.isExporting = true
-        viewModel.exportError = nil
-        defer { viewModel.isExporting = false }
-        do {
+    private func exportPDF() {
+        runExport(kind: .pdf) {
             let blocks = MigraineReport.blocks(
                 user: userData.currentUser,
                 migraines: migraineData.migraines,
                 useMetricUnits: useMetricUnits,
                 useDMY: useDayMonthYearDates
             )
-            viewModel.exportURL = try PDFReportRenderer.writeTemporaryFile(PDFReportRenderer.render(blocks))
-            viewModel.showDocumentPicker = true
+            return try PDFReportRenderer.writeTemporaryFile(PDFReportRenderer.render(blocks))
+        }
+        if viewModel.export?.kind == .pdf {
+            migraineData.noteReportExported()
+        }
+    }
+
+    private func exportCSV() {
+        runExport(kind: .csv) {
+            let csv = MigraineReport.csv(migraines: migraineData.migraines, useMetricUnits: useMetricUnits)
+            return try ExportFiles.writeTemporaryFile(Data(csv.utf8), fileExtension: "csv")
+        }
+    }
+
+    private func runExport(kind: ExportKind, produce: () throws -> URL) {
+        guard !viewModel.isExporting else { return }
+        Haptics.lightImpact()
+        viewModel.isExporting = true
+        viewModel.exportError = nil
+        defer { viewModel.isExporting = false }
+        do {
+            viewModel.export = PendingExport(kind: kind, url: try produce())
             Haptics.success()
         } catch {
-            viewModel.exportError = String(localized: "Could not export PDF. \(error.localizedDescription)")
+            viewModel.exportError = switch kind {
+            case .pdf: String(localized: "Could not export PDF. \(error.localizedDescription)")
+            case .csv: String(localized: "Could not export CSV. \(error.localizedDescription)")
+            }
             Haptics.error()
+        }
+    }
+
+    private func restorePurchases() async {
+        viewModel.isRestoring = true
+        defer { viewModel.isRestoring = false }
+        await subscription.restorePurchases()
+        if let error = subscription.error {
+            Haptics.error()
+            toastManager.show(error: error)
+        } else if subscription.hasPlus {
+            Haptics.success()
+            toastManager.showSuccess(String(localized: "Mygra Plus restored"))
+        } else {
+            toastManager.show(message: String(localized: "No previous purchase was found."), style: .info)
         }
     }
 
@@ -338,9 +472,10 @@ extension SettingsView {
     final class ViewModel {
         var isEditingUser = false
         var isExporting = false
+        var isRestoring = false
         var exportError: String?
-        var exportURL: URL?
-        var showDocumentPicker = false
+        var export: PendingExport?
+        var showManageSubscriptions = false
         var showDeleteConfirmation = false
         var showingFarewell = false
         var showSampleDataConfirmation = false
@@ -352,10 +487,10 @@ extension SettingsView {
         }
 
         func cleanupExport() {
-            if let exportURL {
-                try? FileManager.default.removeItem(at: exportURL)
+            if let url = export?.url {
+                try? FileManager.default.removeItem(at: url)
             }
-            exportURL = nil
+            export = nil
         }
     }
 }

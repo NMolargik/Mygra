@@ -134,6 +134,23 @@ struct MigraineDataModelTests {
         #expect(defaults.bool(forKey: AppStorageKeys.hasPromptedForFifthReview))
     }
 
+    @Test("the export review prompt fires once, after the first PDF export")
+    func exportReviewMilestone() {
+        let requester = FakeReviewRequester()
+        let defaults = FakeKeyValueStore()
+        let model = makeMigraineData(repository: PreviewMigraineRepository(), reviewRequester: requester, defaults: defaults)
+        model.noteReportExported()
+        model.noteReportExported()
+        #expect(requester.requestCount == 1)
+        #expect(defaults.bool(forKey: AppStorageKeys.hasPromptedForExportReview))
+
+        // Independent of the fifth-migraine milestone.
+        for index in 1...5 {
+            model.log(Migraine(startDate: Date().addingTimeInterval(Double(-index)), endDate: Date(), painLevel: 3, stressLevel: 3))
+        }
+        #expect(requester.requestCount == 2)
+    }
+
     @Test("change-stream events from elsewhere refresh the cache")
     func externalChangesRefresh() async throws {
         let repository = PreviewMigraineRepository()
@@ -243,15 +260,43 @@ struct InsightModelTests {
         }
     }
 
-    private func makeModel(repository: PreviewMigraineRepository, intelligence: ScriptedIntelligence) -> InsightModel {
+    private func makeModel(repository: PreviewMigraineRepository, intelligence: ScriptedIntelligence, hasPlus: Bool = true) -> InsightModel {
         InsightModel(
             loadMigraines: LoadMigrainesUseCase(repository: repository),
             findMigraine: FindMigraineUseCase(repository: repository),
             loadUser: LoadUserUseCase(repository: PreviewUserRepository()),
             updateMigraine: UpdateMigraineUseCase(repository: repository),
             observeChanges: ObserveMigraineChangesUseCase(center: repository.changeCenter),
-            intelligence: intelligence
+            intelligence: intelligence,
+            entitlement: FixedEntitlement(hasPlus: hasPlus)
         )
+    }
+
+    @Test("without Plus nothing generative runs, even on a capable device")
+    func freeTierSkipsIntelligence() async throws {
+        let repository = PreviewMigraineRepository()
+        let intelligence = ScriptedIntelligence()
+        let model = makeModel(repository: repository, intelligence: intelligence, hasPlus: false)
+        #expect(model.supportsAppleIntelligence)
+        #expect(model.canUseIntelligence == false)
+        #expect(model.canViewQuickBits == false)
+
+        let migraine = Migraine(startDate: Date(), painLevel: 7, stressLevel: 7)
+        repository.storage = [migraine]
+        await model.analyzeNewlyLogged(migraine)
+        #expect(intelligence.analyzed.isEmpty)
+        #expect(migraine.insight == nil)
+
+        let insight = Insight(category: .foods, title: "t", message: "m", priority: .low)
+        #expect(await model.explanation(for: insight) == nil)
+
+        await model.startChat()
+        #expect(intelligence.isChatActive == false)
+        let reply = await model.send("hello")
+        #expect(reply == PlusFeature.assistant.paywallReason)
+        #expect(intelligence.conversation.isEmpty)
+        // Not a device failure: no error is recorded for a locked feature.
+        #expect(model.errors.isEmpty)
     }
 
     @Test func refreshGeneratesRuleInsights() {

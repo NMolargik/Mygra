@@ -109,7 +109,7 @@ struct QuickBitsSectionView: View {
                 expandedKeys.insert(key)
             }
         }
-        guard !isExpanded, explanations[key] == nil, !loadingKeys.contains(key) else { return }
+        guard !isExpanded, insights.canUseIntelligence, explanations[key] == nil, !loadingKeys.contains(key) else { return }
         loadingKeys.insert(key)
         Task {
             let fetched = await insights.explanation(for: insight)

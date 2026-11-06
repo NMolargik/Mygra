@@ -196,6 +196,15 @@ public final class MigraineDataModel {
 
     // MARK: - Review prompt
 
+    /// Call after a PDF report has been produced: asks for a review once, on the first export.
+    public func noteReportExported() {
+        guard let reviewRequester else { return }
+        let hasPrompted = defaults.bool(forKey: AppStorageKeys.hasPromptedForExportReview)
+        guard ReviewMilestone.shouldPromptAfterExport(hasPrompted: hasPrompted) else { return }
+        defaults.set(true, forKey: AppStorageKeys.hasPromptedForExportReview)
+        reviewRequester.requestReview()
+    }
+
     private func maybeRequestReview() {
         guard let reviewRequester else { return }
         let hasPrompted = defaults.bool(forKey: AppStorageKeys.hasPromptedForFifthReview)

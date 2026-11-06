@@ -6,7 +6,8 @@
 //  `.sidebarAdaptable`, with each tab owning its own navigation stack. The tab bar's
 //  bottom accessory (iOS 26+) is a persistent status strip — the live ongoing-migraine
 //  timer, or the migraine-free streak with a one-tap Log action. The new-migraine sheet
-//  and assistant are presented here, and every deep link routes through `AppRouter`.
+//  and assistant are presented here, as is the Mygra Plus paywall whenever a gated
+//  feature asks for it, and every deep link routes through `AppRouter`.
 //
 
 #if os(iOS)
@@ -19,10 +20,12 @@ import MygraFeatureCalendar
 import MygraFeatureMigraines
 import MygraFeatureAssistant
 import MygraFeatureSettings
+import MygraServices
 
 struct MainView: View {
     @Environment(MigraineDataModel.self) private var migraineData
     @Environment(InsightModel.self) private var insights
+    @Environment(SubscriptionManager.self) private var subscription
 
     let session: SessionController
 
@@ -32,6 +35,7 @@ struct MainView: View {
 
     var body: some View {
         @Bindable var router = router
+        @Bindable var paywall = session.paywall
         TabView(selection: $router.selectedTab) {
             Tab(AppTab.dashboard.title, systemImage: AppTab.dashboard.systemImage, value: .dashboard) {
                 NavigationStack(path: $navigation.dashboardPath) {
@@ -99,6 +103,13 @@ struct MainView: View {
                     .presentationSizing(.page)
             }
         }
+        .sheet(item: $paywall.request) { request in
+            PaywallView(feature: request.feature)
+                .presentationSizing(.page)
+        }
+        .onChange(of: subscription.isGrandfathered) { _, _ in
+            session.showEarlySupporterThanksIfNeeded()
+        }
         .alert("Ongoing Migraine", isPresented: $navigation.showingOngoingAlert) {
             Button("OK", role: .cancel) {}
             if let ongoing = migraineData.ongoingMigraine {
@@ -112,6 +123,7 @@ struct MainView: View {
         }
         .onAppear {
             handleDeepLink(router.pendingDeepLink)
+            session.showEarlySupporterThanksIfNeeded()
         }
     }
 
@@ -175,9 +187,12 @@ struct MainView: View {
             navigation.settingsPath = NavigationPath([SettingsDestination.tags])
         case .migraine(let id): navigateToMigraine(id: id)
         case .assistant:
-            if #available(iOS 26.0, *), insights.supportsAppleIntelligence {
+            guard #available(iOS 26.0, *), insights.supportsAppleIntelligence else { break }
+            if insights.canUseIntelligence {
                 navigation.showingAssistant = true
                 Task { await insights.startChat() }
+            } else {
+                session.paywall.present(.assistant)
             }
         case .endOngoing:
             migraineData.endOngoing()

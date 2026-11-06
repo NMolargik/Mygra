@@ -175,6 +175,10 @@ public struct PreviewEnvironment {
     public let weatherManager: WeatherManager
     public let notificationManager = NotificationManager()
     public let cloudSyncManager = CloudSyncManager()
+    /// Off StoreKit; previews render as a Plus member so gated content shows.
+    public let subscription = SubscriptionManager(defaults: UserDefaults.standard, startsAutomatically: false)
+    public let entitlement = FixedEntitlement(hasPlus: true)
+    public let paywall = PaywallPresenter()
     #if canImport(HealthKit) && !os(macOS)
     public let healthManager = HealthManager()
     #endif
@@ -227,7 +231,8 @@ public struct PreviewEnvironment {
             loadUser: LoadUserUseCase(repository: userRepository),
             updateMigraine: update,
             observeChanges: observe,
-            intelligence: PreviewIntelligence()
+            intelligence: PreviewIntelligence(),
+            entitlement: entitlement
         )
         weatherManager = WeatherManager(locationManager: LocationManager())
     }
@@ -247,6 +252,8 @@ extension View {
             .environment(env.notificationManager)
             .environment(env.cloudSyncManager)
             .environment(env.toastManager)
+            .environment(env.subscription)
+            .environment(env.paywall)
         #if canImport(HealthKit) && !os(macOS)
         return base.environment(env.healthManager)
         #else

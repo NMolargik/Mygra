@@ -11,6 +11,7 @@ import Foundation
 import Testing
 import MygraCore
 import MygraData
+import MygraServices
 @testable import MygraComposition
 
 private final class FakeKeyValueStore: KeyValueStoring, @unchecked Sendable {
@@ -46,6 +47,7 @@ struct SessionControllerTests {
             container: try MygraStore.makeTemporaryContainer(),
             defaults: FakeKeyValueStore(),
             sharedDefaults: sharedDefaults,
+            subscription: SubscriptionManager(defaults: FakeKeyValueStore(), startsAutomatically: false),
             indexer: indexer,
             widgetReloader: widgets,
             indexDebounce: .milliseconds(20)

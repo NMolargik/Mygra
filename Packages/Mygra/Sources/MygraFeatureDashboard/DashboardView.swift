@@ -3,6 +3,8 @@
 //  MygraFeatureDashboard
 //
 //  Weather, the assistant entry, today's Health stats with Quick Add, and Quick Bits.
+//  The assistant and Quick Bits are Mygra Plus; free users see locked cards that open
+//  the paywall with the feature as context.
 //  Cards stack on iPhone and flow into two balanced columns at regular widths (iPad
 //  windows, Mac), so a resized window never shows a single stretched column.
 //
@@ -20,6 +22,7 @@ public struct DashboardView: View {
     @Environment(HealthManager.self) private var healthManager
     @Environment(WeatherManager.self) private var weatherManager
     @Environment(MigraineDataModel.self) private var migraineData
+    @Environment(PaywallPresenter.self) private var paywall
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
@@ -96,10 +99,17 @@ public struct DashboardView: View {
     private var assistantCard: some View {
         if #available(iOS 26.0, *) {
             if insights.supportsAppleIntelligence {
-                IntelligenceCardView {
-                    Haptics.lightImpact()
-                    viewModel.isShowingAssistant = true
-                    Task { await insights.startChat() }
+                if insights.canUseIntelligence {
+                    IntelligenceCardView {
+                        Haptics.lightImpact()
+                        viewModel.isShowingAssistant = true
+                        Task { await insights.startChat() }
+                    }
+                } else {
+                    PlusLockedCard(feature: .assistant) {
+                        Haptics.lightImpact()
+                        paywall.present(.assistant)
+                    }
                 }
             }
         } else {
@@ -135,10 +145,18 @@ public struct DashboardView: View {
         )
     }
 
+    @ContentBuilder
     private var quickBits: some View {
-        QuickBitsSectionView {
-            Haptics.lightImpact()
-            insights.refresh()
+        if insights.canViewQuickBits {
+            QuickBitsSectionView {
+                Haptics.lightImpact()
+                insights.refresh()
+            }
+        } else {
+            PlusLockedCard(feature: .quickBits) {
+                Haptics.lightImpact()
+                paywall.present(.quickBits)
+            }
         }
     }
 

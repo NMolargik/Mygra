@@ -38,6 +38,8 @@ public final class SessionController {
     public let intelligence: IntelligenceService
     public let statusSync: MigraineStatusSync
     public let weatherRiskNotifier: WeatherRiskNotifier
+    public let subscription: SubscriptionManager
+    public let paywall = PaywallPresenter()
 
     #if canImport(HealthKit) && !os(macOS)
     public let healthManager: HealthManager
@@ -84,10 +86,13 @@ public final class SessionController {
     ///   - defaults: Standard defaults (review-prompt bookkeeping).
     ///   - sharedDefaults: The App Group suite (widget/watch status, intent hand-off).
     ///   - indexer/reviewRequester/intentDonor/activityAnnotator: App-target seams (nil in tests/previews).
+    ///   - subscription: The Plus entitlement source (defaults to a live StoreKit manager
+    ///     caching in `defaults`; tests pass one built with `startsAutomatically: false`).
     public init(
         container: ModelContainer? = nil,
         defaults: any KeyValueStoring = UserDefaults.standard,
         sharedDefaults: (any KeyValueStoring)? = AppGroup.defaults,
+        subscription: SubscriptionManager? = nil,
         indexer: (any MigraineIndexing)? = nil,
         reviewRequester: (any ReviewRequesting)? = nil,
         intentDonor: (any IntentDonating)? = nil,
@@ -104,6 +109,9 @@ public final class SessionController {
 
         let toastManager = ToastManager()
         self.toastManager = toastManager
+
+        let subscription = subscription ?? SubscriptionManager(defaults: defaults)
+        self.subscription = subscription
 
         let changeCenter = MigraineChangeCenter()
         let migraineRepository = DefaultMigraineRepository(container: container, changeCenter: changeCenter)
@@ -188,7 +196,8 @@ public final class SessionController {
             loadUser: loadUser,
             updateMigraine: updateMigraine,
             observeChanges: observeChanges,
-            intelligence: intelligence
+            intelligence: intelligence,
+            entitlement: subscription
         )
 
         let cloud = CloudSyncManager(changeCenter: changeCenter)
@@ -199,7 +208,7 @@ public final class SessionController {
         weatherManager = weather
         let notifications = NotificationManager()
         notificationManager = notifications
-        weatherRiskNotifier = WeatherRiskNotifier(weather: weather, notifications: notifications)
+        weatherRiskNotifier = WeatherRiskNotifier(weather: weather, notifications: notifications, entitlement: subscription)
 
         #if canImport(WatchConnectivity)
         let phone = PhoneConnectivityManager()
@@ -257,9 +266,22 @@ public final class SessionController {
         consumePendingDeepLinkFromIntents()
     }
 
-    /// Runs one weather-risk check (background task or foreground timer).
+    /// Runs one weather-risk check (background task or foreground timer). A no-op
+    /// without Mygra Plus.
     public func checkWeatherRisk() async {
         await weatherRiskNotifier.checkAndNotify()
+    }
+
+    /// Shows the one-time early-supporter thank-you once the grandfather check has
+    /// landed. Safe to call on every activation; it fires at most once per install.
+    public func showEarlySupporterThanksIfNeeded() {
+        guard subscription.shouldShowEarlySupporterThanks else { return }
+        subscription.markEarlySupporterThanksShown()
+        toastManager.show(
+            message: String(localized: "Thanks for being an early supporter — Mygra Plus is yours for life."),
+            style: .success,
+            icon: "sparkles"
+        )
     }
 
     // MARK: - Deep links

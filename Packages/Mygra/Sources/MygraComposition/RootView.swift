@@ -41,6 +41,8 @@ public struct RootView: View {
             .environment(session.weatherManager)
             .environment(session.notificationManager)
             .environment(session.healthManager)
+            .environment(session.subscription)
+            .environment(session.paywall)
     }
 
     private var stageView: some View {
