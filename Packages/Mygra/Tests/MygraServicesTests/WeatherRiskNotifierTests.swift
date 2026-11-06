@@ -39,7 +39,7 @@ struct WeatherRiskNotifierTests {
     @Test func notifiesOnceWhenRiskRises() async {
         let weather = FakeWeather(stormy)
         let notifier = FakeNotifier()
-        let sut = WeatherRiskNotifier(weather: weather, notifications: notifier, now: { Date(timeIntervalSince1970: 1_000) })
+        let sut = WeatherRiskNotifier(weather: weather, notifications: notifier, entitlement: FixedEntitlement(hasPlus: true), now: { Date(timeIntervalSince1970: 1_000) })
 
         #expect(await sut.checkAndNotify())
         #expect(weather.refreshCount == 1)
@@ -63,17 +63,35 @@ struct WeatherRiskNotifierTests {
         let weather = FakeWeather(stormy)
         let notifier = FakeNotifier()
         notifier.authorized = false
-        let sut = WeatherRiskNotifier(weather: weather, notifications: notifier)
+        let sut = WeatherRiskNotifier(weather: weather, notifications: notifier, entitlement: FixedEntitlement(hasPlus: true))
 
         #expect(await sut.checkAndNotify() == false)
         #expect(notifier.sent.isEmpty)
         #expect(sut.wasHighRisk)
     }
 
+    @Test("without Plus the check neither refreshes nor notifies")
+    func freeTierIsANoOp() async {
+        let weather = FakeWeather(stormy)
+        let notifier = FakeNotifier()
+        let entitlement = FixedEntitlement(hasPlus: false)
+        let sut = WeatherRiskNotifier(weather: weather, notifications: notifier, entitlement: entitlement)
+
+        #expect(await sut.checkAndNotify() == false)
+        #expect(weather.refreshCount == 0)
+        #expect(notifier.sent.isEmpty)
+        #expect(sut.wasHighRisk == false)
+
+        // Unlocking Plus turns the same notifier on.
+        entitlement.hasPlus = true
+        #expect(await sut.checkAndNotify())
+        #expect(notifier.sent.count == 1)
+    }
+
     @Test func deliveryFailureIsReportedNotThrown() async {
         let notifier = FakeNotifier()
         notifier.shouldFail = true
-        let sut = WeatherRiskNotifier(weather: FakeWeather(stormy), notifications: notifier)
+        let sut = WeatherRiskNotifier(weather: FakeWeather(stormy), notifications: notifier, entitlement: FixedEntitlement(hasPlus: true))
         #expect(await sut.checkAndNotify() == false)
     }
 }

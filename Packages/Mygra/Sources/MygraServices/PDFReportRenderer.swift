@@ -65,11 +65,7 @@ nonisolated public enum PDFReportRenderer {
 
     /// Writes the report to a timestamped file in the temporary directory.
     public static func writeTemporaryFile(_ data: Data, now: Date = Date()) throws -> URL {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("Mygra_Migraines_\(formatter.string(from: now)).pdf")
-        try data.write(to: url, options: .atomic)
-        return url
+        try ExportFiles.writeTemporaryFile(data, fileExtension: "pdf", now: now)
     }
 
     @discardableResult
