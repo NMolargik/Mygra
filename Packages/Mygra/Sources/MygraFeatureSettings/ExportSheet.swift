@@ -38,7 +38,7 @@ struct ExportSheet: View {
 
     private var subtitle: LocalizedStringKey {
         switch export.kind {
-        case .pdf: "A doctor-ready summary of your profile and every migraine."
+        case .pdf: "A clinical summary with headache days, medication use, questionnaire scores, and every attack."
         case .csv: "Every migraine as a spreadsheet row, with health and weather columns."
         }
     }

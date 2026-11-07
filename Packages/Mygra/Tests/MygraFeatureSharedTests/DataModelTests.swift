@@ -97,6 +97,26 @@ struct MigraineDataModelTests {
         #expect(model.migraines.isEmpty)
     }
 
+    @Test("medication quick-add records doses and feeds overuse alerts")
+    func medicationQuickAdd() {
+        let model = makeMigraineData(repository: PreviewMigraineRepository())
+        let migraine = Migraine(startDate: Date(), painLevel: 6, stressLevel: 2)
+        model.log(migraine)
+
+        #expect(!model.logMedication(for: migraine, name: "   ", medicationClass: .triptan))
+        for day in 0..<8 {
+            #expect(model.logMedication(for: migraine, name: " Sumatriptan ", medicationClass: .triptan, dose: "50 mg", takenAt: Date().addingTimeInterval(-Double(day) * 86_400)))
+        }
+        #expect(migraine.sortedMedications.count == 8)
+        #expect(migraine.sortedMedications.first?.name == "Sumatriptan")
+        #expect(model.overuseAlerts().first?.status == .approaching)
+
+        let dose = migraine.sortedMedications[0]
+        model.removeMedication(dose, from: migraine)
+        #expect(migraine.sortedMedications.count == 7)
+        #expect(model.overuseAlerts().isEmpty)
+    }
+
     @Test("start refuses a second ongoing migraine")
     func startRefusesDuplicates() {
         let model = makeMigraineData(repository: PreviewMigraineRepository())
