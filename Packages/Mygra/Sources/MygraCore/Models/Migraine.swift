@@ -51,6 +51,10 @@ public final class Migraine {
     @Relationship(deleteRule: .cascade, inverse: \IntensitySample.parentMigraine)
     public var intensitySamples: [IntensitySample]?
 
+    // MARK: - Medications
+    @Relationship(deleteRule: .cascade, inverse: \MedicationDose.migraine)
+    public var medications: [MedicationDose]?
+
     // MARK: - Init
     public init(
         id: UUID = UUID(),
@@ -110,6 +114,11 @@ public final class Migraine {
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
         return (triggers.map(\.displayName) + custom).uniqued { $0.lowercased() }
+    }
+
+    /// Doses taken for this attack, in the order taken.
+    public var sortedMedications: [MedicationDose] {
+        (medications ?? []).sorted { $0.takenAt < $1.takenAt }
     }
 
     /// Intensity samples ordered by timestamp.

@@ -60,6 +60,8 @@ private func makeMigraineData(
         deleteAll: DeleteAllMigrainesUseCase(repository: repository),
         recordIntensitySample: RecordIntensitySampleUseCase(repository: repository),
         removeIntensitySample: RemoveIntensitySampleUseCase(repository: repository),
+        logMedication: LogMedicationUseCase(repository: repository),
+        removeMedication: RemoveMedicationUseCase(repository: repository),
         observeChanges: ObserveMigraineChangesUseCase(center: repository.changeCenter),
         reviewRequester: reviewRequester,
         defaults: defaults,

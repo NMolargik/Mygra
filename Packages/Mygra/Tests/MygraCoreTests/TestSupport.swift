@@ -116,6 +116,19 @@ final class InMemoryMigraineRepository: MigraineRepository {
         try check()
         changeCenter.notify(.migraineUpdated(migraine.id))
     }
+    @discardableResult
+    func addMedication(to migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String, takenAt: Date) throws(PersistenceError) -> MedicationDose {
+        try check()
+        let entry = MedicationDose(name: name, medicationClass: medicationClass, dose: dose, takenAt: takenAt, migraine: migraine)
+        migraine.medications = (migraine.medications ?? []) + [entry]
+        changeCenter.notify(.migraineUpdated(migraine.id))
+        return entry
+    }
+    func removeMedication(_ dose: MedicationDose, from migraine: Migraine) throws(PersistenceError) {
+        try check()
+        migraine.medications?.removeAll { $0.id == dose.id }
+        changeCenter.notify(.migraineUpdated(migraine.id))
+    }
 }
 
 @MainActor

@@ -61,6 +61,17 @@ public final class PreviewMigraineRepository: MigraineRepository {
         migraine.intensitySamples?.removeAll { $0.id == sample.id }
         changeCenter.notify(.migraineUpdated(migraine.id))
     }
+    @discardableResult
+    public func addMedication(to migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String, takenAt: Date) throws(PersistenceError) -> MedicationDose {
+        let entry = MedicationDose(name: name, medicationClass: medicationClass, dose: dose, takenAt: takenAt, migraine: migraine)
+        migraine.medications = (migraine.medications ?? []) + [entry]
+        changeCenter.notify(.migraineUpdated(migraine.id))
+        return entry
+    }
+    public func removeMedication(_ dose: MedicationDose, from migraine: Migraine) throws(PersistenceError) {
+        migraine.medications?.removeAll { $0.id == dose.id }
+        changeCenter.notify(.migraineUpdated(migraine.id))
+    }
 }
 
 @MainActor
@@ -204,6 +215,8 @@ public struct PreviewEnvironment {
             deleteAll: DeleteAllMigrainesUseCase(repository: migraineRepository),
             recordIntensitySample: RecordIntensitySampleUseCase(repository: migraineRepository),
             removeIntensitySample: RemoveIntensitySampleUseCase(repository: migraineRepository),
+            logMedication: LogMedicationUseCase(repository: migraineRepository),
+            removeMedication: RemoveMedicationUseCase(repository: migraineRepository),
             observeChanges: observe,
             toastManager: toastManager
         )

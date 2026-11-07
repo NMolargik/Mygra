@@ -183,3 +183,31 @@ struct RepositoryTests {
         #expect(all.allSatisfy { $0.weather != nil && $0.health != nil })
     }
 }
+
+@Suite("Medication persistence", .serialized)
+@MainActor
+struct MedicationPersistenceTests {
+    @Test("doses persist on the migraine and cascade away with it")
+    func addRemoveAndCascade() throws {
+        let container = try MygraStore.makeTemporaryContainer()
+        let center = MigraineChangeCenter()
+        let repo = DefaultMigraineRepository(container: container, changeCenter: center)
+        let migraine = Migraine(startDate: Date(), painLevel: 6, stressLevel: 3)
+        try repo.insert(migraine)
+
+        let dose = try repo.addMedication(to: migraine, name: "Rizatriptan", medicationClass: .triptan, dose: "10 mg", takenAt: Date())
+        #expect(migraine.sortedMedications.map(\.name) == ["Rizatriptan"])
+        #expect(dose.medicationClass == .triptan)
+
+        let context = ModelContext(container)
+        #expect(try context.fetch(FetchDescriptor<MedicationDose>()).count == 1)
+
+        try repo.removeMedication(dose, from: migraine)
+        #expect(migraine.medications?.isEmpty == true)
+
+        _ = try repo.addMedication(to: migraine, name: "Ibuprofen", medicationClass: .simpleAnalgesic, dose: "", takenAt: Date())
+        try repo.delete(migraine)
+        let remaining = try ModelContext(container).fetch(FetchDescriptor<MedicationDose>())
+        #expect(remaining.isEmpty)
+    }
+}

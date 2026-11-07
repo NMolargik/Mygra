@@ -33,6 +33,8 @@ public final class MigraineDataModel {
     @ObservationIgnored private let deleteAllUseCase: any DeleteAllMigraines
     @ObservationIgnored private let recordSampleUseCase: any RecordIntensitySample
     @ObservationIgnored private let removeSampleUseCase: any RemoveIntensitySample
+    @ObservationIgnored private let logMedicationUseCase: any LogMedication
+    @ObservationIgnored private let removeMedicationUseCase: any RemoveMedication
     @ObservationIgnored private let observeChanges: any ObserveMigraineChanges
     @ObservationIgnored private let reviewRequester: (any ReviewRequesting)?
     @ObservationIgnored private let defaults: any KeyValueStoring
@@ -71,6 +73,8 @@ public final class MigraineDataModel {
         deleteAll: any DeleteAllMigraines,
         recordIntensitySample: any RecordIntensitySample,
         removeIntensitySample: any RemoveIntensitySample,
+        logMedication: any LogMedication,
+        removeMedication: any RemoveMedication,
         observeChanges: any ObserveMigraineChanges,
         reviewRequester: (any ReviewRequesting)? = nil,
         defaults: any KeyValueStoring = UserDefaults.standard,
@@ -88,6 +92,8 @@ public final class MigraineDataModel {
         self.deleteAllUseCase = deleteAll
         self.recordSampleUseCase = recordIntensitySample
         self.removeSampleUseCase = removeIntensitySample
+        self.logMedicationUseCase = logMedication
+        self.removeMedicationUseCase = removeMedication
         self.observeChanges = observeChanges
         self.reviewRequester = reviewRequester
         self.defaults = defaults
@@ -184,6 +190,29 @@ public final class MigraineDataModel {
 
     public func removeIntensitySample(_ sample: IntensitySample, from migraine: Migraine) {
         surfacing(fallback: ()) { try removeSampleUseCase(sample, from: migraine) }
+    }
+
+    /// Records a dose taken for `migraine` (quick-add on the attack screen).
+    @discardableResult
+    public func logMedication(for migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String = "", takenAt: Date = Date()) -> Bool {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return false }
+        return surfacing(fallback: false) {
+            _ = try logMedicationUseCase(for: migraine, name: trimmed, medicationClass: medicationClass, dose: dose, takenAt: takenAt)
+            return true
+        }
+    }
+
+    public func removeMedication(_ dose: MedicationDose, from migraine: Migraine) {
+        surfacing(fallback: ()) { try removeMedicationUseCase(dose, from: migraine) }
+    }
+
+    /// Every recorded dose, for the rolling overuse counts.
+    public var allMedicationDoses: [MedicationDose] { MedicationOveruse.doses(in: migraines) }
+
+    /// Overuse alerts for the last 30 days.
+    public func overuseAlerts(now: Date = Date()) -> [OveruseAlert] {
+        MedicationOveruse.alerts(for: allMedicationDoses, now: now)
     }
 
     #if DEBUG

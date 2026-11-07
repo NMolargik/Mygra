@@ -42,6 +42,13 @@ public protocol MigraineRepository: AnyObject {
 
     /// Removes an intensity sample.
     func removeIntensitySample(_ sample: IntensitySample, from migraine: Migraine) throws(PersistenceError)
+
+    /// Records a medication dose taken for the migraine.
+    @discardableResult
+    func addMedication(to migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String, takenAt: Date) throws(PersistenceError) -> MedicationDose
+
+    /// Removes a medication dose.
+    func removeMedication(_ dose: MedicationDose, from migraine: Migraine) throws(PersistenceError)
 }
 
 // MARK: - Use cases
@@ -266,3 +273,39 @@ public protocol GenerateSampleData {
     func callAsFunction() throws(PersistenceError)
 }
 
+
+// MARK: - Medication
+
+@MainActor
+public protocol LogMedication {
+    @discardableResult
+    func callAsFunction(for migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String, takenAt: Date) throws(PersistenceError) -> MedicationDose
+}
+
+public struct LogMedicationUseCase: LogMedication {
+    private let repository: any MigraineRepository
+    public init(repository: any MigraineRepository) { self.repository = repository }
+    @discardableResult
+    public func callAsFunction(for migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String, takenAt: Date) throws(PersistenceError) -> MedicationDose {
+        try repository.addMedication(
+            to: migraine,
+            name: name.trimmingCharacters(in: .whitespacesAndNewlines),
+            medicationClass: medicationClass,
+            dose: dose.trimmingCharacters(in: .whitespacesAndNewlines),
+            takenAt: takenAt
+        )
+    }
+}
+
+@MainActor
+public protocol RemoveMedication {
+    func callAsFunction(_ dose: MedicationDose, from migraine: Migraine) throws(PersistenceError)
+}
+
+public struct RemoveMedicationUseCase: RemoveMedication {
+    private let repository: any MigraineRepository
+    public init(repository: any MigraineRepository) { self.repository = repository }
+    public func callAsFunction(_ dose: MedicationDose, from migraine: Migraine) throws(PersistenceError) {
+        try repository.removeMedication(dose, from: migraine)
+    }
+}
