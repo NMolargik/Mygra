@@ -45,7 +45,8 @@ nonisolated public enum PDFReportRenderer {
                     ensureRoom(30)
                     cursorY += draw(text, at: cursorY, width: contentWidth, font: .systemFont(ofSize: 24, weight: .bold), color: .black)
                 case .sectionHeader(let text):
-                    ensureRoom(24)
+                    // Keep a heading with the start of what follows (no stranded headings).
+                    ensureRoom(110)
                     cursorY += draw(text, at: cursorY, width: contentWidth, font: .systemFont(ofSize: 18, weight: .semibold), color: .black)
                 case .subheadline(let text):
                     ensureRoom(20)
