@@ -54,6 +54,11 @@ public struct SettingsView: View {
         .sheet(item: $viewModel.export, onDismiss: { viewModel.cleanupExport() }) { export in
             ExportSheet(export: export)
         }
+        .sheet(isPresented: $viewModel.showReportSetup) {
+            ClinicalReportSetupView { options, assessment in
+                exportPDF(options: options, assessment: assessment)
+            }
+        }
         .manageSubscriptionsSheet(isPresented: $viewModel.showManageSubscriptions)
         .sheet(isPresented: $viewModel.showingFarewell) {
             FarewellView()
@@ -250,9 +255,9 @@ public struct SettingsView: View {
     private var dataSection: some View {
         Section {
             exportRow(title: "Export Migraines as PDF", systemImage: "doc.richtext.fill", tint: .orange, feature: .pdfReport) {
-                exportPDF()
+                viewModel.showReportSetup = true
             }
-            .accessibilityHint("Builds a PDF report you can save or share")
+            .accessibilityHint("Sets up a clinical PDF report you can save or share")
 
             exportRow(title: "Export Migraines as CSV", systemImage: "tablecells.fill", tint: .green, feature: .csvExport) {
                 exportCSV()
@@ -393,11 +398,13 @@ public struct SettingsView: View {
         )
     }
 
-    private func exportPDF() {
+    private func exportPDF(options: ClinicalReportOptions, assessment: ClinicalAssessment) {
         runExport(kind: .pdf) {
-            let blocks = MigraineReport.blocks(
+            let blocks = ClinicalReport.blocks(
                 user: userData.currentUser,
                 migraines: migraineData.migraines,
+                options: options,
+                assessment: assessment,
                 useMetricUnits: useMetricUnits,
                 useDMY: useDayMonthYearDates
             )
@@ -476,6 +483,7 @@ extension SettingsView {
         var exportError: String?
         var export: PendingExport?
         var showManageSubscriptions = false
+        var showReportSetup = false
         var showDeleteConfirmation = false
         var showingFarewell = false
         var showSampleDataConfirmation = false

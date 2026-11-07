@@ -86,18 +86,24 @@ public final class NotificationManager: LocalNotifying {
         try await send(title: title, body: body, category: .alert, identifier: identifier)
     }
 
+    public func sendTimeSensitive(title: String, body: String, identifier: String) async throws {
+        try await send(title: title, body: body, category: .alert, identifier: identifier, timeSensitive: true)
+    }
+
     /// Delivers a local notification one second from now.
     public func send(
         title: String,
         body: String,
         category: LocalNotificationCategory = .alert,
-        identifier: String = UUID().uuidString
+        identifier: String = UUID().uuidString,
+        timeSensitive: Bool = false
     ) async throws {
         let content = UNMutableNotificationContent()
         content.title = title
         content.body = body
         content.sound = .default
         content.categoryIdentifier = category.rawValue
+        if timeSensitive { content.interruptionLevel = .timeSensitive }
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)

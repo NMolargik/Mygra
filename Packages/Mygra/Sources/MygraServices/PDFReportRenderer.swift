@@ -58,6 +58,12 @@ nonisolated public enum PDFReportRenderer {
                 case .divider:
                     ensureRoom(20)
                     drawDivider(atY: cursorY - 6)
+                case .table(let table):
+                    drawTable(table, cursorY: &cursorY, contentWidth: contentWidth, ensureRoom: ensureRoom)
+                case .curve(let curve):
+                    ensureRoom(curveHeight + 8)
+                    drawCurve(curve, atY: cursorY, width: contentWidth)
+                    cursorY += curveHeight + 8
                 }
             }
         }
@@ -97,6 +103,108 @@ nonisolated public enum PDFReportRenderer {
         context.addLine(to: CGPoint(x: pageRect.width - margin, y: y))
         context.strokePath()
         context.restoreGState()
+    }
+
+    // MARK: - Tables
+
+    private static func drawTable(_ table: ReportTable, cursorY: inout CGFloat, contentWidth: CGFloat, ensureRoom: (CGFloat) -> Void) {
+        guard !table.columns.isEmpty else { return }
+        // The first column (labels) is wider than the numeric columns.
+        let count = table.columns.count
+        let firstWidth = count == 1 ? contentWidth : min(contentWidth * 0.34, 170)
+        let otherWidth = count > 1 ? (contentWidth - firstWidth) / CGFloat(count - 1) : 0
+        func columnX(_ index: Int) -> CGFloat { margin + (index == 0 ? 0 : firstWidth + otherWidth * CGFloat(index - 1)) }
+        func columnWidth(_ index: Int) -> CGFloat { index == 0 ? firstWidth : otherWidth }
+
+        func drawRow(_ cells: [String], font: UIFont, color: UIColor, background: UIColor?) {
+            let height = cells.enumerated().map { index, text in
+                ceil((text as NSString).boundingRect(
+                    with: CGSize(width: columnWidth(index) - 6, height: .greatestFiniteMagnitude),
+                    options: [.usesLineFragmentOrigin], attributes: [.font: font], context: nil
+                ).height)
+            }.max() ?? 14
+            let rowHeight = max(height, 12) + 6
+            ensureRoom(rowHeight)
+            if let background, let cg = UIGraphicsGetCurrentContext() {
+                cg.setFillColor(background.cgColor)
+                cg.fill(CGRect(x: margin, y: cursorY, width: contentWidth, height: rowHeight))
+            }
+            for (index, text) in cells.enumerated() where index < count {
+                (text as NSString).draw(
+                    with: CGRect(x: columnX(index) + 3, y: cursorY + 3, width: columnWidth(index) - 6, height: rowHeight - 3),
+                    options: [.usesLineFragmentOrigin], attributes: [.font: font, .foregroundColor: color], context: nil
+                )
+            }
+            cursorY += rowHeight
+            drawDivider(atY: cursorY)
+        }
+
+        drawRow(table.columns, font: .systemFont(ofSize: 10, weight: .semibold), color: .black, background: UIColor(white: 0.93, alpha: 1))
+        for (index, row) in table.rows.enumerated() {
+            let highlighted = table.highlightedRows.contains(index)
+            drawRow(
+                row,
+                font: .systemFont(ofSize: 10, weight: highlighted ? .semibold : .regular),
+                color: highlighted ? UIColor(red: 0.7, green: 0.2, blue: 0.1, alpha: 1) : .darkGray,
+                background: highlighted ? UIColor(red: 1, green: 0.95, blue: 0.9, alpha: 1) : nil
+            )
+        }
+        cursorY += 4
+    }
+
+    // MARK: - Curves
+
+    private static let curveHeight: CGFloat = 78
+
+    /// A compact pain-over-time plot: title/subtitle on the left, plot on the right.
+    private static func drawCurve(_ curve: ReportCurve, atY y: CGFloat, width: CGFloat) {
+        let textWidth: CGFloat = 170
+        let plot = CGRect(x: margin + textWidth + 14, y: y + 6, width: width - textWidth - 22, height: curveHeight - 20)
+        draw(curve.title, at: y, width: textWidth, font: .systemFont(ofSize: 10, weight: .semibold), color: .black)
+        (curve.subtitle as NSString).draw(
+            with: CGRect(x: margin, y: y + 14, width: textWidth, height: 40),
+            options: [.usesLineFragmentOrigin], attributes: [.font: UIFont.systemFont(ofSize: 9), .foregroundColor: UIColor.darkGray], context: nil
+        )
+        guard let cg = UIGraphicsGetCurrentContext() else { return }
+        cg.saveGState()
+        defer { cg.restoreGState() }
+
+        // Grid at pain 0, 5, 10.
+        cg.setLineWidth(0.4)
+        cg.setStrokeColor(UIColor.lightGray.cgColor)
+        for level in [0.0, 5.0, 10.0] {
+            let gy = plot.maxY - plot.height * level / 10
+            cg.move(to: CGPoint(x: plot.minX, y: gy))
+            cg.addLine(to: CGPoint(x: plot.maxX, y: gy))
+            cg.strokePath()
+            ("\(Int(level))" as NSString).draw(
+                at: CGPoint(x: plot.minX - 12, y: gy - 5),
+                withAttributes: [.font: UIFont.systemFont(ofSize: 7), .foregroundColor: UIColor.gray]
+            )
+        }
+
+        let maxMinutes = max(curve.points.map(\.minutes).max() ?? 0, 30)
+        func point(_ p: ReportCurve.Point) -> CGPoint {
+            CGPoint(x: plot.minX + plot.width * p.minutes / maxMinutes, y: plot.maxY - plot.height * min(max(p.pain, 0), 10) / 10)
+        }
+        let color = UIColor(red: 0.36, green: 0.31, blue: 0.85, alpha: 1)
+        cg.setStrokeColor(color.cgColor)
+        cg.setFillColor(color.cgColor)
+        cg.setLineWidth(1.5)
+        if let first = curve.points.first {
+            cg.move(to: point(first))
+            for p in curve.points.dropFirst() { cg.addLine(to: point(p)) }
+            cg.strokePath()
+        }
+        for p in curve.points {
+            let c = point(p)
+            cg.fillEllipse(in: CGRect(x: c.x - 2, y: c.y - 2, width: 4, height: 4))
+        }
+        let label = MigraineDates.durationString(maxMinutes * 60)
+        (label as NSString).draw(
+            at: CGPoint(x: plot.maxX - 30, y: plot.maxY + 2),
+            withAttributes: [.font: UIFont.systemFont(ofSize: 7), .foregroundColor: UIColor.gray]
+        )
     }
 }
 #endif

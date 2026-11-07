@@ -24,6 +24,7 @@ public enum MygraStore {
         HealthData.self,
         MigraineTag.self,
         IntensitySample.self,
+        MedicationDose.self,
     ])
 
     public static func makeContainer(inMemory: Bool = false) -> ModelContainer {

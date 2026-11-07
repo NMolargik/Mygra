@@ -135,6 +135,24 @@ public final class DefaultMigraineRepository: MigraineRepository {
         changeCenter?.notify(.migraineUpdated(migraine.id))
     }
 
+    @discardableResult
+    public func addMedication(to migraine: Migraine, name: String, medicationClass: MedicationClass, dose: String, takenAt: Date) throws(PersistenceError) -> MedicationDose {
+        let entry = MedicationDose(name: name, medicationClass: medicationClass, dose: dose, takenAt: takenAt, migraine: migraine)
+        context.insert(entry)
+        if migraine.medications == nil { migraine.medications = [] }
+        migraine.medications?.append(entry)
+        try save(operation: "add medication")
+        changeCenter?.notify(.migraineUpdated(migraine.id))
+        return entry
+    }
+
+    public func removeMedication(_ dose: MedicationDose, from migraine: Migraine) throws(PersistenceError) {
+        migraine.medications?.removeAll { $0.id == dose.id }
+        context.delete(dose)
+        try save(operation: "remove medication")
+        changeCenter?.notify(.migraineUpdated(migraine.id))
+    }
+
     // MARK: - Saving
 
     private func save(operation: String) throws(PersistenceError) {

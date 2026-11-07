@@ -38,6 +38,9 @@ public final class SessionController {
     public let intelligence: IntelligenceService
     public let statusSync: MigraineStatusSync
     public let weatherRiskNotifier: WeatherRiskNotifier
+    public let medicationNotifier: MedicationOveruseNotifier
+    /// Latest MIDAS / HIT-6 answers (standard defaults).
+    public let assessmentStore: ClinicalAssessmentStore
     public let subscription: SubscriptionManager
     public let paywall = PaywallPresenter()
 
@@ -75,6 +78,7 @@ public final class SessionController {
     @ObservationIgnored private let activityAnnotator: (any MigraineActivityAnnotating)?
     @ObservationIgnored private let sharedDefaults: (any KeyValueStoring)?
     @ObservationIgnored private var indexObservationTask: Task<Void, Never>?
+    @ObservationIgnored private var medicationObservationTask: Task<Void, Never>?
     @ObservationIgnored private var pendingIndexTask: Task<Void, Never>?
     @ObservationIgnored private let indexDebounce: Duration
     @ObservationIgnored private var lastIndexFingerprint: [String]?
@@ -161,6 +165,8 @@ public final class SessionController {
             deleteAll: DeleteAllMigrainesUseCase(repository: migraineRepository),
             recordIntensitySample: recordSample,
             removeIntensitySample: RemoveIntensitySampleUseCase(repository: migraineRepository),
+            logMedication: LogMedicationUseCase(repository: migraineRepository),
+            removeMedication: RemoveMedicationUseCase(repository: migraineRepository),
             observeChanges: observeChanges,
             reviewRequester: reviewRequester,
             defaults: defaults,
@@ -209,6 +215,8 @@ public final class SessionController {
         let notifications = NotificationManager()
         notificationManager = notifications
         weatherRiskNotifier = WeatherRiskNotifier(weather: weather, notifications: notifications, entitlement: subscription)
+        medicationNotifier = MedicationOveruseNotifier(notifications: notifications, defaults: defaults)
+        assessmentStore = ClinicalAssessmentStore(defaults: defaults)
 
         #if canImport(WatchConnectivity)
         let phone = PhoneConnectivityManager()
@@ -247,6 +255,7 @@ public final class SessionController {
 
     deinit {
         indexObservationTask?.cancel()
+        medicationObservationTask?.cancel()
         pendingIndexTask?.cancel()
     }
 
@@ -264,6 +273,27 @@ public final class SessionController {
         #endif
         reindexMigraines()
         consumePendingDeepLinkFromIntents()
+        startMedicationObservation()
+    }
+
+    /// Re-checks medication-overuse levels at launch and after every store change. The
+    /// notifier's ledger makes each crossing alert only once.
+    private func startMedicationObservation() {
+        guard medicationObservationTask == nil else { return }
+        medicationObservationTask = Task { [weak self] in
+            await self?.checkMedicationOveruse()
+            guard let stream = self?.observeMigraineChanges() else { return }
+            for await _ in stream {
+                guard let self else { return }
+                await self.checkMedicationOveruse()
+            }
+        }
+    }
+
+    /// One overuse evaluation over the stored migraines.
+    public func checkMedicationOveruse() async {
+        guard let migraines = try? loadMigraines() else { return }
+        await medicationNotifier.checkAndNotify(migraines: migraines)
     }
 
     /// Runs one weather-risk check (background task or foreground timer). A no-op

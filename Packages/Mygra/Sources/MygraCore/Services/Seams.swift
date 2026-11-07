@@ -137,6 +137,15 @@ public final class FixedEntitlement: EntitlementProviding {
 public protocol LocalNotifying: AnyObject {
     var isAuthorized: Bool { get async }
     func send(title: String, body: String, identifier: String) async throws
+    /// Delivers with the Time Sensitive interruption level (breaks through scheduled
+    /// summaries and most Focus modes). Implementations without it fall back to `send`.
+    func sendTimeSensitive(title: String, body: String, identifier: String) async throws
+}
+
+extension LocalNotifying {
+    public func sendTimeSensitive(title: String, body: String, identifier: String) async throws {
+        try await send(title: title, body: body, identifier: identifier)
+    }
 }
 
 // MARK: - Weather

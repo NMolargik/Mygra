@@ -169,6 +169,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "% of attacks" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "% de crisis"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "% des crises"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作の割合"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "%.0f%% of migraines included %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -404,6 +428,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ 時間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%@ · %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ · %2$@"
           }
         }
       },
@@ -961,6 +1009,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "%lld months" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld meses"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lldか月"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "%lld out of 10" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1159,6 +1231,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "%lld+ days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld+ días"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld+ jours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld日以上"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "%lldd" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1327,6 +1423,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "1 month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1か月"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "10" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1346,6 +1466,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "10"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "A clinical summary with headache days, medication use, questionnaire scores, and every attack." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un resumen clínico con días de cefalea, uso de medicación, puntuaciones de cuestionarios y cada crisis."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un résumé clinique avec les jours de céphalée, l’utilisation de médicaments, les scores des questionnaires et chaque crise."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛日、薬の使用状況、質問票のスコア、すべての発作をまとめた臨床サマリーです。"
           }
         }
       },
@@ -1394,6 +1538,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "いくつかの情報があれば、Mygra はインサイトをパーソナライズしパターンを見つけられます。すべてデバイス上または iCloud に暗号化して保存され、いつでも変更できます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "A headache day is any calendar day touched by an attack. A migraine day is a headache day with an attack that peaked at pain 4 or higher or lasted 4 hours or more." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un día de cefalea es cualquier día del calendario afectado por una crisis. Un día de migraña es un día de cefalea con una crisis cuyo dolor máximo fue de 4 o más, o que duró 4 horas o más."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un jour de céphalée est tout jour du calendrier touché par une crise. Un jour de migraine est un jour de céphalée avec une crise dont la douleur a atteint 4 ou plus, ou qui a duré 4 heures ou plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛日とは、発作にかかった暦日のことです。片頭痛日は、痛みが最大4以上、または4時間以上続いた発作がある頭痛日です。"
           }
         }
       },
@@ -1591,6 +1759,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Acetaminophen-aspirin-caffeine, butalbital combinations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paracetamol-aspirina-cafeína, combinaciones con butalbital"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Acétaminophène-aspirine-caféine, associations au butalbital"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アセトアミノフェン・アスピリン・カフェイン配合薬、ブタルビタール配合薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Active" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1658,6 +1850,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "活動時心拍数：%lld bpm"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Acute Medication Days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días de medicación aguda"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours de médicaments de crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頓服薬の使用日数"
           }
         }
       },
@@ -1850,6 +2066,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "摂取量を追加"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Add Medication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Añadir medicación"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter un médicament"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬を追加"
           }
         }
       },
@@ -2407,6 +2647,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Always" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siempre"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toujours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いつも"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "American Migraine Foundation: medication-overuse headache" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "American Migraine Foundation: cefalea por abuso de medicación"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "American Migraine Foundation : céphalée par abus de médicaments"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "American Migraine Foundation：薬剤の使用過多による頭痛"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "An ongoing migraine shows on your Lock Screen and Dynamic Island." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2455,6 +2743,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Answer" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Respuesta"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réponse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "回答"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Anxiety / depression" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2474,6 +2786,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "不安・抑うつ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Anything else you take for an attack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cualquier otra cosa que tomes durante una crisis"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout autre médicament pris pendant une crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作時に服用するその他のもの"
           }
         }
       },
@@ -2623,6 +2959,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Approaching the medication-overuse limit: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca del límite de abuso de medicación: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proche de la limite d’abus de médicaments : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬剤の使いすぎの上限に近づいています：%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Are you sure?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2690,6 +3050,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アシスタントが入力中"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attack Detail (%lld)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalle de las crisis (%lld)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détail des crises (%lld)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作の詳細（%lld）"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attacks" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crisis"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crises"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attacks: %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crisis: %lld"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crises : %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作：%lld"
           }
         }
       },
@@ -2810,6 +3242,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "28°C 以上での平均の痛み：%.1f。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Average peak pain: %.1f / 10" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolor máximo promedio: %.1f / 10"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douleur maximale moyenne : %.1f / 10"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "平均最大痛み：%.1f / 10"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Average per 30 days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Promedio por 30 días"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moyenne par 30 jours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30日あたりの平均"
           }
         }
       },
@@ -4039,6 +4519,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Class" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clase"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Classe"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分類"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Clear" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4111,6 +4615,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Clinical Report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informe clínico"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapport clinique"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "臨床レポート"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Close" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4154,6 +4682,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "曇り"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Codeine, tramadol" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codeína, tramadol"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Codéine, tramadol"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "コデイン、トラマドール"
           }
         }
       },
@@ -4250,6 +4802,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カラー"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Combination analgesic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analgésico combinado"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analgésique combiné"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配合鎮痛薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Common medications" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medicamentos comunes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Médicaments courants"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "よく使われる薬"
           }
         }
       },
@@ -4615,6 +5215,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Create PDF" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crear PDF"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer le PDF"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "PDFを作成"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Create Tags" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4875,6 +5499,30 @@
           }
         }
       }
+    },
+    "Days with at least one dose. Limits: ergots, triptans, opioids, and combination analgesics 10 or more days a month; simple analgesics 15 or more. ⚠ marks a month or the last 30 days at or past the limit." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días con al menos una dosis. Límites: ergotamínicos, triptanes, opioides y analgésicos combinados, 10 o más días al mes; analgésicos simples, 15 o más. ⚠ marca un mes o los últimos 30 días en el límite o por encima."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours avec au moins une dose. Limites : ergots, triptans, opioïdes et analgésiques combinés, 10 jours ou plus par mois; analgésiques simples, 15 jours ou plus. ⚠ indique un mois ou les 30 derniers jours à la limite ou au-delà."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1回以上服用した日数です。基準：エルゴタミン、トリプタン、オピオイド、配合鎮痛薬は月10日以上、単純鎮痛薬は月15日以上。⚠は、基準に達した、または超えた月（または直近30日）を示します。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Day–Month–Year Dates" : {
       "extractionState" : "manual",
@@ -5164,6 +5812,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Détails"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "詳細"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Developer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5308,6 +5980,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Dihydroergotamine, ergotamine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dihidroergotamina, ergotamina"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dihydroergotamine, ergotamine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ジヒドロエルゴタミン、エルゴタミン"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Dismiss" : {
       "comment" : "A button that dismisses a toast.",
       "extractionState" : "manual",
@@ -5377,6 +6073,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "完了"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Dose (optional)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dosis (opcional)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dose (facultatif)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用量（任意）"
           }
         }
       },
@@ -5473,6 +6193,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "継続時間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Duration %@, peak pain %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Duración %@, dolor máximo %lld"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée %@, douleur maximale %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "継続時間 %@、最大の痛み %lld"
           }
         }
       },
@@ -6075,6 +6819,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Ergot" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergotamínico"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ergot"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エルゴタミン"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Error: %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6118,6 +6886,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "片頭痛ごとに 1 行、健康と天候の列を含むスプレッドシートです。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Everything here is optional. Leave details off to share an anonymous report." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo esto es opcional. Deja los datos desactivados para compartir un informe anónimo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout ceci est facultatif. Désactivez les renseignements pour partager un rapport anonyme."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "すべて任意です。オフにすると匿名のレポートを共有できます。"
           }
         }
       },
@@ -7179,6 +7971,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Generated from patient-entered data in Mygra. This report is informational, is not a diagnosis, and is not medical advice. Questionnaire scores are screening aids. Medication-overuse thresholds follow ICHD-3." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Generado a partir de datos introducidos por el paciente en Mygra. Este informe es informativo, no es un diagnóstico ni consejo médico. Las puntuaciones de los cuestionarios son herramientas de cribado. Los umbrales de abuso de medicación siguen la ICHD-3."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Généré à partir des données saisies par le patient dans Mygra. Ce rapport est fourni à titre informatif; il ne constitue ni un diagnostic ni un avis médical. Les scores des questionnaires sont des outils de dépistage. Les seuils d’abus de médicaments suivent la CIM des céphalées (ICHD-3)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra に患者が入力したデータから作成されています。このレポートは情報提供を目的としたもので、診断や医学的助言ではありません。質問票のスコアはスクリーニングの補助です。薬剤の使用過多の基準は ICHD-3 に準拠しています。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Generating explanation…" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7222,6 +8038,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "インサイトを生成中…"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Gepant" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gepante"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gépant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲパント"
           }
         }
       },
@@ -7467,6 +8307,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Grade %@: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grado %@: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niveau %@ : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "グレード%@：%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Graphics" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7510,6 +8374,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "グラフィックデザイナー：Rahul Parmar、LinkedIn プロフィールを開きます"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "HIT-6" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "HIT-6: %lld of 78, %@%@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6: %lld de 78, %@%@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6 : %lld sur 78, %@%@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6：78点中%lld点、%@%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "HIT-6: not completed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6: sin completar"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6 : non rempli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "HIT-6：未回答"
           }
         }
       },
@@ -7606,6 +8542,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "頭痛の記録"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Headache and Migraine Days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días de cefalea y migraña"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours de céphalée et de migraine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛日・片頭痛日"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Headache days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días de cefalea"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours de céphalée"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛日"
           }
         }
       },
@@ -7798,6 +8782,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "このデバイスではヘルスデータを利用できません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Health profile (sex, height, weight, sleep, conditions)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Perfil de salud (sexo, estatura, peso, sueño, afecciones)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil de santé (sexe, taille, poids, sommeil, affections)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "健康プロフィール（性別、身長、体重、睡眠、持病）"
           }
         }
       },
@@ -8355,6 +9363,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "How often do headaches limit your ability to do usual daily activities, including household work, work, school, or social activities?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Con qué frecuencia los dolores de cabeza limitan tu capacidad para realizar tus actividades habituales, como tareas del hogar, trabajo, escuela o vida social?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À quelle fréquence vos maux de tête limitent-ils vos activités habituelles, notamment les tâches ménagères, le travail, l’école ou les activités sociales ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛のために、家事、仕事、学校、社会活動などの日常活動が制限されることはどのくらいありますか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "How stressed are you feeling?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8475,6 +9507,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Ibuprofen, naproxen, acetaminophen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ibuprofeno, naproxeno, paracetamol"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ibuprofène, naproxène, acétaminophène"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "イブプロフェン、ナプロキセン、アセトアミノフェン"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Immediately starts tracking an ongoing migraine without opening the app." : {
       "localizations" : {
         "es" : {
@@ -8496,6 +9552,78 @@
           }
         }
       }
+    },
+    "In the last 4 weeks, how often did headaches limit your ability to concentrate on work or daily activities?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En las últimas 4 semanas, ¿con qué frecuencia los dolores de cabeza limitaron tu capacidad para concentrarte en el trabajo o las actividades diarias?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 4 dernières semaines, à quelle fréquence vos maux de tête ont-ils limité votre concentration au travail ou dans vos activités quotidiennes ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去4週間に、頭痛のために仕事や日常活動に集中しづらいことはどのくらいありましたか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "In the last 4 weeks, how often have you felt fed up or irritated because of your headaches?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En las últimas 4 semanas, ¿con qué frecuencia te sentiste harto/a o irritable por tus dolores de cabeza?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 4 dernières semaines, à quelle fréquence vous êtes-vous senti(e) exaspéré(e) ou irrité(e) à cause de vos maux de tête ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去4週間に、頭痛のためにうんざりしたり、いらいらしたりしたことはどのくらいありましたか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "In the last 4 weeks, how often have you felt too tired to do work or daily activities because of your headaches?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En las últimas 4 semanas, ¿con qué frecuencia te sentiste demasiado cansado/a para trabajar o hacer tus actividades diarias por tus dolores de cabeza?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 4 dernières semaines, à quelle fréquence vous êtes-vous senti(e) trop fatigué(e) pour travailler ou faire vos activités quotidiennes à cause de vos maux de tête ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去4週間に、頭痛のために疲れすぎて仕事や日常活動ができないと感じたことはどのくらいありましたか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Indoor mold / dampness" : {
       "extractionState" : "manual",
@@ -8805,6 +9933,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Last 30 d" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Últ. 30 d"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "30 derniers j"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近30日"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Last migraine today" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8973,6 +10125,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Limit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Límite"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Limite"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "基準"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "List foods eaten around this time (comma or newline separated)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8992,6 +10168,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "その前後に食べたものを記入（カンマまたは改行区切り）"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Little or no impact" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Poco o ningún impacto"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peu ou pas d’impact"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "影響はほとんどない、またはなし"
           }
         }
       },
@@ -9763,6 +10963,102 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "MIDAS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "MIDAS measures lost days over 3 months; HIT-6 measures the impact of headaches over 4 weeks. Both are screening aids, not a diagnosis. Completed answers are printed in the report." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS mide los días perdidos en 3 meses; HIT-6 mide el impacto de los dolores de cabeza en 4 semanas. Ambos son herramientas de cribado, no un diagnóstico. Las respuestas completadas se imprimen en el informe."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le MIDAS mesure les jours perdus sur 3 mois; le HIT-6 mesure l’impact des maux de tête sur 4 semaines. Ce sont des outils de dépistage, pas un diagnostic. Les réponses remplies figurent dans le rapport."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS は3か月間の損失日数を、HIT-6 は4週間の頭痛の影響を測ります。どちらもスクリーニングの補助であり、診断ではありません。回答済みの内容はレポートに記載されます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "MIDAS: %lld days lost, %@%@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS: %lld días perdidos, %@%@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS : %lld jours perdus, %@%@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS：損失日数%lld日、%@%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "MIDAS: not completed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS: sin completar"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS : non rempli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "MIDAS：未回答"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "MSG" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9927,6 +11223,78 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Medication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medicación"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Médicament"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Medication Use" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uso de medicación"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utilisation de médicaments"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬の使用状況"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Medication name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del medicamento"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom du médicament"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬の名前"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Medication overuse" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9951,6 +11319,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Medication-overuse threshold reached: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umbral de abuso de medicación alcanzado: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seuil d’abus de médicaments atteint : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬剤の使いすぎの基準に達しました：%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Medications" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9970,6 +11362,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Medications recorded: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medicamentos registrados: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Médicaments enregistrés : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録された薬：%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Medications: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Medicamentos: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Médicaments : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "薬：%@"
           }
         }
       },
@@ -10210,6 +11650,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "片頭痛の状態"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Migraine days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Días de migraña"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours de migraine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛日"
           }
         }
       },
@@ -10549,6 +12013,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Monthly" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10741,6 +12229,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Mygra Clinical Report" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informe clínico de Mygra"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rapport clinique Mygra"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra 臨床レポート"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Mygra Export" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -10878,6 +12390,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mygra アプリのロゴ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Mygra counts the days you take each class so it can warn you before regular use reaches the levels linked to medication-overuse headache. This is general information, not medical advice." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra cuenta los días que tomas cada clase para avisarte antes de que el uso habitual alcance los niveles asociados con la cefalea por abuso de medicación. Esta es información general, no consejo médico."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra compte les jours où vous prenez chaque classe afin de vous avertir avant qu’un usage régulier n’atteigne les niveaux associés à la céphalée par abus de médicaments. Il s’agit d’information générale, pas d’un avis médical."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra は分類ごとの服用日数を数え、定期的な使用が薬剤の使用過多による頭痛と関連するレベルに達する前にお知らせします。これは一般的な情報であり、医学的助言ではありません。"
           }
         }
       },
@@ -11022,6 +12558,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ネットワークに問題があります。接続を確認してもう一度お試しください。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Never" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nunca"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jamais"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全くない"
           }
         }
       },
@@ -11267,6 +12827,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "No acute medication recorded in this period." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay medicación aguda registrada en este periodo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun médicament de crise enregistré pendant cette période."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この期間に記録された頓服薬はありません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "No health data was captured with this migraine." : {
       "comment" : "A description of a message that appears when a migraine has no health data.",
       "extractionState" : "manual",
@@ -11485,6 +13069,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "No migraines recorded in this period." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No hay migrañas registradas en este periodo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune migraine enregistrée pendant cette période."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "この期間に記録された片頭痛はありません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "No migraines recorded on %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11624,6 +13232,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "誘因が選択されていません"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Not completed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin completar"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non rempli"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "未回答"
           }
         }
       },
@@ -12133,6 +13765,126 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "On how many days in the last 3 months did you miss family, social, or leisure activities because of your headaches?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuántos días de los últimos 3 meses te perdiste actividades familiares, sociales o de ocio por tus dolores de cabeza?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 3 derniers mois, pendant combien de jours avez-vous manqué des activités familiales, sociales ou de loisirs à cause de vos maux de tête ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去3か月のうち、頭痛のために家族・社会・余暇の活動に参加できなかった日は何日ありましたか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "On how many days in the last 3 months did you miss work or school because of your headaches?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuántos días de los últimos 3 meses faltaste al trabajo o a la escuela por tus dolores de cabeza?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 3 derniers mois, pendant combien de jours avez-vous manqué le travail ou l’école à cause de vos maux de tête ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去3か月のうち、頭痛のために仕事や学校を休んだ日は何日ありましたか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "On how many days in the last 3 months did you not do household work because of your headaches?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuántos días de los últimos 3 meses no hiciste las tareas del hogar por tus dolores de cabeza?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 3 derniers mois, pendant combien de jours n’avez-vous pas fait les tâches ménagères à cause de vos maux de tête ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去3か月のうち、頭痛のために家事ができなかった日は何日ありましたか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "On how many days in the last 3 months was your productivity at work or school cut by half or more because of your headaches? (Don't count days you already counted above.)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuántos días de los últimos 3 meses tu rendimiento en el trabajo o la escuela se redujo a la mitad o más por tus dolores de cabeza? (No cuentes los días ya contados arriba.)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 3 derniers mois, pendant combien de jours votre productivité au travail ou à l’école a-t-elle été réduite de moitié ou plus à cause de vos maux de tête ? (Ne comptez pas les jours déjà comptés ci-dessus.)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去3か月のうち、頭痛のために仕事や学校での能率が半分以下に下がった日は何日ありましたか？（上で数えた日は除く）"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "On how many days in the last 3 months was your productivity in household work cut by half or more because of your headaches? (Don't count days you already counted above.)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Cuántos días de los últimos 3 meses tu rendimiento en las tareas del hogar se redujo a la mitad o más por tus dolores de cabeza? (No cuentes los días ya contados arriba.)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au cours des 3 derniers mois, pendant combien de jours votre productivité dans les tâches ménagères a-t-elle été réduite de moitié ou plus à cause de vos maux de tête ? (Ne comptez pas les jours déjà comptés ci-dessus.)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去3か月のうち、頭痛のために家事の能率が半分以下に下がった日は何日ありましたか？（上で数えた日は除く）"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "On-Device Storage" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12551,6 +14303,30 @@
         }
       }
     },
+    "Opens in your browser" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se abre en tu navegador"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S’ouvre dans votre navigateur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ブラウザで開きます"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Opens intake editor to log water, caffeine, food, or sleep" : {
       "comment" : "A hint for the user to add data to their health.",
       "extractionState" : "manual",
@@ -12620,6 +14396,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "アクセスを許可できる「設定」アプリを開きます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Opioid" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opioide"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Opioïde"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オピオイド"
           }
         }
       },
@@ -13105,6 +14905,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Patient" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paciente"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Patient"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "患者"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Patient Details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Datos del paciente"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renseignements sur le patient"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "患者情報"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Peak pain occurs early" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13148,6 +14996,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "痛みのピークは後半"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Period" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Periodo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "期間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Period: %@ (%lld %@)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Periodo: %@ (%lld %@)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période : %@ (%lld %@)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "期間：%@（%lld %@）"
           }
         }
       },
@@ -13897,6 +15793,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Questionnaires" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuestionarios"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Questionnaires"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "質問票"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Quick Add" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14084,6 +16004,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "期間：%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Rarely" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rara vez"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rarement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まれに"
           }
         }
       },
@@ -14281,6 +16225,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Remove %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を削除"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Report Period" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Periodo del informe"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période du rapport"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "レポート期間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Requires an internet connection to delete your iCloud data." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14425,6 +16417,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Result" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Resultado"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résultat"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "結果"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Returns to the previous step." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14540,6 +16556,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "所により雷雨"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Score %lld of 78: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puntuación %lld de 78: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score %lld sur 78 : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スコア：78点中%lld点、%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Score %lld: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Puntuación %lld: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Score %lld : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スコア%lld：%@"
           }
         }
       },
@@ -14833,6 +16897,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Sets up a clinical PDF report you can save or share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configura un informe clínico en PDF que puedes guardar o compartir"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Configure un rapport clinique PDF que vous pouvez enregistrer ou partager"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "保存や共有ができる臨床PDFレポートを設定します"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Settings" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14852,6 +16940,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Severe impact" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impacto grave"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impact grave"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重度の影響あり"
           }
         }
       },
@@ -15169,6 +17281,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Simple analgesic" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analgésico simple"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Analgésique simple"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単純鎮痛薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Skip" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15476,6 +17612,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "雪"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Some impact" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cierto impacto"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impact modéré"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "いくらか影響あり"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Sometimes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A veces"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parfois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時々"
           }
         }
       },
@@ -16223,6 +18407,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Substantial impact" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impacto considerable"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impact important"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "かなりの影響あり"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Sumatriptan, rizatriptan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumatriptán, rizatriptán"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sumatriptan, rizatriptan"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スマトリプタン、リザトリプタン"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Sun Flurries" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16441,6 +18673,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Tag" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etiqueta"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étiquette"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Tag Frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frecuencia de etiquetas"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence des étiquettes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タグの頻度"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Tag Preview" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16580,6 +18860,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "生データをどこへでも持ち出せます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Taken at" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomado a las"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pris à"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服用時刻"
           }
         }
       },
@@ -17257,6 +19561,78 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Total" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Total"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "合計"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Trigger" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Desencadenante"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déclencheur"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誘因"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Trigger Frequency" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frecuencia de desencadenantes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fréquence des déclencheurs"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "誘因の頻度"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Triggers" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17353,6 +19729,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Triptan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Triptán"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Triptan"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トリプタン"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Tropical Storm" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17444,6 +19844,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "普段の摂取量"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Ubrogepant, rimegepant" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ubrogepant, rimegepant"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ubrogépant, rimégépant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ウブロゲパント、リメゲパント"
           }
         }
       },
@@ -17948,6 +20372,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "片頭痛の日は血中酸素飽和度がかなり低め"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Very often" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muy a menudo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Très souvent"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非常によくある"
           }
         }
       },
@@ -18673,6 +21121,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "When you have a headache, how often do you wish you could lie down?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando tienes dolor de cabeza, ¿con qué frecuencia desearías poder acostarte?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lorsque vous avez un mal de tête, à quelle fréquence aimeriez-vous pouvoir vous allonger ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛があるとき、横になりたいと思うことはどのくらいありますか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "When you have headaches, how often is the pain severe?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando tienes dolor de cabeza, ¿con qué frecuencia es intenso?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lorsque vous avez des maux de tête, à quelle fréquence la douleur est-elle intense ?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頭痛があるとき、痛みが強いことはどのくらいありますか？"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Windy" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18974,6 +21470,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "オフラインです。再接続すると変更は自動的に同期されます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "You've used %@ on %lld of the last 30 days, close to the %lld-day mark linked to medication-overuse headache. This is general information, not medical advice." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has usado %@ en %lld de los últimos 30 días, cerca de la marca de %lld días asociada con la cefalea por abuso de medicación. Esta es información general, no consejo médico."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez pris %@ pendant %lld des 30 derniers jours, près du seuil de %lld jours associé à la céphalée par abus de médicaments. Il s’agit d’information générale, pas d’un avis médical."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去30日のうち%2$lld日で%1$@を使用しました。薬剤の使用過多による頭痛との関連が指摘される%3$lld日に近づいています。これは一般的な情報であり、医学的助言ではありません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "You've used %@ on %lld of the last 30 days. Using them on %lld or more days a month is linked to medication-overuse headache. This is general information, not medical advice. Please talk with your clinician." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Has usado %@ en %lld de los últimos 30 días. Usarlos %lld o más días al mes se asocia con la cefalea por abuso de medicación. Esta es información general, no consejo médico. Habla con tu profesional de salud."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez pris %@ pendant %lld des 30 derniers jours. Les utiliser %lld jours ou plus par mois est associé à la céphalée par abus de médicaments. Il s’agit d’information générale, pas d’un avis médical. Parlez-en à votre professionnel de la santé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去30日のうち%2$lld日で%1$@を使用しました。月に%3$lld日以上使用すると、薬剤の使用過多による頭痛との関連が指摘されています。これは一般的な情報であり、医学的助言ではありません。医療従事者にご相談ください。"
           }
         }
       },
@@ -19289,6 +21833,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "acute medication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "medicación aguda"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "médicament de crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頓服薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "acute medications" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "medicamentos agudos"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "médicaments de crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "頓服薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "at start" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19361,6 +21953,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "combination analgesics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "analgésicos combinados"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "analgésiques combinés"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "配合鎮痛薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "day migraine-free" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19428,6 +22044,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "減少"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "ergots" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ergotamínicos"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ergots"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "エルゴタミン"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "gepants" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gepantes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "gépants"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ゲパント"
           }
         }
       },
@@ -19577,6 +22241,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "little or no disability" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "poca o ninguna discapacidad"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "peu ou pas d’incapacité"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "障害はほとんどない、またはなし"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "longer" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19625,6 +22313,174 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "mild disability" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "discapacidad leve"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "incapacité légère"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軽度の障害"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "moderate disability" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "discapacidad moderada"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "incapacité modérée"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中等度の障害"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "month" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "か月"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "months" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "meses"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "mois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "か月"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "opioids" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opioides"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "opioïdes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "オピオイド"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "other medications" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "otros medicamentos"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "autres médicaments"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "その他の薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "severe disability" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "discapacidad grave"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "incapacité grave"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重度の障害"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "shorter" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19649,6 +22505,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "simple analgesics" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "analgésicos simples"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "analgésiques simples"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "単純鎮痛薬"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "sleep" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19668,6 +22548,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "睡眠"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "triptans" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "triptanes"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "triptans"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "トリプタン"
           }
         }
       },

@@ -41,6 +41,7 @@ public struct DashboardView: View {
                 if isRegularWidth {
                     HStack(alignment: .top, spacing: Brand.Space.lg) {
                         VStack(spacing: Brand.Space.lg) {
+                            MedicationOveruseCard()
                             weatherCard
                             assistantCard
                             todayCard
@@ -50,6 +51,7 @@ public struct DashboardView: View {
                         }
                     }
                 } else {
+                    MedicationOveruseCard()
                     weatherCard
                     assistantCard
                     todayCard

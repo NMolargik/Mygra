@@ -33,6 +33,7 @@ public struct MigraineDetailView: View {
     @State private var showDeleteConfirm = false
     @State private var showingModifySheet = false
     @State private var showingIntensitySheet = false
+    @State private var showingMedicationSheet = false
     @State private var showPastWeatherAlert = false
 
     public init(migraine: Migraine, onClose: (() -> Void)? = nil) {
@@ -56,6 +57,8 @@ public struct MigraineDetailView: View {
                     samples: migraine.intensitySamples ?? [],
                     onUpdateIntensity: migraine.isOngoing ? { showingIntensitySheet = true } : nil
                 )
+
+                MedicationSectionView(migraine: migraine) { showingMedicationSheet = true }
 
                 InsightSectionView(migraine: migraine)
 
@@ -84,6 +87,13 @@ public struct MigraineDetailView: View {
         .sheet(isPresented: $showingIntensitySheet) {
             IntensityUpdateSheet(migraine: migraine) { pain, stress, note in
                 migraineData.addIntensitySample(to: migraine, painLevel: pain, stressLevel: stress, note: note)
+            }
+            .presentationDetents([.large])
+            .presentationSizing(.form)
+        }
+        .sheet(isPresented: $showingMedicationSheet) {
+            MedicationQuickAddSheet(migraine: migraine) { name, medicationClass, dose, takenAt in
+                migraineData.logMedication(for: migraine, name: name, medicationClass: medicationClass, dose: dose, takenAt: takenAt)
             }
             .presentationDetents([.large])
             .presentationSizing(.form)

@@ -15,6 +15,43 @@ nonisolated public enum ReportBlock: Equatable, Sendable {
     case body(String)
     case spacer(CGFloat)
     case divider
+    case table(ReportTable)
+    case curve(ReportCurve)
+}
+
+/// A simple grid: header row plus rows; `highlightedRows` are drawn emphasized (thresholds).
+nonisolated public struct ReportTable: Equatable, Sendable {
+    public var columns: [String]
+    public var rows: [[String]]
+    public var highlightedRows: Set<Int>
+
+    public init(columns: [String], rows: [[String]], highlightedRows: Set<Int> = []) {
+        self.columns = columns
+        self.rows = rows
+        self.highlightedRows = highlightedRows
+    }
+}
+
+/// One attack's pain over time (x = minutes since onset, y = pain 0...10).
+nonisolated public struct ReportCurve: Equatable, Sendable {
+    public struct Point: Equatable, Sendable {
+        public let minutes: Double
+        public let pain: Double
+        public init(minutes: Double, pain: Double) {
+            self.minutes = minutes
+            self.pain = pain
+        }
+    }
+
+    public var title: String
+    public var subtitle: String
+    public var points: [Point]
+
+    public init(title: String, subtitle: String, points: [Point]) {
+        self.title = title
+        self.subtitle = subtitle
+        self.points = points
+    }
 }
 
 public enum MigraineReport {
@@ -99,6 +136,10 @@ public enum MigraineReport {
         lines.append(String(localized: "Pain: \(migraine.painLevel)"))
         lines.append(String(localized: "Stress: \(migraine.stressLevel)"))
 
+        if !migraine.sortedMedications.isEmpty {
+            let doses = migraine.sortedMedications.map { "\($0.summary) (\($0.medicationClass.displayName), \(DateFormatting.time($0.takenAt)))" }
+            lines.append(String(localized: "Medications: \(doses.joined(separator: "; "))"))
+        }
         if !migraine.triggers.isEmpty {
             lines.append(String(localized: "Triggers: \(migraine.triggers.map(\.displayName).joined(separator: ", "))"))
         }
@@ -197,7 +238,7 @@ extension MigraineReport {
     /// meant for spreadsheets and other tools, not for reading in the app.
     public static let csvHeaders: [String] = [
         "Start", "End", "Ongoing", "Duration (minutes)", "Pain (0-10)", "Stress (0-10)", "Severity", "Pinned",
-        "Triggers", "Custom Triggers", "Foods", "Tags", "Note",
+        "Triggers", "Custom Triggers", "Foods", "Tags", "Medications", "Note",
         "Weather Condition", "Temperature", "Humidity (%)", "Pressure", "Weather Location",
         "Water", "Sleep (h)", "Food (kcal)", "Caffeine (mg)", "Steps", "Resting HR (bpm)", "Active HR (bpm)",
         "Glucose", "Blood Oxygen (%)", "Menstrual Phase", "Insight",
@@ -241,6 +282,7 @@ extension MigraineReport {
             migraine.customTriggers.joined(separator: "; "),
             migraine.foodsEaten.joined(separator: "; "),
             (migraine.tags ?? []).map(\.name).sorted().joined(separator: "; "),
+            migraine.sortedMedications.map { "\($0.name)\($0.dose.isEmpty ? "" : " " + $0.dose) [\($0.medicationClass.rawValue)] @ \(formatter.string(from: $0.takenAt))" }.joined(separator: "; "),
             migraine.note ?? dash,
             weather?.condition.rawValue ?? dash,
             number(temperature),

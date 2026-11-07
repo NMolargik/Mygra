@@ -19,6 +19,16 @@ nonisolated public enum AppStorageKeys {
     public static let plusGrandfathered = "Plus.grandfathered"
     public static let plusEarlySupporterThanksShown = "Plus.earlySupporterThanksShown"
 
+    // MARK: - Clinical
+    /// JSON `[String: Int]` of the overuse level already notified per class.
+    public static let medicationAlertLevels = "Medication.alertLevels"
+    /// JSON `ClinicalAssessment` (latest MIDAS / HIT-6 answers).
+    public static let clinicalAssessment = "Clinical.assessment"
+    public static let reportWindowMonths = "Clinical.reportWindowMonths"
+    public static let reportIncludeName = "Clinical.reportIncludeName"
+    public static let reportIncludeBirthday = "Clinical.reportIncludeBirthday"
+    public static let reportIncludeHealthProfile = "Clinical.reportIncludeHealthProfile"
+
     // MARK: - Dashboard Stat Visibility
     public static let showWaterStat = "showWaterStat"
     public static let showSleepStat = "showSleepStat"
