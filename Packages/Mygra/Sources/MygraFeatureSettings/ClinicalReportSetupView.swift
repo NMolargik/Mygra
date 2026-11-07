@@ -123,7 +123,7 @@ private struct MIDASFormView: View {
             ForEach(Array(MIDAS.questions.enumerated()), id: \.offset) { index, question in
                 Section {
                     Stepper(value: $answers[index], in: 0...MIDAS.maxDaysPerQuestion) {
-                        Text("\(answers[index]) days")
+                        Text(answers[index] == 1 ? LocalizedStringKey("\(answers[index]) day") : LocalizedStringKey("\(answers[index]) days"))
                     }
                 } header: {
                     Text(question).textCase(nil).font(.subheadline).foregroundStyle(.primary)

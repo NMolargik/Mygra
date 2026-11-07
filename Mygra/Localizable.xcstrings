@@ -691,6 +691,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "%lld day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld día"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld jour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 日"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "%lld days" : {
       "extractionState" : "manual",
       "localizations" : {
