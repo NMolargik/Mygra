@@ -59,7 +59,7 @@ nonisolated public enum PDFReportRenderer {
                     ensureRoom(20)
                     drawDivider(atY: cursorY - 6)
                 case .table(let table):
-                    drawTable(table, cursorY: &cursorY, contentWidth: contentWidth, ensureRoom: ensureRoom)
+                    drawTable(table, contentWidth: contentWidth, cursorY: { cursorY }, advance: { cursorY += $0 }, ensureRoom: ensureRoom)
                 case .curve(let curve):
                     ensureRoom(curveHeight + 8)
                     drawCurve(curve, atY: cursorY, width: contentWidth)
@@ -107,7 +107,9 @@ nonisolated public enum PDFReportRenderer {
 
     // MARK: - Tables
 
-    private static func drawTable(_ table: ReportTable, cursorY: inout CGFloat, contentWidth: CGFloat, ensureRoom: (CGFloat) -> Void) {
+    /// The cursor is passed as closures (not `inout`) because `ensureRoom` also mutates it
+    /// when a row starts a new page; overlapping access to one variable traps at runtime.
+    private static func drawTable(_ table: ReportTable, contentWidth: CGFloat, cursorY: () -> CGFloat, advance: (CGFloat) -> Void, ensureRoom: (CGFloat) -> Void) {
         guard !table.columns.isEmpty else { return }
         // The first column (labels) is wider than the numeric columns.
         let count = table.columns.count
@@ -127,16 +129,16 @@ nonisolated public enum PDFReportRenderer {
             ensureRoom(rowHeight)
             if let background, let cg = UIGraphicsGetCurrentContext() {
                 cg.setFillColor(background.cgColor)
-                cg.fill(CGRect(x: margin, y: cursorY, width: contentWidth, height: rowHeight))
+                cg.fill(CGRect(x: margin, y: cursorY(), width: contentWidth, height: rowHeight))
             }
             for (index, text) in cells.enumerated() where index < count {
                 (text as NSString).draw(
-                    with: CGRect(x: columnX(index) + 3, y: cursorY + 3, width: columnWidth(index) - 6, height: rowHeight - 3),
+                    with: CGRect(x: columnX(index) + 3, y: cursorY() + 3, width: columnWidth(index) - 6, height: rowHeight - 3),
                     options: [.usesLineFragmentOrigin], attributes: [.font: font, .foregroundColor: color], context: nil
                 )
             }
-            cursorY += rowHeight
-            drawDivider(atY: cursorY)
+            advance(rowHeight)
+            drawDivider(atY: cursorY())
         }
 
         drawRow(table.columns, font: .systemFont(ofSize: 10, weight: .semibold), color: .black, background: UIColor(white: 0.93, alpha: 1))
@@ -149,7 +151,7 @@ nonisolated public enum PDFReportRenderer {
                 background: highlighted ? UIColor(red: 1, green: 0.95, blue: 0.9, alpha: 1) : nil
             )
         }
-        cursorY += 4
+        advance(4)
     }
 
     // MARK: - Curves
