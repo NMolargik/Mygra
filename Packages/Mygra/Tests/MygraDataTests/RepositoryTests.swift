@@ -176,11 +176,14 @@ struct RepositoryTests {
         try generator()
 
         let all = try h.migraines.migraines()
-        #expect(all.count == 13)
+        #expect(all.count == 17)
         #expect(try h.tags.tags().count == 6)
         #expect(all.filter(\.isOngoing).count == 1)
         #expect(all.allSatisfy { ($0.intensitySamples ?? []).count >= 3 })
         #expect(all.allSatisfy { $0.weather != nil && $0.health != nil })
+        let doses = MedicationOveruse.doses(in: all)
+        let triptan = MedicationOveruse.usage(of: doses).first { $0.medicationClass == .triptan }
+        #expect((triptan?.days ?? 0) >= 10)
     }
 }
 

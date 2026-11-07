@@ -37,10 +37,34 @@ public struct SampleMigraineData: GenerateSampleData {
         let createdTags = try createTags()
         for scenario in Self.scenarios {
             guard let migraine = makeMigraine(from: scenario, tags: createdTags) else { continue }
+            addSampleDoses(to: migraine, scenario: scenario)
             try migraines.insert(migraine)
             try seedIntensitySamples(for: migraine, pattern: scenario.intensityPattern)
         }
     }
+
+    // MARK: - Medications
+
+    /// Triptan doses on most attacks (11 distinct days in the last 30 crosses the 10-day
+    /// threshold) and ibuprofen on a subset (8 days, "approaching"), so the overuse card,
+    /// alert, and clinical report have something to show. Older attacks add history.
+    private func addSampleDoses(to migraine: Migraine, scenario: Scenario) {
+        let start = migraine.startDate
+        var doses: [MedicationDose] = []
+        if !Self.noTriptanDays.contains(scenario.daysAgo) {
+            doses.append(MedicationDose(name: "Sumatriptan", medicationClass: .triptan, dose: "50 mg", takenAt: start.addingTimeInterval(1200)))
+        }
+        if scenario.daysAgo % 3 != 2 || scenario.daysAgo == 0 {
+            doses.append(MedicationDose(name: "Ibuprofen", medicationClass: .simpleAnalgesic, dose: "400 mg", takenAt: start.addingTimeInterval(2400)))
+        }
+        if scenario.daysAgo == 12 {
+            doses.append(MedicationDose(name: "Rizatriptan", medicationClass: .triptan, dose: "10 mg", takenAt: start.addingTimeInterval(14_400)))
+        }
+        migraine.medications = doses
+        for dose in doses { dose.migraine = migraine }
+    }
+
+    private static let noTriptanDays: Set<Int> = [14, 25]
 
     // MARK: - Tags
 
@@ -246,6 +270,10 @@ public struct SampleMigraineData: GenerateSampleData {
         Scenario(daysAgo: 22, hoursAgo: 8, painLevel: 5, stressLevel: 4, triggers: [.loudNoise, .strongOdors], customTriggers: ["Concert"], foods: [], durationHours: 3.0, tagIndices: [], intensityPattern: .peaked, condition: .clear, note: "After concert last night"),
         Scenario(daysAgo: 25, hoursAgo: 18, painLevel: 4, stressLevel: 3, triggers: [.oversleeping], customTriggers: [], foods: [], durationHours: 2.5, tagIndices: [4], intensityPattern: .decreasing, condition: .foggy, note: "Weekend sleep-in headache"),
         Scenario(daysAgo: 27, hoursAgo: 6, painLevel: 8, stressLevel: 7, triggers: [.stress, .caffeineExcess, .postureNeckTension], customTriggers: ["Project deadline"], foods: ["Coffee", "Energy bar"], durationHours: 6.5, tagIndices: [0], intensityPattern: .increasing, condition: .partlyCloudy, note: "End of sprint crunch"),
+        Scenario(daysAgo: 35, hoursAgo: 9, painLevel: 6, stressLevel: 5, triggers: [.stress], customTriggers: [], foods: [], durationHours: 4.0, tagIndices: [0], intensityPattern: .peaked, condition: .cloudy, note: nil),
+        Scenario(daysAgo: 41, hoursAgo: 11, painLevel: 7, stressLevel: 6, triggers: [.lackOfSleep, .dehydration], customTriggers: [], foods: [], durationHours: 5.0, tagIndices: [4], intensityPattern: .increasing, condition: .rain, note: nil),
+        Scenario(daysAgo: 49, hoursAgo: 7, painLevel: 5, stressLevel: 4, triggers: [.hormonalFluctuation], customTriggers: [], foods: [], durationHours: 3.0, tagIndices: [2], intensityPattern: .decreasing, condition: .clear, note: nil),
+        Scenario(daysAgo: 56, hoursAgo: 15, painLevel: 8, stressLevel: 7, triggers: [.stress, .skippedMeals], customTriggers: [], foods: [], durationHours: 7.0, tagIndices: [0, 3], intensityPattern: .increasing, condition: .hot, note: nil),
         // One ongoing migraine (no end date)
         Scenario(daysAgo: 0, hoursAgo: 2, painLevel: 6, stressLevel: 5, triggers: [.eyeStrainBlueLight, .stress], customTriggers: [], foods: ["Coffee"], durationHours: nil, tagIndices: [0], intensityPattern: .increasing, condition: .mostlyCloudy, note: "Started this morning"),
     ]
