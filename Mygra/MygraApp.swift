@@ -42,9 +42,18 @@ struct MygraApp: App {
     /// `App` value more than once at launch.
     private static let testContainer: ModelContainer = (try? MygraStore.makeTemporaryContainer()) ?? MygraStore.makeContainer(inMemory: true)
 
+    /// DEBUG: `-MygraDebugLocalStore YES` runs on a CloudKit-free temp store, for unsigned
+    /// simulator builds (CloudKit traps without the iCloud entitlement).
+    private static var debugContainer: ModelContainer? {
+        #if DEBUG
+        if UserDefaults.standard.bool(forKey: "MygraDebugLocalStore") { return Self.testContainer }
+        #endif
+        return nil
+    }
+
     init() {
         let session = SessionController(
-            container: Self.isRunningTests ? Self.testContainer : nil,
+            container: Self.isRunningTests ? Self.testContainer : Self.debugContainer,
             indexer: Self.isRunningTests ? nil : SpotlightIndexer(),
             reviewRequester: AppStoreReviewRequester(),
             intentDonor: Self.isRunningTests ? nil : IntentDonor(),
@@ -84,6 +93,14 @@ struct MygraApp: App {
                 .onChange(of: quickActions.url) { _, _ in consumeQuickAction() }
                 .task {
                     session.start()
+                    #if DEBUG
+                    if let scenario = UserDefaults.standard.string(forKey: "MygraDebugScenario") {
+                        session.runDebugAttackScenario(scenario)
+                    }
+                    if UserDefaults.standard.string(forKey: "MygraDebugTab") == "settings" {
+                        session.router.select(.settings)
+                    }
+                    #endif
                     consumeQuickAction()
                     await session.notificationManager.refreshAuthorizationStatus()
                     guard !Self.isRunningTests else { return }

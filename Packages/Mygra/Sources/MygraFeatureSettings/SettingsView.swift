@@ -39,8 +39,8 @@ public struct SettingsView: View {
             profileSection
             plusSection
             CloudSyncSection()
-            preferencesSection
             attackModeSection
+            preferencesSection
             dashboardSection
             tagsSection
             dataSection

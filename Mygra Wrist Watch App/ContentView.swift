@@ -34,7 +34,8 @@ struct ContentView: View {
                 }
             }
             .refreshable { refresh() }
-            .navigationTitle("Mygra")
+            // No bright title while Attack Mode is showing.
+            .navigationTitle(bridge.status.hasOngoingMigraine ? "" : "Mygra")
             .onAppear { refresh() }
         }
     }
