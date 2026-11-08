@@ -107,19 +107,39 @@ struct QuickBitsSectionView: View {
 
     private func cycleRow(_ result: PerimenstrualResult) -> some View {
         let subtitle: String
+        var basis: String?
         switch result {
         case .insufficient(let cycles, let attacks):
             subtitle = MenstrualCycles.insufficientMessage(cycles: cycles, attacks: attacks)
         case .result(let analysis):
-            subtitle = MenstrualCycles.summary(analysis) + " " + MenstrualCycles.basis(analysis)
+            subtitle = MenstrualCycles.summary(analysis)
+            basis = MenstrualCycles.basis(analysis)
         }
-        return DetailRowView(
-            style: .insight,
-            systemImage: "drop.circle.fill",
-            title: String(localized: "Cycle pattern"),
-            subtitle: subtitle,
-            tint: .pink
-        ) { EmptyView() }
+        // Not a DetailRowView: its subtitle is capped at three lines and this sentence is longer.
+        return HStack(alignment: .top, spacing: Brand.Space.md) {
+            Image(systemName: "drop.circle.fill")
+                .font(.title3)
+                .foregroundStyle(.pink)
+                .frame(width: 36, height: 36)
+                .background(Color.pink.opacity(0.15), in: Circle())
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Cycle pattern").font(.headline)
+                Text(subtitle)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                if let basis {
+                    Text(basis)
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(Brand.Space.md)
+        .background(Color.pink.opacity(0.06), in: RoundedRectangle(cornerRadius: Brand.Radius.control, style: .continuous))
         .accessibilityElement(children: .combine)
     }
 

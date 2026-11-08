@@ -43,7 +43,7 @@ public struct DashboardView: View {
                     // Screenshots: `-MygraDebugDashboardScroll pressure|cycle` scrolls to a card.
                     guard let anchor = UserDefaults.standard.string(forKey: "MygraDebugDashboardScroll") else { return }
                     try? await Task.sleep(for: .milliseconds(800))
-                    proxy.scrollTo(anchor, anchor: .top)
+                    proxy.scrollTo(anchor, anchor: UserDefaults.standard.bool(forKey: "MygraDebugScrollBottom") ? .bottom : .top)
                 }
                 #endif
         }
@@ -177,6 +177,7 @@ public struct DashboardView: View {
                 Haptics.lightImpact()
                 insights.refresh()
             }
+            .id("cycle")
         } else {
             PlusLockedCard(feature: .quickBits) {
                 Haptics.lightImpact()

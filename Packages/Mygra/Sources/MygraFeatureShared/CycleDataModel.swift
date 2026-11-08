@@ -30,6 +30,10 @@ public final class CycleDataModel {
     public private(set) var periodStarts: [Date] = []
     /// Whether a Health read has completed since the feature was turned on.
     public private(set) var hasLoaded = false
+    #if DEBUG
+    /// DEBUG: canned days installed; a real (empty) Health read must not wipe them.
+    private var isDebugPinned = false
+    #endif
 
     /// How far back flow is read.
     public static let lookBackYears = 2
@@ -74,6 +78,9 @@ public final class CycleDataModel {
 
     /// Re-reads flow from Health. A no-op unless the feature is active.
     public func refresh() async {
+        #if DEBUG
+        if isDebugPinned { return }
+        #endif
         guard isActive, let flow, !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
@@ -101,6 +108,7 @@ public final class CycleDataModel {
     /// DEBUG: installs canned flow days and turns the feature on (screenshots, previews).
     public func installDebugFlowDays(_ days: [Date]) {
         isEnabled = true
+        isDebugPinned = true
         let normalized = Set(days.map { calendar.startOfDay(for: $0) })
         flowDays = normalized
         periodStarts = MenstrualCycles.periodStarts(fromFlowDays: normalized, calendar: calendar)

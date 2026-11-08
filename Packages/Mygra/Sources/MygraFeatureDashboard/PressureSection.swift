@@ -220,18 +220,38 @@ struct PressureSection: View {
     // MARK: - Threshold
 
     private var thresholdSection: some View {
-        DisclosureGroup(isExpanded: $isTuning) {
-            VStack(alignment: .leading, spacing: Brand.Space.md) {
-                Stepper(value: $dropHpa, in: PressureDropThreshold.dropRange, step: 1) {
-                    HStack {
-                        Text("Drop size")
-                        Spacer()
-                        Text(PressureDropDetector.displayDrop(threshold.dropHpa, useMetricUnits: useMetricUnits))
-                            .monospacedDigit()
-                            .foregroundStyle(.secondary)
-                    }
+        VStack(alignment: .leading, spacing: Brand.Space.md) {
+            Button {
+                Haptics.lightImpact()
+                withAnimation(.snappy) { isTuning.toggle() }
+            } label: {
+                HStack {
+                    Label("Alert threshold", systemImage: "slider.horizontal.3")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color.mygraPurple)
+                    Spacer()
+                    Image(systemName: "chevron.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(Color.mygraPurple)
+                        .rotationEffect(.degrees(isTuning ? 180 : 0))
+                        .accessibilityHidden(true)
                 }
-                .accessibilityIdentifier("pressure.dropStepper")
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityIdentifier("pressure.thresholdToggle")
+
+            if isTuning {
+                HStack {
+                    Text("Drop size")
+                    Spacer()
+                    Text(verbatim: PressureDropDetector.displayDrop(threshold.dropHpa, useMetricUnits: useMetricUnits))
+                        .monospacedDigit()
+                        .foregroundStyle(Color.secondary)
+                    Stepper("Drop size", value: $dropHpa, in: PressureDropThreshold.dropRange, step: 1)
+                        .labelsHidden()
+                        .accessibilityIdentifier("pressure.dropStepper")
+                }
 
                 Picker("Within", selection: $windowHours) {
                     ForEach(PressureDropThreshold.windowOptions, id: \.self) { hours in
@@ -242,7 +262,7 @@ struct PressureSection: View {
 
                 Text(PressureDropDetector.explanation(threshold, useMetricUnits: useMetricUnits))
                     .font(.footnote)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.secondary)
                     .fixedSize(horizontal: false, vertical: true)
 
                 if threshold != .default {
@@ -254,12 +274,7 @@ struct PressureSection: View {
                     .font(.footnote.weight(.semibold))
                 }
             }
-            .padding(.top, Brand.Space.sm)
-        } label: {
-            Label("Alert threshold", systemImage: "slider.horizontal.3")
-                .font(.subheadline.weight(.semibold))
         }
-        .tint(.mygraPurple)
     }
 }
 

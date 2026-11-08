@@ -155,9 +155,12 @@ extension View {
     /// blank glass bar. No-op on earlier releases and on Mac ("Designed for iPad"),
     /// where a floating bottom accessory reads as out of place under the Mac chrome.
     @ContentBuilder
-    public func tabViewBottomAccessoryIfAvailable<Accessory: View>(@ContentBuilder _ accessory: () -> Accessory) -> some View {
+    public func tabViewBottomAccessoryIfAvailable<Accessory: View>(isEnabled: Bool = true, @ContentBuilder _ accessory: () -> Accessory) -> some View {
         #if os(iOS)
-        if #available(iOS 26.0, *), !ProcessInfo.processInfo.isiOSAppOnMac {
+        if #available(iOS 26.1, *), !ProcessInfo.processInfo.isiOSAppOnMac {
+            // `isEnabled: false` removes the accessory (and its space) entirely.
+            tabViewBottomAccessory(isEnabled: isEnabled, content: accessory)
+        } else if #available(iOS 26.0, *), !ProcessInfo.processInfo.isiOSAppOnMac, isEnabled {
             tabViewBottomAccessory(content: accessory)
         } else {
             self

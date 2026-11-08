@@ -101,6 +101,7 @@ extension SessionController {
         )
     }
 
+    #if canImport(UIKit)
     /// Writes the clinical report (with the cycle section) to Documents/debug-report.pdf.
     public func writeDebugClinicalReport() {
         let blocks = ClinicalReport.blocks(
@@ -116,5 +117,6 @@ extension SessionController {
             try? data.write(to: documents.appendingPathComponent("debug-report.pdf"))
         }
     }
+    #endif
 }
 #endif
