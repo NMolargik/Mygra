@@ -182,6 +182,7 @@ public struct PreviewEnvironment {
     public let migraineData: MigraineDataModel
     public let tagData: TagDataModel
     public let userData: UserDataModel
+    public let cycleData: CycleDataModel
     public let insights: InsightModel
     public let attackMode: AttackModeModel
     public let router = AppRouter()
@@ -262,7 +263,26 @@ public struct PreviewEnvironment {
             toastManager: toastManager
         )
         weatherManager = WeatherManager(locationManager: LocationManager())
+        #if canImport(HealthKit) && !os(macOS)
+        cycleData = CycleDataModel(flow: healthManager, entitlement: entitlement, defaults: PreviewDefaults())
+        #else
+        cycleData = CycleDataModel(flow: nil, entitlement: entitlement, defaults: PreviewDefaults())
+        #endif
     }
+}
+
+/// In-memory defaults so previews never persist the Cycle Insights opt-in.
+@MainActor
+final class PreviewDefaults: KeyValueStoring {
+    private var storage: [String: Any] = [:]
+    func bool(forKey defaultName: String) -> Bool { storage[defaultName] as? Bool ?? false }
+    func double(forKey defaultName: String) -> Double { storage[defaultName] as? Double ?? 0 }
+    func integer(forKey defaultName: String) -> Int { storage[defaultName] as? Int ?? 0 }
+    func string(forKey defaultName: String) -> String? { storage[defaultName] as? String }
+    func data(forKey defaultName: String) -> Data? { storage[defaultName] as? Data }
+    func object(forKey defaultName: String) -> Any? { storage[defaultName] }
+    func set(_ value: Any?, forKey defaultName: String) { storage[defaultName] = value }
+    func removeObject(forKey defaultName: String) { storage.removeValue(forKey: defaultName) }
 }
 
 extension View {
@@ -274,6 +294,7 @@ extension View {
             .environment(env.migraineData)
             .environment(env.tagData)
             .environment(env.userData)
+            .environment(env.cycleData)
             .environment(env.insights)
             .environment(env.weatherManager)
             .environment(env.notificationManager)

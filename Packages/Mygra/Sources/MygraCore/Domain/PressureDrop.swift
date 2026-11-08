@@ -140,3 +140,24 @@ nonisolated public struct PressureDropThresholdStore {
         defaults.set(threshold.windowHours, forKey: AppStorageKeys.pressureDropWindowHours)
     }
 }
+
+/// How much of the series the pressure graph shows around "now".
+nonisolated public enum PressureGraphRange: String, CaseIterable, Identifiable, Sendable {
+    /// 48 hours back and 24 ahead: the 72-hour view.
+    case threeDays
+    /// 7 days back and 48 hours ahead, for tuning against more attacks.
+    case week
+
+    public var id: String { rawValue }
+    public var hoursBack: Int { self == .threeDays ? 48 : 168 }
+    public var hoursAhead: Int { self == .threeDays ? 24 : 48 }
+
+    public func interval(now: Date) -> DateInterval {
+        DateInterval(start: now.addingTimeInterval(-Double(hoursBack) * 3600), end: now.addingTimeInterval(Double(hoursAhead) * 3600))
+    }
+
+    public func samples(_ samples: [PressureSample], now: Date) -> [PressureSample] {
+        let window = interval(now: now)
+        return samples.filter { window.contains($0.date) }.sorted { $0.date < $1.date }
+    }
+}

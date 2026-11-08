@@ -31,6 +31,7 @@ public final class SessionController {
     public let migraineData: MigraineDataModel
     public let tagData: TagDataModel
     public let userData: UserDataModel
+    public let cycleData: CycleDataModel
     public let insights: InsightModel
     public let attackMode: AttackModeModel
     public let cloudSyncManager: CloudSyncManager
@@ -127,9 +128,12 @@ public final class SessionController {
         let health = HealthManager()
         healthManager = health
         let headaches: (any HeadacheRecording)? = health
+        let menstrualFlow: (any MenstrualFlowProviding)? = health
         #else
         let headaches: (any HeadacheRecording)? = nil
+        let menstrualFlow: (any MenstrualFlowProviding)? = nil
         #endif
+        cycleData = CycleDataModel(flow: menstrualFlow, entitlement: subscription, defaults: defaults)
 
         let loadMigraines = LoadMigrainesUseCase(repository: migraineRepository)
         let findMigraine = FindMigraineUseCase(repository: migraineRepository)
@@ -213,6 +217,7 @@ public final class SessionController {
 
         let weather = WeatherManager(locationManager: LocationManager())
         weatherManager = weather
+        weather.loadsPressureSeries = { [subscription] in subscription.gate.unlocks(.weatherRisk) }
         let notifications = NotificationManager()
         notificationManager = notifications
         weatherRiskNotifier = WeatherRiskNotifier(weather: weather, notifications: notifications, entitlement: subscription, defaults: defaults)
@@ -347,6 +352,7 @@ public final class SessionController {
     public func appDidBecomeActive() {
         consumePendingDeepLinkFromIntents()
         statusSync.reassertLiveActivity()
+        Task { await cycleData.refresh() }
     }
 
     /// Picks up a deep link stashed by an `openAppWhenRun` App Intent.

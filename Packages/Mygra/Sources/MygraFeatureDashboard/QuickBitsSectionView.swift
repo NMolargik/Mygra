@@ -15,6 +15,8 @@ struct QuickBitsSectionView: View {
     @Environment(InsightModel.self) private var insights
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
+    /// Cycle Insights (opt-in, Plus): the perimenstrual statistic, shown as the first row.
+    var cycleResult: PerimenstrualResult? = nil
     let onRefresh: () -> Void
 
     @State private var expandedKeys: Set<String> = []
@@ -43,7 +45,11 @@ struct QuickBitsSectionView: View {
             }
             .padding(.bottom, 8)
 
-            if insights.insights.isEmpty {
+            if let cycleResult {
+                cycleRow(cycleResult)
+            }
+
+            if insights.insights.isEmpty && cycleResult == nil {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("No insights yet")
                         .font(.subheadline).bold()
@@ -97,6 +103,24 @@ struct QuickBitsSectionView: View {
         }
         .padding(14)
         .cardSurface()
+    }
+
+    private func cycleRow(_ result: PerimenstrualResult) -> some View {
+        let subtitle: String
+        switch result {
+        case .insufficient(let cycles, let attacks):
+            subtitle = MenstrualCycles.insufficientMessage(cycles: cycles, attacks: attacks)
+        case .result(let analysis):
+            subtitle = MenstrualCycles.summary(analysis) + " " + MenstrualCycles.basis(analysis)
+        }
+        return DetailRowView(
+            style: .insight,
+            systemImage: "drop.circle.fill",
+            title: String(localized: "Cycle pattern"),
+            subtitle: subtitle,
+            tint: .pink
+        ) { EmptyView() }
+        .accessibilityElement(children: .combine)
     }
 
     private func toggle(_ insight: Insight, key: String) {

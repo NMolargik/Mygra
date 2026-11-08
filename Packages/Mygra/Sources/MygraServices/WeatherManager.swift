@@ -105,6 +105,8 @@ public final class WeatherManager: CurrentWeatherProviding {
     // MARK: - State
     public private(set) var isFetching = false
     public private(set) var reading: WeatherReading?
+    /// Hourly pressure from a week ago through the next two days (empty until fetched).
+    public private(set) var pressureSeries: [PressureSample] = []
     public private(set) var placemark: CLPlacemark?
     public var error: (any Error)?
 
@@ -118,6 +120,8 @@ public final class WeatherManager: CurrentWeatherProviding {
     public var minUpdateInterval: TimeInterval = 10 * 60
     /// Minimum distance change required to fetch again when streaming.
     public var minDistanceChange: CLLocationDistance = 500
+    /// Whether to fetch the hourly pressure series (Plus only; free users skip the extra call).
+    public var loadsPressureSeries: () -> Bool = { true }
     /// Global cooldown between successful WeatherKit hits (cost control).
     public var refreshCooldownInterval: TimeInterval = 60 * 60
 
@@ -226,10 +230,42 @@ public final class WeatherManager: CurrentWeatherProviding {
             fetchedAt: now
         )
         lastSuccessfulFetch = now
+        if loadsPressureSeries() { await loadPressureSeries(for: location, now: now) }
 
         await reverseGeocodeIfNeeded(for: location)
         lastLocation = location
     }
+
+    // MARK: - Pressure series
+
+    /// How far back and ahead the hourly pressure series reaches.
+    nonisolated static let pressureLookBack: TimeInterval = 7 * 24 * 3600
+    nonisolated static let pressureLookAhead: TimeInterval = 48 * 3600
+
+    /// Hourly pressure for the graph and the drop alert. Best effort: a failure keeps the
+    /// previous series and never fails the current-conditions fetch.
+    private func loadPressureSeries(for location: CLLocation, now: Date) async {
+        do {
+            let hourly = try await service.weather(
+                for: location,
+                including: .hourly(startDate: now.addingTimeInterval(-Self.pressureLookBack), endDate: now.addingTimeInterval(Self.pressureLookAhead))
+            )
+            pressureSeries = hourly.forecast.map {
+                PressureSample(date: $0.date, hpa: $0.pressure.converted(to: .hectopascals).value)
+            }
+        } catch {
+            Log.weather.error("Hourly pressure unavailable: \(error.localizedDescription)")
+        }
+    }
+
+    #if DEBUG
+    /// DEBUG: installs a canned reading and pressure series (simulators have no WeatherKit).
+    public func installDebugWeather(reading: WeatherReading, pressureSeries: [PressureSample]) {
+        self.reading = reading
+        self.pressureSeries = pressureSeries
+        lastSuccessfulFetch = reading.fetchedAt
+    }
+    #endif
 
     // MARK: - Private
 

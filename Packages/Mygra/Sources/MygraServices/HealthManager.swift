@@ -132,6 +132,27 @@ actor HealthQueryClient {
         }
     }
 
+    /// Start-of-day dates on which any menstrual flow was recorded (the "none" value excluded).
+    func menstrualFlowDays(_ flowType: HKCategoryType, from start: Date, to end: Date, calendar: Calendar) async throws -> [Date] {
+        try await withCheckedThrowingContinuation { continuation in
+            let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: [])
+            let sort = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)
+            let query = HKSampleQuery(sampleType: flowType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [sort]) { _, samples, error in
+                if let hkError = error as? HKError, hkError.code == .errorNoData {
+                    continuation.resume(returning: [])
+                } else if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    let flowing = ((samples as? [HKCategorySample]) ?? []).filter {
+                        HKCategoryValueVaginalBleeding(rawValue: $0.value) != HKCategoryValueVaginalBleeding.none
+                    }
+                    continuation.resume(returning: flowing.map { calendar.startOfDay(for: $0.startDate) })
+                }
+            }
+            store.execute(query)
+        }
+    }
+
     func inferMenstrualPhase(_ flowType: HKCategoryType?, from start: Date, to end: Date) async throws -> MenstrualPhase? {
         guard let flowType else { return nil }
         return try await withCheckedThrowingContinuation { continuation in
@@ -173,7 +194,7 @@ actor HealthQueryClient {
 
 @MainActor
 @Observable
-public final class HealthManager: HeadacheRecording {
+public final class HealthManager: HeadacheRecording, MenstrualFlowProviding {
 
     @ObservationIgnored private let store: any HealthStore
     @ObservationIgnored private let queryClient: HealthQueryClient
@@ -206,7 +227,6 @@ public final class HealthManager: HeadacheRecording {
     private var ctSleep: HKCategoryType { .categoryType(forIdentifier: .sleepAnalysis)! }
     private var ctHeadache: HKCategoryType { .categoryType(forIdentifier: .headache)! }
     private var ctMenstrualFlow: HKCategoryType? { HKObjectType.categoryType(forIdentifier: .menstrualFlow) }
-    private var ctOvulation: HKCategoryType? { HKObjectType.categoryType(forIdentifier: .ovulationTestResult) }
 
     private let unitMilliliter = HKUnit.literUnit(with: .milli)
     private let unitMilligram = HKUnit.gramUnit(with: .milli)
@@ -217,10 +237,9 @@ public final class HealthManager: HeadacheRecording {
     private let unitPercent = HKUnit.percent()
 
     private var readTypes: Set<HKObjectType> {
-        var types: Set<HKObjectType> = [qtWater, qtCaffeine, qtEnergy, qtSteps, qtRestingHR, qtHR, ctSleep, qtGlucose, qtBloodOxygen, ctHeadache]
-        if let flow = ctMenstrualFlow { types.insert(flow) }
-        if let ovulation = ctOvulation { types.insert(ovulation) }
-        return types
+        // Menstrual flow is deliberately absent: it is requested on its own, with an
+        // explanation, only when the user turns on Cycle Insights.
+        [qtWater, qtCaffeine, qtEnergy, qtSteps, qtRestingHR, qtHR, ctSleep, qtGlucose, qtBloodOxygen, ctHeadache]
     }
 
     private var shareTypes: Set<HKSampleType> {
@@ -273,6 +292,35 @@ public final class HealthManager: HeadacheRecording {
             if !isAuthorized {
                 throw HealthError.authorizationDenied
             }
+        }
+    }
+
+    // MARK: - Cycle insights (read only)
+
+    /// Asks Health for **read** access to menstrual flow, and nothing else. Call this only
+    /// after the user has turned on Cycle Insights and seen why. Returns false when Health
+    /// is unavailable. HealthKit does not reveal read denials, so a declined request simply
+    /// yields no days later.
+    @discardableResult
+    public func requestMenstrualFlowAccess() async -> Bool {
+        guard type(of: store).isHealthDataAvailable(), let flow = ctMenstrualFlow else { return false }
+        do {
+            try await store.requestAuthorization(toShare: [], read: [flow])
+            return true
+        } catch {
+            Log.health.error("Menstrual flow authorization failed: \(error.localizedDescription)")
+            return false
+        }
+    }
+
+    /// Days with recorded flow since `start` (never prompts; empty without access).
+    public func fetchMenstrualFlowDays(since start: Date, calendar: Calendar = .current) async -> [Date] {
+        guard type(of: store).isHealthDataAvailable(), let flow = ctMenstrualFlow else { return [] }
+        do {
+            return try await queryClient.menstrualFlowDays(flow, from: start, to: Date(), calendar: calendar)
+        } catch {
+            Log.health.error("Menstrual flow read failed: \(error.localizedDescription)")
+            return []
         }
     }
 

@@ -10,6 +10,12 @@ import MygraCore
 import MygraDesignSystem
 import MygraServices
 
+/// What the embedded pressure section needs.
+struct PressureInputs {
+    let samples: [PressureSample]
+    let attackStarts: [Date]
+}
+
 struct WeatherCardView: View {
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
 
@@ -18,6 +24,8 @@ struct WeatherCardView: View {
     let error: (any Error)?
     let locationString: String?
     let onRefresh: () -> Void
+    /// Plus: the pressure section inside this card. Nil for free users.
+    var pressure: PressureInputs? = nil
 
     @State private var bounceFlag = false
 
@@ -33,6 +41,19 @@ struct WeatherCardView: View {
     }
 
     private func readingCard(_ reading: WeatherReading) -> some View {
+        VStack(alignment: .leading, spacing: Brand.Space.md) {
+            currentConditions(reading)
+            if let pressure {
+                Divider()
+                PressureSection(samples: pressure.samples, attackStarts: pressure.attackStarts)
+            }
+        }
+        .cardStyle()
+        .onChange(of: reading.condition) { bounceFlag.toggle() }
+        .onAppear { bounceFlag.toggle() }
+    }
+
+    private func currentConditions(_ reading: WeatherReading) -> some View {
         HStack(spacing: 15) {
             reading.condition.symbolView()
                 .font(.title)
@@ -74,9 +95,6 @@ struct WeatherCardView: View {
                     .font(.caption)
             }
         }
-        .cardStyle()
-        .onChange(of: reading.condition) { bounceFlag.toggle() }
-        .onAppear { bounceFlag.toggle() }
     }
 
     private var unavailableCard: some View {

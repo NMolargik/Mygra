@@ -95,10 +95,17 @@ struct MygraApp: App {
                     session.start()
                     #if DEBUG
                     if let scenario = UserDefaults.standard.string(forKey: "MygraDebugScenario") {
-                        session.runDebugAttackScenario(scenario)
+                        if scenario == "cyclePressure" {
+                            session.runDebugCyclePressureScenario()
+                            session.writeDebugClinicalReport()
+                        } else {
+                            session.runDebugAttackScenario(scenario)
+                        }
                     }
-                    if UserDefaults.standard.string(forKey: "MygraDebugTab") == "settings" {
-                        session.router.select(.settings)
+                    switch UserDefaults.standard.string(forKey: "MygraDebugTab") {
+                    case "settings": session.router.select(.settings)
+                    case "calendar": session.router.select(.calendar)
+                    default: break
                     }
                     #endif
                     consumeQuickAction()

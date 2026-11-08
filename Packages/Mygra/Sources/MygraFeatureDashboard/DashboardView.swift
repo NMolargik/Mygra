@@ -21,6 +21,8 @@ public struct DashboardView: View {
     @Environment(InsightModel.self) private var insights
     @Environment(HealthManager.self) private var healthManager
     @Environment(WeatherManager.self) private var weatherManager
+    @Environment(CycleDataModel.self) private var cycleData
+    @Environment(SubscriptionManager.self) private var subscription
     @Environment(MigraineDataModel.self) private var migraineData
     @Environment(PaywallPresenter.self) private var paywall
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -34,6 +36,20 @@ public struct DashboardView: View {
     private var isRegularWidth: Bool { horizontalSizeClass == .regular }
 
     public var body: some View {
+        ScrollViewReader { proxy in
+            scrollContent
+                #if DEBUG
+                .task {
+                    // Screenshots: `-MygraDebugDashboardScroll pressure|cycle` scrolls to a card.
+                    guard let anchor = UserDefaults.standard.string(forKey: "MygraDebugDashboardScroll") else { return }
+                    try? await Task.sleep(for: .milliseconds(800))
+                    proxy.scrollTo(anchor, anchor: .top)
+                }
+                #endif
+        }
+    }
+
+    private var scrollContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Brand.Space.lg) {
                 StreakHeaderView(daysSince: MigraineStatistics.streakDays(migraineData.migraines), hasOngoing: migraineData.ongoingMigraine != nil, total: migraineData.migraines.count)
@@ -74,6 +90,7 @@ public struct DashboardView: View {
         }
         .task {
             await refreshAll()
+            await cycleData.refresh()
         }
         .fullScreenCover(isPresented: $viewModel.isShowingAssistant) {
             MigraineAssistantView()
@@ -95,8 +112,12 @@ public struct DashboardView: View {
             onRefresh: {
                 Haptics.lightImpact()
                 Task { await weatherManager.refresh() }
-            }
+            },
+            pressure: subscription.gate.unlocks(.weatherRisk)
+                ? PressureInputs(samples: weatherManager.pressureSeries, attackStarts: migraineData.migraines.map(\.startDate))
+                : nil
         )
+        .id("pressure")
     }
 
     @ContentBuilder
@@ -152,7 +173,7 @@ public struct DashboardView: View {
     @ContentBuilder
     private var quickBits: some View {
         if insights.canViewQuickBits {
-            QuickBitsSectionView {
+            QuickBitsSectionView(cycleResult: cycleData.result(for: migraineData.migraines)) {
                 Haptics.lightImpact()
                 insights.refresh()
             }

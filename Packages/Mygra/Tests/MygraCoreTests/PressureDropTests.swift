@@ -119,4 +119,16 @@ struct PressureDropTests {
         #expect(!metric.contains("—"))
         #expect(PressureDropDetector.explanation(.default, useMetricUnits: false).contains("inHg"))
     }
+
+    @Test("the graph range keeps 48 hours back and 24 ahead, or a week back and 48 ahead")
+    func graphRange() {
+        let now = t0.addingTimeInterval(100 * 3600)
+        let samples = (0..<300).map { PressureSample(date: t0.addingTimeInterval(Double($0) * 3600), hpa: 1013) }
+        let short = PressureGraphRange.threeDays.samples(samples, now: now)
+        #expect(short.first?.date == now.addingTimeInterval(-48 * 3600))
+        #expect(short.last?.date == now.addingTimeInterval(24 * 3600))
+        let week = PressureGraphRange.week.samples(samples, now: now)
+        #expect(week.first?.date == now.addingTimeInterval(-100 * 3600)) // series starts at t0
+        #expect(week.last?.date == now.addingTimeInterval(48 * 3600))
+    }
 }

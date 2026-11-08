@@ -24,6 +24,7 @@ public struct SettingsView: View {
     @Environment(PaywallPresenter.self) private var paywall
     @Environment(AttackModeModel.self) private var attackMode
     @Environment(NotificationManager.self) private var notificationManager
+    @Environment(CycleDataModel.self) private var cycleData
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
@@ -31,10 +32,25 @@ public struct SettingsView: View {
     @AppStorage(AppStorageKeys.attackFinishPromptDelayMinutes) private var attackFinishPromptDelayMinutes: Int = FinishLoggingSettings.defaultDelayMinutes
 
     @State private var viewModel = ViewModel()
+    @State private var showCycleExplanation = false
 
     public init() {}
 
     public var body: some View {
+        ScrollViewReader { proxy in
+            settingsForm
+                #if DEBUG
+                .task {
+                    // Screenshots: `-MygraDebugSettingsScroll cycle` scrolls to that section.
+                    guard let anchor = UserDefaults.standard.string(forKey: "MygraDebugSettingsScroll") else { return }
+                    try? await Task.sleep(for: .milliseconds(800))
+                    proxy.scrollTo(anchor, anchor: .center)
+                }
+                #endif
+        }
+    }
+
+    private var settingsForm: some View {
         Form {
             profileSection
             plusSection
@@ -42,6 +58,7 @@ public struct SettingsView: View {
             attackModeSection
             preferencesSection
             dashboardSection
+            cycleSection
             tagsSection
             dataSection
             aboutSection
@@ -51,6 +68,14 @@ public struct SettingsView: View {
             #endif
         }
         .formStyle(.grouped)
+        .alert("Read Your Period Days?", isPresented: $showCycleExplanation) {
+            Button("Not Now", role: .cancel) {}
+            Button("Continue") {
+                Task { await cycleData.setEnabled(true) }
+            }
+        } message: {
+            Text("Mygra will ask Apple Health for permission to read menstrual flow dates. They are used only on this device, to mark period days on your calendar and compare them with when your attacks start. Mygra never writes cycle data, and you can turn this off at any time.")
+        }
         .sheet(isPresented: $viewModel.isEditingUser) {
             UserEditSheet(user: userData.currentUser ?? User()) { edited in
                 userData.apply(edited)
@@ -287,6 +312,46 @@ public struct SettingsView: View {
         }
     }
 
+    // MARK: Cycle insights
+
+    /// Opt-in, read-only, Plus. The explanation appears before Health's own prompt.
+    private var cycleSection: some View {
+        let unlocked = subscription.gate.unlocks(.cycleInsights)
+        let binding = Binding<Bool>(
+            get: { cycleData.isEnabled && unlocked },
+            set: { newValue in
+                Haptics.lightImpact()
+                if !newValue {
+                    Task { await cycleData.setEnabled(false) }
+                } else if unlocked {
+                    showCycleExplanation = true
+                } else {
+                    paywall.present(.cycleInsights)
+                }
+            }
+        )
+        return Section {
+            Toggle(isOn: binding) {
+                HStack(spacing: Brand.Space.sm) {
+                    Label("Cycle Insights", systemImage: "drop.circle.fill")
+                        .labelStyle(.settingsIcon(.pink))
+                    if !unlocked { PlusBadge() }
+                }
+            }
+            .tint(.pink)
+            .accessibilityIdentifier("cycleInsightsToggle")
+            .accessibilityHint("Reads period days from Apple Health to compare with your attacks")
+        } header: {
+            Text("Cycle").id("cycle")
+        } footer: {
+            if cycleData.isActive, cycleData.hasLoaded, cycleData.flowDays.isEmpty {
+                Text("No period days were found in Apple Health. If you track your cycle there, check that Mygra can read Cycle Tracking in Settings > Health > Data Access.")
+            } else {
+                Text("Mark period days on the calendar and see whether your attacks cluster around your period. Mygra only reads menstrual flow dates from Apple Health and never writes cycle data.")
+            }
+        }
+    }
+
     private var tagsSection: some View {
         Section {
             NavigationLink(value: SettingsDestination.tags) {
@@ -453,7 +518,8 @@ public struct SettingsView: View {
                 options: options,
                 assessment: assessment,
                 useMetricUnits: useMetricUnits,
-                useDMY: useDayMonthYearDates
+                useDMY: useDayMonthYearDates,
+                perimenstrual: cycleData.result(for: migraineData.migraines)
             )
             return try PDFReportRenderer.writeTemporaryFile(PDFReportRenderer.render(blocks))
         }

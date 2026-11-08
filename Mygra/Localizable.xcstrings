@@ -535,6 +535,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "%@, period day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, día de periodo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, jour de règles"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@、生理の日"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "%@. Consider hydration, rest, and minimizing triggers." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -758,6 +782,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld 日間 片頭痛なし"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld hours" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld horas"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld heures"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld時間"
           }
         }
       },
@@ -1057,6 +1105,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "%lld of %lld attacks started during or within 6 hours after a flagged drop." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de %lld ataques empezaron durante o hasta 6 horas después de un descenso señalado."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld crises sur %lld ont commencé pendant une baisse signalée ou dans les 6 heures suivantes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作%lld回のうち%lld回が、検出された低下中またはその後6時間以内に始まりました。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld of 1 attack started during or within 6 hours after a flagged drop." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld de 1 ataque empezó durante o hasta 6 horas después de un descenso señalado."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld crise sur 1 a commencé pendant une baisse signalée ou dans les 6 heures suivantes."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作1回のうち%lld回が、検出された低下中またはその後6時間以内に始まりました。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "%lld out of 10" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1076,6 +1172,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "10 点中 %lld"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld pressure drops flagged." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld descensos de presión señalados."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld baisses de pression signalées."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧の低下を%lld回検出しました。"
           }
         }
       },
@@ -1220,6 +1340,102 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "SpO₂ %lld%%"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld%% of your attacks started within 2 days before to 3 days after your period starts, about %@ times what chance would predict." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El %lld%% de tus ataques empezó entre 2 días antes y 3 días después del inicio de tu periodo, unas %@ veces más de lo que predeciría el azar."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %% de vos crises ont commencé de 2 jours avant à 3 jours après le début de vos règles, environ %@ fois plus que ce que prédirait le hasard."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作の%lld%%が、生理開始の2日前から3日後までの間に始まりました。偶然から予想される割合の約%@倍です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld%% of your attacks started within 2 days before to 3 days after your period starts, close to the %lld%% chance would predict." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El %lld%% de tus ataques empezó entre 2 días antes y 3 días después del inicio de tu periodo, cerca del %lld%% que predeciría el azar."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %% de vos crises ont commencé de 2 jours avant à 3 jours après le début de vos règles, près des %lld %% que prédirait le hasard."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作の%lld%%が、生理開始の2日前から3日後までの間に始まりました。偶然から予想される%lld%%に近い値です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld%% of your attacks started within 2 days before to 3 days after your period starts, less than the %lld%% chance would predict." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El %lld%% de tus ataques empezó entre 2 días antes y 3 días después del inicio de tu periodo, menos del %lld%% que predeciría el azar."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %% de vos crises ont commencé de 2 jours avant à 3 jours après le début de vos règles, moins que les %lld %% que prédirait le hasard."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作の%lld%%が、生理開始の2日前から3日後までの間に始まりました。偶然から予想される%lld%%より少ない値です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "%lld%% of your attacks started within 2 days before to 3 days after your period starts." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El %lld%% de tus ataques empezó entre 2 días antes y 3 días después del inicio de tu periodo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %% de vos crises ont commencé de 2 jours avant à 3 jours après le début de vos règles."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作の%lld%%が、生理開始の2日前から3日後までの間に始まりました。"
           }
         }
       },
@@ -1471,6 +1687,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "1 pressure drop flagged." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 descenso de presión señalado."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 baisse de pression signalée."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧の低下を1回検出しました。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "10" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1490,6 +1730,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "10"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "10 or more" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 o más"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10 ou plus"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "10以上"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "3 days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 días"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 jours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3日間"
           }
         }
       },
@@ -2479,6 +2767,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Alert threshold" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Umbral de alerta"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seuil d'alerte"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "通知のしきい値"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "All" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3103,6 +3415,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Attack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ataque"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Attack Detail (%lld)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3218,6 +3554,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "発作"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attacks in the window: %lld of %lld. Expected by chance: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ataques en la ventana: %lld de %lld. Esperados por azar: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crises dans la fenêtre : %lld sur %lld. Attendues par hasard : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "該当期間の発作:%lld回(全%lld回中)。偶然による期待値:%@"
           }
         }
       },
@@ -3746,6 +4106,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "気圧の変化"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Barometric pressure graph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gráfico de presión barométrica"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graphique de pression barométrique"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧グラフ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Based on %lld attacks across %lld cycles. This describes your logged data and does not show a cause." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basado en %lld ataques a lo largo de %lld ciclos. Describe tus datos registrados y no demuestra una causa."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Basé sur %lld crises réparties sur %lld cycles. Ceci décrit vos données enregistrées et n'indique pas de cause."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld回の発作と%lld周期に基づきます。記録されたデータの傾向を示すもので、原因を示すものではありません。"
           }
         }
       },
@@ -5478,6 +5886,150 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Cycle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ciclo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cycle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周期"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Cycle Insights" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Información del ciclo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçus du cycle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周期インサイト"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Cycle days come from Apple Health. The window is the 2 days before to 3 days after the first day of flow. Chance is estimated from each cycle's length." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los días del ciclo provienen de Apple Salud. La ventana va de 2 días antes a 3 días después del primer día de sangrado. El azar se estima a partir de la duración de cada ciclo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les jours du cycle proviennent de Santé d'Apple. La fenêtre va de 2 jours avant à 3 jours après le premier jour de flux. Le hasard est estimé à partir de la durée de chaque cycle."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周期の日付は「ヘルスケア」から取得しています。該当期間は、出血の初日の2日前から3日後までです。偶然の割合は各周期の長さから推定しています。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Cycle insights" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Información del ciclo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aperçus du cycle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周期インサイト"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Cycle insights are part of Mygra Plus." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La información del ciclo forma parte de Mygra Plus."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les aperçus du cycle font partie de Mygra Plus."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周期インサイトはMygra Plusの機能です。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Cycle pattern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Patrón del ciclo"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendance du cycle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "周期との関連"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Dashboard" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6289,6 +6841,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "霧雨"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Drop size" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tamaño del descenso"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ampleur de la baisse"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "低下の大きさ"
           }
         }
       },
@@ -7851,6 +8427,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Flagged drop" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descenso señalado"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baisse signalée"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "検出された低下"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Flashing / strobe lights" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9262,6 +9862,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "クイック追加を隠す"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Hides the pressure graph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oculta el gráfico de presión"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masque le graphique de pression"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧グラフを隠します"
           }
         }
       },
@@ -11419,6 +12043,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Mark period days on the calendar and see whether your attacks cluster around your period. Mygra only reads menstrual flow dates from Apple Health and never writes cycle data." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marca los días del periodo en el calendario y comprueba si tus ataques se concentran alrededor de él. Mygra solo lee las fechas de sangrado de Apple Salud y nunca escribe datos del ciclo."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquez les jours de règles dans le calendrier et voyez si vos crises se regroupent autour. Mygra lit seulement les dates de flux menstruel dans Santé d'Apple et n'écrit jamais de données de cycle."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カレンダーに生理の日を表示し、発作がその前後に集中しているか確認できます。Mygraは「ヘルスケア」から月経の出血日を読み取るだけで、周期データを書き込むことはありません。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Marked your migraine as ended." : {
       "localizations" : {
         "es" : {
@@ -11722,6 +12370,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "月経期"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Menstrual Cycle Pattern" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Patrón del ciclo menstrual"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tendance du cycle menstruel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "月経周期との関連"
           }
         }
       },
@@ -12731,6 +13403,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Mygra flags a pressure drop when the pressure falls %@ or more within %lld hours. When one is happening or forecast in the next few hours, your weather-risk alert can fire. Lower numbers flag more drops." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra señala un descenso de presión cuando esta baja %@ o más en %lld horas. Si ocurre o se prevé en las próximas horas, puede activarse tu alerta de riesgo meteorológico. Los valores más bajos señalan más descensos."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra signale une baisse de pression quand la pression chute de %@ ou plus en %lld heures. Si c'est en cours ou prévu dans les prochaines heures, votre alerte météo peut se déclencher. Des valeurs plus basses signalent plus de baisses."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧が%lld時間以内に%@以上下がると、Mygraは気圧の低下として検出します。低下が起きている、または数時間以内に予報されている場合、天気リスクの通知が届くことがあります。数値を小さくすると、より多くの低下を検出します。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Mygra is designed to keep your data private and secure." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -12774,6 +13470,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mygra はデバイス上の知能を使ってウェルネスのインサイトを生成することがあります。これらは情報提供のみを目的としており、医学的助言、診断、治療に代わるものではありません。健康に関する疑問は必ず資格のある医療専門家に相談してください。このアプリで読んだ内容を理由に専門的な治療を無視したり遅らせたりしないでください。医療上の緊急事態の場合は、直ちに地域の緊急通報番号に電話してください。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Mygra will ask Apple Health for permission to read menstrual flow dates. They are used only on this device, to mark period days on your calendar and compare them with when your attacks start. Mygra never writes cycle data, and you can turn this off at any time." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra pedirá permiso a Apple Salud para leer las fechas de sangrado menstrual. Solo se usan en este dispositivo, para marcar los días del periodo en tu calendario y compararlos con el inicio de tus ataques. Mygra nunca escribe datos del ciclo y puedes desactivarlo cuando quieras."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygra demandera à Santé d'Apple l'autorisation de lire les dates de flux menstruel. Elles servent uniquement sur cet appareil, pour marquer les jours de règles dans votre calendrier et les comparer au début de vos crises. Mygra n'écrit jamais de données de cycle, et vous pouvez désactiver cette option en tout temps."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mygraは「ヘルスケア」に月経の出血日を読み取る許可を求めます。データはこのデバイス上でのみ使われ、カレンダーに生理の日を表示し、発作の開始時期と比べるために利用されます。周期データの書き込みは行いません。いつでもオフにできます。"
           }
         }
       },
@@ -13453,6 +14173,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "No period days were found in Apple Health. If you track your cycle there, check that Mygra can read Cycle Tracking in Settings > Health > Data Access." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontraron días de periodo en Apple Salud. Si registras tu ciclo allí, comprueba que Mygra pueda leer Seguimiento del ciclo en Ajustes > Salud > Acceso a datos."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun jour de règles trouvé dans Santé d'Apple. Si vous suivez votre cycle là-bas, vérifiez que Mygra peut lire le suivi du cycle dans Réglages > Santé > Accès aux données."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「ヘルスケア」に生理の日が見つかりませんでした。そこで周期を記録している場合は、設定 > ヘルスケア > データアクセスで、Mygraが周期記録を読み取れるか確認してください。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "No pressure drop flagged for now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin descenso de presión señalado por ahora"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune baisse de pression signalée pour l'instant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在、気圧の低下は検出されていません"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "No previous purchase was found." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13549,6 +14317,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Not Now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora no"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas maintenant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今はしない"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Not completed" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13592,6 +14384,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "未設定"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Not enough data yet. This needs at least %lld completed cycles and %lld attacks inside them. Right now there are %lld cycles and %lld attacks." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay datos suficientes. Se necesitan al menos %lld ciclos completos y %lld ataques dentro de ellos. Ahora hay %lld ciclos y %lld ataques."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore assez de données. Il faut au moins %lld cycles complets et %lld crises à l'intérieur. Pour l'instant, il y a %lld cycles et %lld crises."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "まだデータが足りません。完了した周期が%lld回以上、その中の発作が%lld回以上必要です。現在は%lld周期、発作%lld回です。"
           }
         }
       },
@@ -13904,6 +14720,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "通知が許可されませんでした。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在"
           }
         }
       },
@@ -15409,6 +16249,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Period day, from Apple Health" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día de periodo, de Apple Salud"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jour de règles, de Santé d'Apple"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生理の日(ヘルスケアより)"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Period: %@ (%lld %@)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15793,6 +16657,54 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Pressure (hPa)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presión (hPa)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pression (hPa)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧(hPa)"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure (inHg)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presión (inHg)"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pression (inHg)"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧(inHg)"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Pressure Alerts" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -15812,6 +16724,126 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "気圧の警告"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure drop forecast: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Descenso de presión previsto: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Baisse de pression prévue : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧低下の予報:%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure falling: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Presión en descenso: %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pression en baisse : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧が低下中:%@"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure history appears here once weather has loaded for your location." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El historial de presión aparecerá aquí cuando se cargue el clima de tu ubicación."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'historique de pression apparaîtra ici une fois la météo chargée pour votre position."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "お住まいの場所の天気が読み込まれると、気圧の履歴がここに表示されます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure is falling %@ (%lld to %lld hPa)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La presión está bajando %@ (de %lld a %lld hPa)."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La pression baisse de %@ (de %lld à %lld hPa)."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧が%@低下しています(%lld hPaから%lld hPa)。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pressure trend loading" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cargando tendencia de presión"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement de la tendance de pression"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧の傾向を読み込み中"
           }
         }
       },
@@ -16369,6 +17401,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Range" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rango"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Période"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "期間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Range: %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16412,6 +17468,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "まれに"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Read Your Period Days?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Leer los días de tu periodo?"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire les jours de vos règles?"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "生理の日を読み取りますか?"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Reads period days from Apple Health to compare with your attacks" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lee los días del periodo de Apple Salud para compararlos con tus ataques"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lit les jours de règles dans Santé d'Apple pour les comparer à vos crises"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「ヘルスケア」から生理の日を読み取り、発作と比べます"
           }
         }
       },
@@ -16724,6 +17828,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "順序をリセット"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Reset to default" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restablecer valores"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rétablir les valeurs par défaut"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "初期値に戻す"
           }
         }
       },
@@ -17185,6 +18313,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "See how your attacks line up with your menstrual cycle." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mira cómo coinciden tus ataques con tu ciclo menstrual."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voyez comment vos crises s'alignent avec votre cycle menstruel."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作と月経周期の重なりを確認できます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "See intake alongside each migraine and log it with Quick Add." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17636,6 +18788,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ピン留めのみ表示中です。オフにするとすべての片頭痛が表示されます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Shows the pressure graph and alert threshold" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra el gráfico de presión y el umbral de alerta"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Affiche le graphique de pression et le seuil d'alerte"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気圧グラフと通知のしきい値を表示します"
           }
         }
       },
@@ -21433,6 +22609,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Week" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semana"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semaine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1週間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Weight" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21764,6 +22964,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "みぞれ混じり"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Within" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En un máximo de"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En moins de"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "時間内"
           }
         }
       },
