@@ -256,6 +256,11 @@ private struct MigraineStatusAccessory: View {
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.tabViewBottomAccessoryPlacement) private var placement
+    @Environment(\.horizontalSizeClass) private var sizeClass
+
+    /// On regular width (iPad) the accessory spans the whole bottom edge and cannot be
+    /// sized, so the content is capped and centered instead of stretching edge to edge.
+    private var contentMaxWidth: CGFloat { sizeClass == .regular ? 360 : .infinity }
 
     private var isInline: Bool { placement == .inline }
 
@@ -287,7 +292,7 @@ private struct MigraineStatusAccessory: View {
                     Text(MigraineDates.elapsedString(since: migraine.startDate, now: context.date))
                         .font(.subheadline.weight(.semibold))
                         .monospacedDigit()
-                        .foregroundStyle(isInline ? .primary : .secondary)
+                        .foregroundStyle(.primary)
                         .contentTransition(.numericText())
                     if !isInline {
                         Spacer(minLength: 0)
@@ -298,6 +303,10 @@ private struct MigraineStatusAccessory: View {
                     }
                 }
                 .padding(.horizontal, isInline ? Brand.Space.sm : Brand.Space.lg)
+                .frame(maxWidth: contentMaxWidth, minHeight: 32)
+                // A soft brand tint so the live state reads as a distinct, tappable chip.
+                .background(Capsule().fill(Color.mygraPurple.opacity(0.22)))
+                .frame(maxWidth: .infinity)
                 .contentShape(Rectangle())
             }
         }
@@ -308,22 +317,27 @@ private struct MigraineStatusAccessory: View {
 
     // MARK: Log
 
-    /// Just the quick action. The dashboard header already says how long it has been,
-    /// so the pill never repeats the status.
+    /// Just the quick action, as a filled capsule so it reads as a button. The dashboard
+    /// header already says how long it has been, so the pill never repeats the status.
+    /// The fill is the brand purple deepened slightly so white text clears 4.5:1 contrast
+    /// in light and dark mode (the pure brand purple reaches about 4.4:1).
     private var logStrip: some View {
         Button(action: onLog) {
             Label("Log a Migraine", systemImage: "plus")
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.mygraPurple)
+                .foregroundStyle(.white)
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
+                .padding(.horizontal, Brand.Space.lg)
+                .frame(maxWidth: contentMaxWidth, minHeight: 32)
+                .background(Capsule().fill(Color.mygraPurple.mix(with: .black, by: 0.12)))
                 .frame(maxWidth: .infinity)
                 .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .keyboardShortcut("l", modifiers: .command)
         .hoverHighlight()
-        .padding(.horizontal, isInline ? Brand.Space.sm : Brand.Space.lg)
+        .padding(.horizontal, isInline ? Brand.Space.xs : Brand.Space.sm)
         .accessibilityIdentifier("accessoryLogButton")
         .accessibilityLabel(Text("Log a new migraine"))
     }
