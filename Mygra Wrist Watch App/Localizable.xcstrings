@@ -27,6 +27,28 @@
         }
       }
     },
+    "Attack in progress": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ataque en curso"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Crise en cours"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "発作中"
+          }
+        }
+      }
+    },
     "Couldn't end migraine. Try again.": {
       "localizations": {
         "es": {
@@ -45,6 +67,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "片頭痛を終了できませんでした。もう一度お試しください。"
+          }
+        }
+      }
+    },
+    "Couldn't reach your iPhone. Try again.": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No se pudo conectar con tu iPhone. Inténtalo de nuevo."
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Impossible de joindre votre iPhone. Réessayez."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhoneに接続できませんでした。もう一度お試しください。"
           }
         }
       }
@@ -93,6 +137,28 @@
         }
       }
     },
+    "End Attack": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminar ataque"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terminer la crise"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "発作を終了"
+          }
+        }
+      }
+    },
     "End Migraine": {
       "localizations": {
         "es": {
@@ -111,6 +177,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "片頭痛を終了"
+          }
+        }
+      }
+    },
+    "iPhone not reachable": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone no disponible"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhone injoignable"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iPhoneに接続できません"
+          }
+        }
+      }
+    },
+    "Logged %@": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registrado: %@"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ enregistré"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@を記録しました"
+          }
+        }
+      }
+    },
+    "Mild": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Leve"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Léger"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "軽い"
+          }
+        }
+      }
+    },
+    "Moderate": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Moderado"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Modéré"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "中程度"
           }
         }
       }
@@ -181,6 +335,28 @@
         }
       }
     },
+    "Pain now": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dolor ahora"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Douleur actuelle"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "現在の痛み"
+          }
+        }
+      }
+    },
     "Refresh": {
       "localizations": {
         "es": {
@@ -203,6 +379,28 @@
         }
       }
     },
+    "Severe": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grave"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sévère"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "重い"
+          }
+        }
+      }
+    },
     "Start Migraine": {
       "localizations": {
         "es": {
@@ -221,6 +419,94 @@
           "stringUnit": {
             "state": "translated",
             "value": "片頭痛を開始"
+          }
+        }
+      }
+    },
+    "Strong": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fuerte"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fort"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "強い"
+          }
+        }
+      }
+    },
+    "Tap again to end": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toca otra vez para terminar"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Touchez de nouveau pour terminer"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "もう一度タップして終了"
+          }
+        }
+      }
+    },
+    "Took medication": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tomé medicación"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "J’ai pris un médicament"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "服用した薬"
+          }
+        }
+      }
+    },
+    "Worst": {
+      "localizations": {
+        "es": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lo peor"
+          }
+        },
+        "fr-CA": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Le pire"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "最悪"
           }
         }
       }

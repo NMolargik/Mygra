@@ -10,5 +10,6 @@ import SwiftUI
 struct MygraWristWidgetsBundle: WidgetBundle {
     var body: some Widget {
         MygraWristWidgets()
+        MygraWristAttackWidget()
     }
 }

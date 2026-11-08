@@ -34,7 +34,7 @@ nonisolated public enum NotificationError: LocalizedError {
 
 @MainActor
 @Observable
-public final class NotificationManager: LocalNotifying {
+public final class NotificationManager: LocalNotifying, LocalNotificationScheduling {
     /// Resolved lazily: `UNUserNotificationCenter.current()` traps in processes without
     /// a bundle (host tests), and the composition root constructs this manager there.
     @ObservationIgnored private lazy var center = UNUserNotificationCenter.current()
@@ -112,5 +112,33 @@ public final class NotificationManager: LocalNotifying {
         } catch {
             throw NotificationError.schedulingFailed(underlying: error)
         }
+    }
+
+    // MARK: - LocalNotificationScheduling
+
+    /// Schedules a quiet (no sound) notification for `fireDate`, replacing any pending
+    /// request with the same identifier.
+    public func schedule(title: String, body: String, identifier: String, fireDate: Date, userInfo: [String: String]) async throws {
+        let content = UNMutableNotificationContent()
+        content.title = title
+        content.body = body
+        content.categoryIdentifier = LocalNotificationCategory.reminder.rawValue
+        content.userInfo = userInfo
+
+        let interval = max(1, fireDate.timeIntervalSinceNow)
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
+        let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+        do {
+            try await center.add(request)
+        } catch {
+            throw NotificationError.schedulingFailed(underlying: error)
+        }
+    }
+
+    public func cancel(identifiers: [String]) {
+        guard !identifiers.isEmpty else { return }
+        center.removePendingNotificationRequests(withIdentifiers: identifiers)
+        center.removeDeliveredNotifications(withIdentifiers: identifiers)
     }
 }

@@ -38,6 +38,8 @@ public struct DashboardView: View {
             VStack(alignment: .leading, spacing: Brand.Space.lg) {
                 StreakHeaderView(daysSince: MigraineStatistics.streakDays(migraineData.migraines), hasOngoing: migraineData.ongoingMigraine != nil, total: migraineData.migraines.count)
 
+                FinishLoggingCard()
+
                 if isRegularWidth {
                     HStack(alignment: .top, spacing: Brand.Space.lg) {
                         VStack(spacing: Brand.Space.lg) {

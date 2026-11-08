@@ -38,6 +38,11 @@ public protocol WidgetTimelineReloading {
 nonisolated public enum WidgetKind {
     public static let daysSinceLastMigraine = "DaysSinceLastMigraine"
     public static let daysSinceLastMigraineWatch = "DaysSinceLastMigraineWatch"
+    /// The Lock Screen widget that starts or reopens Attack Mode.
+    public static let attackMode = "AttackMode"
+    public static let attackModeWatch = "AttackModeWatch"
+    /// The Control Center control that starts or reopens Attack Mode.
+    public static let attackModeControl = "AttackModeControl"
 }
 
 // MARK: - Watch
@@ -146,6 +151,14 @@ extension LocalNotifying {
     public func sendTimeSensitive(title: String, body: String, identifier: String) async throws {
         try await send(title: title, body: body, identifier: identifier)
     }
+}
+
+/// Schedules a quiet local notification for a future date (UserNotifications impl in
+/// MygraServices). `userInfo["url"]` carries the `mygra://` deep link the tap opens.
+@MainActor
+public protocol LocalNotificationScheduling: AnyObject {
+    func schedule(title: String, body: String, identifier: String, fireDate: Date, userInfo: [String: String]) async throws
+    func cancel(identifiers: [String])
 }
 
 // MARK: - Weather

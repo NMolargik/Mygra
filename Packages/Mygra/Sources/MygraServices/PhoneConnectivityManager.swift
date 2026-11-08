@@ -28,6 +28,7 @@ public final class PhoneConnectivityManager: NSObject, WatchStatusPushing {
     @ObservationIgnored private var currentStatus: (() -> SharedMigraineStatus)?
     @ObservationIgnored private var endOngoing: (any EndOngoingMigraine)?
     @ObservationIgnored private var start: (any StartMigraine)?
+    @ObservationIgnored private var attack: (any AttackModeActions)?
 
     @ObservationIgnored private var session: WCSession?
 
@@ -39,11 +40,13 @@ public final class PhoneConnectivityManager: NSObject, WatchStatusPushing {
     public func configure(
         currentStatus: @escaping () -> SharedMigraineStatus,
         endOngoing: any EndOngoingMigraine,
-        start: any StartMigraine
+        start: any StartMigraine,
+        attack: (any AttackModeActions)? = nil
     ) {
         self.currentStatus = currentStatus
         self.endOngoing = endOngoing
         self.start = start
+        self.attack = attack
     }
 
     // MARK: - Activation
@@ -111,6 +114,26 @@ public final class PhoneConnectivityManager: NSObject, WatchStatusPushing {
             } else {
                 reply?(WatchCommandReply(success: false, error: .alreadyOngoing).payload)
             }
+
+        case .startAttack:
+            let started = attack?.startAttack()
+            reply?(WatchCommandReply(success: started != nil, migraineID: started?.id).payload)
+            if started != nil { pushCurrentStatus() }
+
+        case .setIntensity:
+            let recorded = message.painLevel.map { attack?.setIntensity($0) ?? false } ?? false
+            reply?(WatchCommandReply(success: recorded).payload)
+            if recorded { pushCurrentStatus() }
+
+        case .logMedication:
+            let logged = message.medication.map { attack?.logMedication($0) ?? false } ?? false
+            reply?(WatchCommandReply(success: logged).payload)
+            if logged { pushCurrentStatus() }
+
+        case .endAttack:
+            let ended = attack?.endAttack() ?? false
+            reply?(WatchCommandReply(success: ended).payload)
+            if ended { pushCurrentStatus() }
 
         case nil:
             break

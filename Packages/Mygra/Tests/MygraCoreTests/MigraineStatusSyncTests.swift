@@ -44,7 +44,7 @@ struct MigraineStatusSyncTests {
         let status = h.defaults.readSharedStatus()
         #expect(status.hasOngoingMigraine)
         #expect(status.lastMigraineStart.map { abs($0.timeIntervalSince(start)) < 1 } == true)
-        #expect(h.widgets.reloadedKinds == [WidgetKind.daysSinceLastMigraine])
+        #expect(h.widgets.reloadedKinds == [WidgetKind.daysSinceLastMigraine, WidgetKind.attackMode])
         #expect(h.watch.pushedStatuses.count == 1)
         #expect(h.activity.events.first == .started(h.repository.storage[0].id))
     }
@@ -71,8 +71,10 @@ struct MigraineStatusSyncTests {
         #expect(h.activity.events.last == .ended(migraine.id))
         #expect(h.watch.pushedStatuses.count == 2)
         #expect(h.defaults.readSharedStatus().hasOngoingMigraine == false)
-        // Widget only reloads when the last start changes.
-        #expect(h.widgets.reloadedKinds.count == 1)
+        // The days-since widget only reloads when the last start changes; the Attack Mode
+        // widget reloads whenever an attack starts or ends.
+        #expect(h.widgets.reloadedKinds.filter { $0 == WidgetKind.daysSinceLastMigraine }.count == 1)
+        #expect(h.widgets.reloadedKinds.filter { $0 == WidgetKind.attackMode }.count == 2)
     }
 
     @Test func levelChangesUpdateTheActivity() {
@@ -104,5 +106,33 @@ struct MigraineStatusSyncTests {
             try? await Task.sleep(for: .milliseconds(10))
         }
         #expect(h.defaults.readSharedStatus().hasOngoingMigraine)
+    }
+
+    @Test func attackDetailsReachTheWatchOnlyWhileOngoing() {
+        let h = Harness()
+        let migraine = makeMigraine(start: Date(), pain: 6, stress: 4)
+        h.repository.storage = [migraine]
+        h.sync.syncNow()
+        #expect(h.watch.pushedStatuses.last?.currentPainLevel == 6)
+        #expect(h.watch.pushedStatuses.last?.quickMedications.isEmpty == false)
+
+        // A pain change alone is enough to refresh the watch's Attack Mode.
+        migraine.painLevel = 8
+        h.sync.syncNow()
+        #expect(h.watch.pushedStatuses.last?.currentPainLevel == 8)
+
+        migraine.endDate = Date()
+        h.sync.syncNow()
+        #expect(h.watch.pushedStatuses.last?.currentPainLevel == nil)
+        #expect(h.watch.pushedStatuses.last?.quickMedications.isEmpty == true)
+    }
+
+    @Test func reassertingTheLiveActivityRestartsItForTheOngoingAttack() {
+        let h = Harness()
+        let migraine = makeMigraine(start: Date())
+        h.repository.storage = [migraine]
+        h.sync.syncNow()
+        h.sync.reassertLiveActivity()
+        #expect(h.activity.events == [.started(migraine.id), .started(migraine.id)])
     }
 }

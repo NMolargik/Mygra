@@ -1519,6 +1519,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "A dark, one-tap screen for logging during a severe migraine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una pantalla oscura de un toque para registrar durante una migraña intensa"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un écran sombre à un seul toucher pour consigner pendant une migraine intense"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強い片頭痛の間に1タップで記録できる暗い画面"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "A doctor-ready summary of your profile and every migraine." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3098,6 +3122,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "発作の詳細（%lld）"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attack Mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo Ataque"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作モード"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attack Mode logs a severe migraine with one tap and almost no light. Triggers and notes wait until the attack is over, then a quiet reminder offers to finish the entry." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El Modo Ataque registra una migraña intensa con un toque y casi sin luz. Los desencadenantes y las notas esperan a que termine el ataque; después, un recordatorio discreto te ofrece completar el registro."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le mode crise consigne une migraine intense en un seul toucher et avec presque aucune lumière. Les déclencheurs et les notes attendent la fin de la crise, puis un rappel discret vous propose de terminer la saisie."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作モードでは、強い片頭痛を1タップでほとんど光を出さずに記録できます。誘因とメモは発作が終わるまで待ち、その後に静かなリマインダーで記録の完了をご案内します。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Attack in progress" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ataque en curso"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crise en cours"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作中"
           }
         }
       },
@@ -6606,6 +6702,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "End Attack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminar ataque"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer la crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作を終了"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "End Date" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7630,6 +7750,78 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "フィルタが適用されています。解除するとより多くの片頭痛が表示されます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Finish Logging" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminar registro"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminer la saisie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録を完了"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Finish logging your migraine" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Termina de registrar tu migraña"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminez la saisie de votre migraine"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛の記録を完了しましょう"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Finish-Logging Reminder" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordatorio para terminar el registro"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rappel de fin de saisie"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録完了のリマインダー"
           }
         }
       },
@@ -10581,6 +10773,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Log %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrar %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を記録"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Log a Migraine" : {
       "localizations" : {
         "es" : {
@@ -10718,6 +10934,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最初の片頭痛を記録するとパターンが見えてきます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Logged %@ at %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Registrado: %@ a las %@"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ enregistré à %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@を%@に記録しました"
           }
         }
       },
@@ -11941,6 +12181,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Mild" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leve"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Léger"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "軽い"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Minimum Pain: %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11960,6 +12224,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "最小の痛み：%lld"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Moderate" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moderado"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modéré"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "中程度"
           }
         }
       },
@@ -14145,6 +14433,30 @@
         }
       }
     },
+    "Open Attack Mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abrir Modo Ataque"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrir le mode crise"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "発作モードを開く"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Open Migraine Assistant" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14713,6 +15025,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Pain %lld of 10" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolor %lld de 10"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douleur %lld sur 10"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "痛み 10段階中%lld"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Pain %lld out of 10" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -14828,6 +15164,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "痛みとストレスのレベルは 0〜10 の範囲で指定してください。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Pain now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dolor ahora"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Douleur actuelle"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在の痛み"
           }
         }
       },
@@ -16225,6 +16585,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Remind Me After" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recordarme después de"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me rappeler après"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "リマインドまでの時間"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Remove" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -16964,6 +17348,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "設定"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Severe" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sévère"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重い"
           }
         }
       },
@@ -18017,6 +18425,30 @@
         }
       }
     },
+    "Starts a migraine and opens Attack Mode, a dark screen for logging with one tap. Opens the attack already in progress if there is one." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inicia una migraña y abre el Modo Ataque, una pantalla oscura para registrar con un toque. Si ya hay un ataque en curso, abre ese."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Démarre une migraine et ouvre le mode crise, un écran sombre pour consigner en un seul toucher. Ouvre la crise en cours s’il y en a une."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "片頭痛を開始し、1タップで記録できる暗い画面「発作モード」を開きます。進行中の発作がある場合は、それを開きます。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Step %lld of %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18330,6 +18762,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "ストレス：%lld"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Strong" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fuerte"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fort"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "強い"
           }
         }
       },
@@ -18908,6 +19364,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "服用時刻"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Tap again to end" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca otra vez para terminar"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez de nouveau pour terminer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "もう一度タップして終了"
           }
         }
       },
@@ -19556,6 +20036,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "カフェインの摂りすぎ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Took medication" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tomé medicación"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J’ai pris un médicament"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "服用した薬"
           }
         }
       },
@@ -21145,6 +21649,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "When you feel up to it, add triggers and notes while you still remember." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuando te sientas mejor, añade desencadenantes y notas mientras aún lo recuerdes."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand vous vous sentirez mieux, ajoutez les déclencheurs et les notes pendant que vous vous en souvenez."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "体調が戻ったら、覚えているうちに誘因とメモを追加しましょう。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "When you have a headache, how often do you wish you could lie down?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -21236,6 +21764,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "みぞれ混じり"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Worst" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lo peor"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le pire"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最悪"
           }
         }
       },
@@ -21710,6 +22262,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "あなたのタグ"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Your attack from %@ is saved. Add triggers and notes whenever you feel up to it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ataque del %@ está guardado. Añade desencadenantes y notas cuando te sientas con fuerzas."
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre crise du %@ est enregistrée. Ajoutez les déclencheurs et les notes quand vous vous sentirez prêt."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@の発作は保存されました。余裕ができたときに誘因とメモを追加してください。"
           }
         }
       },

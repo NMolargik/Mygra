@@ -19,6 +19,7 @@ public struct MigraineDetailView: View {
     @Environment(InsightModel.self) private var insights
     @Environment(WeatherManager.self) private var weatherManager
     @Environment(HealthManager.self) private var healthManager
+    @Environment(AttackModeModel.self) private var attackMode
     @Environment(\.dismiss) private var dismiss
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
@@ -53,6 +54,20 @@ public struct MigraineDetailView: View {
                     onEndTap: { showingEndSheet = true }
                 )
 
+                if migraine.isOngoing {
+                    Button {
+                        Haptics.lightImpact()
+                        attackMode.present()
+                    } label: {
+                        Label("Open Attack Mode", systemImage: "moon.fill")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                    }
+                    .secondaryActionButton(tint: .mygraPurple)
+                    .accessibilityIdentifier("openAttackModeButton")
+                    .accessibilityHint("A dark, one-tap screen for logging during a severe migraine")
+                }
+
                 IntensityChartView(
                     samples: migraine.intensitySamples ?? [],
                     onUpdateIntensity: migraine.isOngoing ? { showingIntensitySheet = true } : nil
@@ -84,6 +99,12 @@ public struct MigraineDetailView: View {
         .navigationSubtitleIfAvailable(DateFormatting.date(migraine.startDate, useDMY: useDayMonthYearDates))
         .navigationBarTitleDisplayMode(.inline)
         .toolbar { toolbarContent }
+        // The deferred "finish logging" prompt lands here and opens Modify, pre-filled.
+        .onChange(of: attackMode.finishRequestID, initial: true) { _, requested in
+            guard requested == migraine.id, !migraine.isOngoing else { return }
+            attackMode.finishRequestID = nil
+            showingModifySheet = true
+        }
         .sheet(isPresented: $showingIntensitySheet) {
             IntensityUpdateSheet(migraine: migraine) { pain, stress, note in
                 migraineData.addIntensitySample(to: migraine, painLevel: pain, stressLevel: stress, note: note)
@@ -205,6 +226,8 @@ public struct MigraineDetailView: View {
             m.painLevel = edits.painLevel
             m.stressLevel = edits.stressLevel
             m.triggers = Array(edits.triggers)
+            let trimmedNote = edits.note.trimmingCharacters(in: .whitespacesAndNewlines)
+            m.note = trimmedNote.isEmpty ? nil : trimmedNote
         }
 
         Task {

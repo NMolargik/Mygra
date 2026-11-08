@@ -26,6 +26,7 @@ struct MainView: View {
     @Environment(MigraineDataModel.self) private var migraineData
     @Environment(InsightModel.self) private var insights
     @Environment(SubscriptionManager.self) private var subscription
+    @Environment(AttackModeModel.self) private var attackMode
 
     let session: SessionController
 
@@ -36,6 +37,7 @@ struct MainView: View {
     var body: some View {
         @Bindable var router = router
         @Bindable var paywall = session.paywall
+        @Bindable var attackMode = attackMode
         TabView(selection: $router.selectedTab) {
             Tab(AppTab.dashboard.title, systemImage: AppTab.dashboard.systemImage, value: .dashboard) {
                 NavigationStack(path: $navigation.dashboardPath) {
@@ -102,6 +104,9 @@ struct MainView: View {
                 MigraineAssistantView()
                     .presentationSizing(.page)
             }
+        }
+        .fullScreenCover(isPresented: $attackMode.isPresented) {
+            AttackModeView()
         }
         .sheet(item: $paywall.request) { request in
             PaywallView(feature: request.feature)
@@ -196,6 +201,12 @@ struct MainView: View {
             }
         case .endOngoing:
             migraineData.endOngoing()
+        case .attackMode:
+            // Starts an attack when none is active, otherwise opens the one in progress.
+            attackMode.enter()
+        case .finishLogging(let id):
+            attackMode.requestFinish(id)
+            navigateToMigraine(id: id)
         }
     }
 

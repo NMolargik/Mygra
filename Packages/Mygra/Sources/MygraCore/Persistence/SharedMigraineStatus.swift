@@ -14,17 +14,26 @@ nonisolated public struct SharedMigraineStatus: Equatable, Sendable {
     public var lastMigraineStart: Date?
     /// Whether a migraine is currently ongoing.
     public var hasOngoingMigraine: Bool
+    /// The ongoing attack's current pain level (0 to 10); nil when none is ongoing.
+    public var currentPainLevel: Int?
+    /// The user's usual medications for one-tap logging on the watch; empty when no
+    /// attack is ongoing.
+    public var quickMedications: [QuickMedication]
 
     public enum Keys {
         public static let lastMigraineStart = "lastMigraineStart"
         public static let hasOngoingMigraine = "hasOngoingMigraine"
+        public static let currentPainLevel = "currentPainLevel"
+        public static let quickMedications = "quickMedications"
     }
 
     public static let empty = SharedMigraineStatus(lastMigraineStart: nil, hasOngoingMigraine: false)
 
-    public init(lastMigraineStart: Date?, hasOngoingMigraine: Bool) {
+    public init(lastMigraineStart: Date?, hasOngoingMigraine: Bool, currentPainLevel: Int? = nil, quickMedications: [QuickMedication] = []) {
         self.lastMigraineStart = lastMigraineStart
         self.hasOngoingMigraine = hasOngoingMigraine
+        self.currentPainLevel = currentPainLevel
+        self.quickMedications = quickMedications
     }
 
     // MARK: - Key-value storage
@@ -34,6 +43,9 @@ nonisolated public struct SharedMigraineStatus: Equatable, Sendable {
         let raw = defaults?.double(forKey: Keys.lastMigraineStart) ?? 0
         self.lastMigraineStart = Self.date(fromStoredInterval: raw)
         self.hasOngoingMigraine = defaults?.bool(forKey: Keys.hasOngoingMigraine) ?? false
+        self.currentPainLevel = defaults?.object(forKey: Keys.currentPainLevel) as? Int
+        self.quickMedications = defaults?.data(forKey: Keys.quickMedications)
+            .flatMap { try? JSONDecoder().decode([QuickMedication].self, from: $0) } ?? []
     }
 
     /// Persists the status to a defaults store.
@@ -44,6 +56,16 @@ nonisolated public struct SharedMigraineStatus: Equatable, Sendable {
             defaults?.removeObject(forKey: Keys.lastMigraineStart)
         }
         defaults?.set(hasOngoingMigraine, forKey: Keys.hasOngoingMigraine)
+        if let currentPainLevel {
+            defaults?.set(currentPainLevel, forKey: Keys.currentPainLevel)
+        } else {
+            defaults?.removeObject(forKey: Keys.currentPainLevel)
+        }
+        if quickMedications.isEmpty {
+            defaults?.removeObject(forKey: Keys.quickMedications)
+        } else {
+            defaults?.set(try? JSONEncoder().encode(quickMedications), forKey: Keys.quickMedications)
+        }
     }
 
     // MARK: - Wire payload (WatchConnectivity)
@@ -51,10 +73,13 @@ nonisolated public struct SharedMigraineStatus: Equatable, Sendable {
     /// The `[String: Any]` form sent over WatchConnectivity (application context,
     /// complication user info, live messages, and status replies).
     public var payload: [String: Any] {
-        [
+        var dictionary: [String: Any] = [
             Keys.lastMigraineStart: lastMigraineStart?.timeIntervalSince1970 ?? 0,
             Keys.hasOngoingMigraine: hasOngoingMigraine,
         ]
+        if let currentPainLevel { dictionary[Keys.currentPainLevel] = currentPainLevel }
+        dictionary[Keys.quickMedications] = quickMedications.map(\.payload)
+        return dictionary
     }
 
     /// Decodes a WatchConnectivity payload. Returns nil when neither key is present.
@@ -64,6 +89,8 @@ nonisolated public struct SharedMigraineStatus: Equatable, Sendable {
         guard rawStart != nil || ongoing != nil else { return nil }
         self.lastMigraineStart = rawStart.flatMap(Self.date(fromStoredInterval:))
         self.hasOngoingMigraine = ongoing ?? false
+        self.currentPainLevel = payload[Keys.currentPainLevel] as? Int
+        self.quickMedications = (payload[Keys.quickMedications] as? [[String: Any]])?.compactMap(QuickMedication.init(payload:)) ?? []
     }
 
     /// Normalizes any legacy values stored in milliseconds; zero means "none".

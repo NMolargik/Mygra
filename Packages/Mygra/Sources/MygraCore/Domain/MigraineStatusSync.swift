@@ -65,9 +65,19 @@ public final class MigraineStatusSync {
     /// The current status as the store sees it (also the watch's status reply).
     public func currentStatus() -> SharedMigraineStatus {
         guard let migraines = try? loadMigraines() else { return lastStatus }
+        return Self.status(for: migraines)
+    }
+
+    /// The shared status for a set of migraines. While an attack is ongoing it also
+    /// carries the current pain level and the usual medications, which the watch's
+    /// Attack Mode shows.
+    static func status(for migraines: [Migraine]) -> SharedMigraineStatus {
+        let ongoing = migraines.first(where: \.isOngoing)
         return SharedMigraineStatus(
             lastMigraineStart: migraines.first?.startDate,
-            hasOngoingMigraine: migraines.contains(where: \.isOngoing)
+            hasOngoingMigraine: ongoing != nil,
+            currentPainLevel: ongoing?.painLevel,
+            quickMedications: ongoing == nil ? [] : QuickMedications.suggestions(from: MedicationOveruse.doses(in: migraines))
         )
     }
 
@@ -82,10 +92,7 @@ public final class MigraineStatusSync {
         }
 
         let ongoing = migraines.first(where: \.isOngoing)
-        let current = SharedMigraineStatus(
-            lastMigraineStart: migraines.first?.startDate,
-            hasOngoingMigraine: ongoing != nil
-        )
+        let current = Self.status(for: migraines)
 
         reconcileLiveActivity(with: ongoing)
 
@@ -98,6 +105,8 @@ public final class MigraineStatusSync {
             }
         }()
         let changedOngoing = previous.hasOngoingMigraine != current.hasOngoingMigraine
+        let changedAttackDetails = previous.currentPainLevel != current.currentPainLevel
+            || previous.quickMedications != current.quickMedications
 
         sharedDefaults?.writeSharedStatus(current)
         lastStatus = current
@@ -105,9 +114,26 @@ public final class MigraineStatusSync {
         if changedLastStart {
             widgets?.reloadTimelines(ofKind: WidgetKind.daysSinceLastMigraine)
         }
-        if changedLastStart || changedOngoing {
+        if changedOngoing {
+            widgets?.reloadTimelines(ofKind: WidgetKind.attackMode)
+        }
+        if changedLastStart || changedOngoing || changedAttackDetails {
             watch?.pushStatus(current)
         }
+    }
+
+    /// Re-asserts the Live Activity for the ongoing attack. ActivityKit refuses requests
+    /// made while the app is in the background (a watch start can arrive that way), so the
+    /// app calls this when it becomes active. Idempotent.
+    public func reassertLiveActivity() {
+        guard let liveActivity, let migraines = try? loadMigraines(), let ongoing = migraines.first(where: \.isOngoing) else { return }
+        liveActivity.ensureStarted(
+            for: ongoing.id,
+            startDate: ongoing.startDate,
+            painLevel: ongoing.painLevel,
+            stressLevel: ongoing.stressLevel,
+            note: ongoing.note ?? ""
+        )
     }
 
     private func reconcileLiveActivity(with ongoing: Migraine?) {

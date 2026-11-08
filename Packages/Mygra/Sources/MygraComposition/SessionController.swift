@@ -32,6 +32,7 @@ public final class SessionController {
     public let tagData: TagDataModel
     public let userData: UserDataModel
     public let insights: InsightModel
+    public let attackMode: AttackModeModel
     public let cloudSyncManager: CloudSyncManager
     public let weatherManager: WeatherManager
     public let notificationManager: NotificationManager
@@ -218,6 +219,18 @@ public final class SessionController {
         medicationNotifier = MedicationOveruseNotifier(notifications: notifications, defaults: defaults)
         assessmentStore = ClinicalAssessmentStore(defaults: defaults)
 
+        let attackMode = AttackModeModel(
+            migraineData: migraineData,
+            startAttack: StartAttackUseCase(repository: migraineRepository, start: startMigraine),
+            recordIntensity: RecordAttackIntensityUseCase(repository: migraineRepository, record: recordSample),
+            logMedication: LogAttackMedicationUseCase(repository: migraineRepository, log: LogMedicationUseCase(repository: migraineRepository)),
+            endAttack: EndAttackUseCase(repository: migraineRepository, end: endOngoing),
+            coordinator: FinishLoggingCoordinator(defaults: defaults, scheduler: notifications),
+            observeChanges: observeChanges,
+            toastManager: toastManager
+        )
+        self.attackMode = attackMode
+
         #if canImport(WatchConnectivity)
         let phone = PhoneConnectivityManager()
         phoneConnectivity = phone
@@ -246,7 +259,8 @@ public final class SessionController {
         phone.configure(
             currentStatus: { [statusSync] in statusSync.currentStatus() },
             endOngoing: endOngoing,
-            start: startMigraine
+            start: startMigraine,
+            attack: attackMode
         )
         #endif
 
@@ -321,7 +335,21 @@ public final class SessionController {
         router.open(url: url)
     }
 
-    /// Picks up a deep link stashed by an `openAppWhenRun` App Intent (call on activation).
+    /// Starts an attack when none is active, then shows Attack Mode (the Action button /
+    /// Siri intent; widgets and the Control arrive as `mygra://attack-mode`).
+    public func enterAttackMode() {
+        attackMode.enter()
+    }
+
+    /// Call when the app becomes active: picks up intent hand-offs and re-asserts the
+    /// Live Activity (an attack started from the watch while the app was suspended could
+    /// not start one).
+    public func appDidBecomeActive() {
+        consumePendingDeepLinkFromIntents()
+        statusSync.reassertLiveActivity()
+    }
+
+    /// Picks up a deep link stashed by an `openAppWhenRun` App Intent.
     public func consumePendingDeepLinkFromIntents() {
         if let link = DeepLink.takePending(from: sharedDefaults) {
             router.open(link)
