@@ -36,6 +36,7 @@ public struct RootView: View {
             .environment(session.tagData)
             .environment(session.userData)
             .environment(session.insights)
+            .environment(session.attackMode)
             .environment(session.toastManager)
             .environment(session.cloudSyncManager)
             .environment(session.weatherManager)

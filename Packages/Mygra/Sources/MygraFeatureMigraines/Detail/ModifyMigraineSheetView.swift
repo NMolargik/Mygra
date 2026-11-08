@@ -19,6 +19,7 @@ struct MigraineEdits: Equatable {
     var stressLevel: Int
     var triggers: Set<MigraineTrigger>
     var additions: IntakeAdditions
+    var note: String = ""
 
     /// Validates the timing. Returns a user-facing message when invalid.
     static func validationMessage(startDate: Date, endDate: Date?, now: Date = Date()) -> String? {
@@ -42,6 +43,7 @@ struct ModifyMigraineSheetView: View {
     @State private var editPainLevel: Int
     @State private var editStressLevel: Int
     @State private var selectedTriggers: Set<MigraineTrigger>
+    @State private var noteText: String
     @State private var modifyError: String?
     @State private var additions = IntakeAdditions()
     @State private var isEditingIntake = false
@@ -56,6 +58,7 @@ struct ModifyMigraineSheetView: View {
         _editPainLevel = State(initialValue: migraine.painLevel)
         _editStressLevel = State(initialValue: migraine.stressLevel)
         _selectedTriggers = State(initialValue: Set(migraine.triggers))
+        _noteText = State(initialValue: migraine.note ?? "")
     }
 
     var body: some View {
@@ -100,6 +103,14 @@ struct ModifyMigraineSheetView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+
+                Section {
+                    TextEditor(text: $noteText)
+                        .frame(minHeight: 100)
+                        .accessibilityIdentifier("modifyNoteEditor")
+                } header: {
+                    Text("Notes")
+                }
             }
             .navigationTitle("Modify Migraine")
             .toolbar {
@@ -137,7 +148,8 @@ struct ModifyMigraineSheetView: View {
             painLevel: editPainLevel,
             stressLevel: editStressLevel,
             triggers: selectedTriggers,
-            additions: additions
+            additions: additions,
+            note: noteText
         ))
     }
 }

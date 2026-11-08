@@ -22,9 +22,13 @@ public struct SettingsView: View {
     @Environment(ToastManager.self) private var toastManager
     @Environment(SubscriptionManager.self) private var subscription
     @Environment(PaywallPresenter.self) private var paywall
+    @Environment(AttackModeModel.self) private var attackMode
+    @Environment(NotificationManager.self) private var notificationManager
 
     @AppStorage(AppStorageKeys.useMetricUnits) private var useMetricUnits: Bool = false
     @AppStorage(AppStorageKeys.useDayMonthYearDates) private var useDayMonthYearDates: Bool = false
+    @AppStorage(AppStorageKeys.attackFinishPromptEnabled) private var attackFinishPromptEnabled: Bool = true
+    @AppStorage(AppStorageKeys.attackFinishPromptDelayMinutes) private var attackFinishPromptDelayMinutes: Int = FinishLoggingSettings.defaultDelayMinutes
 
     @State private var viewModel = ViewModel()
 
@@ -36,6 +40,7 @@ public struct SettingsView: View {
             plusSection
             CloudSyncSection()
             preferencesSection
+            attackModeSection
             dashboardSection
             tagsSection
             dataSection
@@ -224,6 +229,48 @@ public struct SettingsView: View {
         } header: {
             Text("Preferences")
         }
+    }
+
+    /// Attack Mode is free. This only controls the gentle follow-up after an attack ends.
+    private var attackModeSection: some View {
+        Section {
+            Toggle(isOn: hapticBinding($attackFinishPromptEnabled)) {
+                Label("Finish-Logging Reminder", systemImage: "moon.zzz.fill")
+                    .labelStyle(.settingsIcon(.indigo))
+            }
+            .tint(.indigo)
+            .accessibilityIdentifier("finishPromptToggle")
+            .onChange(of: attackFinishPromptEnabled) { _, isOn in
+                attackMode.finishPromptSettingsChanged()
+                if isOn, notificationManager.authorizationStatus == .notDetermined {
+                    Task { try? await notificationManager.requestAuthorization() }
+                }
+            }
+
+            if attackFinishPromptEnabled {
+                Picker(selection: $attackFinishPromptDelayMinutes) {
+                    ForEach(FinishLoggingSettings.delayOptions, id: \.self) { minutes in
+                        Text(Self.delayText(minutes)).tag(minutes)
+                    }
+                } label: {
+                    Label("Remind Me After", systemImage: "clock")
+                        .labelStyle(.settingsIcon(.gray))
+                }
+                .accessibilityIdentifier("finishPromptDelayPicker")
+            }
+        } header: {
+            Text("Attack Mode")
+        } footer: {
+            Text("Attack Mode logs a severe migraine with one tap and almost no light. Triggers and notes wait until the attack is over, then a quiet reminder offers to finish the entry.")
+        }
+    }
+
+    private static func delayText(_ minutes: Int) -> String {
+        let interval = TimeInterval(minutes * 60)
+        let formatter = DateComponentsFormatter()
+        formatter.allowedUnits = minutes >= 60 ? [.hour] : [.minute]
+        formatter.unitsStyle = .full
+        return formatter.string(from: interval) ?? "\(minutes)"
     }
 
     private var dashboardSection: some View {

@@ -183,6 +183,8 @@ public struct PreviewEnvironment {
     public let tagData: TagDataModel
     public let userData: UserDataModel
     public let insights: InsightModel
+    public let attackMode: AttackModeModel
+    public let router = AppRouter()
     public let weatherManager: WeatherManager
     public let notificationManager = NotificationManager()
     public let cloudSyncManager = CloudSyncManager()
@@ -247,6 +249,18 @@ public struct PreviewEnvironment {
             intelligence: PreviewIntelligence(),
             entitlement: entitlement
         )
+        let record = RecordIntensitySampleUseCase(repository: migraineRepository)
+        let endOngoing = EndOngoingMigraineUseCase(repository: migraineRepository, update: update)
+        attackMode = AttackModeModel(
+            migraineData: migraineData,
+            startAttack: StartAttackUseCase(repository: migraineRepository, start: StartMigraineUseCase(repository: migraineRepository, log: log)),
+            recordIntensity: RecordAttackIntensityUseCase(repository: migraineRepository, record: record),
+            logMedication: LogAttackMedicationUseCase(repository: migraineRepository, log: LogMedicationUseCase(repository: migraineRepository)),
+            endAttack: EndAttackUseCase(repository: migraineRepository, end: endOngoing),
+            coordinator: FinishLoggingCoordinator(defaults: UserDefaults.standard),
+            observeChanges: observe,
+            toastManager: toastManager
+        )
         weatherManager = WeatherManager(locationManager: LocationManager())
     }
 }
@@ -267,6 +281,8 @@ extension View {
             .environment(env.toastManager)
             .environment(env.subscription)
             .environment(env.paywall)
+            .environment(env.attackMode)
+            .environment(env.router)
         #if canImport(HealthKit) && !os(macOS)
         return base.environment(env.healthManager)
         #else

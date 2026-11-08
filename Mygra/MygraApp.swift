@@ -75,7 +75,7 @@ struct MygraApp: App {
                     case .background where !Self.isRunningTests:
                         bgWeatherTaskScheduled = BackgroundWeatherRefresh.schedule()
                     case .active:
-                        session.consumePendingDeepLinkFromIntents()
+                        session.appDidBecomeActive()
                         consumeQuickAction()
                     default:
                         break

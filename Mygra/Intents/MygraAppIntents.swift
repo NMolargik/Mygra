@@ -86,6 +86,25 @@ struct LogMigraineIntent: AppIntent {
     }
 }
 
+// MARK: - Start Migraine: Attack Mode (Action button, Siri, Shortcuts)
+
+/// "Start Migraine": begins an attack and opens Attack Mode, the near-dark one-tap
+/// logging screen. If an attack is already active it opens that one instead of starting
+/// a second. Assign it to the Action button, or say it to Siri.
+struct StartAttackIntent: AppIntent {
+    static let title: LocalizedStringResource = "Start Migraine"
+    static let description = IntentDescription("Starts a migraine and opens Attack Mode, a dark screen for logging with one tap. Opens the attack already in progress if there is one.")
+    static let openAppWhenRun = true
+
+    @Dependency private var session: SessionController
+
+    @MainActor
+    func perform() async throws -> some IntentResult {
+        session.enterAttackMode()
+        return .result()
+    }
+}
+
 // MARK: - Start tracking an ongoing migraine (background)
 
 struct StartMigraineIntent: AppIntent {

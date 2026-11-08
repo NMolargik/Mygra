@@ -12,6 +12,7 @@
 
 import SwiftUI
 import UIKit
+import UserNotifications
 import MygraCore
 
 /// Bridge between the UIKit delegate world and SwiftUI. The `shared` instance exists
@@ -27,6 +28,17 @@ final class QuickActionRelay {
 }
 
 final class QuickActionAppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        // `UNUserNotificationCenter.current()` traps without a bundle, so skip under tests.
+        if !MygraApp.isRunningTests {
+            UNUserNotificationCenter.current().delegate = NotificationRouter.shared
+        }
+        return true
+    }
+
     func application(
         _ application: UIApplication,
         configurationForConnecting session: UISceneSession,

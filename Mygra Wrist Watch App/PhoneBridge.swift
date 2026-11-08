@@ -68,6 +68,44 @@ final class PhoneBridge: NSObject {
         await send(WatchMessage(command: .startMigraine, painLevel: painLevel, stressLevel: stressLevel))
     }
 
+    // MARK: - Attack Mode
+
+    /// Starts an attack on the phone, or reports the one already in progress.
+    func startAttack() async -> WatchCommandReply {
+        await send(WatchMessage(command: .startAttack))
+    }
+
+    /// Records an intensity sample at `painLevel` on the ongoing attack.
+    func setIntensity(_ painLevel: Int) async -> WatchCommandReply {
+        await send(WatchMessage(command: .setIntensity, painLevel: painLevel))
+    }
+
+    /// Logs `medication` as taken now on the ongoing attack.
+    func logMedication(_ medication: QuickMedication) async -> WatchCommandReply {
+        await send(WatchMessage(command: .logMedication, medication: medication))
+    }
+
+    /// Ends the attack; the phone queues the deferred finish-logging prompt.
+    func endAttack() async -> WatchCommandReply {
+        await send(WatchMessage(command: .endAttack))
+    }
+
+    /// The complication's one action: start an attack when none is active (waiting briefly
+    /// for the phone on a cold launch), then the app shows Attack Mode.
+    func openAttackMode() async {
+        refresh()
+        for _ in 0..<8 where !isPhoneReachable {
+            try? await Task.sleep(for: .milliseconds(500))
+            refreshConnectivity()
+        }
+        guard !status.hasOngoingMigraine else { return }
+        let reply = await startAttack()
+        if reply.success {
+            apply(SharedMigraineStatus(lastMigraineStart: Date(), hasOngoingMigraine: true, currentPainLevel: StartAttackUseCase.defaultLevel, quickMedications: status.quickMedications))
+            requestStatus()
+        }
+    }
+
     private func send(_ message: WatchMessage) async -> WatchCommandReply {
         guard WCSession.isSupported(), WCSession.default.isReachable else {
             return WatchCommandReply(success: false)

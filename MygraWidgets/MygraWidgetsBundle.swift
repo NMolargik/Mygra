@@ -11,5 +11,7 @@ struct MygraWidgetsBundle: WidgetBundle {
     var body: some Widget {
         MygraWidgetsLiveActivity()
         MygraWidgetsDaysSinceLastMigraine()
+        MygraWidgetsAttackMode()
+        MygraAttackModeControl()
     }
 }

@@ -37,6 +37,9 @@ public final class AttackModeModel: AttackModeActions {
     /// Whether the full-screen Attack Mode cover is showing.
     public var isPresented = false
     public private(set) var machine = AttackStateMachine()
+    /// Set when the finish-logging prompt is opened; the migraine's detail screen claims
+    /// it and presents the pre-filled Modify sheet.
+    public var finishRequestID: UUID?
     /// The last dose logged this session, for the quiet confirmation line.
     public private(set) var lastLoggedMedication: (medication: QuickMedication, date: Date)?
 
@@ -162,7 +165,14 @@ public final class AttackModeModel: AttackModeActions {
 
     // MARK: - Finish logging
 
-    /// The user is opening the detail flow (or skipping): the item no longer needs a prompt.
+    /// The prompt was opened: forget its card and notification and ask the detail screen
+    /// to present the Modify sheet.
+    public func requestFinish(_ id: UUID) {
+        coordinator.resolve(id)
+        finishRequestID = id
+    }
+
+    /// The user chose "Not now": the item no longer needs a prompt.
     public func resolveFinish(_ id: UUID) {
         coordinator.resolve(id)
     }

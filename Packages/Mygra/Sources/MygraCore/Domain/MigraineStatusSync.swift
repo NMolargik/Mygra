@@ -114,6 +114,9 @@ public final class MigraineStatusSync {
         if changedLastStart {
             widgets?.reloadTimelines(ofKind: WidgetKind.daysSinceLastMigraine)
         }
+        if changedOngoing {
+            widgets?.reloadTimelines(ofKind: WidgetKind.attackMode)
+        }
         if changedLastStart || changedOngoing || changedAttackDetails {
             watch?.pushStatus(current)
         }

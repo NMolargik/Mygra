@@ -38,6 +38,11 @@ public protocol WidgetTimelineReloading {
 nonisolated public enum WidgetKind {
     public static let daysSinceLastMigraine = "DaysSinceLastMigraine"
     public static let daysSinceLastMigraineWatch = "DaysSinceLastMigraineWatch"
+    /// The Lock Screen widget that starts or reopens Attack Mode.
+    public static let attackMode = "AttackMode"
+    public static let attackModeWatch = "AttackModeWatch"
+    /// The Control Center control that starts or reopens Attack Mode.
+    public static let attackModeControl = "AttackModeControl"
 }
 
 // MARK: - Watch

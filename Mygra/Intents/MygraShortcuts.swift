@@ -11,7 +11,7 @@ import AppIntents
 struct MygraShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
-            intent: StartMigraineIntent(),
+            intent: StartAttackIntent(),
             phrases: [
                 "Start tracking a migraine in \(.applicationName)",
                 "Log a new migraine in \(.applicationName)",
