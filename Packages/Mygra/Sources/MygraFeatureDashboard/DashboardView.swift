@@ -2,7 +2,8 @@
 //  DashboardView.swift
 //  MygraFeatureDashboard
 //
-//  Weather, the assistant entry, today's Health stats with Quick Add, and Quick Bits.
+//  Weather, the assistant entry, Quick Bits, and today's Health stats with Quick Add (a
+//  single compact row until Health is connected, so insights always lead).
 //  The assistant and Quick Bits are Mygra Plus; free users see locked cards that open
 //  the paywall with the feature as context.
 //  Cards stack on iPhone and flow into two balanced columns at regular widths (iPad
@@ -52,7 +53,7 @@ public struct DashboardView: View {
     private var scrollContent: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: Brand.Space.lg) {
-                StreakHeaderView(daysSince: MigraineStatistics.streakDays(migraineData.migraines), hasOngoing: migraineData.ongoingMigraine != nil, total: migraineData.migraines.count)
+                StreakHeaderView(recency: MigraineRecency.of(migraineData.migraines, hasOngoing: migraineData.ongoingMigraine != nil), total: migraineData.migraines.count)
 
                 FinishLoggingCard()
 
@@ -62,18 +63,18 @@ public struct DashboardView: View {
                             MedicationOveruseCard()
                             weatherCard
                             assistantCard
-                            todayCard
                         }
                         VStack(spacing: Brand.Space.lg) {
                             quickBits
+                            todayCard
                         }
                     }
                 } else {
                     MedicationOveruseCard()
                     weatherCard
                     assistantCard
-                    todayCard
                     quickBits
+                    todayCard
                 }
 
                 Color.clear.frame(height: Brand.Space.md)
@@ -231,54 +232,63 @@ extension DashboardView {
 
 // MARK: - Streak header
 
-/// The one number that matters most, up top: days since the last migraine (or the
-/// ongoing state), with a quiet lifetime count.
+/// The one place the app says how long it has been: the last migraine in plain relative
+/// words (or the migraine-free streak, or the ongoing state), with a quiet lifetime count.
+/// The floating pill carries only the Log action, so this is never repeated.
 private struct StreakHeaderView: View {
-    let daysSince: Int
-    let hasOngoing: Bool
+    let recency: MigraineRecency
     let total: Int
 
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: Brand.Space.md) {
             VStack(alignment: .leading, spacing: 2) {
-                if hasOngoing {
+                switch recency {
+                case .ongoing:
                     Text("Migraine in progress")
                         .font(.title2.weight(.bold))
                         .foregroundStyle(LinearGradient.mygraHorizontal)
-                    Text("Hang in there — log updates as it changes.")
+                    Text("Hang in there. Update your log as it changes.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                } else if total == 0 {
+                case .none:
                     Text("Welcome to Mygra")
                         .font(.title2.weight(.bold))
                     Text("Log your first migraine to start seeing patterns.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                } else if daysSince == 0 {
-                    Text("Last migraine today")
-                        .font(.title2.weight(.bold))
-                    Text("Rest up — \(total) logged in total.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                } else {
-                    HStack(alignment: .firstTextBaseline, spacing: Brand.Space.xs) {
-                        Text(daysSince, format: .number)
-                            .font(.system(size: 40, weight: .bold, design: .rounded))
-                            .monospacedDigit()
-                            .foregroundStyle(LinearGradient.mygraHorizontal)
-                            .contentTransition(.numericText())
-                        Text(daysSince == 1 ? "day migraine-free" : "days migraine-free")
-                            .font(.headline)
-                    }
-                    Text("\(total) logged in total")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                case .withinHour:
+                    title(Text("Last migraine less than an hour ago"))
+                    totalLine
+                case .hoursAgo(let hours):
+                    title(Text("Last migraine \(hours) hours ago"))
+                    totalLine
+                case .daysAgo(let days):
+                    title(Text("Last migraine \(days) days ago"))
+                    totalLine
+                case .migraineFree(let days):
+                    title(Text("No migraines in \(days) days"), accent: true)
+                    totalLine
                 }
             }
             Spacer(minLength: 0)
         }
         .padding(.horizontal, Brand.Space.xs)
         .accessibilityElement(children: .combine)
+    }
+
+    @ContentBuilder
+    private func title(_ text: Text, accent: Bool = false) -> some View {
+        if accent {
+            text.font(.title2.weight(.bold)).foregroundStyle(LinearGradient.mygraHorizontal)
+        } else {
+            text.font(.title2.weight(.bold))
+        }
+    }
+
+    private var totalLine: some View {
+        Text("\(total) logged in total")
+            .font(.subheadline)
+            .foregroundStyle(.secondary)
     }
 }
 
