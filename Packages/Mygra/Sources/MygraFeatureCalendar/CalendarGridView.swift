@@ -14,6 +14,8 @@ struct CalendarGridView: View {
     let displayedMonth: Date
     @Binding var selectedDate: Date
     let migraines: [Migraine]
+    /// Marks period days (Cycle Insights). Nil leaves the grid exactly as before.
+    var isPeriodDay: ((Date) -> Bool)? = nil
 
     private let calendar = Calendar.current
     private let columns = Array(repeating: GridItem(.flexible()), count: 7)
@@ -38,6 +40,7 @@ struct CalendarGridView: View {
                             date: date,
                             isSelected: calendar.isDate(date, inSameDayAs: selectedDate),
                             isToday: calendar.isDateInToday(date),
+                            isPeriodDay: isPeriodDay?(date) ?? false,
                             migrainesForDay: MigraineStatistics.migraines(migraines, on: date, calendar: calendar),
                             onTap: { selectedDate = date }
                         )
@@ -72,6 +75,7 @@ private struct DayCell: View {
     let date: Date
     let isSelected: Bool
     let isToday: Bool
+    let isPeriodDay: Bool
     let migrainesForDay: [Migraine]
     let onTap: () -> Void
 
@@ -110,8 +114,17 @@ private struct DayCell: View {
             .frame(height: 44)
             .background(
                 RoundedRectangle(cornerRadius: Brand.Radius.chip, style: .continuous)
-                    .fill(isSelected ? AnyShapeStyle(LinearGradient.mygra) : AnyShapeStyle(Color.clear))
+                    .fill(isSelected ? AnyShapeStyle(LinearGradient.mygra) : AnyShapeStyle(isPeriodDay ? Color.pink.opacity(0.18) : Color.clear))
             )
+            .overlay(alignment: .topTrailing) {
+                if isPeriodDay {
+                    Image(systemName: "drop.fill")
+                        .font(.system(size: 8))
+                        .foregroundStyle(isSelected ? .white : .pink)
+                        .padding(4)
+                        .accessibilityHidden(true)
+                }
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: Brand.Radius.chip, style: .continuous)
                     .strokeBorder(isToday && !isSelected ? Color.mygraBlue.opacity(0.6) : Color.clear, lineWidth: 1.5)
@@ -126,16 +139,16 @@ private struct DayCell: View {
 
     private var accessibilityLabel: String {
         let dateString = date.formatted(date: .abbreviated, time: .omitted)
-        if migrainesForDay.isEmpty {
-            return dateString
-        }
-        return String(localized: "\(dateString), \(migrainesForDay.count) migraines")
+        let base = migrainesForDay.isEmpty
+            ? dateString
+            : String(localized: "\(dateString), \(migrainesForDay.count) migraines")
+        return isPeriodDay ? String(localized: "\(base), period day") : base
     }
 }
 
 #if DEBUG
 #Preview("Calendar Grid") {
-    CalendarGridView(displayedMonth: Date(), selectedDate: .constant(Date()), migraines: [Migraine.sample()])
+    CalendarGridView(displayedMonth: Date(), selectedDate: .constant(Date()), migraines: [Migraine.sample()], isPeriodDay: { Calendar.current.component(.day, from: $0) < 5 })
         .padding()
 }
 #endif

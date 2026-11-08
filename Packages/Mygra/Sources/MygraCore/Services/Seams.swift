@@ -170,6 +170,23 @@ public protocol CurrentWeatherProviding: AnyObject {
     func refresh() async
     /// The readings that feed `WeatherRisk`.
     var riskInput: WeatherRiskInput { get }
+    /// Hourly pressure: recent readings plus the forecast. Empty when unavailable.
+    var pressureSeries: [PressureSample] { get }
+}
+
+extension CurrentWeatherProviding {
+    public var pressureSeries: [PressureSample] { [] }
+}
+
+// MARK: - Cycle insights
+
+/// Read-only menstrual flow from Health (impl: `HealthManager`).
+@MainActor
+public protocol MenstrualFlowProviding: AnyObject {
+    /// Asks for read access to menstrual flow only. False when Health is unavailable.
+    func requestMenstrualFlowAccess() async -> Bool
+    /// Days with recorded flow since `start`; empty without access. Never prompts.
+    func fetchMenstrualFlowDays(since start: Date, calendar: Calendar) async -> [Date]
 }
 
 // MARK: - Apple Intelligence

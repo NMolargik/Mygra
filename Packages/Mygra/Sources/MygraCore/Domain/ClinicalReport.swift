@@ -120,6 +120,7 @@ public enum ClinicalReport {
         assessment: ClinicalAssessment = ClinicalAssessment(),
         useMetricUnits: Bool,
         useDMY: Bool,
+        perimenstrual: PerimenstrualResult? = nil,
         now: Date = Date(),
         calendar: Calendar = .current
     ) -> [ReportBlock] {
@@ -141,6 +142,7 @@ public enum ClinicalReport {
         blocks += medicationBlocks(doses: doses, window: window, now: now, calendar: calendar)
         blocks += assessmentBlocks(assessment, useDMY: useDMY)
         blocks += frequencyBlocks(migraines: migraines)
+        blocks += MenstrualCycles.reportBlocks(perimenstrual)
         blocks += curveBlocks(migraines: migraines, now: now, useDMY: useDMY)
 
         blocks.append(.sectionHeader(String(localized: "Attack Detail (\(migraines.count))")))

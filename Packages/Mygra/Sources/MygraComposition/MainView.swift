@@ -80,7 +80,9 @@ struct MainView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .minimizeTabBarOnScrollIfAvailable()
-        .tabViewBottomAccessoryIfAvailable {
+        // The status strip carries the Log action, so it only belongs on the tabs where
+        // logging happens; on Settings it just covers section text.
+        .tabViewBottomAccessoryIfAvailable(isEnabled: router.selectedTab != .settings) {
             if #available(iOS 26.0, *) {
                 MigraineStatusAccessory(
                     ongoing: migraineData.ongoingMigraine,

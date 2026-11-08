@@ -17,6 +17,7 @@ nonisolated public enum PlusFeature: String, CaseIterable, Identifiable, Sendabl
     case assistant
     case quickBits
     case weatherRisk
+    case cycleInsights
     case pdfReport
     case csvExport
 
@@ -27,6 +28,7 @@ nonisolated public enum PlusFeature: String, CaseIterable, Identifiable, Sendabl
         case .assistant: "sparkles"
         case .quickBits: "lightbulb.max.fill"
         case .weatherRisk: "cloud.bolt.rain.fill"
+        case .cycleInsights: "calendar.badge.clock"
         case .pdfReport: "doc.richtext.fill"
         case .csvExport: "tablecells.fill"
         }
@@ -37,6 +39,7 @@ nonisolated public enum PlusFeature: String, CaseIterable, Identifiable, Sendabl
         case .assistant: String(localized: "Migraine Assistant")
         case .quickBits: String(localized: "Quick Bits & trigger analysis")
         case .weatherRisk: String(localized: "Weather-risk forecasts")
+        case .cycleInsights: String(localized: "Cycle insights")
         case .pdfReport: String(localized: "Doctor-ready PDF reports")
         case .csvExport: String(localized: "CSV export")
         }
@@ -47,6 +50,7 @@ nonisolated public enum PlusFeature: String, CaseIterable, Identifiable, Sendabl
         case .assistant: String(localized: "Chat with on-device Apple Intelligence about your history.")
         case .quickBits: String(localized: "Spot patterns across triggers, sleep, hydration, and weather.")
         case .weatherRisk: String(localized: "Get notified when conditions turn migraine-prone.")
+        case .cycleInsights: String(localized: "See how your attacks line up with your menstrual cycle.")
         case .pdfReport: String(localized: "Share a clean summary with your care team.")
         case .csvExport: String(localized: "Take your raw data anywhere.")
         }
@@ -58,6 +62,7 @@ nonisolated public enum PlusFeature: String, CaseIterable, Identifiable, Sendabl
         case .assistant: String(localized: "The Migraine Assistant is part of Mygra Plus.")
         case .quickBits: String(localized: "Quick Bits and trigger analysis are part of Mygra Plus.")
         case .weatherRisk: String(localized: "Weather-risk alerts are part of Mygra Plus.")
+        case .cycleInsights: String(localized: "Cycle insights are part of Mygra Plus.")
         case .pdfReport: String(localized: "PDF reports are part of Mygra Plus.")
         case .csvExport: String(localized: "CSV export is part of Mygra Plus.")
         }

@@ -15,6 +15,7 @@ import MygraFeatureShared
 public struct MigraineCalendarView: View {
     @Environment(MigraineDataModel.self) private var migraineData
     @Environment(TagDataModel.self) private var tagData
+    @Environment(CycleDataModel.self) private var cycleData
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var selectedDate = Date()
@@ -92,7 +93,12 @@ public struct MigraineCalendarView: View {
                     .padding(.bottom, Brand.Space.sm)
             }
 
-            CalendarGridView(displayedMonth: displayedMonth, selectedDate: $selectedDate, migraines: filteredMigraines)
+            CalendarGridView(
+                displayedMonth: displayedMonth,
+                selectedDate: $selectedDate,
+                migraines: filteredMigraines,
+                isPeriodDay: cycleData.isActive ? { cycleData.isPeriodDay($0) } : nil
+            )
                 .padding(.horizontal)
                 .id(calendar.dateInterval(of: .month, for: displayedMonth)?.start ?? displayedMonth)
                 .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity), removal: .opacity))
@@ -105,7 +111,15 @@ public struct MigraineCalendarView: View {
                 )
                 .accessibilityAction(named: Text("Next month")) { changeMonth(by: 1) }
                 .accessibilityAction(named: Text("Previous month")) { changeMonth(by: -1) }
+
+            if cycleData.isActive {
+                Label("Period day, from Apple Health", systemImage: "drop.fill")
+                    .font(.caption)
+                    .foregroundStyle(.pink)
+                    .padding(.top, Brand.Space.sm)
+            }
         }
+        .task { await cycleData.refresh() }
     }
 
     @ContentBuilder

@@ -15,11 +15,14 @@ nonisolated public struct WeatherRiskInput: Sendable, Equatable {
     /// Barometric pressure in hectopascals.
     public var pressureHpa: Double?
     public var condition: SkyCondition?
+    /// A pressure drop that meets the user's threshold and is happening or forecast soon.
+    public var pressureDrop: PressureDrop?
 
-    public init(humidity: Double?, pressureHpa: Double?, condition: SkyCondition?) {
+    public init(humidity: Double?, pressureHpa: Double?, condition: SkyCondition?, pressureDrop: PressureDrop? = nil) {
         self.humidity = humidity
         self.pressureHpa = pressureHpa
         self.condition = condition
+        self.pressureDrop = pressureDrop
     }
 }
 
@@ -33,7 +36,7 @@ nonisolated public enum WeatherRisk {
         let humidityHigh = input.humidity.map { $0 >= humidityThreshold } ?? false
         let pressureLow = input.pressureHpa.map { $0 < lowPressureThresholdHpa } ?? false
         let storms = input.condition == .strongStorms
-        return humidityHigh || pressureLow || storms
+        return humidityHigh || pressureLow || storms || input.pressureDrop != nil
     }
 
     /// Whether a notification should fire: only on the transition into high risk.
@@ -49,6 +52,9 @@ nonisolated public enum WeatherRisk {
         }
         if let pressure = input.pressureHpa {
             parts.append(String(format: "%.0f hPa", pressure))
+        }
+        if let drop = input.pressureDrop {
+            parts.append(PressureDropDetector.alertDetail(drop, useMetricUnits: true))
         }
         if let humidity = input.humidity {
             parts.append(String(format: "%.0f%% humidity", humidity * 100.0))
