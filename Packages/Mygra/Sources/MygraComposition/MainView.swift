@@ -43,7 +43,7 @@ struct MainView: View {
                 NavigationStack(path: $navigation.dashboardPath) {
                     DashboardView()
                         .navigationTitle("Mygra")
-                        .toolbar { newMigraineToolbar }
+                        .newMigraineToolbarIfNeeded(self)
                         .navigationDestination(for: UUID.self, destination: migraineDestination)
                 }
             }
@@ -51,7 +51,7 @@ struct MainView: View {
             Tab(AppTab.calendar.title, systemImage: AppTab.calendar.systemImage, value: .calendar) {
                 NavigationStack(path: $navigation.calendarPath) {
                     MigraineCalendarView()
-                        .toolbar { newMigraineToolbar }
+                        .newMigraineToolbarIfNeeded(self)
                         .navigationDestination(for: UUID.self, destination: migraineDestination)
                 }
             }
@@ -60,7 +60,7 @@ struct MainView: View {
                 NavigationStack(path: $navigation.listPath) {
                     MigraineListView()
                         .navigationTitle(AppTab.list.title)
-                        .toolbar { newMigraineToolbar }
+                        .newMigraineToolbarIfNeeded(self)
                         .navigationDestination(for: UUID.self, destination: migraineDestination)
                 }
             }
@@ -127,6 +127,12 @@ struct MainView: View {
             handleDeepLink(newLink)
         }
         .onAppear {
+            #if DEBUG
+            // Screenshots: `-MygraDebugTab Dashboard|Calendar|Migraines|Settings`.
+            if let name = UserDefaults.standard.string(forKey: "MygraDebugTab"), let tab = AppTab(rawValue: name) {
+                router.selectedTab = tab
+            }
+            #endif
             handleDeepLink(router.pendingDeepLink)
             session.showEarlySupporterThanksIfNeeded()
         }
@@ -135,10 +141,12 @@ struct MainView: View {
     // MARK: - Toolbar
 
     /// The top-trailing "New Migraine" action on the Dashboard, Calendar, and Migraines
-    /// pages. While a migraine is ongoing the tab-bar accessory takes over, so the
-    /// button becomes a shortcut to it.
+    /// pages, only installed before iOS 26. From iOS 26 the tab-bar accessory pill is the
+    /// single entry point (log, or open the ongoing migraine) on iPhone and iPad, and ⌘N
+    /// still works through the menu-bar command. While a migraine is ongoing the button
+    /// becomes a shortcut to it.
     @ToolbarContentBuilder
-    private var newMigraineToolbar: some ToolbarContent {
+    fileprivate var newMigraineToolbar: some ToolbarContent {
         ToolbarItem(placement: .primaryAction) {
             if let ongoing = migraineData.ongoingMigraine {
                 Button {
@@ -318,6 +326,21 @@ private struct MigraineStatusAccessory: View {
         .padding(.horizontal, isInline ? Brand.Space.sm : Brand.Space.lg)
         .accessibilityIdentifier("accessoryLogButton")
         .accessibilityLabel(Text("Log a new migraine"))
+    }
+}
+
+// MARK: - Toolbar gating
+
+private extension View {
+    /// Adds the legacy "+" toolbar button only where the bottom accessory pill does not exist
+    /// (iOS 18 to 25), so logging has exactly one entry point on every OS.
+    @ContentBuilder
+    func newMigraineToolbarIfNeeded(_ main: MainView) -> some View {
+        if #available(iOS 26.0, *) {
+            self
+        } else {
+            self.toolbar { main.newMigraineToolbar }
+        }
     }
 }
 
