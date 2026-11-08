@@ -18,6 +18,7 @@ struct DeepLinkTests {
         ("mygra://tags", DeepLink.tags),
         ("mygra://assistant", DeepLink.assistant),
         ("mygra://end-ongoing", DeepLink.endOngoing),
+        ("mygra://attack-mode", DeepLink.attackMode),
     ])
     func parsesKnownHosts(urlString: String, expected: DeepLink) throws {
         let url = try #require(URL(string: urlString))
@@ -30,7 +31,7 @@ struct DeepLinkTests {
         #expect(DeepLink(url: try #require(URL(string: "mygra://migraine/\(id.uuidString)?action=end"))) == .migraine(id))
     }
 
-    @Test(arguments: ["mygra://migraine/not-a-uuid", "mygra://migraine", "mygra://unknown", "https://home", "otherapp://home"])
+    @Test(arguments: ["mygra://migraine/not-a-uuid", "mygra://migraine", "mygra://finish-logging/nope", "mygra://unknown", "https://home", "otherapp://home"])
     func rejectsInvalidURLs(urlString: String) throws {
         let url = try #require(URL(string: urlString))
         #expect(DeepLink(url: url) == nil)
@@ -38,7 +39,7 @@ struct DeepLinkTests {
 
     @Test("every case round-trips through its URL")
     func roundTrip() {
-        let links: [DeepLink] = [.newMigraine, .home, .calendar, .list, .settings, .tags, .assistant, .endOngoing, .migraine(UUID())]
+        let links: [DeepLink] = [.newMigraine, .home, .calendar, .list, .settings, .tags, .assistant, .endOngoing, .attackMode, .migraine(UUID()), .finishLogging(UUID())]
         for link in links {
             #expect(DeepLink(url: link.url) == link)
         }
@@ -55,6 +56,8 @@ struct DeepLinkTests {
         #expect(DeepLink.tags.destinationTab == .settings)
         #expect(DeepLink.assistant.destinationTab == nil)
         #expect(DeepLink.endOngoing.destinationTab == nil)
+        #expect(DeepLink.attackMode.destinationTab == nil)
+        #expect(DeepLink.finishLogging(UUID()).destinationTab == .list)
     }
 
     @Test("store then take returns the same deep link and clears it")

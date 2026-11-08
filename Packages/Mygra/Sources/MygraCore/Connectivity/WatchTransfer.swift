@@ -19,6 +19,7 @@ nonisolated public enum WatchMessageKey {
     public static let success = "success"
     public static let error = "error"
     public static let migraineID = "migraineID"
+    public static let medication = "medication"
 }
 
 /// Read-only requests the watch makes.
@@ -30,6 +31,14 @@ nonisolated public enum WatchRequest: String, Sendable {
 nonisolated public enum WatchCommand: String, Sendable {
     case endMigraine
     case startMigraine
+    /// Attack Mode: start (or surface the active) attack.
+    case startAttack
+    /// Attack Mode: record an intensity sample at `painLevel`.
+    case setIntensity
+    /// Attack Mode: log `medication` as taken now.
+    case logMedication
+    /// Attack Mode: end the attack and queue the deferred finish-logging prompt.
+    case endAttack
 }
 
 /// Error codes the phone can return to the watch.
@@ -43,12 +52,14 @@ nonisolated public struct WatchMessage: Sendable, Equatable {
     public var command: WatchCommand?
     public var painLevel: Int?
     public var stressLevel: Int?
+    public var medication: QuickMedication?
 
-    public init(request: WatchRequest? = nil, command: WatchCommand? = nil, painLevel: Int? = nil, stressLevel: Int? = nil) {
+    public init(request: WatchRequest? = nil, command: WatchCommand? = nil, painLevel: Int? = nil, stressLevel: Int? = nil, medication: QuickMedication? = nil) {
         self.request = request
         self.command = command
         self.painLevel = painLevel
         self.stressLevel = stressLevel
+        self.medication = medication
     }
 
     /// Extracts the Sendable fields from a raw WatchConnectivity dictionary.
@@ -57,6 +68,7 @@ nonisolated public struct WatchMessage: Sendable, Equatable {
         command = (payload[WatchMessageKey.command] as? String).flatMap(WatchCommand.init(rawValue:))
         painLevel = payload[WatchMessageKey.painLevel] as? Int
         stressLevel = payload[WatchMessageKey.stressLevel] as? Int
+        medication = (payload[WatchMessageKey.medication] as? [String: Any]).flatMap(QuickMedication.init(payload:))
     }
 
     /// The outbound dictionary for this message.
@@ -66,6 +78,7 @@ nonisolated public struct WatchMessage: Sendable, Equatable {
         if let command { dictionary[WatchMessageKey.command] = command.rawValue }
         if let painLevel { dictionary[WatchMessageKey.painLevel] = painLevel }
         if let stressLevel { dictionary[WatchMessageKey.stressLevel] = stressLevel }
+        if let medication { dictionary[WatchMessageKey.medication] = medication.payload }
         return dictionary
     }
 }

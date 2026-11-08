@@ -29,6 +29,14 @@ nonisolated public enum AppStorageKeys {
     public static let reportIncludeBirthday = "Clinical.reportIncludeBirthday"
     public static let reportIncludeHealthProfile = "Clinical.reportIncludeHealthProfile"
 
+    // MARK: - Attack Mode
+    /// Whether ending an attack schedules the gentle finish-logging prompt (default on).
+    public static let attackFinishPromptEnabled = "AttackMode.finishPromptEnabled"
+    /// Minutes after End Attack before the prompt (default 120).
+    public static let attackFinishPromptDelayMinutes = "AttackMode.finishPromptDelayMinutes"
+    /// JSON `[FinishItem]` of ended attacks still waiting to be finished.
+    public static let attackPendingFinishItems = "AttackMode.pendingFinishItems"
+
     // MARK: - Dashboard Stat Visibility
     public static let showWaterStat = "showWaterStat"
     public static let showSleepStat = "showSleepStat"

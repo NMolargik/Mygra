@@ -19,6 +19,10 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
     case migraine(UUID)
     case assistant
     case endOngoing
+    /// Starts an attack if none is active, then opens Attack Mode.
+    case attackMode
+    /// Opens a finished attack's detail flow to answer the deferred questions.
+    case finishLogging(UUID)
 
     /// The custom URL scheme handled by the app.
     public static let scheme = "mygra"
@@ -26,7 +30,8 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
     /// Parses a `mygra://` URL. Supported forms:
     /// - `mygra://new-migraine`
     /// - `mygra://home`, `calendar`, `list`, `settings`, `tags`, `assistant`, `end-ongoing`
-    /// - `mygra://migraine/<uuid>`
+    /// - `mygra://attack-mode`
+    /// - `mygra://migraine/<uuid>`, `mygra://finish-logging/<uuid>`
     public init?(url: URL) {
         guard url.scheme == Self.scheme, let host = url.host() else { return nil }
         switch host {
@@ -38,6 +43,11 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
         case "tags": self = .tags
         case "assistant": self = .assistant
         case "end-ongoing": self = .endOngoing
+        case "attack-mode": self = .attackMode
+        case "finish-logging":
+            guard let component = url.pathComponents.dropFirst().first,
+                  let id = UUID(uuidString: component) else { return nil }
+            self = .finishLogging(id)
         case "migraine":
             guard let component = url.pathComponents.dropFirst().first,
                   let id = UUID(uuidString: component) else { return nil }
@@ -59,6 +69,8 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
         case .tags: path = "tags"
         case .assistant: path = "assistant"
         case .endOngoing: path = "end-ongoing"
+        case .attackMode: path = "attack-mode"
+        case .finishLogging(let id): path = "finish-logging/\(id.uuidString)"
         case .migraine(let id): path = "migraine/\(id.uuidString)"
         }
         return URL(string: "\(Self.scheme)://\(path)")!
@@ -70,9 +82,9 @@ nonisolated public enum DeepLink: Equatable, Sendable, Hashable {
         switch self {
         case .home, .newMigraine: return .dashboard
         case .calendar: return .calendar
-        case .list, .migraine: return .list
+        case .list, .migraine, .finishLogging: return .list
         case .settings, .tags: return .settings
-        case .assistant, .endOngoing: return nil
+        case .assistant, .endOngoing, .attackMode: return nil
         }
     }
 }
