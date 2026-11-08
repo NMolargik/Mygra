@@ -42,7 +42,7 @@ public struct FinishLoggingCard: View {
                         Haptics.lightImpact()
                         attack.resolveFinish(item.id)
                     } label: {
-                        Text("Not Now")
+                        Text("Not now")
                     }
                     .secondaryActionButton()
                     .accessibilityIdentifier("finishLoggingDismissButton")
