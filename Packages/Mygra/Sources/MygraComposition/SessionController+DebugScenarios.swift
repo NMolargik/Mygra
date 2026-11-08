@@ -120,3 +120,31 @@ extension SessionController {
     #endif
 }
 #endif
+
+// MARK: - Dashboard states
+
+extension SessionController {
+    /// Seeds a history whose last attack ended `hoursAgo` hours ago (`-MygraDebugScenario
+    /// dashRecent` = 16 h, `dashDays` = 3 days, `dashQuiet` = 12 days, `dashActive` = ongoing), so the header
+    /// wording can be captured. `-MygraDebugHealth connected` adds canned Health stats.
+    public func runDebugDashboardScenario(_ scenario: String) {
+        let hours: [String: Double] = ["dashRecent": 16, "dashDays": 3 * 24, "dashQuiet": 12 * 24, "dashActive": 40]
+        guard let endedHoursAgo = hours[scenario] else { return }
+        migraineData.deleteAll()
+        let now = Date()
+        // 15 attacks in total, the newest ending `endedHoursAgo` ago.
+        for index in 0..<15 {
+            let end = now.addingTimeInterval(-(endedHoursAgo + Double(index) * 52) * 3600)
+            migraineData.log(Migraine(startDate: end.addingTimeInterval(-4 * 3600), endDate: end, painLevel: 3 + index % 5, stressLevel: 4))
+        }
+        if scenario == "dashActive" {
+            // An ongoing attack, started 40 minutes ago, without opening Attack Mode.
+            migraineData.log(Migraine(startDate: now.addingTimeInterval(-40 * 60), endDate: nil, painLevel: 7, stressLevel: 4))
+        }
+        #if canImport(HealthKit) && !os(macOS)
+        if UserDefaults.standard.string(forKey: "MygraDebugHealth") == "connected" {
+            healthManager.installDebugHealth(HealthData(waterLiters: 1.4, sleepHours: 6.5, energyKilocalories: 1650, caffeineMg: 95))
+        }
+        #endif
+    }
+}

@@ -98,6 +98,8 @@ struct MygraApp: App {
                         if scenario == "cyclePressure" {
                             session.runDebugCyclePressureScenario()
                             session.writeDebugClinicalReport()
+                        } else if scenario.hasPrefix("dash") {
+                            session.runDebugDashboardScenario(scenario)
                         } else {
                             session.runDebugAttackScenario(scenario)
                         }

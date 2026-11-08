@@ -214,6 +214,16 @@ public final class HealthManager: HeadacheRecording, MenstrualFlowProviding {
         self.init(store: LiveHealthStore())
     }
 
+    #if DEBUG
+    /// DEBUG: pins a connected state with canned stats (simulators have no HealthKit access).
+    @ObservationIgnored private var debugData: HealthData?
+    public func installDebugHealth(_ data: HealthData) {
+        debugData = data
+        isAuthorized = true
+        latestData = data
+    }
+    #endif
+
     // MARK: - Types
 
     private var qtWater: HKQuantityType { .quantityType(forIdentifier: .dietaryWater)! }
@@ -368,6 +378,9 @@ public final class HealthManager: HeadacheRecording, MenstrualFlowProviding {
     /// passive path (dashboard, pull-to-refresh) — it never triggers the system
     /// authorization prompt; without access it simply clears the snapshot.
     public func refreshLatest(from start: Date, to end: Date) async {
+        #if DEBUG
+        if let debugData { isAuthorized = true; latestData = debugData; return }
+        #endif
         refreshAuthorizationStatus()
         guard isAuthorized else {
             latestData = nil

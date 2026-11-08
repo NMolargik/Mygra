@@ -5479,6 +5479,30 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Connect" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conectar"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecter"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連携"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Connect Apple Health" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5498,6 +5522,30 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Apple ヘルスケアを連携"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Connect Apple Health to see daily stats" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conecta Apple Health para ver las estadísticas diarias"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez Apple Santé pour voir les statistiques quotidiennes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appleヘルスケアと連携して日々の統計を表示"
           }
         }
       },
@@ -9291,25 +9339,25 @@
       },
       "shouldGenerateSymbol" : false
     },
-    "Hang in there — log updates as it changes." : {
+    "Hang in there. Update your log as it changes." : {
       "extractionState" : "manual",
       "localizations" : {
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aguanta: registra actualizaciones a medida que cambie."
+            "value" : "Ánimo. Actualiza tu registro si cambia."
           }
         },
         "fr-CA" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Courage — consignez les changements au fil du temps."
+            "value" : "Courage. Mettez votre journal à jour si la situation change."
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "がんばって。変化があれば記録しましょう。"
+            "value" : "もう少しの辛抱です。状態が変わったら記録を更新してください。"
           }
         }
       },
@@ -10797,6 +10845,138 @@
       },
       "shouldGenerateSymbol" : false
     },
+    "Last migraine %lld days ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Última migraña hace %lld día"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Última migraña hace %lld días"
+                }
+              }
+            }
+          }
+        },
+        "fr-CA" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dernière migraine il y a %lld jour"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dernière migraine il y a %lld jours"
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "最後の片頭痛は%lld日前"
+                }
+              }
+            }
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Last migraine %lld hours ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Última migraña hace %lld hora"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Última migraña hace %lld horas"
+                }
+              }
+            }
+          }
+        },
+        "fr-CA" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dernière migraine il y a %lld heure"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Dernière migraine il y a %lld heures"
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "最後の片頭痛は%lld時間前"
+                }
+              }
+            }
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "Last migraine less than an hour ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Última migraña hace menos de una hora"
+          }
+        },
+        "fr-CA" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dernière migraine il y a moins d’une heure"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最後の片頭痛は1時間以内"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
     "Last migraine today" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11422,6 +11602,7 @@
       "shouldGenerateSymbol" : false
     },
     "Log a Migraine" : {
+      "extractionState" : "manual",
       "localizations" : {
         "es" : {
           "stringUnit" : {
@@ -11441,7 +11622,8 @@
             "value" : "片頭痛を記録"
           }
         }
-      }
+      },
+      "shouldGenerateSymbol" : false
     },
     "Log a migraine" : {
       "extractionState" : "manual",
@@ -14072,6 +14254,60 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "今日は片頭痛なし。"
+          }
+        }
+      },
+      "shouldGenerateSymbol" : false
+    },
+    "No migraines in %lld days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sin migrañas en %lld día"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Sin migrañas en %lld días"
+                }
+              }
+            }
+          }
+        },
+        "fr-CA" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Aucune migraine en %lld jour"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "Aucune migraine en %lld jours"
+                }
+              }
+            }
+          }
+        },
+        "ja" : {
+          "variations" : {
+            "plural" : {
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%lld日間、片頭痛なし"
+                }
+              }
+            }
           }
         }
       },
@@ -17852,30 +18088,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "初期値に戻す"
-          }
-        }
-      },
-      "shouldGenerateSymbol" : false
-    },
-    "Rest up — %lld logged in total." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Descansa: %lld registradas en total."
-          }
-        },
-        "fr-CA" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reposez-vous — %lld consignées au total."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ゆっくり休んでください。合計 %lld 件を記録。"
           }
         }
       },

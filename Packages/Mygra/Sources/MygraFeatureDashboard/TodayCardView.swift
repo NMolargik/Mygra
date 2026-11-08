@@ -154,22 +154,25 @@ struct TodayCardView: View {
         }
     }
 
+    /// Without Health the card is one quiet row: it should not out-shout the insights.
     private var connectCard: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Label("Today", systemImage: "calendar")
-                    .font(.headline)
-                Spacer()
-                Button(action: onConnectHealth) {
-                    Label("Connect Health", systemImage: "heart.fill")
-                }
-                .glassActionButton(tint: .pink)
-                .hoverHighlight()
-            }
-            Text("Connect Apple Health to see your daily stats.")
+        HStack(spacing: Brand.Space.md) {
+            Image(systemName: "heart.text.square")
+                .symbolRenderingMode(.hierarchical)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
+            Text("Connect Apple Health to see daily stats")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button("Connect", action: onConnectHealth)
+                .glassActionButton(prominent: false)
+                .controlSize(.small)
+                .hoverHighlight()
+                .accessibilityLabel("Connect Apple Health")
         }
-        .padding(14)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .cardSurface()
     }
 

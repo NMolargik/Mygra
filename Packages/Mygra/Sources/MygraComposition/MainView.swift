@@ -5,7 +5,7 @@
 //  The adaptive four-tab shell: a tab bar on iPhone and a sidebar on iPad/Mac through
 //  `.sidebarAdaptable`, with each tab owning its own navigation stack. The tab bar's
 //  bottom accessory (iOS 26+) is a persistent status strip — the live ongoing-migraine
-//  timer, or the migraine-free streak with a one-tap Log action. The new-migraine sheet
+//  timer, or a one-tap Log a Migraine action (the header owns the status text). The new-migraine sheet
 //  and assistant are presented here, as is the Mygra Plus paywall whenever a gated
 //  feature asks for it, and every deep link routes through `AppRouter`.
 //
@@ -86,8 +86,6 @@ struct MainView: View {
             if #available(iOS 26.0, *) {
                 MigraineStatusAccessory(
                     ongoing: migraineData.ongoingMigraine,
-                    daysSince: MigraineStatistics.streakDays(migraineData.migraines),
-                    total: migraineData.migraines.count,
                     onOpenOngoing: { id in navigateToMigraine(id: id) },
                     onLog: handleAddTapped
                 )
@@ -240,14 +238,11 @@ struct MainView: View {
 
 /// The tab-bar bottom accessory. Always present, so it always says something useful:
 /// while a migraine is in progress, a pulsing waveform with the live elapsed time that
-/// opens the detail screen; otherwise the migraine-free streak with a compact Log
-/// action. When the tab bar minimizes on scroll the accessory moves inline next to the
+/// opens the detail screen; otherwise just the Log a Migraine action. When the tab bar minimizes on scroll the accessory moves inline next to the
 /// selected tab, so the inline placement drops to the essentials.
 @available(iOS 26.0, *)
 private struct MigraineStatusAccessory: View {
     let ongoing: Migraine?
-    let daysSince: Int
-    let total: Int
     let onOpenOngoing: (UUID) -> Void
     let onLog: () -> Void
 
@@ -260,7 +255,7 @@ private struct MigraineStatusAccessory: View {
         if let ongoing {
             ongoingStrip(ongoing)
         } else {
-            streakStrip
+            logStrip
         }
     }
 
@@ -303,60 +298,26 @@ private struct MigraineStatusAccessory: View {
         .accessibilityLabel(Text("Ongoing migraine in progress, tap to view"))
     }
 
-    // MARK: Streak
+    // MARK: Log
 
-    private var streakStrip: some View {
-        HStack(spacing: Brand.Space.sm) {
-            Image(systemName: total == 0 ? "sparkles" : "calendar.badge.checkmark")
-                .symbolRenderingMode(.hierarchical)
+    /// Just the quick action. The dashboard header already says how long it has been,
+    /// so the pill never repeats the status.
+    private var logStrip: some View {
+        Button(action: onLog) {
+            Label("Log a Migraine", systemImage: "plus")
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.mygraPurple)
-                .accessibilityHidden(true)
-
-            HStack(alignment: .firstTextBaseline, spacing: Brand.Space.xs) {
-                if total == 0 {
-                    Text(isInline ? "Log a migraine" : "No migraines logged yet")
-                        .font(.subheadline.weight(.semibold))
-                } else if daysSince == 0 {
-                    Text("Last migraine today")
-                        .font(.subheadline.weight(.semibold))
-                } else {
-                    Text(daysSince, format: .number)
-                        .font(isInline ? .subheadline.weight(.bold) : .title3.weight(.bold))
-                        .monospacedDigit()
-                        .foregroundStyle(LinearGradient.mygraHorizontal)
-                        .contentTransition(.numericText())
-                    Text(daysSince == 1 ? "day migraine-free" : "days migraine-free")
-                        .font(.subheadline.weight(.semibold))
-                }
-            }
-            .lineLimit(1)
-            .minimumScaleFactor(0.8)
-
-            if !isInline {
-                Spacer(minLength: Brand.Space.sm)
-
-                Button(action: onLog) {
-                    Label("Log", systemImage: "plus")
-                        .font(.subheadline.weight(.semibold))
-                }
-                .glassActionButton(tint: .mygraPurple)
-                .controlSize(.small)
-                .keyboardShortcut("l", modifiers: .command)
-                .hoverHighlight()
-                .accessibilityIdentifier("accessoryLogButton")
-                .accessibilityLabel(Text("Log a new migraine"))
-            }
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+        .keyboardShortcut("l", modifiers: .command)
+        .hoverHighlight()
         .padding(.horizontal, isInline ? Brand.Space.sm : Brand.Space.lg)
-        .if(isInline) { $0.contentShape(Rectangle()).onTapGesture(perform: onLog) }
-        .accessibilityElement(children: isInline ? .combine : .contain)
-        .accessibilityLabel(accessibilitySummary)
-    }
-
-    private var accessibilitySummary: Text {
-        if total == 0 { return Text("No migraines logged yet") }
-        if daysSince == 0 { return Text("Last migraine today") }
-        return Text("\(daysSince) days migraine-free")
+        .accessibilityIdentifier("accessoryLogButton")
+        .accessibilityLabel(Text("Log a new migraine"))
     }
 }
 

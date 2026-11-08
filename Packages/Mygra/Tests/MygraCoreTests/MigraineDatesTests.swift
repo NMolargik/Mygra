@@ -81,3 +81,40 @@ struct MigraineDatesTests {
         #expect(today.end == now)
     }
 }
+
+@Suite("MigraineRecency")
+struct MigraineRecencyTests {
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+    private func attack(endedHoursAgo hours: Double) -> Migraine {
+        let end = now.addingTimeInterval(-hours * 3600)
+        return Migraine(startDate: end.addingTimeInterval(-4 * 3600), endDate: end, painLevel: 5, stressLevel: 3)
+    }
+
+    @Test("no migraines and ongoing")
+    func noneAndOngoing() {
+        #expect(MigraineRecency.of([], hasOngoing: false, now: now) == .none)
+        #expect(MigraineRecency.of([attack(endedHoursAgo: 2)], hasOngoing: true, now: now) == .ongoing)
+    }
+
+    @Test("hours resolve below a day, even across midnight")
+    func hours() {
+        #expect(MigraineRecency.of([attack(endedHoursAgo: 0.5)], hasOngoing: false, now: now) == .withinHour)
+        #expect(MigraineRecency.of([attack(endedHoursAgo: 1.2)], hasOngoing: false, now: now) == .hoursAgo(1))
+        #expect(MigraineRecency.of([attack(endedHoursAgo: 16)], hasOngoing: false, now: now) == .hoursAgo(16))
+        #expect(MigraineRecency.of([attack(endedHoursAgo: 23.9)], hasOngoing: false, now: now) == .hoursAgo(23))
+    }
+
+    @Test("days then streak at the threshold")
+    func days() {
+        #expect(MigraineRecency.of([attack(endedHoursAgo: 72)], hasOngoing: false, now: now) == .daysAgo(3))
+        if case .daysAgo(let d) = MigraineRecency.of([attack(endedHoursAgo: 5.5 * 24)], hasOngoing: false, now: now) { #expect(d == 5 || d == 6) } else { Issue.record("expected daysAgo") }
+        if case .migraineFree(let d) = MigraineRecency.of([attack(endedHoursAgo: 12 * 24)], hasOngoing: false, now: now) { #expect(d >= 11 && d <= 12) } else { Issue.record("expected migraineFree") }
+    }
+
+    @Test("uses the most recent migraine")
+    func mostRecent() {
+        let items = [attack(endedHoursAgo: 400), attack(endedHoursAgo: 30)]
+        // 30 hours ago is 1 or 2 calendar days depending on the host time zone.
+        if case .daysAgo(let d) = MigraineRecency.of(items, hasOngoing: false, now: now) { #expect(d == 1 || d == 2) } else { Issue.record("expected daysAgo") }
+    }
+}
