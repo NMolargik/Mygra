@@ -18,6 +18,7 @@ public final class WeatherRiskNotifier {
     private let weather: any CurrentWeatherProviding
     private let notifications: any LocalNotifying
     private let entitlement: any EntitlementProviding
+    private let thresholds: PressureDropThresholdStore
     private let now: () -> Date
 
     /// Whether the last check was high risk (notifications fire on the transition only).
@@ -27,8 +28,10 @@ public final class WeatherRiskNotifier {
         weather: any CurrentWeatherProviding,
         notifications: any LocalNotifying,
         entitlement: any EntitlementProviding,
+        defaults: any KeyValueStoring = UserDefaults.standard,
         now: @escaping () -> Date = Date.init
     ) {
+        self.thresholds = PressureDropThresholdStore(defaults: defaults)
         self.weather = weather
         self.notifications = notifications
         self.entitlement = entitlement
@@ -42,7 +45,10 @@ public final class WeatherRiskNotifier {
     public func checkAndNotify() async -> Bool {
         guard entitlement.gate.unlocks(.weatherRisk) else { return false }
         await weather.refresh()
-        let input = weather.riskInput
+        var input = weather.riskInput
+        // The user's pressure-drop threshold also drives the alert.
+        let drops = PressureDropDetector.drops(in: weather.pressureSeries, threshold: thresholds.load())
+        input.pressureDrop = PressureDropDetector.alertDrop(in: drops, now: now())
         let high = WeatherRisk.isHighRisk(input)
         defer { wasHighRisk = high }
 

@@ -29,6 +29,12 @@ nonisolated public enum AppStorageKeys {
     public static let reportIncludeBirthday = "Clinical.reportIncludeBirthday"
     public static let reportIncludeHealthProfile = "Clinical.reportIncludeHealthProfile"
 
+    // MARK: - Cycle insights and pressure
+    /// Whether the user opted in to the menstrual-cycle correlation (reads Health flow data).
+    public static let cycleInsightsEnabled = "Cycle.insightsEnabled"
+    public static let pressureDropThresholdHpa = "Pressure.dropThresholdHpa"
+    public static let pressureDropWindowHours = "Pressure.dropWindowHours"
+
     // MARK: - Attack Mode
     /// Whether ending an attack schedules the gentle finish-logging prompt (default on).
     public static let attackFinishPromptEnabled = "AttackMode.finishPromptEnabled"

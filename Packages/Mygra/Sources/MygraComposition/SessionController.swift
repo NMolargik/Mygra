@@ -215,7 +215,7 @@ public final class SessionController {
         weatherManager = weather
         let notifications = NotificationManager()
         notificationManager = notifications
-        weatherRiskNotifier = WeatherRiskNotifier(weather: weather, notifications: notifications, entitlement: subscription)
+        weatherRiskNotifier = WeatherRiskNotifier(weather: weather, notifications: notifications, entitlement: subscription, defaults: defaults)
         medicationNotifier = MedicationOveruseNotifier(notifications: notifications, defaults: defaults)
         assessmentStore = ClinicalAssessmentStore(defaults: defaults)
 

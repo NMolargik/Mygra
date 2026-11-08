@@ -170,6 +170,12 @@ public protocol CurrentWeatherProviding: AnyObject {
     func refresh() async
     /// The readings that feed `WeatherRisk`.
     var riskInput: WeatherRiskInput { get }
+    /// Hourly pressure: recent readings plus the forecast. Empty when unavailable.
+    var pressureSeries: [PressureSample] { get }
+}
+
+extension CurrentWeatherProviding {
+    public var pressureSeries: [PressureSample] { [] }
 }
 
 // MARK: - Apple Intelligence

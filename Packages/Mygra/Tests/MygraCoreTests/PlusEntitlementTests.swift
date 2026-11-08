@@ -44,9 +44,9 @@ struct PlusGateTests {
         #expect(gate.lockedFeatures.isEmpty)
     }
 
-    @Test("the gated set is exactly the five Plus features")
+    @Test("the gated set is exactly the six Plus features")
     func gatedFeatures() {
-        #expect(Set(PlusFeature.allCases) == [.assistant, .quickBits, .weatherRisk, .pdfReport, .csvExport])
+        #expect(Set(PlusFeature.allCases) == [.assistant, .quickBits, .weatherRisk, .cycleInsights, .pdfReport, .csvExport])
         for feature in PlusFeature.allCases {
             #expect(!feature.title.isEmpty)
             #expect(!feature.paywallReason.isEmpty)
