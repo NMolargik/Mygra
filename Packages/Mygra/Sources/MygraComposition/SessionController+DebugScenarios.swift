@@ -119,7 +119,6 @@ extension SessionController {
     }
     #endif
 }
-#endif
 
 // MARK: - Dashboard states
 
@@ -148,3 +147,4 @@ extension SessionController {
         #endif
     }
 }
+#endif
